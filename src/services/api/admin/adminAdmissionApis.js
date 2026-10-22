@@ -1,11 +1,9 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { apiBaseQuery } from "../base-query.js";
+import { createApi } from "@reduxjs/toolkit/query/react";
 
 const adminAdmissionApis = createApi({
   reducerPath: "adminAdmissionApis",
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL || "http://localhost:3000",
-    credentials: "include",
-  }),
+  baseQuery: apiBaseQuery,
   tagTypes: ["AdminAdmission"],
   endpoints: (builder) => ({
     getAdminAdmissions: builder.query({

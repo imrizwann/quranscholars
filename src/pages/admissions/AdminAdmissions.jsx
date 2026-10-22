@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import "./admin-admissions.css";
+import ConfirmationModal from "@/components/ui/ConfirmationModal.jsx";
 import { toast, Toaster } from "sonner";
 import {
   BookOpen,
@@ -75,6 +77,7 @@ const AdminAdmissions = () => {
   const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [pendingDeletion, setPendingDeletion] = useState(null);
 
   const queryArgs = useMemo(
     () => ({ page, limit: 15, status, search }),
@@ -127,10 +130,8 @@ const AdminAdmissions = () => {
   };
 
   const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      "Delete this admission record? This action cannot be undone.",
-    );
-    if (!confirmed) return;
+    if (!id || isDeleting) return;
+    setPendingDeletion(null);
     try {
       await deleteAdmission(id).unwrap();
       toast.success("Admission deleted");
@@ -140,7 +141,7 @@ const AdminAdmissions = () => {
   };
 
   return (
-    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
+    <main className="admin-admissions min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
       <Toaster richColors position="top-center" />
       <div className="mx-auto w-full max-w-7xl">
         <header className="rounded-lg border border-border bg-surface p-5 shadow-card sm:p-6">
@@ -226,9 +227,10 @@ const AdminAdmissions = () => {
               onSubmit={onSearchSubmit}
               className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row"
             >
-              <div className="flex h-11 min-w-0 flex-1 items-center gap-3 rounded-lg border border-input bg-background px-3 transition focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/20">
+              <div className="admissions-search-field flex min-h-11 min-w-0 flex-none items-center gap-3 rounded-lg border border-input bg-background px-3 transition focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/20 sm:flex-1">
                 <Search className="size-4 shrink-0 text-muted-foreground" />
                 <input
+                  aria-label="Search admissions"
                   value={searchInput}
                   onChange={(event) => setSearchInput(event.target.value)}
                   className="h-full min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
@@ -248,6 +250,7 @@ const AdminAdmissions = () => {
               <label className="flex h-11 items-center gap-2 rounded-lg border border-input bg-background px-3 text-sm font-semibold text-muted-foreground">
                 <Filter className="size-4" />
                 <select
+                  aria-label="Filter admissions by status"
                   value={status}
                   onChange={(event) => {
                     setPage(1);
@@ -277,8 +280,8 @@ const AdminAdmissions = () => {
         </section>
 
         <section className="relative mt-5 overflow-hidden rounded-lg border border-border bg-surface shadow-card">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-230 border-collapse text-left text-sm">
+          <div className="admissions-results">
+            <table className="admissions-table w-full border-collapse text-left text-sm" role="table" aria-label="Student admissions">
               <thead className="border-b border-border bg-secondary">
                 <tr>
                   <th className="px-5 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">
@@ -301,13 +304,14 @@ const AdminAdmissions = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-border" role="rowgroup">
                 {items.map((admission) => (
                   <tr
                     key={admission._id}
+                    role="row"
                     className="transition hover:bg-muted/70"
                   >
-                    <td className="px-5 py-4 align-top">
+                    <td data-label="Student" role="cell" className="px-5 py-4 align-top">
                       <p className="font-bold text-foreground">
                         {admission.fullName || "--"}
                       </p>
@@ -315,7 +319,7 @@ const AdminAdmissions = () => {
                         {admission.email || "--"}
                       </p>
                     </td>
-                    <td className="px-5 py-4 align-top">
+                    <td data-label="Contact" role="cell" className="px-5 py-4 align-top">
                       <div className="grid gap-1.5 text-xs text-muted-foreground">
                         <p className="flex items-center gap-2">
                           <Phone className="size-3.5" />
@@ -327,7 +331,7 @@ const AdminAdmissions = () => {
                         </p>
                       </div>
                     </td>
-                    <td className="px-5 py-4 align-top">
+                    <td data-label="Location" role="cell" className="px-5 py-4 align-top">
                       <p className="flex items-center gap-2 font-semibold text-foreground">
                         <MapPin className="size-3.5 text-muted-foreground" />
                         {admission.city || "--"}
@@ -336,16 +340,17 @@ const AdminAdmissions = () => {
                         {admission.country || "--"}
                       </p>
                     </td>
-                    <td className="px-5 py-4 align-top">
+                    <td data-label="Courses" role="cell" className="px-5 py-4 align-top">
                       <p className="inline-flex items-center gap-2 rounded-full bg-accent px-2.5 py-1 text-xs font-bold text-accent-foreground">
                         <BookOpen className="size-3.5" />
                         {admission.selectedCourses?.length || 0} selected
                       </p>
                     </td>
-                    <td className="px-5 py-4 align-top">
+                    <td data-label="Status" role="cell" className="px-5 py-4 align-top">
                       <div className="grid gap-2">
                         <StatusBadge value={admission.status} />
                         <select
+                          aria-label={`Admission status for ${admission.fullName || admission.email || "learner"}`}
                           value={admission.status || "pending"}
                           onChange={(event) =>
                             handleStatusChange(admission._id, event.target.value)
@@ -361,10 +366,10 @@ const AdminAdmissions = () => {
                         </select>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-right align-top">
+                    <td data-label="Actions" role="cell" className="px-5 py-4 text-right align-top">
                       <button
                         type="button"
-                        onClick={() => handleDelete(admission._id)}
+                        onClick={() => setPendingDeletion(admission._id)}
                         disabled={isDeleting}
                         className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--destructive)_22%,transparent)] bg-[color-mix(in_srgb,var(--destructive)_8%,transparent)] px-3 text-xs font-bold text-[var(--destructive)] transition hover:bg-[color-mix(in_srgb,var(--destructive)_12%,transparent)] disabled:pointer-events-none disabled:opacity-60"
                       >
@@ -376,7 +381,7 @@ const AdminAdmissions = () => {
                 ))}
                 {!isFetching && items.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-5 py-16 text-center">
+                    <td colSpan={6} role="cell" className="admissions-empty px-5 py-16 text-center">
                       <div className="mx-auto grid max-w-sm place-items-center">
                         <span className="grid size-12 place-items-center rounded-lg bg-muted text-muted-foreground">
                           <Inbox className="size-6" />
@@ -410,7 +415,7 @@ const AdminAdmissions = () => {
           <p className="text-sm font-semibold text-muted-foreground">
             Showing {items.length} of {pagination.total || 0} admissions
           </p>
-          <div className="flex items-center gap-2">
+          <div className="admissions-pagination flex items-center gap-2">
             <button
               type="button"
               disabled={page <= 1}
@@ -435,6 +440,15 @@ const AdminAdmissions = () => {
           </div>
         </footer>
       </div>
+      <ConfirmationModal
+        open={Boolean(pendingDeletion)}
+        title="Delete this admission record?"
+        description="This admission record will be permanently removed. This cannot be undone."
+        confirmLabel="Delete admission"
+        danger
+        onCancel={() => setPendingDeletion(null)}
+        onConfirm={() => handleDelete(pendingDeletion)}
+      />
     </main>
   );
 };

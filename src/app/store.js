@@ -1,4 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { setupListeners } from "@reduxjs/toolkit/query";
+import instructorCoursesApi from "@/services/api/instructor/recordedCoursesApi.js";
+import { instructorSessionMiddleware } from "@/features/instructor-courses/sessionMiddleware.js";
 import courseReducer from "@/store/slices/courseSlice.js";
 import userAuthApi from "@/services/api/user/userAuthApis.js";
 import userSlice from "@/store/slices/userSlice.js";
@@ -11,6 +14,7 @@ export const store = configureStore({
   reducer: {
     course: courseReducer,
     user: userSlice,
+    [instructorCoursesApi.reducerPath]: instructorCoursesApi.reducer,
     [userAuthApi.reducerPath]: userAuthApi.reducer,
     [admissionApis.reducerPath]: admissionApis.reducer,
     [fileUploadApi.reducerPath]: fileUploadApi.reducer,
@@ -20,6 +24,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
+      .concat(instructorSessionMiddleware, instructorCoursesApi.middleware)
       .concat(userAuthApi.middleware)
       .concat(admissionApis.middleware)
       .concat(fileUploadApi.middleware)
@@ -27,5 +32,7 @@ export const store = configureStore({
       .concat(courseApi.middleware)
       .concat(adminAdmissionApis.middleware),
 });
+
+setupListeners(store.dispatch);
 
 export default store;

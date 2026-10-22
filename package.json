@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test:recorded-courses": "node --test tests/recorded-course-*.test.mjs",
+    "test:frontend": "node --test tests/*.test.mjs",
     "generate:favicons": "node scripts/generate-favicons.mjs",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"

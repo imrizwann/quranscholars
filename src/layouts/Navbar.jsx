@@ -1,3 +1,4 @@
+import LoadingState from "@/components/feedback/LoadingState.jsx";
 import Logo from "/images/Logo-4.svg";
 import { useEffect, useState, useRef } from "react";
 import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
@@ -30,8 +31,8 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { useLogoutMutation } from "@/services/api/user/userAuthApis.js";
 import { setUser } from "@/store/slices/userSlice.js";
-import { useGetProfilePicutreUrlQuery } from "@/services/api/user/fileUploadApis.js";
-import { getFeaturedRecordedCourses } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
+import { useGetAvatarUrlQuery } from "@/services/api/user/fileUploadApis.js";
+import { useGetRecordedCoursesQuery } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
 import admissionApis from "@/services/api/user/admissionApis.js";
 import { cn } from "@/lib/utils.js";
 
@@ -70,9 +71,8 @@ const Navbar = () => {
       .trim()
       .toLowerCase() === "admin";
 
-  const { data } = useGetProfilePicutreUrlQuery();
+  const { data } = useGetAvatarUrlQuery();
 
-  const isCoursesLoading = false;
 
   const dispatch = useDispatch();
 
@@ -239,7 +239,8 @@ const Navbar = () => {
     };
   }, [isProfileOpen]);
 
-  const courseLinks = getFeaturedRecordedCourses(4).map((course) => ({ to: `/courses/${course.slug}`, label: course.title }));
+  const { data: recordedData, isLoading: isCoursesLoading, isError: coursesError } = useGetRecordedCoursesQuery({ limit: 4 });
+  const courseLinks = (recordedData?.courses || []).map((course) => ({ to: `/courses/${course.slug}`, label: course.title }));
 
   const serviceLinks = [
     { to: "/live-classes", label: "Live classes" },
@@ -499,7 +500,7 @@ const Navbar = () => {
                   )}
                   <div className="grid gap-0.5 text-left">
                     <p className="m-0 max-w-34 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-extrabold text-foreground">
-                      {user?.fullname}
+                      {user?.name}
                     </p>
                     <p className="m-0 text-[0.72rem] font-semibold text-faint-foreground">
                       My account
@@ -518,7 +519,7 @@ const Navbar = () => {
                 >
                   <div className="border-b border-border bg-surface-alt p-4">
                     <p className="m-0 overflow-hidden text-ellipsis whitespace-nowrap font-extrabold text-foreground">
-                      {user?.fullname}
+                      {user?.name}
                     </p>
                     <p className="m-0 mt-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-muted-foreground">
                       {user?.email}
@@ -615,7 +616,7 @@ const Navbar = () => {
                     </span>
                     <div>
                       <p className="text-sm font-extrabold text-foreground">
-                        Featured video courses
+                        Latest video courses
                       </p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         Explore structured video lessons
@@ -626,10 +627,11 @@ const Navbar = () => {
                   <div className="mt-4 grid gap-1">
                     {isCoursesLoading && (
                       <p className="px-3 py-2 text-sm font-semibold text-muted-foreground">
-                        Loading courses...
+                        <LoadingState variant="inline" label="Loading courses..." />
                       </p>
                     )}
-                    {!isCoursesLoading && courseLinks.length === 0 && (
+                    {coursesError && <p role="alert" className="px-3 py-2 text-sm text-muted-foreground">Courses could not be loaded. Open the catalog to try again.</p>}
+                    {!isCoursesLoading && !coursesError && courseLinks.length === 0 && (
                       <p className="px-3 py-2 text-sm font-semibold text-muted-foreground">
                         New courses are coming soon.
                       </p>
@@ -785,7 +787,7 @@ const Navbar = () => {
                   )}
                   <div className="grid min-w-0 gap-0.5">
                     <p className="m-0 overflow-hidden text-ellipsis whitespace-nowrap font-display text-base font-extrabold text-foreground">
-                      {user.fullname}
+                      {user.name}
                     </p>
                     <p className="m-0 text-sm font-semibold text-muted-foreground">
                       Account
@@ -933,10 +935,11 @@ const Navbar = () => {
                             </NavLink>
                             {isCoursesLoading && (
                               <div className="rounded-md px-3 py-2 text-sm font-semibold leading-snug text-faint-foreground">
-                                Loading courses...
+                                <LoadingState variant="inline" label="Loading courses..." />
                               </div>
                             )}
-                            {!isCoursesLoading && courseLinks.length === 0 && (
+                            {coursesError && <p role="alert" className="px-3 py-2 text-sm text-muted-foreground">Courses could not be loaded. Open the catalog to try again.</p>}
+                    {!isCoursesLoading && !coursesError && courseLinks.length === 0 && (
                               <div className="rounded-md px-3 py-2 text-sm font-semibold leading-snug text-faint-foreground">
                                 No courses available
                               </div>

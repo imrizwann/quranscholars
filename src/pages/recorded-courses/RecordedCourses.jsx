@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import LoadingState from "@/components/feedback/LoadingState.jsx";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   ArrowRight,
@@ -12,44 +13,59 @@ import CustomSelect from "@/components/ui/CustomSelect.jsx";
 import RecordedCourseCard from "@/features/recorded-courses/components/RecordedCourseCard.jsx";
 import RecordedCourseSkeleton from "@/features/recorded-courses/components/RecordedCourseSkeleton.jsx";
 import UrduCompanion from "@/components/marketing/UrduCompanion.jsx";
-import {
-  getRecordedCourses,
-  recordedCourseCategories,
-  recordedCourseLevels,
-} from "@/features/recorded-courses/services/recordedCoursesRepository.js";
+import { useGetRecordedCoursesQuery } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
+import { recordedCourseLevels, recordedCourseLanguages } from "@/features/recorded-courses/services/recordedCourseContract.js";
 const PAGE_SIZE = 8;
-const levelOptions = recordedCourseLevels.map((item) => ({
-  value: item,
-  label: item === "All" ? "All levels" : item,
-}));
-const sortOptions = [
-  { value: "popular", label: "Most popular" },
-  { value: "rating", label: "Highest rated" },
-  { value: "newest", label: "Newest" },
-  { value: "price-low", label: "Price: low to high" },
-];
+const levelOptions = recordedCourseLevels.map((value) => ({ value, label: value === "All" ? "All levels" : value }));
+const languageOptions = recordedCourseLanguages.map((value) => ({ value, label: value === "All" ? "All languages" : value }));
+const sortOptions = [{ value: "newest", label: "Newest" }];
 
 const RecordedCourses = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get("search") || "";
 
-  const category = recordedCourseCategories.includes(
-    searchParams.get("subject"),
-  )
-    ? searchParams.get("subject")
-    : "All";
-
-  const level = recordedCourseLevels.includes(searchParams.get("level"))
-    ? searchParams.get("level")
-    : "All";
-
-  const sort = sortOptions.some(
-    (option) => option.value === searchParams.get("sort"),
-  )
-    ? searchParams.get("sort")
-    : "popular";
-
-  const page = Math.max(1, Number.parseInt(searchParams.get("page"), 10) || 1);
+  const categoryParam = (searchParams.get("subject") || searchParams.get("category") || "").trim().toLowerCase();
+  const category = !categoryParam || categoryParam === "all" ? "All" : categoryParam;
+  const level = recordedCourseLevels.find((value) => value.toLowerCase() === searchParams.get("level")?.toLowerCase()) || "All";
+  const language = searchParams.get("language") || "All";
+  const sort = "newest";
+  const requestedPage = Number(searchParams.get("page") || 1);
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+  const [categories, setCategories] = useState({});
+  const resultsRef = useRef(null);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(search), 300);
+    return () => window.clearTimeout(timer);
+  }, [search]);
+  const { data, currentData, isFetching, isError, refetch } = useGetRecordedCoursesQuery({
+    page, limit: PAGE_SIZE, search: debouncedSearch, category, level, language,
+  }, { skip: search !== debouncedSearch });
+  const isLoading = isFetching || search !== debouncedSearch;
+  const hasError = isError && !isLoading;
+  // Retain the last page while a replacement request runs, avoiding layout collapse.
+  const displayedData = currentData || data;
+  const visibleCourses = displayedData?.courses || [];
+  const totalCourses = displayedData?.pagination.totalCourses ?? 0;
+  const pageCount = displayedData?.pagination.totalPages ?? 0;
+  const currentPage = displayedData?.pagination.page ?? page;
+  useEffect(() => {
+    if (!currentData) return;
+    setCategories((previous) => ({ ...previous, ...Object.fromEntries(currentData.courses
+      .filter((course) => course.categorySlug)
+      .map((course) => [course.categorySlug, course.category])) }));
+  }, [currentData]);
+  const categoryOptions = [{ value: "All", label: "All" }, ...Object.entries({
+    ...categories, ...(category !== "All" && { [category]: categories[category] || category }),
+  }).map(([value, label]) => ({ value, label }))];
+  useEffect(() => {
+    if (!currentData || isFetching || page <= Math.max(1, pageCount)) return;
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous);
+      next.set("page", String(Math.max(1, pageCount)));
+      return next;
+    }, { replace: true });
+  }, [currentData, isFetching, page, pageCount, setSearchParams]);
 
   const updateFilter = (key, value, fallback = "") =>
     setSearchParams(
@@ -58,6 +74,8 @@ const RecordedCourses = () => {
         if (value === fallback || !value) next.delete(key);
         else next.set(key, value);
         next.delete("page");
+        next.delete("sort");
+        if (key === "subject") next.delete("category");
         return next;
       },
       { replace: key === "search" },
@@ -66,43 +84,25 @@ const RecordedCourses = () => {
   const setSearch = (value) => updateFilter("search", value);
   const setCategory = (value) => updateFilter("subject", value, "All");
   const setLevel = (value) => updateFilter("level", value, "All");
-  const setSort = (value) => updateFilter("sort", value, "popular");
+  const setLanguage = (value) => updateFilter("language", value, "All");
 
-  const setPage = (updater) =>
+  const setPage = (updater) => {
     setSearchParams((previous) => {
       const next = new URLSearchParams(previous);
       next.set("page", String(updater(currentPage)));
       return next;
     });
-
-  const isLoading = false;
-  const hasError = false;
-
-  const filteredCourses = useMemo(
-    () => getRecordedCourses({ search, category, level, sort }),
-    [search, category, level, sort],
-  );
-
-  const pageCount = Math.max(1, Math.ceil(filteredCourses.length / PAGE_SIZE));
-
-  const currentPage = Math.min(page, pageCount);
-  const visibleCourses = filteredCourses.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  );
-
-  const handleSearchChange = (event) => {
-    setSearch(event.target.value);
-    setPage(1);
+    // Pagination returns to the results, never the marketing hero. Filters stay put.
+    const results = resultsRef.current;
+    if (results?.getBoundingClientRect().top < 0) {
+      results.scrollIntoView({ block: "start", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+    }
+    results?.focus({ preventScroll: true });
   };
 
-  const selectFilter = (setter) => (nextValue) => {
-    setter(nextValue);
-    setPage(1);
-  };
-
-  const hasActiveFilters =
-    search || category !== "All" || level !== "All" || sort !== "popular";
+  const handleSearchChange = (event) => setSearch(event.target.value);
+  const selectFilter = (setter) => (nextValue) => setter(nextValue);
+  const hasActiveFilters = search || category !== "All" || level !== "All" || language !== "All";
 
   const clearFilters = () => setSearchParams({});
 
@@ -161,14 +161,11 @@ const RecordedCourses = () => {
                 Find your next course
               </h2>
             </div>
-            <p
-              className="inline-flex items-center gap-2 text-sm font-bold text-[#68766f]"
-              aria-live="polite"
-            >
-              <Grid3X3 className="size-4 text-primary" />
-              Showing {visibleCourses.length} of {filteredCourses.length}{" "}
-              courses
-            </p>
+            <div className="inline-flex items-center gap-2 text-sm font-bold text-[#68766f]">
+              {isLoading ? <LoadingState variant="inline" label={displayedData ? "Updating courses..." : "Loading courses..."} /> : (
+                <p aria-live="polite" aria-atomic="true"><Grid3X3 className="mr-2 inline size-4 text-primary" />Showing {hasError ? 0 : visibleCourses.length} of {hasError ? 0 : totalCourses} courses</p>
+              )}
+            </div>
           </div>
 
           <div className="mt-8 border-y border-[#dfe6e2] py-5">
@@ -181,7 +178,8 @@ const RecordedCourses = () => {
                   type="search"
                   value={search}
                   onChange={handleSearchChange}
-                  placeholder="Search courses, subjects, or instructors"
+                  maxLength={100}
+                  placeholder="Search course titles, descriptions, or tags"
                 />
                 {search && (
                   <button
@@ -200,7 +198,8 @@ const RecordedCourses = () => {
                 label="Sort"
                 value={sort}
                 options={sortOptions}
-                onChange={selectFilter(setSort)}
+                disabled
+                onChange={() => {}}
               />
             </div>
 
@@ -210,17 +209,17 @@ const RecordedCourses = () => {
                   Subject:
                 </span>
                 <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  {recordedCourseCategories.map((item) => {
-                    const isActive = category === item;
+                  {categoryOptions.map((item) => {
+                    const isActive = category === item.value;
                     return (
                       <button
                         type="button"
-                        key={item}
-                        onClick={() => selectFilter(setCategory)(item)}
+                        key={item.value}
+                        onClick={() => selectFilter(setCategory)(item.value)}
                         aria-pressed={isActive}
                         className={`min-h-8 shrink-0 rounded-full border px-3.5 text-xs font-extrabold transition ${isActive ? "border-[#174d42] bg-[#174d42] text-white" : "border-transparent text-[#586861] hover:border-[#d7e0dc] hover:bg-white"}`}
                       >
-                        {item}
+                        {item.label}
                       </button>
                     );
                   })}
@@ -235,6 +234,14 @@ const RecordedCourses = () => {
                   options={levelOptions}
                   onChange={selectFilter(setLevel)}
                 />
+                <CustomSelect
+                  className="w-full sm:w-48"
+                  menuAlign="right"
+                  label="Language"
+                  value={language}
+                  options={languageOptions.some((item) => item.value === language) ? languageOptions : [...languageOptions, { value: language, label: language }]}
+                  onChange={selectFilter(setLanguage)}
+                />
                 {hasActiveFilters && (
                   <button
                     type="button"
@@ -248,28 +255,30 @@ const RecordedCourses = () => {
             </div>
           </div>
 
-          {isLoading ? (
+          <div ref={resultsRef} tabIndex={-1} aria-label="Course results" aria-busy={isLoading} data-scroll-pending={isLoading ? "true" : undefined} className="scroll-mt-24 outline-none">
+          {isLoading && !displayedData ? (
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {Array.from({ length: 8 }, (_, index) => (
                 <RecordedCourseSkeleton key={index} />
               ))}
             </div>
           ) : hasError ? (
-            <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+            <div role="alert" className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
               <h3 className="font-display text-xl font-black text-red-900">
                 We could not load courses
               </h3>
               <p className="mt-2 text-sm font-medium text-red-700">
                 Please refresh the page or try again shortly.
               </p>
+              <button type="button" onClick={refetch} className="mt-4 font-bold text-primary">Try again</button>
             </div>
           ) : visibleCourses.length ? (
-            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div inert={isLoading ? true : undefined} className={`mt-8 grid gap-6 transition-opacity motion-reduce:transition-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${isLoading ? "opacity-50" : "opacity-100"}`}>
               {visibleCourses.map((course) => (
                 <RecordedCourseCard key={course.id} course={course} />
               ))}
             </div>
-          ) : (
+          ) : isLoading ? <LoadingState label="Updating courses..." /> : (
             <div className="mt-8 rounded-2xl border border-dashed border-[#cbd8d1] bg-white p-10 text-center">
               <span className="mx-auto grid size-12 place-items-center rounded-xl bg-[#e8f4f0] text-primary">
                 <BookOpen className="size-5" />
@@ -290,14 +299,15 @@ const RecordedCourses = () => {
             </div>
           )}
 
-          {pageCount > 1 && (
+          </div>
+          {!hasError && pageCount > 1 && (
             <nav
               className="mt-10 flex items-center justify-center gap-2"
               aria-label="Course pages"
             >
               <button
                 type="button"
-                disabled={currentPage === 1}
+                disabled={isLoading || currentPage === 1}
                 onClick={() => setPage((value) => Math.max(1, value - 1))}
                 className="min-h-10 rounded-lg border border-[#d5ded9] bg-white px-4 text-sm font-black text-[#43554d] disabled:cursor-not-allowed disabled:opacity-45"
               >
@@ -308,7 +318,7 @@ const RecordedCourses = () => {
               </span>
               <button
                 type="button"
-                disabled={currentPage === pageCount}
+                disabled={isLoading || currentPage >= pageCount}
                 onClick={() =>
                   setPage((value) => Math.min(pageCount, value + 1))
                 }

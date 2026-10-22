@@ -1,9 +1,121 @@
-import { NavLink, Outlet } from "react-router-dom";
-import { BarChart3, BookOpen, ChevronLeft, CircleDollarSign, ClipboardCheck, LayoutDashboard, Library, Menu, MessageSquareText, Radio, Settings, UserRound, Users, X } from "lucide-react";
-import { useState } from "react";
-import { cn } from "@/lib/utils.js";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import CollapsibleSidebar, { HamburgerIcon, SidebarToggle } from "@/components/navigation/CollapsibleSidebar.jsx";
+import { useSelector } from "react-redux";
+import { ArrowUpRight, BarChart3, BookOpen, ChevronRight, CircleDollarSign, ClipboardCheck, GraduationCap, LayoutDashboard, Library, MessageSquareText, Radio, Settings, UserRound, Users, X } from "lucide-react";
+import "./workspace.css";
 
-const studentLinks = [{ to: "/dashboard", label: "Overview", icon: LayoutDashboard, end: true }, { to: "/dashboard/learning", label: "My Learning", icon: BookOpen }, { to: "/dashboard/assignments", label: "Assignments", icon: ClipboardCheck }, { to: "/dashboard/wishlist", label: "Wishlist", icon: Library }, { to: "/dashboard/purchases", label: "Purchases", icon: CircleDollarSign }, { to: "/dashboard/profile", label: "Profile", icon: UserRound }, { to: "/dashboard/settings", label: "Settings", icon: Settings }];
-const instructorLinks = [{ to: "/instructor/dashboard", label: "Overview", icon: LayoutDashboard }, { to: "/instructor/courses", label: "Courses", icon: BookOpen }, { to: "/instructor/live-classes", label: "Live Classes", icon: Radio }, { to: "/instructor/students", label: "Students", icon: Users }, { to: "/instructor/assignments", label: "Assignments", icon: ClipboardCheck }, { to: "/instructor/resources", label: "Resources", icon: Library }, { to: "/instructor/earnings", label: "Earnings", icon: CircleDollarSign }, { to: "/instructor/analytics", label: "Analytics", icon: BarChart3 }, { to: "/instructor/reviews", label: "Reviews", icon: MessageSquareText }, { to: "/instructor/profile", label: "Public Profile", icon: UserRound }, { to: "/instructor/settings", label: "Settings", icon: Settings }];
+const studentLinks = [
+  { to: "/dashboard", label: "Overview", icon: LayoutDashboard, end: true },
+  { to: "/dashboard/learning", label: "My learning", icon: BookOpen },
+  { to: "/dashboard/assignments", label: "Assignments", icon: ClipboardCheck },
+  { to: "/dashboard/wishlist", label: "Wishlist", icon: Library },
+  { to: "/dashboard/purchases", label: "Purchases", icon: CircleDollarSign },
+];
+const instructorLinks = [
+  { to: "/instructor/dashboard", label: "Overview", icon: LayoutDashboard },
+  { to: "/instructor/courses", label: "Courses", icon: BookOpen },
+  { to: "/instructor/live-classes", label: "Live classes", icon: Radio },
+  { to: "/instructor/students", label: "Students", icon: Users },
+  { to: "/instructor/assignments", label: "Assignments", icon: ClipboardCheck },
+  { to: "/instructor/resources", label: "Resources", icon: Library },
+  { to: "/instructor/earnings", label: "Earnings", icon: CircleDollarSign },
+  { to: "/instructor/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/instructor/reviews", label: "Reviews", icon: MessageSquareText },
+];
 
-export default function WorkspaceLayout({ type = "student" }) { const [open, setOpen] = useState(false); const links = type === "instructor" ? instructorLinks : studentLinks; const title = type === "instructor" ? "Instructor workspace" : "Student dashboard"; const Sidebar = () => <div className="flex h-full flex-col bg-[#082f2b] text-white"><div className="flex min-h-18 items-center justify-between border-b border-white/10 px-5"><NavLink to="/" className="font-display text-xl font-black text-white no-underline">Quran<span className="text-[#f4c95d]">Scholar</span></NavLink><button onClick={() => setOpen(false)} className="grid size-9 place-items-center lg:hidden" aria-label="Close navigation"><X className="size-5" /></button></div><div className="px-5 py-5"><p className="text-[.68rem] font-black uppercase tracking-[.15em] text-white/40">{title}</p><p className="mt-2 text-sm font-bold">Assalamu alaikum, learner</p></div><nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 pb-5">{links.map(({ icon: Icon, ...link }) => <NavLink key={link.to} {...link} onClick={() => setOpen(false)} className={({ isActive }) => cn("flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-bold text-white/62 no-underline transition hover:bg-white/8 hover:text-white", isActive && "bg-white/12 text-white")}><Icon className="size-[1.1rem]" />{link.label}</NavLink>)}</nav><NavLink to="/" className="m-3 flex min-h-11 items-center gap-2 rounded-lg border border-white/10 px-3 text-sm font-bold text-white/65 no-underline"><ChevronLeft className="size-4" />Back to website</NavLink></div>; return <div className="min-h-screen bg-[#f5f7f5] text-foreground lg:grid lg:grid-cols-[17rem_1fr]"><aside className="hidden h-screen lg:sticky lg:top-0 lg:block"><Sidebar /></aside>{open && <div className="fixed inset-0 z-50 bg-black/50 lg:hidden" onClick={(event) => event.target === event.currentTarget && setOpen(false)}><aside className="h-full w-[min(18rem,88vw)]"><Sidebar /></aside></div>}<div className="min-w-0"><header className="sticky top-0 z-30 flex min-h-16 items-center justify-between border-b border-border bg-white/90 px-4 backdrop-blur sm:px-6"><button onClick={() => setOpen(true)} className="grid size-10 place-items-center rounded-lg border border-border lg:hidden" aria-label="Open navigation"><Menu className="size-5" /></button><p className="hidden text-sm font-black sm:block">{title}</p><span className="grid size-9 place-items-center rounded-full bg-primary text-xs font-black text-white">MR</span></header><Outlet /></div></div>; }
+const adminLinks = [{ to: "/admin/admissions", label: "Admissions", icon: ClipboardCheck }];
+
+function WorkspaceSidebar({ instructor, admin, onNavigate, mobile = false, collapsed = false }) {
+  const base = instructor ? "/instructor" : "/dashboard";
+  const { pathname } = useLocation();
+  const links = admin ? adminLinks : instructor ? instructorLinks : studentLinks;
+  const role = admin ? "Admin" : instructor ? "Instructor" : "Learner";
+  const renderLink = ({ icon: Icon, ...link }) => (
+    <NavLink key={link.to} {...link} onClick={onNavigate} aria-label={link.label} title={collapsed ? link.label : undefined}
+      className={({ isActive }) => `workspace-nav-link${isActive || (instructor && pathname === "/instructor" && link.label === "Overview") ? " is-active" : ""}`}>
+      <Icon size={18} aria-hidden="true" /><span>{link.label}</span>
+    </NavLink>
+  );
+  return (
+    <div className="workspace-sidebar">
+      <div className="workspace-brand-row">
+        <NavLink to="/" className="workspace-brand" onClick={onNavigate} aria-label="QuranScholar home" title={collapsed ? "QuranScholar home" : undefined}>
+          <span className="workspace-brand-icon"><BookOpen size={21} aria-hidden="true" /></span>
+          <span className="workspace-brand-copy">QuranScholar<span className="workspace-brand-caption">A journey of knowledge</span></span>
+        </NavLink>
+        {mobile && <button className="workspace-icon-button" aria-label="Close navigation" onClick={onNavigate}><X size={20} /></button>}
+      </div>
+      <div className="workspace-role" title={collapsed ? `${role} workspace` : undefined}><GraduationCap size={17} aria-hidden="true" /><span>{role} workspace</span></div>
+      <nav aria-label={`${role} navigation`} className="workspace-navigation">
+        <p className="workspace-nav-caption">{admin ? "Administration" : instructor ? "Teaching" : "Your learning"}</p>
+        {links.map(renderLink)}
+        <p className="workspace-nav-caption workspace-account-caption">Account</p>
+        {(admin ? [{ to: "/profile", label: "Profile", icon: UserRound }] : [
+          { to: `${base}/profile`, label: instructor ? "Public profile" : "Profile", icon: UserRound },
+          { to: `${base}/settings`, label: "Settings", icon: Settings },
+        ]).map(renderLink)}
+      </nav>
+      <div className="workspace-sidebar-footer">
+        <p>Learn with purpose.<br />Grow with every lesson.</p>
+        <NavLink to="/" onClick={onNavigate} aria-label="Back to website" title={collapsed ? "Back to website" : undefined}><span>Back to website</span><ArrowUpRight size={16} aria-hidden="true" /></NavLink>
+      </div>
+    </div>
+  );
+}
+
+export default function WorkspaceLayout({ type = "student" }) {
+  const instructor = type === "instructor";
+  const admin = type === "admin";
+  const role = admin ? "Admin" : instructor ? "Instructor" : "Learner";
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const user = useSelector((state) => state.user.user);
+  const name = user?.name?.trim() || role;
+  const initials = name.split(/\s+/).slice(0, 2).map((word) => word[0]).join("");
+  const dialog = useRef(null);
+  const { pathname } = useLocation();
+  const base = instructor ? "/instructor" : "/dashboard";
+  const closeNavigation = () => dialog.current?.close();
+  const activeLink = [...(admin ? adminLinks : instructor ? instructorLinks : studentLinks),
+    { to: `${base}/profile`, label: "Profile" }, { to: `${base}/settings`, label: "Settings" },
+  ].find((link) => link.end ? pathname === link.to : pathname.startsWith(link.to));
+
+  useEffect(() => {
+    closeNavigation();
+  }, [pathname]);
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const closeOnDesktop = () => { if (desktop.matches) closeNavigation(); };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
+  }, []);
+
+  return (
+    <div className="workspace-shell">
+      <a href="#workspace-content" className="workspace-skip-link">Skip to content</a>
+      <CollapsibleSidebar id="workspace-desktop-navigation" className="workspace-desktop-sidebar" collapsed={collapsed}>
+        <WorkspaceSidebar instructor={instructor} admin={admin} collapsed={collapsed} />
+      </CollapsibleSidebar>
+      <dialog ref={dialog} id="workspace-mobile-navigation" className="workspace-mobile-drawer" aria-label="Workspace navigation" onClose={() => setMobileOpen(false)}
+        onClick={(event) => { if (event.target === event.currentTarget) closeNavigation(); }}>
+        <WorkspaceSidebar instructor={instructor} admin={admin} mobile onNavigate={closeNavigation} />
+      </dialog>
+      <div className="workspace-body">
+        <header className="workspace-topbar">
+          <div className="workspace-breadcrumb">
+            <SidebarToggle className="workspace-desktop-toggle" collapsed={collapsed} onToggle={() => setCollapsed((value) => !value)} controls="workspace-desktop-navigation" />
+            <button type="button" className="workspace-icon-button workspace-menu-button" onClick={() => { dialog.current?.showModal(); setMobileOpen(true); }} aria-label="Open navigation" aria-expanded={mobileOpen} aria-controls="workspace-mobile-navigation"><HamburgerIcon /></button>
+            <span>{admin ? "Admin" : instructor ? "Instructor" : "My workspace"}</span><ChevronRight size={14} aria-hidden="true" />
+            <strong>{activeLink?.label || "Overview"}</strong>
+          </div>
+          <NavLink to={admin ? "/profile" : `${base}/profile`} className="workspace-account" aria-label={`Profile for ${name}`}>
+            <span className="workspace-account-name">{name}<small>{role}</small></span>
+            <span className="workspace-avatar">{initials}</span>
+          </NavLink>
+        </header>
+        <div id="workspace-content" tabIndex={-1}><Outlet /></div>
+      </div>
+    </div>
+  );
+}

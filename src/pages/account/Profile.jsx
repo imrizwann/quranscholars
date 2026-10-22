@@ -3,8 +3,8 @@ import { AnimatePresence } from "framer-motion";
 import { Toaster } from "sonner";
 import { useSelector } from "react-redux";
 import {
-  useUploadProfilePictureMutation,
-  useGetProfilePicutreUrlQuery,
+  useUploadAvatarMutation,
+  useGetAvatarUrlQuery,
 } from "@/services/api/user/fileUploadApis.js";
 import ProfileDeleteModal from "@/features/profile/components/ProfileDeleteModal.jsx";
 import {
@@ -25,15 +25,15 @@ const inputClass = "mt-2 min-h-11 w-full rounded-xl border border-[#d8e2dd] bg-w
 
 const ProfilePage = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const { data } = useGetProfilePicutreUrlQuery();
-  const [uploadProfilePicture, { isLoading: isUploading }] = useUploadProfilePictureMutation();
+  const { data } = useGetAvatarUrlQuery();
+  const [uploadAvatar, { isLoading: isUploading }] = useUploadAvatarMutation();
   const { user } = useSelector((state) => state.user);
   const [file, setFile] = useState(null);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [userDetails, setUserDetails] = useState({
-    fullname: user?.fullname || "",
+    name: user?.name || "",
     email: user?.email || "",
     bio: "Committed to consistent Quran study and deeper understanding.",
     location: "",
@@ -47,7 +47,7 @@ const ProfilePage = () => {
   useEffect(() => {
     setUserDetails((current) => ({
       ...current,
-      fullname: user?.fullname || current.fullname,
+      name: user?.name || current.name,
       email: user?.email || current.email,
     }));
   }, [user]);
@@ -73,8 +73,8 @@ const ProfilePage = () => {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      await uploadProfilePicture(formData).unwrap();
-      setMessage("Profile picture updated.");
+      await uploadAvatar(formData).unwrap();
+      setMessage("Avatar updated.");
       setFile(null);
       setError(null);
     } catch (requestError) {
@@ -92,7 +92,7 @@ const ProfilePage = () => {
     setEditMode(false);
   };
 
-  const initials = (userDetails.fullname || userDetails.email || "QS")
+  const initials = (userDetails.name || userDetails.email || "QS")
     .split(" ")
     .map((part) => part[0])
     .join("")
@@ -116,11 +116,11 @@ const ProfilePage = () => {
             <div className="-mt-12">
               <div className="relative grid size-28 place-items-center overflow-hidden rounded-2xl border-4 border-white bg-[#dcece6] text-2xl font-black text-primary shadow-lg">
                 {previewUrl || data?.url ? <img src={previewUrl || data?.url} alt="Profile" className="size-full object-cover" /> : initials}
-                <label className="absolute bottom-1.5 right-1.5 grid size-9 cursor-pointer place-items-center rounded-lg bg-[#0f766e] text-white shadow-md transition hover:bg-[#0b665f]" aria-label="Choose profile picture"><Camera className="size-4" /><input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={handleImageChange} /></label>
+                <label className="absolute bottom-1.5 right-1.5 grid size-9 cursor-pointer place-items-center rounded-lg bg-[#0f766e] text-white shadow-md transition hover:bg-[#0b665f]" aria-label="Choose avatar"><Camera className="size-4" /><input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={handleImageChange} /></label>
               </div>
             </div>
             <div className="pt-1 sm:pt-5">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"><div><h2 id="profile-summary-title" className="text-2xl font-black tracking-[-0.03em]">{userDetails.fullname || "QuranScholar student"}</h2><p className="mt-1 text-sm font-semibold text-[#718078]">{userDetails.email}</p></div>{file && <div className="flex gap-2"><button type="button" onClick={handleImageUpload} disabled={isUploading} className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-[#0f766e] px-3.5 text-xs font-black text-white disabled:opacity-60">{isUploading && <Loader2 className="size-3.5 animate-spin" />}Save photo</button><button type="button" onClick={() => setFile(null)} className="min-h-10 rounded-lg border border-[#d8e2dd] px-3.5 text-xs font-black text-[#52655c]">Cancel</button></div>}</div>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"><div><h2 id="profile-summary-title" className="text-2xl font-black tracking-[-0.03em]">{userDetails.name || "QuranScholar student"}</h2><p className="mt-1 text-sm font-semibold text-[#718078]">{userDetails.email}</p></div>{file && <div className="flex gap-2"><button type="button" onClick={handleImageUpload} disabled={isUploading} className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-[#0f766e] px-3.5 text-xs font-black text-white disabled:opacity-60">{isUploading && <Loader2 className="size-3.5 animate-spin" />}Save photo</button><button type="button" onClick={() => setFile(null)} className="min-h-10 rounded-lg border border-[#d8e2dd] px-3.5 text-xs font-black text-[#52655c]">Cancel</button></div>}</div>
               <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-[#5f7268]">{userDetails.bio}</p>
               <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-[#718078]"><span className="inline-flex items-center gap-1.5"><MapPin className="size-3.5 text-primary" />{userDetails.location || "Location not added"}</span><span className="inline-flex items-center gap-1.5"><Phone className="size-3.5 text-primary" />{userDetails.phone || "Phone not added"}</span><span className="inline-flex items-center gap-1.5"><Globe2 className="size-3.5 text-primary" />Timezone detected automatically</span></div>
               {(error || message) && <p className={`mt-4 rounded-lg px-3 py-2 text-xs font-bold ${error ? "bg-red-50 text-red-700" : "bg-[#e7f4ef] text-[#176255]"}`} role="status">{error || message}</p>}
@@ -132,7 +132,7 @@ const ProfilePage = () => {
           <section className="rounded-2xl border border-[#dfe6e2] bg-white p-6 sm:p-8" aria-labelledby="profile-details-title">
             <div className="flex items-start justify-between gap-4"><div><h2 id="profile-details-title" className="text-xl font-black tracking-[-0.025em]">Profile details</h2><p className="mt-1 text-sm font-medium text-[#718078]">Review how your account is identified.</p></div>{!editMode && <button type="button" onClick={() => setEditMode(true)} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[#d8e2dd] px-3.5 text-xs font-black text-[#365147]"><Edit3 className="size-3.5" />Edit</button>}</div>
             <div className="mt-7 grid gap-5 sm:grid-cols-2">
-              <label className="text-sm font-black text-[#29443a]">Full name<input className={inputClass} name="fullname" value={userDetails.fullname} onChange={handleFieldChange} disabled={!editMode} /></label>
+              <label className="text-sm font-black text-[#29443a]">Full name<input className={inputClass} name="name" value={userDetails.name} onChange={handleFieldChange} disabled={!editMode} /></label>
               <label className="text-sm font-black text-[#29443a]">Email address<input className={inputClass} name="email" type="email" value={userDetails.email} disabled /></label>
               <label className="text-sm font-black text-[#29443a]">Phone number<input className={inputClass} name="phone" placeholder="Add phone" value={userDetails.phone} onChange={handleFieldChange} disabled={!editMode} /></label>
               <label className="text-sm font-black text-[#29443a]">Location<input className={inputClass} name="location" placeholder="City, country" value={userDetails.location} onChange={handleFieldChange} disabled={!editMode} /></label>

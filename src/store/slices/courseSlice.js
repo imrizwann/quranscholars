@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-
 const courses = [
   {
     course_id: 1,
@@ -316,8 +315,7 @@ const courses = [
       ],
     },
   },
-]
-
+];
 
 export const courseSlice = createSlice({
   name: "courses",

@@ -1,6 +1,49 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarDays, Clock3, Play, Radio } from "lucide-react";
-import { AssignmentCard } from "@/components/lms/LmsComponents.jsx";
+import { ArrowRight, BookOpen, ClipboardCheck, Play, Radio } from "lucide-react";
+import { DashboardAssignments, DashboardHeading, DashboardMetrics, DashboardPreviewNote, DashboardSchedule, DashboardSection } from "@/components/lms/DashboardParts.jsx";
 import { assignments, liveClasses } from "@/data/lmsData.js";
 
-export default function StudentDashboard() { const next = liveClasses[0]; return <main className="p-4 sm:p-6 lg:p-8"><div className="mx-auto max-w-7xl"><div><p className="text-xs font-black uppercase tracking-[.14em] text-primary">Saturday, 5 September</p><h1 className="mt-2 font-display text-3xl font-black sm:text-4xl">Your learning, at a glance</h1><p className="mt-2 text-sm font-medium text-muted-foreground">Continue where you left off and see what needs your attention.</p></div><div className="mt-8 grid gap-6 xl:grid-cols-[1.35fr_1fr]"><section className="overflow-hidden rounded-2xl bg-[#082f2b] p-6 text-white sm:p-8"><p className="text-xs font-black uppercase tracking-[.14em] text-[#a6dace]">Continue learning</p><h2 className="mt-4 font-display text-3xl font-black">Tajweed Foundations</h2><p className="mt-2 text-sm font-semibold text-white/55">Lesson 8 · Noon Sakinah and Tanween</p><div className="mt-8 flex items-center gap-3"><div className="h-2 flex-1 overflow-hidden rounded-full bg-white/10"><div className="h-full w-[38%] rounded-full bg-[#f4c95d]" /></div><span className="text-xs font-black">38%</span></div><Link to="/courses/tajweed-foundations" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-5 text-sm font-black text-[#14372f] no-underline"><Play className="size-4 fill-current" />Continue course</Link></section><section className="rounded-2xl border border-border bg-white p-6 sm:p-8"><div className="flex items-center justify-between"><p className="text-xs font-black uppercase tracking-[.14em] text-primary">Upcoming live class</p><Radio className="size-5 text-primary" /></div><h2 className="mt-4 font-display text-2xl font-black">{next.title}</h2><p className="mt-2 text-sm font-semibold text-muted-foreground">Topic: Harakat and connecting letters</p><div className="mt-5 flex flex-wrap gap-4 text-sm font-bold"><span className="flex gap-2"><CalendarDays className="size-4 text-primary" />Tuesday</span><span className="flex gap-2"><Clock3 className="size-4 text-primary" />{next.time}</span></div><Link to={`/classroom/${next.slug}`} className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-black text-white no-underline">Open classroom <ArrowRight className="size-4" /></Link></section></div><div className="mt-8 grid gap-6 xl:grid-cols-[1fr_.65fr]"><section><div className="flex items-center justify-between gap-3"><h2 className="font-display text-2xl font-black">Assignments</h2><Link to="/dashboard/assignments" className="text-sm font-black text-primary no-underline">View all</Link></div><div className="mt-4 grid gap-4 md:grid-cols-2">{assignments.slice(0,2).map((item) => <AssignmentCard key={item.id} assignment={item} compact />)}</div></section><section><h2 className="font-display text-2xl font-black">My learning</h2><dl className="mt-4 grid grid-cols-2 gap-3"><div className="rounded-xl border border-border bg-white p-5"><dt className="text-xs font-bold text-muted-foreground">Recorded courses</dt><dd className="mt-2 text-3xl font-black">3</dd></div><div className="rounded-xl border border-border bg-white p-5"><dt className="text-xs font-bold text-muted-foreground">Live classes</dt><dd className="mt-2 text-3xl font-black">2</dd></div></dl></section></div></div></main>; }
+export default function StudentDashboard() {
+  const nextClass = liveClasses[0];
+  return <main className="dashboard-page">
+    <DashboardHeading eyebrow="Your learning journey" title="A little progress, every day." description="Make time for what matters. Your next lesson is waiting.">
+      <Link to="/dashboard/learning" className="dashboard-button dashboard-button-outline">My learning <ArrowRight size={16} aria-hidden="true" /></Link>
+    </DashboardHeading>
+    <DashboardPreviewNote />
+    <div className="dashboard-feature-grid">
+      <section className="dashboard-study-card">
+        <div className="dashboard-study-art" aria-hidden="true"><BookOpen strokeWidth={1} /></div>
+        <div className="dashboard-study-content">
+          <p className="dashboard-eyebrow">Pick up where you left off</p>
+          <span className="dashboard-course-label">Recorded course · Tajweed</span>
+          <h2>Tajweed<br />Foundations</h2>
+          <p className="dashboard-study-lesson">Lesson 8 · Noon Sakinah and Tanween</p>
+          <div className="dashboard-progress-label"><span>Your course progress</span><strong>38%</strong></div>
+          <progress className="dashboard-progress" value="38" max="100" aria-label="Tajweed Foundations course progress">38%</progress>
+          <Link to="/courses/tajweed-foundations" className="dashboard-button dashboard-button-light"><Play size={15} fill="currentColor" aria-hidden="true" />Continue course <ArrowRight size={16} aria-hidden="true" /></Link>
+        </div>
+      </section>
+      <section className="dashboard-next-class">
+        <div className="dashboard-card-kicker"><span className="dashboard-eyebrow">Your next live class</span><Radio size={19} aria-hidden="true" /></div>
+        <div className="dashboard-session-day"><span className="dashboard-calendar-label" aria-hidden="true"><span>Weekly</span><strong>TUE</strong></span><span>{nextClass.schedule}<small>{nextClass.time} · {nextClass.timezone}</small></span></div>
+        <h2>{nextClass.title}</h2>
+        <p className="dashboard-intro">Practice reading with guidance, one letter at a time.</p>
+        <div className="dashboard-teacher"><span className="dashboard-teacher-avatar" aria-hidden="true">AA</span><span>{nextClass.instructor}<small>{nextClass.duration} live session</small></span></div>
+        <Link to={`/classroom/${nextClass.slug}`} className="dashboard-button dashboard-button-outline">Open classroom <ArrowRight size={16} aria-hidden="true" /></Link>
+      </section>
+    </div>
+    <DashboardMetrics items={[
+      { icon: BookOpen, label: "Recorded courses", value: "3", note: "Learn at your own pace" },
+      { icon: Radio, label: "Live classes", value: "2", note: "Learn together, in real time" },
+      { icon: ClipboardCheck, label: "Open assignments", value: String(assignments.filter((item) => item.status !== "Submitted").length), note: "A chance to put learning into practice" },
+    ]} />
+    <div className="dashboard-detail-grid">
+      <DashboardSection title="On your study list" subtitle="Small steps towards deeper understanding." to="/dashboard/assignments">
+        <DashboardAssignments items={assignments.slice(0, 2)} />
+      </DashboardSection>
+      <DashboardSection title="Class schedule" subtitle="Build a rhythm that works for you.">
+        <DashboardSchedule classes={liveClasses.slice(0, 2)} />
+      </DashboardSection>
+    </div>
+  </main>;
+}

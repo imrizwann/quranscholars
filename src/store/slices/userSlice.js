@@ -4,8 +4,12 @@ const normalizeUser = (user) => {
   if (!user || typeof user !== "object") return null;
   return {
     ...user,
-    role: String(user.role || "").trim().toLowerCase(),
-    email: String(user.email || "").trim().toLowerCase(),
+    role: String(user.role || "")
+      .trim()
+      .toLowerCase(),
+    email: String(user.email || "")
+      .trim()
+      .toLowerCase(),
   };
 };
 

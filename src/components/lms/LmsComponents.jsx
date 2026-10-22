@@ -28,7 +28,7 @@ export const StatusBadge = ({ status }) => (
 
 export const ResourceCard = ({ resource, dark = false }) => (
   <article
-    className={`flex items-center gap-3 rounded-xl border p-4 ${dark ? "border-white/10 bg-white/5" : "border-border bg-white"}`}
+    className={`flex min-w-0 items-center gap-3 rounded-xl border p-4 ${dark ? "border-white/10 bg-white/5" : "border-border bg-white"}`}
   >
     <span
       className={`grid size-10 shrink-0 place-items-center rounded-lg ${dark ? "bg-white/10 text-[#f4c95d]" : "bg-primary/10 text-primary"}`}
@@ -45,7 +45,7 @@ export const ResourceCard = ({ resource, dark = false }) => (
     </div>
     <button
       type="button"
-      className={`grid size-9 place-items-center rounded-lg border ${dark ? "border-white/10 text-white hover:bg-white/10" : "border-border text-primary hover:bg-surface-alt"}`}
+      className={`grid size-11 shrink-0 place-items-center rounded-lg border ${dark ? "border-white/10 text-white hover:bg-white/10" : "border-border text-primary hover:bg-surface-alt"}`}
       aria-label={`Download ${resource.title}`}
     >
       <Download className="size-4" />
@@ -71,14 +71,14 @@ export const AssignmentCard = ({ assignment, compact = false }) => (
         {assignment.instructions}
       </p>
     )}
-    <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
       <span className="inline-flex items-center gap-2 text-xs font-bold text-muted-foreground">
         <Clock3 className="size-4" />
         Due {assignment.due}
       </span>
       <button
         type="button"
-        className="inline-flex items-center gap-1 text-xs font-black text-primary"
+        className="inline-flex min-h-11 items-center gap-1 text-xs font-black text-primary"
       >
         Open <ArrowUpRight className="size-4" />
       </button>

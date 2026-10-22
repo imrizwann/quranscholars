@@ -1,26 +1,42 @@
 const formatDuration = (totalSeconds = 0) => {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.round((totalSeconds % 3600) / 60);
+  const totalMinutes = Math.round(Math.max(0, Number(totalSeconds) || 0) / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
   if (!hours) return `${minutes} min`;
   return minutes ? `${hours}h ${minutes}m` : `${hours}h`;
 };
 
 const normalizeLesson = (lesson, sectionId, index) => ({
-  id: lesson?.id || `${sectionId}-lesson-${index + 1}`,
+  id: lesson?._id || lesson?.id || `${sectionId}-lesson-${index + 1}`,
   title: lesson?.title || `Lesson ${index + 1}`,
   description: lesson?.description || "",
   durationSeconds: Number(lesson?.durationSeconds || 0),
   durationLabel: formatDuration(Number(lesson?.durationSeconds || 0)),
   order: Number(lesson?.order || index + 1),
   previewable: Boolean(lesson?.previewable),
-  videoUrl: lesson?.videoUrl || null,
+  videoUrl: playbackUrl(lesson?.playbackUrl || lesson?.videoUrl),
   resources: Array.isArray(lesson?.resources) ? lesson.resources : [],
 });
+
+// Never interpret storage keys or processing metadata as playable media.
+const playbackUrl = (value) =>
+  typeof value === "string" && /^https?:\/\//i.test(value) ? value : null;
+
+export const resolveCourseImage = (
+  value,
+  baseUrl = import.meta.env?.VITE_COURSE_MEDIA_BASE_URL,
+) => {
+  if (typeof value !== "string" || !value.trim()) return null;
+  if (playbackUrl(value)) return value;
+  // Thumbnails are R2 object keys. Only resolve them against an explicitly configured public media origin.
+  if (!playbackUrl(baseUrl)) return null;
+  return `${baseUrl.replace(/\/+$/, "")}/${value.replace(/^\/+/, "")}`;
+};
 
 const adaptRecordedCourse = (record = {}) => {
   const sections = (Array.isArray(record.sections) ? record.sections : []).map(
     (section, index) => {
-      const id = section?.id || `section-${index + 1}`;
+      const id = section?._id || section?.id || `section-${index + 1}`;
       return {
         id,
         title: section?.title || `Section ${index + 1}`,
@@ -47,17 +63,25 @@ const adaptRecordedCourse = (record = {}) => {
     slug: record?.slug || "",
     shortDescription: record?.shortDescription || record?.description || "",
     description: record?.description || record?.shortDescription || "",
-    category: record?.category || "Islamic studies",
+    category:
+      record?.category?.name ||
+      (typeof record.category === "string" ? record.category : "Uncategorized"),
+    categorySlug: record?.category?.slug || "",
     instructor: {
       id: record?.instructor?.id || record?.instructor?._id || "",
-      name: record?.instructor?.name || "QuranScholar instructor",
+      name: record?.instructor?.name || "Instructor not listed",
       title: record?.instructor?.title || "Instructor",
       bio: record?.instructor?.bio || "",
+      avatar: record?.instructor?.avatar || null,
     },
-    thumbnail: record?.thumbnail || null,
-    trailerVideo: record?.trailerVideo || record?.trailer || null,
-    language: record?.language || "English",
-    level: record?.level || "All levels",
+    thumbnail: resolveCourseImage(record?.thumbnail),
+    trailerVideo: playbackUrl(
+      record?.trailerPlaybackUrl ||
+        record?.trailerVideo?.playbackUrl ||
+        record?.trailerVideo,
+    ),
+    language: record?.language || "Not specified",
+    level: record?.level || "Not specified",
     price: {
       original: originalPrice,
       sale: salePrice,
@@ -65,10 +89,20 @@ const adaptRecordedCourse = (record = {}) => {
       currency: record?.price?.currency || record?.currency || "INR",
       discounted: salePrice !== null && salePrice < originalPrice,
     },
-    totalDurationSeconds: Number(record?.totalDuration || 0),
-    durationLabel: formatDuration(Number(record?.totalDuration || 0)),
-    totalSections: Number(record?.totalSections || sections.length),
-    totalLessons: Number(record?.totalLessons || lessons.length),
+    totalDurationSeconds:
+      record.totalDuration == null ? null : Number(record.totalDuration),
+    durationLabel:
+      record.totalDuration == null
+        ? "Duration not listed"
+        : formatDuration(record.totalDuration),
+    totalSections:
+      record?.stats?.totalSections == null
+        ? null
+        : Number(record.stats.totalSections),
+    totalLessons:
+      record?.stats?.totalLessons == null
+        ? null
+        : Number(record.stats.totalLessons),
     rating: Number(record?.averageRating || record?.rating || 0),
     totalReviews: Number(record?.totalReviews || 0),
     totalStudents: Number(record?.totalStudents || 0),

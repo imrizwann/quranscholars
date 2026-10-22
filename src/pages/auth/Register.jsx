@@ -38,7 +38,7 @@ const onboardingSteps = [
 ];
 
 const Register = () => {
-  const [fullname, setFullname] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -73,7 +73,7 @@ const Register = () => {
 
     setIsLoading(true);
     try {
-      await register({ fullname, email, password }).unwrap();
+      await register({ name, email, password }).unwrap();
       setSuccess("Registration successful.");
       setError("");
       setRedirectCountdown(3);
@@ -152,8 +152,8 @@ const Register = () => {
                     type="text"
                     placeholder="e.g. Aisha Siddiqui"
                     className="h-full min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground disabled:opacity-60"
-                    value={fullname}
-                    onChange={(e) => setFullname(e.target.value)}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     disabled={isRedirecting}
                   />
                 </div>

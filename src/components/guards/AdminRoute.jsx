@@ -1,3 +1,4 @@
+import AppLoader from "@/components/feedback/AppLoader.jsx";
 import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useMeQuery } from "@/services/api/user/userAuthApis.js";
@@ -8,10 +9,7 @@ const AdminRoute = ({ children }) => {
   const isAdmin = String(user?.role || "").trim().toLowerCase() === "admin";
 
   if (isLoading) {
-    return (
-      <div>
-        Loading account...
-      </div>);
+    return <AppLoader label="Loading your account..." />;
 
   }
 

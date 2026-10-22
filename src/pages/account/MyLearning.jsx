@@ -1,23 +1,16 @@
 import { liveClasses, demoLiveEnrollments } from "@/data/lmsData.js";
-import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, BookOpenCheck, Clock3, PlayCircle } from "lucide-react";
 import LearningCourseCard from "@/features/recorded-courses/components/LearningCourseCard.jsx";
-import { getRecordedCourses } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
-import { readLearningState, subscribeToLearning } from "@/features/recorded-courses/services/learningStorage.js";
 
 const MyLearning = () => {
   const [params, setParams] = useSearchParams();
   const activeTab = params.get("type") === "live-classes" ? "live-classes" : "courses";
-  const [learningState, setLearningState] = useState(readLearningState);
-  const allCourses = useMemo(() => getRecordedCourses(), []);
-  const enrolledCourses = allCourses
-    .filter((course) => learningState.enrollments?.[course.id])
-    .map((course) => ({ course, enrollment: learningState.enrollments[course.id] }));
+  // Await authenticated learner retrievals; public courses are not enrollments.
+  const enrolledCourses = [];
   const completedLessons = enrolledCourses.reduce((total, item) => total + (item.enrollment.completedLessonIds?.length || 0), 0);
   const totalLessons = enrolledCourses.reduce((total, item) => total + item.course.totalLessons, 0);
 
-  useEffect(() => subscribeToLearning(() => setLearningState(readLearningState())), []);
 
   return (
     <main className="min-h-[70vh] bg-[#fbfcfa] px-4 py-12 text-[#172b24] sm:px-6 sm:py-16">
@@ -40,7 +33,7 @@ const MyLearning = () => {
             <section className="mt-10" aria-labelledby="courses-in-progress"><div className="flex items-center justify-between gap-4"><h2 id="courses-in-progress" className="font-display text-2xl font-black">Courses in progress</h2><span className="text-sm font-bold text-[#718079]">Progress saves on this device for now</span></div><div className="mt-5 grid gap-5">{enrolledCourses.map(({ course, enrollment }) => <LearningCourseCard key={course.id} course={course} enrollment={enrollment} />)}</div></section>
           </>
         ) : (
-          <section className="mt-10 rounded-2xl border border-dashed border-[#cbd8d1] bg-white p-10 text-center"><span className="mx-auto grid size-14 place-items-center rounded-xl bg-[#e8f4f0] text-primary"><BookOpenCheck className="size-6" /></span><h2 className="mt-5 font-display text-2xl font-black">Your learning library is ready</h2><p className="mx-auto mt-3 max-w-md text-sm font-medium leading-6 text-[#68766f]">Courses you purchase or enroll in will appear here with saved lesson progress.</p><Link to="/courses" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-black text-white no-underline">Find a self-paced course <ArrowRight className="size-4" /></Link></section>
+          <section className="mt-10 rounded-2xl border border-dashed border-[#cbd8d1] bg-white p-10 text-center"><span className="mx-auto grid size-14 place-items-center rounded-xl bg-[#e8f4f0] text-primary"><BookOpenCheck className="size-6" /></span><h2 className="mt-5 font-display text-2xl font-black">Your learning library is coming soon</h2><p className="mx-auto mt-3 max-w-md text-sm font-medium leading-6 text-[#68766f]">Recorded-course enrollment and your learning library are not available yet. You can browse course details now.</p><Link to="/courses" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-black text-white no-underline">Find a self-paced course <ArrowRight className="size-4" /></Link></section>
         )}
       </div>
     </main>

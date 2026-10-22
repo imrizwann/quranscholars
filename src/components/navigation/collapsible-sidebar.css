@@ -1,0 +1,6 @@
+.collapsible-sidebar { width: var(--sidebar-expanded-width, 248px); min-width: 0; transition: width 320ms cubic-bezier(.22, 1, .36, 1); }
+.collapsible-sidebar[data-collapsed=true] { width: var(--sidebar-collapsed-width, 76px); }
+.sidebar-toggle { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 6px; color: var(--foreground); background: transparent; cursor: pointer; }
+.sidebar-toggle:hover { color: var(--primary); background: color-mix(in srgb, var(--primary) 6%, var(--surface)); }
+.sidebar-toggle:focus-visible { outline: 2px solid var(--ring); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) { .collapsible-sidebar { transition: none; } }

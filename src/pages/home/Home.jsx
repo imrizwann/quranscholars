@@ -1,3 +1,4 @@
+import LoadingState from "@/components/feedback/LoadingState.jsx";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
@@ -5,13 +6,6 @@ import video from "../../assets/videos/13029950-hd_1920_1080_24fps.mp4";
 import "@vidstack/react/player/styles/base.css";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
-import { MediaPlayer, MediaProvider, Controls } from "@vidstack/react";
-import {
-  DefaultAudioLayout,
-  defaultLayoutIcons,
-  DefaultVideoLayout,
-} from "@vidstack/react/player/layouts/default";
-import PlayerPlayButton from "@/components/video-player/controls/PlayerPlayButton";
 import {
   ArrowRight,
   CalendarCheck,
@@ -33,13 +27,14 @@ import {
   testimonials,
   faqs,
 } from "@/data/homeData.js";
+import RecordedCourseSkeleton from "@/features/recorded-courses/components/RecordedCourseSkeleton.jsx";
 import RecordedCourseCard from "@/features/recorded-courses/components/RecordedCourseCard.jsx";
-import { getFeaturedRecordedCourses } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
+import { useGetRecordedCoursesQuery } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
 import { liveClasses } from "@/data/lmsData.js";
 import { LiveClassCard } from "@/pages/live-classes/LiveClasses.jsx";
 import VideoPlayer from "@/components/video-player/VideoPlayer";
 
-const homeRecordedCourses = getFeaturedRecordedCourses(3);
+
 
 const SectionLabel = ({ children, light = false }) => (
   <div
@@ -54,6 +49,8 @@ const SectionLabel = ({ children, light = false }) => (
 );
 
 const Home = () => {
+  const { data: recordedData, isLoading: coursesLoading, isError: coursesError, refetch: retryCourses } = useGetRecordedCoursesQuery({ limit: 3 });
+  const homeRecordedCourses = recordedData?.courses || [];
   const [openFaq, setOpenFaq] = useState(0);
   const prefersReducedMotion = useReducedMotion();
 
@@ -302,7 +299,7 @@ const Home = () => {
         >
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div className="max-w-2xl">
-              <SectionLabel>Featured self-paced courses</SectionLabel>
+              <SectionLabel>Latest self-paced courses</SectionLabel>
               <h2 className="text-balance font-display text-[clamp(2.2rem,4vw,3.65rem)] font-black leading-[1.04] tracking-[-0.045em]">
                 Start now. Learn at your own pace.
               </h2>
@@ -320,8 +317,11 @@ const Home = () => {
             </Link>
           </div>
 
-          <div className="mt-12 grid gap-6 lg:grid-cols-3">
-            {homeRecordedCourses.map((course) => (
+          {coursesLoading && <LoadingState variant="inline" label="Loading courses..." className="mt-6" />}
+          <div className="mt-12 grid gap-6 lg:grid-cols-3" aria-busy={coursesLoading}>
+            {coursesLoading ? Array.from({ length: 3 }, (_, index) => <RecordedCourseSkeleton key={index} />) : coursesError ? (
+              <p className="text-sm text-[#66736e]" role="alert">Courses could not be loaded. <button type="button" onClick={retryCourses} className="font-bold text-primary">Try again</button></p>
+            ) : !homeRecordedCourses.length ? <p className="text-sm text-[#66736e]">No courses are available yet.</p> : homeRecordedCourses.map((course) => (
               <RecordedCourseCard key={course.id} course={course} />
             ))}
           </div>

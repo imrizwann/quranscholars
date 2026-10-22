@@ -1,3 +1,4 @@
+import AppLoader from "@/components/feedback/AppLoader.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
@@ -8,17 +9,18 @@ import {
   ChevronRight,
   FileText,
   Menu,
-  Play,
   X,
 } from "lucide-react";
 import CurriculumSection from "@/features/recorded-courses/components/CurriculumSection.jsx";
-import { getRecordedCourseBySlug } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
+import { useGetRecordedCourseBySlugQuery } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
 import { getEnrollment, subscribeToLearning, updateCourseProgress } from "@/features/recorded-courses/services/learningStorage.js";
+
+import CourseVideo from "@/features/recorded-courses/components/CourseVideo.jsx";
 
 const RecordedCoursePlayer = () => {
   const { courseSlug, lessonId } = useParams();
   const navigate = useNavigate();
-  const course = getRecordedCourseBySlug(courseSlug);
+  const { currentData: course, isFetching, isError, error, refetch } = useGetRecordedCourseBySlugQuery(courseSlug);
   const [enrollment, setEnrollment] = useState(() => (course ? getEnrollment(course.id) : null));
   const [mobileCurriculumOpen, setMobileCurriculumOpen] = useState(false);
 
@@ -30,6 +32,7 @@ const RecordedCoursePlayer = () => {
   const progress = course?.totalLessons ? Math.round((completedIds.length / course.totalLessons) * 100) : 0;
 
   useEffect(() => {
+    setEnrollment(course ? getEnrollment(course.id) : null);
     if (!course) return undefined;
     return subscribeToLearning(() => setEnrollment(getEnrollment(course.id)));
   }, [course]);
@@ -46,8 +49,10 @@ const RecordedCoursePlayer = () => {
     };
   }, [mobileCurriculumOpen]);
 
+  if (isFetching && !course) return <AppLoader label="Loading your course..." />;
+  if (isError && error?.status !== 404) return <main className="grid min-h-screen place-items-center"><div role="alert">We could not load this course.<button type="button" onClick={refetch} className="ml-3 font-bold text-primary">Try again</button></div></main>;
   if (!course || !currentLesson) {
-    return <main className="grid min-h-screen place-items-center bg-[#071f1c] px-4 text-white"><div className="text-center"><h1 className="font-display text-3xl font-black">Lesson not found</h1><Link to="/my-learning" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-white px-5 text-sm font-black text-[#11342e] no-underline"><ArrowLeft className="size-4" />Back to My Learning</Link></div></main>;
+    return <main className="grid min-h-screen place-items-center bg-[#071f1c] px-4 text-white"><div className="w-full max-w-3xl text-center"><h1 className="mb-6 font-display text-3xl font-black">{course ? "Lessons are not available yet" : "Course not found"}</h1>{course && <CourseVideo poster={course.thumbnail} title={course.title} unavailableMessage="Lesson playback is not available yet." />}<Link to={course ? `/courses/${course.slug}` : "/courses"} className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-white px-5 text-sm font-black text-[#11342e] no-underline"><ArrowLeft className="size-4" />Back to courses</Link></div></main>;
   }
 
   if (!enrollment) {
@@ -82,7 +87,7 @@ const RecordedCoursePlayer = () => {
         <div className="min-w-0 overflow-y-auto">
           <section className="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">
             <div className="relative aspect-video overflow-hidden rounded-xl border border-white/10 bg-[#041513] shadow-[0_25px_65px_rgba(0,0,0,.3)]">
-              {currentLesson.videoUrl ? <video className="size-full" controls src={currentLesson.videoUrl} /> : <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_50%_35%,rgba(25,110,94,.32),transparent_38%)] text-center"><div className="px-6"><span className="mx-auto grid size-16 place-items-center rounded-full border border-white/15 bg-white/10 text-[#f4c95d]"><Play className="ml-1 size-6 fill-current" /></span><p className="mt-5 text-base font-black">Lesson video placeholder</p><p className="mt-1 text-sm font-medium text-white/45">The player will use this lesson’s secure video URL from the API.</p></div></div>}
+              <CourseVideo src={currentLesson.videoUrl} poster={course.thumbnail} title={currentLesson.title} unavailableMessage="Lesson playback is not available yet." />
             </div>
 
             <div className="mt-6 flex flex-col gap-5 border-b border-white/10 pb-6 sm:flex-row sm:items-start sm:justify-between">

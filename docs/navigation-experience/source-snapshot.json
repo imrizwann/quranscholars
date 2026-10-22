@@ -1,0 +1,112 @@
+{
+  "reviewedDate": "2026-10-08",
+  "frontendCommit": "806acd6c81bd928b265b67fe49207aae6062ee94",
+  "workingTree": "Uncommitted changes; pre-existing user edits and previous public retrieval task preserved",
+  "scope": "Frontend only; no backend edits or deployment",
+  "sources": [
+    {
+      "path": "src/app/App.jsx",
+      "sha256": "6870578b19e08a9a157a13923fe711b3ae97420d6319e2fa1b8832b6ca3ea7eb"
+    },
+    {
+      "path": "src/main.jsx",
+      "sha256": "8a63c2b6fa434c0a1cd89e5a4dc94040fe3bd6a27a5c124614bdaa38c58bba1c"
+    },
+    {
+      "path": "src/components/navigation/RouteScrollManager.jsx",
+      "sha256": "f5cd4b9661ed6345a50f4c4d11318c598e46926e7db2137f78681a1bbc742eac"
+    },
+    {
+      "path": "src/components/navigation/scrollPolicy.js",
+      "sha256": "7dd8c01d2b9e4652c28be3231a244f9c96d3d93dab94624ad7c9bc3fe9b5ae85"
+    },
+    {
+      "path": "src/components/navigation/ServiceSideNavigation.jsx",
+      "sha256": "aa5a21884b858392e4db0d2ffe9423e1fdfc77bca2ab29e77538135351082f2c"
+    },
+    {
+      "path": "src/components/feedback/AppLoader.jsx",
+      "sha256": "4bda8f450482a6ec97d6c512b3ac58da003a8aaaba5d2e007d29b80774b973e1"
+    },
+    {
+      "path": "src/components/feedback/LoadingState.jsx",
+      "sha256": "fcd798cdb763ea5b770e50f3b032449067c940811f2f0564c0147c5c9238578d"
+    },
+    {
+      "path": "src/components/feedback/Spinner.jsx",
+      "sha256": "251b129af37d40d851500e2735d49e2ac41b2a7cdd6feae41af894fa4b4a5a68"
+    },
+    {
+      "path": "src/components/feedback/InlineSpinner.jsx",
+      "sha256": "2bad13b3934859cb93739594dce7c976c0683f87e0249cc930252595677a95f1"
+    },
+    {
+      "path": "src/components/ui/CustomSelect.jsx",
+      "sha256": "82564ed6919c22f4ca31e9b2cd332c527d5e20068d8223bc56ec85bc8493198e"
+    },
+    {
+      "path": "src/components/guards/ProtectedRoute.jsx",
+      "sha256": "b76764f631aba60cf9a26d37b373813d9b9fe2183a2f5b7303f5b84c6fb339c8"
+    },
+    {
+      "path": "src/components/guards/AdminRoute.jsx",
+      "sha256": "21c1a55e842565e2755841cd0a3b7d44d32d10f00830701689c85063a1979964"
+    },
+    {
+      "path": "src/styles/globals.css",
+      "sha256": "2f75c29d5d878da8c66cf75fb6bfbecab47a4ec8cbf56cf9c8ebdaec1b213cfe"
+    },
+    {
+      "path": "src/features/recorded-courses/components/RecordedCourseCard.jsx",
+      "sha256": "bb1cd25d47ba7da3aef717164f6367431198dc5888d3306bbed71a28e5f7de18"
+    },
+    {
+      "path": "src/features/recorded-courses/components/RecordedCourseSkeleton.jsx",
+      "sha256": "f81ea922715152222f97ce37dd338be1984dee4242eaf7012a1e7a91cd2f109e"
+    },
+    {
+      "path": "src/pages/recorded-courses/RecordedCourses.jsx",
+      "sha256": "3dcf96af2e8b7f95d8941f72b0a0e48ccfce308f672d27ad883828cf640da6c3"
+    },
+    {
+      "path": "src/pages/recorded-courses/RecordedCourseDetails.jsx",
+      "sha256": "ee278b59feb4e6cdd29a7603f13deeb6cd00a22aaba7a8b2a1987cc13ec94b8f"
+    },
+    {
+      "path": "src/pages/recorded-courses/RecordedCoursePlayer.jsx",
+      "sha256": "3643ed975a9dbb77e7fa7f8d444d83fd4fae4b4a68363a684788cae6c96dfe87"
+    },
+    {
+      "path": "src/pages/home/Home.jsx",
+      "sha256": "4635dd644a72377d75308c7bc4c2c5473867ced6b8bffa150ceb3c7148b2850a"
+    },
+    {
+      "path": "src/layouts/Navbar.jsx",
+      "sha256": "de510228f212c5e3d5e9b5c86813f4e7add59d976acc87856b8bc9833e78db97"
+    },
+    {
+      "path": "tests/navigation-experience.test.mjs",
+      "sha256": "f8325a76e609432562a8dcaa92e3d1797fc4815e0db8745077d5eac349547c55"
+    },
+    {
+      "path": "tests/recorded-course-render.test.mjs",
+      "sha256": "aac5cbe53f230fd16f9b1ee80d0d042fd14188a1ac319f738a59b5ae41a528f5"
+    },
+    {
+      "path": "package.json",
+      "sha256": "0a91c79523283357c1908969b91618f2c42d82dceefb0e153724eb009fff8c2d"
+    },
+    {
+      "path": "scripts/export-recorded-course-guides.py",
+      "sha256": "c6afef6f89817a1a0e873ab3810e5b339959f2c16905296557fd8f1141f8b61a"
+    }
+  ],
+  "verification": {
+    "tests": "npm run test:frontend: 19 passed",
+    "lint": "Scoped ESLint with --max-warnings 0: passed",
+    "build": "npm run build: passed; existing chunk-size warning",
+    "diff": "git diff --check: passed",
+    "browser": "Not verified: no available browser or app in cua inventory",
+    "word": "4 guides exported. Rendering failed because LibreOffice soffice.exe was not found on PATH."
+  }
+}

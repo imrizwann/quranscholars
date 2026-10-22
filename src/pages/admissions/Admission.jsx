@@ -181,7 +181,8 @@ const Admission = () => {
       selectedCourses: Array.from(new Set(values.selectedCourses)),
       notes: values.notes?.trim() || undefined,
     };
-    if (admission?._id) delete payload.email;
+    // The backend derives identity from the authenticated account.
+    delete payload.email;
     try {
       if (admission?._id) {
         await update(payload).unwrap();

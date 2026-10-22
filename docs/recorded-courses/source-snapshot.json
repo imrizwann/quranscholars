@@ -1,0 +1,148 @@
+{
+  "reviewedDate": "2026-10-08",
+  "frontendCommit": "806acd6c81bd928b265b67fe49207aae6062ee94",
+  "frontendWorkingTree": "Uncommitted task edits and pre-existing user changes",
+  "preExistingDirtyFiles": [
+    "src/features/recorded-courses/model/recordedCourseAdapter.js",
+    "src/layouts/Navbar.jsx",
+    "src/pages/account/Profile.jsx",
+    "src/pages/auth/Login.jsx",
+    "src/pages/auth/Register.jsx",
+    "src/pages/recorded-courses/RecordedCourseDetails.jsx",
+    "src/services/api/user/fileUploadApis.js"
+  ],
+  "backendCommit": "bd0194d206ea4389f835d39abe6199d5f119e367",
+  "backendWorkingTreeStatus": "D config/redis/queue.redis.js\n D config/redis/redis.config.js\n D config/redis/worker.redis.js\n D config/storage/r2.client.js\n D config/video.config.js\n M controllers/recorded-course/trailer/trailer.controller.js\n M migrations/recorded-course/recorded-course.indexes.js\n M models/recorded-course/lesson/lesson.model.js\n M models/recorded-course/recorded-course.model.js\n M package.json\n D queues/video/video-processing.events.js\n D queues/video/video-processing.queue.js\n D services/recorded-course/trailer/dispatch-trailer-video.service.js\n M services/recorded-course/trailer/process-trailer-job.service.js\n M services/recorded-course/trailer/trailer-video-process.service.js\n D services/recorded-course/trailer/trailer-video-queueing.service.js\n M services/recorded-course/trailer/trailer-video-state.service.js\n M services/recorded-course/trailer/trailer-video-upload.service.js\n D services/recorded-course/video/collect-video-runs.service.js\n D services/recorded-course/video/reconcile-video-jobs.service.js\n M services/storage/r2-image.service.js\n M services/storage/r2-video.service.js\n M tests/video/pipeline.test.mjs\n D utils/video/calculate-resolutions.js\n D utils/video/cleanup-video-run.js\n M utils/video/download-video-from-r2.js\n D utils/video/get-presigned-r2source-video-url.js\n D utils/video/get-video-metadata.js\n D utils/video/run-ffmpeg.js\n D utils/video/run-video-process.js\n D utils/video/select-video-qualities.js\n M utils/video/stream-video-from-r2.js\n D utils/video/upload-hls-to-r2.js\n D utils/video/validate-hls.js\n D utils/video/video-error.js\n M utils/video/video-run-paths.js\n M validation/recorded-course/trailer/trailer-video.validation.js\n D workers/video/video-dispatcher.js\n M workers/video/video-processing.worker.js\n?? config/shared/\n?? migrations/recorded-course/video-queue-naming.js\n?? queues/shared/\n?? services/recorded-course/trailer/queue-trailer-video.service.js\n?? services/recorded-course/trailer/trailer-video-processing-request.service.js\n?? services/recorded-course/video/cleanup-old-video-runs.service.js\n?? services/recorded-course/video/recover-video-jobs.service.js\n?? utils/shared/\n?? utils/video/video-queue-status.js\n?? workers/video/video-queue-manager.js",
+  "scope": "All task writes are under quranscholars; backend files reviewed read-only",
+  "sources": [
+    {
+      "path": ".env.example",
+      "sha256": "314e111147c9819374fe11ae80b17ccf9270e4a1d5551688797a920953c4b837"
+    },
+    {
+      "path": "package.json",
+      "sha256": "0a91c79523283357c1908969b91618f2c42d82dceefb0e153724eb009fff8c2d"
+    },
+    {
+      "path": "src/main.jsx",
+      "sha256": "8a63c2b6fa434c0a1cd89e5a4dc94040fe3bd6a27a5c124614bdaa38c58bba1c"
+    },
+    {
+      "path": "src/app/store.js",
+      "sha256": "7eba1462115c67e0a50c6e3d52d2f91b9805da0fe2cbd2f77fc937bb0be95daf"
+    },
+    {
+      "path": "src/services/api/courses/courses.api.js",
+      "sha256": "1ade404e732b6812307c42e8b85370ad42b4d8659780877b4b86113432c1b943"
+    },
+    {
+      "path": "src/features/recorded-courses/model/recordedCourseAdapter.js",
+      "sha256": "cf11d267f3c63b174d641b253e0d75faf314afb1039e9ff5ddc0db2c243880f2"
+    },
+    {
+      "path": "src/features/recorded-courses/services/recordedCourseContract.js",
+      "sha256": "505ef0a9575ada5b3bc56304bf1d5a80581c9ac25ece489946cb45da712740c8"
+    },
+    {
+      "path": "src/features/recorded-courses/services/recordedCoursesRepository.js",
+      "sha256": "5562507c3079d40b079b4b968c3017a40e45627de117fc5a2645cdcf2d354772"
+    },
+    {
+      "path": "src/features/recorded-courses/services/learningStorage.js",
+      "sha256": "ee684f5555aaa83ee847d5ef3093d9aac77cfb6f877971b2c481f30d3824ebed"
+    },
+    {
+      "path": "src/features/recorded-courses/components/CourseVideo.jsx",
+      "sha256": "2d8b0f769c5b642ffdb9a7ad3f8e29fb8ffcaaf7214b42b18d599301f7b4160b"
+    },
+    {
+      "path": "src/features/recorded-courses/components/RecordedCourseCard.jsx",
+      "sha256": "bb1cd25d47ba7da3aef717164f6367431198dc5888d3306bbed71a28e5f7de18"
+    },
+    {
+      "path": "src/features/recorded-courses/components/CoursePrice.jsx",
+      "sha256": "bedc2a52cbcaa4c7fedac77f375b72fa160a72f5106907e78baad24ca4651c8c"
+    },
+    {
+      "path": "src/components/video-player/VideoPlayer.jsx",
+      "sha256": "7eaa8a3956897c143e7ca28e76ccca83259d81e59948edc5e6d7cfac55cc6ff9"
+    },
+    {
+      "path": "src/pages/recorded-courses/RecordedCourses.jsx",
+      "sha256": "3dcf96af2e8b7f95d8941f72b0a0e48ccfce308f672d27ad883828cf640da6c3"
+    },
+    {
+      "path": "src/pages/recorded-courses/RecordedCourseDetails.jsx",
+      "sha256": "ee278b59feb4e6cdd29a7603f13deeb6cd00a22aaba7a8b2a1987cc13ec94b8f"
+    },
+    {
+      "path": "src/pages/recorded-courses/RecordedCoursePlayer.jsx",
+      "sha256": "3643ed975a9dbb77e7fa7f8d444d83fd4fae4b4a68363a684788cae6c96dfe87"
+    },
+    {
+      "path": "src/pages/account/MyLearning.jsx",
+      "sha256": "13f2e1b944d18036b5dbc426c52afbf5a8d9545dc8f6f4c9b2c264507d0536be"
+    },
+    {
+      "path": "src/pages/home/Home.jsx",
+      "sha256": "4635dd644a72377d75308c7bc4c2c5473867ced6b8bffa150ceb3c7148b2850a"
+    },
+    {
+      "path": "src/layouts/Navbar.jsx",
+      "sha256": "de510228f212c5e3d5e9b5c86813f4e7add59d976acc87856b8bc9833e78db97"
+    },
+    {
+      "path": "tests/recorded-course-contract.test.mjs",
+      "sha256": "d0d481f329fa99f5a0d051bb4c1b29a9e1a171cbca4cd8a01603744adb127acd"
+    },
+    {
+      "path": "tests/recorded-course-render.test.mjs",
+      "sha256": "aac5cbe53f230fd16f9b1ee80d0d042fd14188a1ac319f738a59b5ae41a528f5"
+    },
+    {
+      "path": "scripts/export-recorded-course-guides.py",
+      "sha256": "c6afef6f89817a1a0e873ab3810e5b339959f2c16905296557fd8f1141f8b61a"
+    },
+    {
+      "path": "../quranscholars-apis/app.js",
+      "sha256": "fe42605414bbd4139a9bfc420922bce73865c17f37110deabf6258c8cc191a55"
+    },
+    {
+      "path": "../quranscholars-apis/routes/recorded-course/recorded-course-public.routes.js",
+      "sha256": "49b910f646ccd6e2ea35c2a14f4a5b04f251bb3f92a530f70dd388e4b4c6a288"
+    },
+    {
+      "path": "../quranscholars-apis/controllers/recorded-course/recorded-course-public.controller.js",
+      "sha256": "cc027b938a653a32f942ce63f187f24c24fd50cf3f3be7c5691918afad998293"
+    },
+    {
+      "path": "../quranscholars-apis/services/recorded-course/recorded-course-public.service.js",
+      "sha256": "9653c1ea87f08808aaec430040ac5e06742de83f466ea540eb5e60cdc11a1d60"
+    },
+    {
+      "path": "../quranscholars-apis/validation/recorded-course/course-query.validation.js",
+      "sha256": "0464bc76813cf8ed95cc11c57732e99f492f0b61171868467a00af45a4e956e3"
+    },
+    {
+      "path": "../quranscholars-apis/models/recorded-course/recorded-course.model.js",
+      "sha256": "3bc715d2bc88a6a0df68e89eff461f3be0f52a50a7d76e2589e75f549067c7a6"
+    },
+    {
+      "path": "../quranscholars-apis/controllers/recorded-course/thumbnail/thumbnail.controller.js",
+      "sha256": "efe17669f9f2fc26ead59d3813b598e5bb35556e2a44533345b4b3546180ea13"
+    },
+    {
+      "path": "../quranscholars-apis/services/recorded-course/thumbnail/thumbnail-upload.service.js",
+      "sha256": "16cdb99d45f99309209f47b44ac7bd01720e2360aae5fe6d19c58d37be127332"
+    }
+  ],
+  "verification": {
+    "contractAndRenderingTests": "9 passed via npm run test:recorded-courses",
+    "build": "Passed; Vite chunk size warnings",
+    "scopedLint": "Passed for changed JS/JSX files",
+    "liveApi": "localhost:3000 read-only pages, combined filters, search, empty, detail, 404 and unsupported sort 400 checked",
+    "browser": "Not verified: cua inventory has no browsers",
+    "word": "Recorded-course Word guides regenerated; layout unverified because LibreOffice is missing.",
+    "navigationAndLoading": "19 frontend tests pass; new behavior and source hashes documented in ../navigation-experience/"
+  }
+}

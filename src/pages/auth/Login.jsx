@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {
   AlertCircle,
@@ -18,8 +18,9 @@ import {
   Video,
 } from "lucide-react";
 
-import { useLoginMutation } from "@/services/api/user/userAuthApis.js";
+import userAuthApi, { useLoginMutation } from "@/services/api/user/userAuthApis.js";
 import { setUser } from "@/store/slices/userSlice.js";
+import { loginDestination } from "@/components/guards/loginDestination.js";
 
 const platformHighlights = [
   {
@@ -43,6 +44,7 @@ const Login = () => {
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const [login] = useLoginMutation();
   const dispatch = useDispatch();
 
@@ -58,8 +60,10 @@ const Login = () => {
       if (response.data) {
         setSuccess(response.data.message);
         setError("");
+        // Replace a cached anonymous session before mounting the instructor guard.
+        await dispatch(userAuthApi.util.upsertQueryData("me", undefined, response.data));
         dispatch(setUser(response.data));
-        navigate("/admission");
+        navigate(loginDestination(response.data, location.state?.from), { replace: true });
         setIsLoading(false);
       }
       if (response.error) {
@@ -211,7 +215,9 @@ const Login = () => {
 
                   <button
                     type="button"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                     onClick={() => setShowPassword((v) => !v)}
                     className="grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
                   >

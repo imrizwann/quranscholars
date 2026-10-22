@@ -1,13 +1,13 @@
-import React, { Suspense, lazy } from "react";
+import React, { lazy } from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import AppLoader from "@/components/feedback/AppLoader.jsx";
 import { Provider } from "react-redux";
 import App from "@/app/App.jsx";
 import "@/styles/globals.css";
 import { store } from "@/app/store.js";
 import ProtectedRoute from "@/components/guards/ProtectedRoute.jsx";
 import AdminRoute from "@/components/guards/AdminRoute.jsx";
+import InstructorCourseAccess from "@/features/instructor-courses/InstructorCourseAccess.jsx";
 import NotLoggedIn from "@/components/guards/NotLoggedIn.jsx";
 import CourseRouteRedirect from "@/components/navigation/CourseRouteRedirect.jsx";
 import WebSocketClient from "@/realtime/WebSocketClient.jsx";
@@ -78,6 +78,18 @@ const CreationWizard = lazy(() =>
 const InstructorApplication = lazy(
   () => import("@/pages/instructor/InstructorApplication.jsx"),
 );
+const InstructorCourses = lazy(
+  () => import("@/pages/instructor/InstructorCourses.jsx"),
+);
+const CreateRecordedCourse = lazy(
+  () => import("@/pages/instructor/CreateRecordedCourse.jsx"),
+);
+const RecordedCourseWorkspace = lazy(
+  () => import("@/pages/instructor/RecordedCourseWorkspace.jsx"),
+);
+const VideoDeletionStatus = lazy(
+  () => import("@/pages/instructor/VideoDeletionStatus.jsx"),
+);
 const PrivacyPolicy = lazy(() => import("@/pages/legal/PrivacyPolicy.jsx"));
 const Profile = lazy(() => import("@/pages/account/Profile.jsx"));
 const TestPage = lazy(() => import("@/pages/dev/TestPage.jsx"));
@@ -111,14 +123,10 @@ const AdminAdmissions = lazy(
   () => import("@/pages/admissions/AdminAdmissions.jsx"),
 );
 
-const WithSuspense = (node) => (
-  <Suspense fallback={<AppLoader />}>{node}</Suspense>
-);
-
 const router = createBrowserRouter([
   {
     path: "/",
-    element: WithSuspense(<App />),
+    element: <App />,
     children: [
       {
         path: "/",
@@ -202,8 +210,38 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <InstructorDashboard /> },
           { path: "dashboard", element: <InstructorDashboard /> },
-          { path: "courses", element: <InstructorSectionPage /> },
-          { path: "courses/new", element: <CreationWizard type="course" /> },
+          {
+            path: "courses",
+            element: (
+              <InstructorCourseAccess>
+                <InstructorCourses />
+              </InstructorCourseAccess>
+            ),
+          },
+          {
+            path: "courses/new",
+            element: (
+              <InstructorCourseAccess>
+                <CreateRecordedCourse />
+              </InstructorCourseAccess>
+            ),
+          },
+          {
+            path: "courses/deletions/:deletionId",
+            element: (
+              <InstructorCourseAccess>
+                <VideoDeletionStatus />
+              </InstructorCourseAccess>
+            ),
+          },
+          {
+            path: "courses/:courseId",
+            element: (
+              <InstructorCourseAccess>
+                <RecordedCourseWorkspace />
+              </InstructorCourseAccess>
+            ),
+          },
           { path: "live-classes", element: <InstructorSectionPage /> },
           { path: "live-classes/new", element: <CreationWizard type="live" /> },
           { path: "students", element: <InstructorSectionPage /> },
@@ -305,7 +343,8 @@ const router = createBrowserRouter([
       },
       {
         path: "/admin/admissions",
-        element: <AdminRoute>{<AdminAdmissions />}</AdminRoute>,
+        element: <AdminRoute><WorkspaceLayout type="admin" /></AdminRoute>,
+        children: [{ index: true, element: <AdminAdmissions /> }],
       },
       { path: "/test", element: <TestPage /> },
       { path: "*", element: <NotFound /> },

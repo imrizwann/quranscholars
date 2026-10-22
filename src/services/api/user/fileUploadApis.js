@@ -1,24 +1,22 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { apiBaseQuery } from "../base-query.js";
+import { createApi } from "@reduxjs/toolkit/query/react";
 
 const fileUploadApi = createApi({
     reducerPath: 'fileUploadApi',
-    baseQuery: fetchBaseQuery({
-        baseUrl: import.meta.env.VITE_API_URL || "http://localhost:3000",
-        credentials: 'include'
-    }),
+    baseQuery: apiBaseQuery,
     tagTypes: ['uploadFiles'],
     endpoints: (builder) => ({
-        uploadProfilePicture: builder.mutation({
+        uploadAvatar: builder.mutation({
             query: (file) => ({
-                url: 'api/upload/profile_picture',
+                url: 'api/upload/avatar',
                 method: "POST",
                 body: file
             }),
             invalidatesTags: ['uploadFiles']
         }),
-        getProfilePicutreUrl: builder.query({
+        getAvatarUrl: builder.query({
             query: () => ({
-                url: 'api/upload/profile_picture_url'
+                url: 'api/upload/avatar_url'
             }),
             providesTags:['uploadFiles']
         })
@@ -26,5 +24,5 @@ const fileUploadApi = createApi({
     })
 })
 
-export const { useUploadProfilePictureMutation, useGetProfilePicutreUrlQuery } = fileUploadApi
+export const { useUploadAvatarMutation, useGetAvatarUrlQuery } = fileUploadApi
 export default fileUploadApi

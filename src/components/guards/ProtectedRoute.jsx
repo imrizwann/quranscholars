@@ -1,4 +1,4 @@
-import React from "react";
+import AppLoader from "@/components/feedback/AppLoader.jsx";
 import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useMeQuery } from "@/services/api/user/userAuthApis.js";
@@ -7,10 +7,7 @@ const ProtectedRoute = ({ children }) => {
   const { isLoading } = useMeQuery();
 
   if (isLoading) {
-    return (
-      <div>
-        Loading account...
-      </div>);
+    return <AppLoader label="Loading your account..." />;
 
   }
 

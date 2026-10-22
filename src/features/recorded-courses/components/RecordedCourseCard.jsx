@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { BookOpen, Clock3, PlayCircle, Users } from "lucide-react";
 import CoursePrice from "@/features/recorded-courses/components/CoursePrice.jsx";
 import CourseRating from "@/features/recorded-courses/components/CourseRating.jsx";
@@ -8,10 +8,16 @@ const compactNumber = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 1,
 });
 
-const RecordedCourseCard = ({ course }) => (
+const RecordedCourseCard = ({ course }) => {
+  const location = useLocation();
+  const courseCatalog = location.pathname === "/courses"
+    ? { url: location.pathname + location.search, key: location.key }
+    : location.state?.courseCatalog;
+  const linkState = courseCatalog ? { courseCatalog } : undefined;
+  return (
   <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-[#dfe6e2] bg-white shadow-[0_8px_30px_rgba(21,54,44,.055)] transition duration-300 hover:-translate-y-1 hover:border-[#bfd1c9] hover:shadow-[0_20px_48px_rgba(21,54,44,.11)]">
     <Link
-      to={`/courses/${course.slug}`}
+      to={`/courses/${course.slug}`} state={linkState}
       className="relative block aspect-16/10 overflow-hidden bg-[#e5f0eb] no-underline"
       aria-label={`View self-paced course: ${course.title}`}
     >
@@ -49,7 +55,7 @@ const RecordedCourseCard = ({ course }) => (
         </p>
         <span className="text-xs font-bold text-[#77847e]">{course.level}</span>
       </div>
-      <Link to={`/courses/${course.slug}`} className="no-underline">
+      <Link to={`/courses/${course.slug}`} state={linkState} className="no-underline">
         <h3 className="mt-3 line-clamp-2 font-display text-xl font-black leading-tight tracking-tight text-[#192e27] transition group-hover:text-primary">
           {course.title}
         </h3>
@@ -76,7 +82,7 @@ const RecordedCourseCard = ({ course }) => (
         </span>
         <span className="inline-flex items-center gap-1.5">
           <BookOpen className="size-3.5 text-primary" />
-          {course.totalLessons} lessons
+          {course.totalLessons == null ? "See course details" : `${course.totalLessons} lessons`}
         </span>
       </div>
       <div className="mt-auto pt-5">
@@ -84,6 +90,7 @@ const RecordedCourseCard = ({ course }) => (
       </div>
     </div>
   </article>
-);
+  );
+};
 
 export default RecordedCourseCard;

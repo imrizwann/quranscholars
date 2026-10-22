@@ -48,3 +48,12 @@
     @apply max-w-full;
   }
 }
+
+@keyframes qs-spinner-turn {
+  to { transform: rotate(360deg); }
+}
+.qs-spinner-ring { transform-origin: center; animation: qs-spinner-turn 1s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .qs-spinner-ring { animation: none; }
+}

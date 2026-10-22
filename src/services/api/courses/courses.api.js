@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { apiBaseQuery } from "../base-query.js";
+import { createApi } from "@reduxjs/toolkit/query/react";
 
 const DEFAULT_PAGE_SIZE = 12;
 
@@ -18,8 +19,7 @@ GET /api/courses/:slug
 */
 
 const getNetPrice = (course) =>
-  Number(course?.price?.amount || 0) -
-  Number(course?.price?.discount || 0);
+  Number(course?.price?.amount || 0) - Number(course?.price?.discount || 0);
 
 const filterLegacyCourses = (courses, queryArgs) => {
   const search = String(queryArgs.search || "")
@@ -37,7 +37,11 @@ const filterLegacyCourses = (courses, queryArgs) => {
         course?.overview?.description,
         course?.category,
         course?.level,
-      ].some((value) => String(value || "").toLowerCase().includes(search)),
+      ].some((value) =>
+        String(value || "")
+          .toLowerCase()
+          .includes(search),
+      ),
     );
   }
 
@@ -62,8 +66,7 @@ const filterLegacyCourses = (courses, queryArgs) => {
     };
 
     result.sort(
-      (a, b) =>
-        (levelOrder[a?.level] || 99) - (levelOrder[b?.level] || 99),
+      (a, b) => (levelOrder[a?.level] || 99) - (levelOrder[b?.level] || 99),
     );
   }
 
@@ -121,7 +124,11 @@ const normalizeCoursesResponse = (response, queryArgs) => {
       filters: {
         categories: Array.isArray(responseCategories)
           ? responseCategories
-          : [...new Set(courses.map((course) => course?.category).filter(Boolean))],
+          : [
+              ...new Set(
+                courses.map((course) => course?.category).filter(Boolean),
+              ),
+            ],
       },
     };
   }
@@ -157,10 +164,7 @@ const normalizeCoursesResponse = (response, queryArgs) => {
 
 const courseApi = createApi({
   reducerPath: "courseApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL || "http://localhost:3000",
-    credentials: "include",
-  }),
+  baseQuery: apiBaseQuery,
   tagTypes: ["Courses"],
   endpoints: (builder) => ({
     getCourses: builder.query({
@@ -237,9 +241,7 @@ const courseApi = createApi({
             };
       },
       keepUnusedDataFor: 300,
-      providesTags: (_result, _error, slug) => [
-        { type: "Courses", id: slug },
-      ],
+      providesTags: (_result, _error, slug) => [{ type: "Courses", id: slug }],
     }),
   }),
 });

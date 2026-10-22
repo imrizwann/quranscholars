@@ -6,11 +6,20 @@ import { serviceCatalog } from "@/data/servicesData.js";
 const ServiceSideNavigation = ({ layout = "sidebar" }) => {
   const { pathname } = useLocation();
   const itemRefs = useRef({});
+  const listRef = useRef(null);
   const isTop = layout === "top";
 
   useEffect(() => {
     if (!isTop) return;
-    itemRefs.current[pathname]?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    const list = listRef.current;
+    const item = itemRefs.current[pathname];
+    if (!list || !item) return;
+    const itemRect = item.getBoundingClientRect();
+    const listRect = list.getBoundingClientRect();
+    list.scrollTo({
+      left: list.scrollLeft + itemRect.left - listRect.left - (listRect.width - itemRect.width) / 2,
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+    });
   }, [isTop, pathname]);
 
   return (
@@ -19,7 +28,7 @@ const ServiceSideNavigation = ({ layout = "sidebar" }) => {
         {isTop ? <ArrowLeft className="size-3.5" /> : <Grid2X2 className="size-3.5" />}
         All services
       </NavLink>
-      <ul className={isTop ? "flex min-w-0 flex-1 gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : "mt-2 grid gap-1"}>
+      <ul ref={listRef} className={isTop ? "flex min-w-0 flex-1 gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : "mt-2 grid gap-1"}>
         {serviceCatalog.map(({ slug, label, icon: Icon }) => {
           const to = `/services/${slug}`;
           return (
