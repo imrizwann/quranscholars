@@ -8,6 +8,7 @@ import userSlice from "@/store/slices/userSlice.js";
 import admissionApis from "@/services/api/user/admissionApis.js";
 import fileUploadApi from "@/services/api/user/fileUploadApis.js";
 import paymentApi from "@/services/api/user/paymentApi.js";
+import { paymentSessionMiddleware } from "@/features/payments/paymentSessionMiddleware.js";
 import courseApi from "@/services/api/courses/courses.api.js";
 import adminAdmissionApis from "@/services/api/admin/adminAdmissionApis.js";
 export const store = configureStore({
@@ -28,7 +29,7 @@ export const store = configureStore({
       .concat(userAuthApi.middleware)
       .concat(admissionApis.middleware)
       .concat(fileUploadApi.middleware)
-      .concat(paymentApi.middleware)
+      .concat(paymentSessionMiddleware, paymentApi.middleware)
       .concat(courseApi.middleware)
       .concat(adminAdmissionApis.middleware),
 });
