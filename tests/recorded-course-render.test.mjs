@@ -21,6 +21,7 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
       export { default as Detail } from "./src/pages/recorded-courses/RecordedCourseDetails.jsx";
       export { default as LoadingState } from "./src/components/feedback/LoadingState.jsx";
       export { default as CourseVideo } from "./src/features/recorded-courses/components/CourseVideo.jsx";
+      export { default as VideoPreview } from "./src/features/instructor-courses/VideoPreview.jsx";
     `, resolveDir: process.cwd() },
     bundle: true, write: false, format: "esm", platform: "node", packages: "external",
     jsx: "automatic", alias: { "@": resolve("src") }, loader: { ".css": "empty" },
@@ -38,9 +39,10 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
       if (url.pathname.endsWith("/missing")) return Response.json({ message: "Course not found" }, { status: 404 });
       if (url.pathname.endsWith("/unavailable")) return Response.json({ message: "Unavailable" }, { status: 500 });
       if (url.pathname.endsWith("/example-course")) return Response.json({ success: true, data: { course: record } });
+      if (url.pathname.endsWith("/with-trailer")) return Response.json({ success: true, data: { course: { ...record, slug: "with-trailer", updatedAt: "invalid-date", outcomes: ["Read with confidence"], requirements: ["A willingness to learn"], audience: ["New learners"], sections: [{ _id: "section-1", title: "Foundations", description: "Start here", lessons: [{ _id: "lesson-1", title: "Understanding the alphabet", durationSeconds: 180, previewable: false }, { _id: "lesson-2", title: "Practice recitation", durationSeconds: null }] }, { _id: "section-2", title: "Next steps", lessons: [] }] }, trailerPlaybackUrl: "https://video.example.test/master.m3u8" } });
       return Response.json({ success: true, data: { courses: [record], pagination: { page: 2, limit: 8, totalCourses: 33, totalPages: 5 }, filters: {} } });
     };
-    const { api, Catalog, Detail, CourseVideo, LoadingState } = await import(pathToFileURL(outputPath));
+    const { api, Catalog, Detail, CourseVideo, VideoPreview, LoadingState } = await import(pathToFileURL(outputPath));
     store = configureStore({ reducer: { [api.reducerPath]: api.reducer }, middleware: (getDefault) => getDefault().concat(api.middleware) });
     const render = (Component, url, path) => renderToStaticMarkup(React.createElement(Provider, { store },
       React.createElement(MemoryRouter, { initialEntries: [url] }, React.createElement(Routes, null,
@@ -62,7 +64,30 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
     assert.match(detail, /Lesson count not listed/);
     assert.match(detail, /The lesson outline is not available yet/);
     assert.match(detail, /Enrollment coming soon/);
+    assert.match(detail, /No trailer available/);
+    assert.doesNotMatch(detail, /aria-label="Preview course trailer"|Preview this course/);
     assert.doesNotMatch(detail, /Verified learner|undefined|\[object Object\]/);
+    const withTrailer = await store.dispatch(api.endpoints.getRecordedCourseBySlug.initiate("with-trailer"));
+    assert.equal(withTrailer.data.trailerVideo, "https://video.example.test/master.m3u8");
+    const availableDetail = render(Detail, "/courses/with-trailer", "/courses/:slug");
+    // Vidstack attaches data-media-player on the client; SSR emits our player class.
+    assert.match(availableDetail, /class="qs-video-player/);
+    assert.match(availableDetail, /A first look at your course/);
+    assert.match(availableDetail, /Understanding the alphabet/);
+    assert.match(availableDetail, /Locked lesson/);
+    assert.match(availableDetail, /Expand all/);
+    assert.match(availableDetail, /aria-expanded="true"/);
+    assert.match(availableDetail, /aria-expanded="false"/);
+    assert.match(availableDetail, /Read with confidence/);
+    assert.match(availableDetail, /A willingness to learn/);
+    assert.match(availableDetail, /New learners/);
+    assert.doesNotMatch(availableDetail, /role="dialog"|Invalid Date|NaN/);
+    assert.doesNotMatch(availableDetail, /No trailer available/);
+    for (const [status, message] of [["NOT_UPLOADED", "Choose a video"], ["PROCESSING", "Video is not ready yet"], ["FAILED", "Video preparation failed"], ["DELETING", "Video is being removed"], ["COMPLETED", "Playback is temporarily unavailable"]]) {
+      const preview = renderToStaticMarkup(React.createElement(VideoPreview, { status, hasUploadedVideo: status !== "NOT_UPLOADED" }));
+      assert.match(preview, new RegExp(message));
+      assert.doesNotMatch(preview, /data-media-player/);
+    }
     await store.dispatch(api.endpoints.getRecordedCourseBySlug.initiate("missing"));
     assert.match(render(Detail, "/courses/missing", "/courses/:slug"), /Course not found/);
     await store.dispatch(api.endpoints.getRecordedCourseBySlug.initiate("unavailable"));

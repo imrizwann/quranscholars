@@ -21,9 +21,7 @@ const CourseOverview = () => {
   } = useGetCourseBySlugQuery(slug, { skip: !slug });
   const { pathname } = useLocation();
   const isServicesView = pathname.startsWith("/services");
-  const handleCoursePayment = async () => {
-    console.log("HandlePayment");
-  };
+
 
   if (isError || (!isLoading && !course)) {
     return (
@@ -200,11 +198,10 @@ const CourseOverview = () => {
                       </div>
 
                       <Link
-                      to={"#"}
-                      onClick={() => handleCoursePayment()}>
+                      to="/contact">
 
                       
-                        Buy Course
+                        Ask about enrollment
                         <span>
                           <FaArrowRight />
                         </span>

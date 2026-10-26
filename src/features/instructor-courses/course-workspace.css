@@ -55,11 +55,11 @@
 .cw-video-preview { min-width: 0; container-type: inline-size; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
 .cw-preview-heading { padding: 14px 16px; gap: 8px; border-bottom: 1px solid var(--border); }
 .cw-preview-badge { padding: 3px 8px; border: 1px solid color-mix(in srgb, var(--primary) 12%, var(--border)); border-radius: 5px; background: color-mix(in srgb, var(--primary) 4%, var(--surface)); color: var(--muted-foreground); font-size: .7rem; white-space: nowrap; }
-.cw-preview-stage { padding: 10px; }
-.cw-preview-placeholder { aspect-ratio: 16 / 9; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; border: 1px solid var(--border); border-radius: 9px; background: color-mix(in srgb, var(--primary) 4%, var(--surface)); color: var(--muted-foreground); text-align: center; font-size: .8rem; }
+.cw-preview-stage { padding: 0; overflow: hidden; background: #000; }
+.cw-preview-placeholder { aspect-ratio: 16 / 9; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; border: 0; border-radius: 0; background: color-mix(in srgb, var(--primary) 4%, var(--surface)); color: var(--muted-foreground); text-align: center; font-size: .8rem; }
 .cw-preview-placeholder > svg { color: var(--primary); }
-.cw-preview-caption { margin: 0; padding: 2px 16px 14px; }
-.cw-preview-player.qs-video-player { box-shadow: none; border-radius: 9px; --player-accent: var(--primary); }
+.cw-preview-caption { margin: 0; padding: 12px 16px 14px; }
+.cw-preview-player.qs-video-player { --player-radius: 0; --player-accent: var(--primary); }
 .cw-preview-player video { object-fit: contain; }
 @container (max-width: 560px) { .cw-video-layout { grid-template-columns: minmax(0, 1fr); gap: 22px; } }
 @container (max-width: 440px) { .cw-preview-player .player-skip-button, .cw-preview-player .player-pip-button, .cw-preview-player .player-volume-slider-wrap { display: none; } .cw-preview-player .player-control-cluster { gap: 0; } .cw-preview-player .player-control-button { width: 32px; height: 36px; } .cw-preview-player .player-title { max-width: 100%; } .cw-preview-player .player-menu { right: 0; width: min(15rem, calc(100cqw - 1rem)); } }

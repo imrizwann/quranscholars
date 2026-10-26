@@ -1,3 +1,5 @@
+import { trailerPlaybackSource } from "../../../lib/trailer-playback.js";
+
 const formatDuration = (totalSeconds = 0) => {
   const totalMinutes = Math.round(Math.max(0, Number(totalSeconds) || 0) / 60);
   const hours = Math.floor(totalMinutes / 60);
@@ -10,8 +12,8 @@ const normalizeLesson = (lesson, sectionId, index) => ({
   id: lesson?._id || lesson?.id || `${sectionId}-lesson-${index + 1}`,
   title: lesson?.title || `Lesson ${index + 1}`,
   description: lesson?.description || "",
-  durationSeconds: Number(lesson?.durationSeconds || 0),
-  durationLabel: formatDuration(Number(lesson?.durationSeconds || 0)),
+  durationSeconds: Number(lesson?.durationSeconds) > 0 ? Number(lesson.durationSeconds) : null,
+  durationLabel: Number(lesson?.durationSeconds) > 0 ? formatDuration(Number(lesson.durationSeconds)) : "Duration not listed",
   order: Number(lesson?.order || index + 1),
   previewable: Boolean(lesson?.previewable),
   videoUrl: playbackUrl(lesson?.playbackUrl || lesson?.videoUrl),
@@ -40,6 +42,7 @@ const adaptRecordedCourse = (record = {}) => {
       return {
         id,
         title: section?.title || `Section ${index + 1}`,
+        description: section?.description || "",
         order: Number(section?.order || index + 1),
         lessons: (Array.isArray(section?.lessons) ? section.lessons : []).map(
           (lesson, lessonIndex) => normalizeLesson(lesson, id, lessonIndex),
@@ -75,11 +78,7 @@ const adaptRecordedCourse = (record = {}) => {
       avatar: record?.instructor?.avatar || null,
     },
     thumbnail: resolveCourseImage(record?.thumbnail),
-    trailerVideo: playbackUrl(
-      record?.trailerPlaybackUrl ||
-        record?.trailerVideo?.playbackUrl ||
-        record?.trailerVideo,
-    ),
+    trailerVideo: trailerPlaybackSource(record)?.src || null,
     language: record?.language || "Not specified",
     level: record?.level || "Not specified",
     price: {

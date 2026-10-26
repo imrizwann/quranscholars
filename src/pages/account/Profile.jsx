@@ -1,3 +1,4 @@
+import { userMessage } from "@/lib/user-messages.js";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { Toaster } from "sonner";
@@ -78,7 +79,7 @@ const ProfilePage = () => {
       setFile(null);
       setError(null);
     } catch (requestError) {
-      setError(requestError?.data?.message || "The image could not be uploaded. Please try again.");
+      setError(userMessage(requestError, "We could not update your profile photo. Please try again."));
     }
   };
 

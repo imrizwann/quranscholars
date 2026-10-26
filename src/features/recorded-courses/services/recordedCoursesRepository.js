@@ -1,6 +1,5 @@
 ﻿import courseApi from "@/services/api/courses/courses.api.js";
-import { adaptRecordedCourse } from "../model/recordedCourseAdapter.js";
-import { buildRecordedCourseQuery, normalizeRecordedCourseList } from "./recordedCourseContract.js";
+import { buildRecordedCourseQuery, normalizeRecordedCourseList, normalizeRecordedCourseDetail } from "./recordedCourseContract.js";
 
 // Public retrievals only. Legacy course endpoints remain available to admissions.
 const recordedCoursesApi = courseApi.injectEndpoints({
@@ -15,10 +14,7 @@ const recordedCoursesApi = courseApi.injectEndpoints({
     }),
     getRecordedCourseBySlug: builder.query({
       query: (slug) => `/api/public/recorded-courses/${encodeURIComponent(slug)}`,
-      transformResponse: (response) => {
-        if (!response?.data?.course) throw new Error("Invalid course response");
-        return adaptRecordedCourse(response.data.course);
-      },
+      transformResponse: normalizeRecordedCourseDetail,
       keepUnusedDataFor: 60,
     }),
   }),

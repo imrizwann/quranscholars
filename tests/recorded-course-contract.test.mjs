@@ -1,7 +1,31 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { adaptRecordedCourse, formatDuration, resolveCourseImage } from "../src/features/recorded-courses/model/recordedCourseAdapter.js";
-import { buildRecordedCourseQuery, normalizeRecordedCourseList } from "../src/features/recorded-courses/services/recordedCourseContract.js";
+import { buildRecordedCourseQuery, normalizeRecordedCourseList, normalizeRecordedCourseDetail } from "../src/features/recorded-courses/services/recordedCourseContract.js";
+import { trailerPlaybackSource } from "../src/lib/trailer-playback.js";
+
+test("public and instructor trailers use the sibling playback URL without modifying signed queries", () => {
+  const url = "https://video.example.test/course/trailer/master.m3u8?token=abc%2F123&expires=999";
+  const course = { _id: "course-1", trailerVideo: { status: "COMPLETED", hls: { masterKey: "private/master.m3u8" } } };
+  assert.equal(normalizeRecordedCourseDetail({ data: { course, trailerPlaybackUrl: url } }).trailerVideo, url);
+  assert.deepEqual(trailerPlaybackSource(course, url), { src: url, type: "application/x-mpegurl" });
+  assert.equal(normalizeRecordedCourseDetail({ data: { course, trailerPlaybackUrl: null } }).trailerVideo, null);
+  assert.equal(normalizeRecordedCourseDetail({ data: { course: { ...course, trailerPlaybackUrl: url }, trailerPlaybackUrl: null } }).trailerVideo, null);
+  assert.throws(() => normalizeRecordedCourseDetail({ data: {} }), /Invalid course response/);
+});
+
+test("unready, removed and invalid trailer sources never become playable", () => {
+  const url = "https://video.example.test/master.m3u8";
+  for (const status of ["NOT_UPLOADED", "UPLOADING", "UPLOADED", "QUEUED", "PROCESSING", "PROCESSED", "FAILED", "DELETING"]) {
+    assert.equal(trailerPlaybackSource({ trailerVideo: { status } }, url), null);
+  }
+  for (const value of [null, "", "private/master.m3u8", "javascript:alert(1)", "https://", {}, "https://user:password@example.test/master.m3u8"]) {
+    assert.equal(trailerPlaybackSource({}, value), null);
+  }
+  // Public responses can omit internal processing status.
+  assert.deepEqual(trailerPlaybackSource({}, url), { src: url, type: "application/x-mpegurl" });
+  assert.equal(trailerPlaybackSource({ trailerVideo: { playbackUrl: url } }, null), null);
+});
 
 test("public query includes server pagination and only supported filters", () => {
   assert.deepEqual(buildRecordedCourseQuery({ page: 3, limit: 8, search: "  Quran  ", category: "ISLAMIC-STUDIES", level: "Beginner", language: "Urdu", sort: "popular", featured: true }), {

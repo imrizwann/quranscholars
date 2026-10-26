@@ -1,3 +1,4 @@
+import { userMessage } from "@/lib/user-messages.js";
 import { forwardRef, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AlertTriangle, CheckCircle2, Loader2, X } from "lucide-react";
@@ -7,8 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { setUser } from "@/store/slices/userSlice.js";
 import {
-  useDeleteProfileMutation,
-  useLogoutMutation } from
+  useDeleteProfileMutation } from
 "@/services/api/user/userAuthApis.js";
 
 const overlayMotion = {
@@ -38,7 +38,6 @@ const panelMotion = {
 const ProfileDeleteModal = forwardRef(({ onClose }, ref) => {
   const [password, setPassword] = useState("");
   const [deleteProfile, { isLoading }] = useDeleteProfileMutation();
-  const [logout] = useLogoutMutation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -97,26 +96,25 @@ const ProfileDeleteModal = forwardRef(({ onClose }, ref) => {
     }
 
     try {
-      const response = await deleteProfile({ password }).unwrap();
-      await logout().unwrap();
+      await deleteProfile({ password }).unwrap();
+      // Account deletion already clears the session cookie.
 
       localStorage.removeItem("user");
       dispatch(setUser(null));
       showToast({
         variant: "success",
-        title: "Profile deleted",
+        title: "Account deleted",
         description:
-        response?.message ||
-        "Your account and profile data have been removed successfully."
+        "Your account has been deleted. You have been signed out."
       });
       onClose();
-      navigate("/", { state: { message: response?.message } });
+      navigate("/");
     } catch (apiError) {
       showToast({
         variant: "error",
-        title: "Delete failed",
+        title: "Account could not be deleted",
         description:
-        apiError?.data?.message || "Unable to delete profile right now."
+        userMessage(apiError, "We could not delete your account. Please try again.")
       });
     }
   };

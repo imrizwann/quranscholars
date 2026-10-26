@@ -1,3 +1,4 @@
+import { userMessage } from "@/lib/user-messages.js";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -74,12 +75,12 @@ const Register = () => {
     setIsLoading(true);
     try {
       await register({ name, email, password }).unwrap();
-      setSuccess("Registration successful.");
+      setSuccess("Your account has been created. You can now sign in.");
       setError("");
       setRedirectCountdown(3);
       setIsRedirecting(true);
     } catch (error) {
-      setError(error?.data?.message || "Registration failed. Please try again.");
+      setError(userMessage(error, "We could not create your account. Please try again."));
       setSuccess("");
     } finally {
       setIsLoading(false);
@@ -93,9 +94,9 @@ const Register = () => {
 
   return (
     <main className="bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
-      <div className="mx-auto grid min-h-[calc(100vh-8rem)] w-full max-w-6xl overflow-hidden rounded-lg border border-border bg-surface shadow-card lg:grid-cols-[0.94fr_1.06fr]">
-        <section className="flex items-center justify-center px-5 py-10 sm:px-8">
-          <form onSubmit={handleRegister} className="w-full max-w-md">
+      <div className="mx-auto grid grid-cols-1 min-h-[calc(100vh-8rem)] w-full max-w-6xl overflow-hidden rounded-lg border border-border bg-surface shadow-card lg:grid-cols-[0.94fr_1.06fr]">
+        <section className="flex min-w-0 items-center justify-center px-5 py-10 sm:px-8">
+          <form onSubmit={handleRegister} className="w-full min-w-0 max-w-md">
             <div>
               <p className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                 <UserPlus className="size-3.5" />
@@ -110,16 +111,16 @@ const Register = () => {
             </div>
 
             {error && (
-              <div className="mt-6 rounded-lg border border-[color-mix(in_srgb,var(--destructive)_24%,transparent)] bg-[color-mix(in_srgb,var(--destructive)_8%,transparent)] px-4 py-3">
+              <div role="alert" className="mt-6 rounded-lg border border-[color-mix(in_srgb,var(--destructive)_24%,transparent)] bg-[color-mix(in_srgb,var(--destructive)_8%,transparent)] px-4 py-3">
                 <p className="flex items-start gap-2 text-sm font-medium text-[var(--destructive)]">
                   <AlertCircle className="mt-0.5 size-4 shrink-0" />
-                  {error.split(",")[0]}
+                  {error}
                 </p>
               </div>
             )}
 
             {success && (
-              <div className="mt-6 rounded-lg border border-success/20 bg-success/10 px-4 py-3">
+              <div role="status" className="mt-6 rounded-lg border border-success/20 bg-success/10 px-4 py-3">
                 <p className="flex items-start gap-2 text-sm font-medium text-success">
                   <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
                   {success}
@@ -143,15 +144,17 @@ const Register = () => {
 
             <div className="mt-7 space-y-5">
               <div>
-                <label className="text-sm font-semibold text-foreground">
+                <label htmlFor="register-name" className="text-sm font-semibold text-foreground">
                   Full name
                 </label>
                 <div className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-input bg-background px-3 transition focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/20">
                   <User className="size-4 shrink-0 text-muted-foreground" />
                   <input
+                    id="register-name"
+                    autoComplete="name"
                     type="text"
                     placeholder="e.g. Aisha Siddiqui"
-                    className="h-full min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground disabled:opacity-60"
+                    className="h-full min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground disabled:opacity-60"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     disabled={isRedirecting}
@@ -160,15 +163,17 @@ const Register = () => {
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-foreground">
+                <label htmlFor="register-email" className="text-sm font-semibold text-foreground">
                   Email
                 </label>
                 <div className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-input bg-background px-3 transition focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/20">
                   <Mail className="size-4 shrink-0 text-muted-foreground" />
                   <input
+                    id="register-email"
+                    autoComplete="email"
                     type="email"
                     placeholder="you@example.com"
-                    className="h-full min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground disabled:opacity-60"
+                    className="h-full min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground disabled:opacity-60"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isRedirecting}
@@ -177,15 +182,17 @@ const Register = () => {
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-foreground">
+                <label htmlFor="register-password" className="text-sm font-semibold text-foreground">
                   Password
                 </label>
                 <div className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-input bg-background px-3 transition focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/20">
                   <Lock className="size-4 shrink-0 text-muted-foreground" />
                   <input
+                    id="register-password"
+                    autoComplete="new-password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Create a strong password"
-                    className="h-full min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground disabled:opacity-60"
+                    className="h-full min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground disabled:opacity-60"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isRedirecting}
@@ -196,7 +203,7 @@ const Register = () => {
                     aria-label={showPassword ? "Hide password" : "Show password"}
                     onClick={() => setShowPassword((v) => !v)}
                     disabled={isRedirecting}
-                    className="grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+                    className="grid size-11 shrink-0 place-items-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                   >
                     {showPassword ? (
                       <EyeOff className="size-4" />
@@ -229,7 +236,7 @@ const Register = () => {
               ) : (
                 <>
                   <UserPlus className="size-4" />
-                  <span>Register</span>
+                  <span>Create account</span>
                 </>
               )}
             </button>
@@ -240,7 +247,7 @@ const Register = () => {
                 to="/login"
                 className="inline-flex items-center gap-2 font-bold text-primary transition hover:text-accent-foreground"
               >
-                <span>Login</span>
+                <span>Sign in</span>
                 <ArrowRight className="size-4" />
               </Link>
             </p>

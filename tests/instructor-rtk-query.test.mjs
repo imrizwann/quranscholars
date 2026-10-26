@@ -8,6 +8,7 @@ import { pathToFileURL } from "node:url";
 import { randomUUID } from "node:crypto";
 import { configureStore } from "@reduxjs/toolkit";
 import { readableError, unwrapAbortable, courseIsPending } from "../src/features/instructor-courses/courseApi.js";
+import { trailerPlaybackSource } from "../src/lib/trailer-playback.js";
 
 const root = "/api/instructor/recorded-courses";
 const pagination = { page: 1, hasNextPage: false };
@@ -60,7 +61,7 @@ test("instructor RTK Query integration", async (t) => {
       if (path.includes("/deletions/")) return { deletionId: "deletion1", storageCleanupPending: false };
       if (path === root) return { courses: [{ _id: "course1", title: "Course" }], pagination };
       if (path.endsWith("/sections") || path.endsWith("/lessons")) return { items: [], pagination };
-      return { course: { _id: path.split("/").pop(), title: "Course", trailerVideo: { status: "COMPLETED" } } };
+      return { course: { _id: path.split("/").pop(), title: "Course", trailerVideo: { status: "COMPLETED" } }, trailerPlaybackUrl: "https://video.example.test/master.m3u8?token=preview" };
     };
     const normalFetch = async (request) => {
       requests.push(request);
@@ -93,7 +94,13 @@ test("instructor RTK Query integration", async (t) => {
       ];
       for (const [name, args, method, path, body] of cases) {
         const before = requests.length;
-        await store.dispatch(api.endpoints[name].initiate(args, { subscribe: false })).unwrap();
+        const result = await store.dispatch(api.endpoints[name].initiate(args, { subscribe: false })).unwrap();
+        if (name === "getCourse") {
+          assert.deepEqual(trailerPlaybackSource(result.course, result.trailerPlaybackUrl), {
+            src: "https://video.example.test/master.m3u8?token=preview",
+            type: "application/x-mpegurl",
+          });
+        }
         const request = requests[before];
         assert.equal(request.url, `https://api.example${path}`);
         assert.equal(request.method, method);
@@ -167,7 +174,7 @@ test("instructor RTK Query integration", async (t) => {
       let attempts = 0;
       globalThis.fetch = async () => { attempts++; return Response.json({ message: "Upload is no longer current" }, { status: 409 }); };
       await assert.rejects(store.dispatch(api.endpoints.processVideo.initiate({ courseId: "course1", uploadId: "old" })).unwrap(),
-        (error) => error.status === 409 && readableError(error) === "Upload is no longer current");
+        (error) => error.status === 409 && readableError(error) === "This item has changed. Refresh the page before trying again.");
       assert.equal(attempts, 1);
       globalThis.fetch = async () => Response.json({ data: { items: "invalid" } });
       await assert.rejects(store.dispatch(api.endpoints.getSections.initiate({ courseId: "course1" })).unwrap(),

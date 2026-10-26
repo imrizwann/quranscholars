@@ -1,4 +1,5 @@
-import { CaptionButton, Captions, Controls, FullscreenButton, Gesture, MediaPlayer, MediaProvider, PIPButton, Poster, SeekButton, Spinner, Time, Track, useMediaState } from "@vidstack/react";
+import { useState } from "react";
+import { CaptionButton, Captions, Controls, FullscreenButton, Gesture, isHLSProvider, MediaPlayer, MediaProvider, PIPButton, Poster, SeekButton, Spinner, Time, Track, useMediaState } from "@vidstack/react";
 import { Captions as CaptionsIcon, Maximize, Minimize, PictureInPicture, RotateCcw, RotateCw, Subtitles } from "lucide-react";
 import PlayerPlayButton from "./controls/PlayerPlayButton";
 import PlayerSettings from "./controls/PlayerSettings";
@@ -6,12 +7,19 @@ import PlayerTimeSlider from "./controls/PlayerTimeSlider";
 import PlayerVolumeControl from "./controls/PlayerVolumeControl";
 import "./video-player.css";
 
-const PlayerStatus = ({ errorMessage }) => {
+const configureProvider = (provider) => {
+  if (isHLSProvider(provider)) {
+    // Ship the installed version with the app instead of loading a runtime CDN script.
+    provider.library = () => import("hls.js");
+  }
+};
+
+const PlayerStatus = ({ errorMessage, onRetry }) => {
   const waiting = useMediaState("waiting");
   const canPlay = useMediaState("canPlay");
   const error = useMediaState("error");
-  if (error) return <div className="player-message" role="alert"><strong>Video unavailable</strong><span>{errorMessage || error.message || "Please refresh the page or try again later."}</span></div>;
-  if (!canPlay || waiting) return <div className="player-buffering" aria-label="Video is loading"><Spinner.Root className="player-spinner"><Spinner.Track className="player-spinner-track" /><Spinner.TrackFill className="player-spinner-fill" /></Spinner.Root></div>;
+  if (error) return <div className="player-message" role="alert"><strong>Video unavailable</strong><span>{errorMessage || "We could not play this video. Check your connection and try again."}</span><button type="button" className="player-retry-button" onClick={onRetry}>Try again</button></div>;
+  if (!canPlay || waiting) return <div className="player-buffering" role="status" aria-label="Video is loading"><Spinner.Root className="player-spinner" aria-hidden="true"><Spinner.Track className="player-spinner-track" /><Spinner.TrackFill className="player-spinner-fill" /></Spinner.Root></div>;
   return null;
 };
 
@@ -24,12 +32,20 @@ const PlayerCenterControl = () => {
 };
 
 const VideoPlayer = ({ src, title = "Course lesson", poster, tracks = [], thumbnails, className = "", autoPlay = false, muted = false, loop = false, playsInline = true, crossOrigin = "anonymous", onEnded, onTimeUpdate, aspectRatio = "16 / 9", errorMessage }) => {
+  const [attempt, setAttempt] = useState(0);
+  const sourceKey = typeof src === "string" ? src : src?.src;
   return (
     <MediaPlayer
+      key={`${sourceKey}-${attempt}`}
       className={`qs-video-player ${className}`}
-      style={{ aspectRatio }}
+      style={{ "--player-aspect-ratio": aspectRatio }}
       title={title}
       src={src}
+      viewType="video"
+      streamType="on-demand"
+      load="visible"
+      preload="metadata"
+      onProviderChange={configureProvider}
       autoPlay={autoPlay} muted={muted} loop={loop} playsInline={playsInline} crossOrigin={crossOrigin}
       keyShortcuts={{ togglePaused: "k Space", toggleMuted: "m", toggleFullscreen: "f", seekBackward: "ArrowLeft", seekForward: "ArrowRight", toggleCaptions: "c" }}
       onEnded={onEnded} onTimeUpdate={onTimeUpdate}
@@ -39,7 +55,7 @@ const VideoPlayer = ({ src, title = "Course lesson", poster, tracks = [], thumbn
         {tracks.map((track) => <Track key={`${track.src}-${track.srclang || track.language}`} {...track} />)}
       </MediaProvider>
       <Captions className="player-captions" />
-      <PlayerStatus errorMessage={errorMessage} />
+      <PlayerStatus errorMessage={errorMessage} onRetry={() => setAttempt((value) => value + 1)} />
       <Gesture className="absolute inset-0" event="pointerup" action="toggle:paused" />
       <Gesture className="absolute inset-0" event="dblpointerup" action="toggle:fullscreen" />
       <Controls.Root className="player-controls">

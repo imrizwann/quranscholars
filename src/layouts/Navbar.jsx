@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+import { userMessage } from "@/lib/user-messages.js";
 import LoadingState from "@/components/feedback/LoadingState.jsx";
 import Logo from "/images/Logo-4.svg";
 import { useEffect, useState, useRef } from "react";
@@ -365,6 +367,7 @@ const Navbar = () => {
     setIsloading(true);
     try {
       const response = await logout();
+      if (response.error) throw response.error;
       if (response.data) {
         localStorage.removeItem("user");
         setIsloading(false);
@@ -375,7 +378,7 @@ const Navbar = () => {
         setIsProfileOpen(false);
       }
     } catch (error) {
-      console.log(error.message);
+      toast.error(userMessage(error, "We could not sign you out. Please try again."));
       setIsloading(false);
     }
   };

@@ -1,3 +1,4 @@
+import { userMessage } from "@/lib/user-messages.js";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -58,7 +59,7 @@ const Login = () => {
     try {
       const response = await login({ email, password });
       if (response.data) {
-        setSuccess(response.data.message);
+        setSuccess("You are signed in.");
         setError("");
         // Replace a cached anonymous session before mounting the instructor guard.
         await dispatch(userAuthApi.util.upsertQueryData("me", undefined, response.data));
@@ -67,13 +68,13 @@ const Login = () => {
         setIsLoading(false);
       }
       if (response.error) {
-        setError(response.error.data.message);
+        setError(userMessage(response.error));
         setSuccess("");
         setIsLoading(false);
       }
     } catch (error) {
       setIsLoading(false);
-      setError("");
+      setError(userMessage(error, "We could not sign you in. Please try again."));
       setSuccess("");
     } finally {
       setIsLoading(false);
@@ -82,7 +83,7 @@ const Login = () => {
 
   return (
     <main className="bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
-      <div className="mx-auto grid min-h-[calc(100vh-8rem)] w-full max-w-6xl overflow-hidden rounded-lg border border-border bg-surface shadow-card lg:grid-cols-[1.06fr_0.94fr]">
+      <div className="mx-auto grid grid-cols-1 min-h-[calc(100vh-8rem)] w-full max-w-6xl overflow-hidden rounded-lg border border-border bg-surface shadow-card lg:grid-cols-[1.06fr_0.94fr]">
         <section className="relative hidden bg-secondary p-8 lg:flex lg:flex-col lg:justify-between">
           <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
 
@@ -137,8 +138,8 @@ const Login = () => {
           </div>
         </section>
 
-        <section className="flex items-center justify-center px-5 py-10 sm:px-8">
-          <form onSubmit={handleLoginSubmit} className="w-full max-w-md">
+        <section className="flex min-w-0 items-center justify-center px-5 py-10 sm:px-8">
+          <form onSubmit={handleLoginSubmit} className="w-full min-w-0 max-w-md">
             <div>
               <Link
                 to="/"
@@ -152,22 +153,22 @@ const Login = () => {
                 Welcome back
               </p>
               <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground">
-                Login to Quran Scholars
+                Sign in to Quran Scholars
               </h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Enter your credentials to open your learning dashboard.
+                Enter your email and password to continue learning.
               </p>
             </div>
 
             {error && (
-              <p className="mt-6 flex items-start gap-2 rounded-lg border border-[color-mix(in_srgb,var(--destructive)_24%,transparent)] bg-[color-mix(in_srgb,var(--destructive)_8%,transparent)] px-4 py-3 text-sm font-medium text-[var(--destructive)]">
+              <p role="alert" className="mt-6 flex items-start gap-2 rounded-lg border border-[color-mix(in_srgb,var(--destructive)_24%,transparent)] bg-[color-mix(in_srgb,var(--destructive)_8%,transparent)] px-4 py-3 text-sm font-medium text-[var(--destructive)]">
                 <AlertCircle className="mt-0.5 size-4 shrink-0" />
-                {error.split(",")[0]}
+                {error}
               </p>
             )}
 
             {success && (
-              <p className="mt-6 flex items-start gap-2 rounded-lg border border-success/20 bg-success/10 px-4 py-3 text-sm font-medium text-success">
+              <p role="status" className="mt-6 flex items-start gap-2 rounded-lg border border-success/20 bg-success/10 px-4 py-3 text-sm font-medium text-success">
                 <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
                 {success}
               </p>
@@ -175,15 +176,17 @@ const Login = () => {
 
             <div className="mt-7 space-y-5">
               <div>
-                <label className="text-sm font-semibold text-foreground">
+                <label htmlFor="login-email" className="text-sm font-semibold text-foreground">
                   Email
                 </label>
                 <div className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-input bg-background px-3 transition focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/20">
                   <Mail className="size-4 shrink-0 text-muted-foreground" />
                   <input
+                    id="login-email"
+                    autoComplete="email"
                     type="email"
                     placeholder="you@example.com"
-                    className="h-full min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                    className="h-full min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -191,24 +194,26 @@ const Login = () => {
               </div>
 
               <div>
-                <div className="flex items-center justify-between gap-4">
-                  <label className="text-sm font-semibold text-foreground">
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                  <label htmlFor="login-password" className="text-sm font-semibold text-foreground">
                     Password
                   </label>
                   <Link
-                    to="#"
+                    to="/contact"
                     className="text-sm font-semibold text-primary transition hover:text-accent-foreground"
                   >
-                    Forgot password?
+                    Need help signing in?
                   </Link>
                 </div>
 
                 <div className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-input bg-background px-3 transition focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/20">
                   <Lock className="size-4 shrink-0 text-muted-foreground" />
                   <input
+                    id="login-password"
+                    autoComplete="current-password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
-                    className="h-full min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                    className="h-full min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -219,7 +224,7 @@ const Login = () => {
                       showPassword ? "Hide password" : "Show password"
                     }
                     onClick={() => setShowPassword((v) => !v)}
-                    className="grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                    className="grid size-11 shrink-0 place-items-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
                   >
                     {showPassword ? (
                       <EyeOff className="size-4" />
@@ -241,7 +246,7 @@ const Login = () => {
               ) : (
                 <>
                   <LogIn className="size-4" />
-                  <span>Login</span>
+                  <span>Sign in</span>
                 </>
               )}
             </button>

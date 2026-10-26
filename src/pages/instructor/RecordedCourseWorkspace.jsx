@@ -1,6 +1,14 @@
+import { courseStatusLabel } from "@/lib/user-messages.js";
 import { useEffect, useRef, useState } from "react";
 import { Link, useBlocker, useNavigate, useParams } from "react-router-dom";
-import { useCreateSectionMutation, useCreateLessonMutation, useDeleteCourseMutation, useDeleteSectionMutation, useDeleteLessonMutation, useDeleteVideoMutation } from "@/services/api/instructor/recordedCoursesApi.js";
+import {
+  useCreateSectionMutation,
+  useCreateLessonMutation,
+  useDeleteCourseMutation,
+  useDeleteSectionMutation,
+  useDeleteLessonMutation,
+  useDeleteVideoMutation,
+} from "@/services/api/instructor/recordedCoursesApi.js";
 import useCourseQuery from "@/features/instructor-courses/useCourseQuery.js";
 import {
   courseIsPending,
@@ -27,6 +35,7 @@ import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import ConfirmationModal from "@/components/ui/ConfirmationModal.jsx";
 import CollapsiblePanel from "@/components/ui/CollapsiblePanel.jsx";
 import VideoUploadPanel from "@/features/instructor-courses/VideoUploadPanel.jsx";
+import { trailerPlaybackSource } from "@/lib/trailer-playback.js";
 import "@/features/instructor-courses/course-workspace.css";
 
 function AddTitleForm({ label, disabled, loading, onCreate }) {
@@ -89,8 +98,18 @@ function Workspace({ courseId }) {
   const [sectionPage, setSectionPage] = useState(1);
   const [lessonPage, setLessonPage] = useState(1);
   const [selected, setSelected] = useState(null);
-  const sections = useCourseQuery("getSections", { courseId, page: sectionPage }, undefined, !course.data);
-  const lessons = useCourseQuery("getLessons", { courseId, sectionId: selected?._id, page: lessonPage }, lessonsArePending, !selected || !course.data);
+  const sections = useCourseQuery(
+    "getSections",
+    { courseId, page: sectionPage },
+    undefined,
+    !course.data,
+  );
+  const lessons = useCourseQuery(
+    "getLessons",
+    { courseId, sectionId: selected?._id, page: lessonPage },
+    lessonsArePending,
+    !selected || !course.data,
+  );
   const [busy, updateBusy] = useState(false);
   const busyRef = useRef(false);
   function setBusy(value) {
@@ -119,14 +138,20 @@ function Workspace({ courseId }) {
     lessons.refresh();
   }
   async function create(kind, title) {
-    const path = kind === "section" ? `${base}/sections` : `${base}/sections/${selected._id}/lessons`;
+    const path =
+      kind === "section"
+        ? `${base}/sections`
+        : `${base}/sections/${selected._id}/lessons`;
     if (saving.current || busy) return false;
     saving.current = true;
     setBusy(true);
     setPendingAction(`create:${path}`);
     setError("");
     try {
-      const request = kind === "section" ? createSection({ courseId, title }) : createLesson({ courseId, sectionId: selected._id, title });
+      const request =
+        kind === "section"
+          ? createSection({ courseId, title })
+          : createLesson({ courseId, sectionId: selected._id, title });
       await request.unwrap();
       return true;
     } catch (failure) {
@@ -151,7 +176,12 @@ function Workspace({ courseId }) {
     setPendingAction(`delete:${path}`);
     setError("");
     try {
-      const mutations = { course: deleteCourse, section: deleteSection, lesson: deleteLesson, video: deleteVideo };
+      const mutations = {
+        course: deleteCourse,
+        section: deleteSection,
+        lesson: deleteLesson,
+        video: deleteVideo,
+      };
       const result = await mutations[label](target).unwrap();
       if (label === "course") {
         // Finish the local operation before navigating through the upload guard.
@@ -175,6 +205,7 @@ function Workspace({ courseId }) {
     }
   }
 
+  console.log(course);
   const data = course.data?.course;
   const refreshing = course.loading || sections.loading || lessons.loading;
   const sectionPath = selected ? `${base}/sections/${selected._id}` : null;
@@ -205,7 +236,7 @@ function Workspace({ courseId }) {
       </header>
       {data && (
         <div className="cw-course-meta">
-          <span className="cw-status">{data.status}</span>
+          <span className="cw-status">{courseStatusLabel(data.status)}</span>
           <span>
             Video progress updates automatically while this page is open.
           </span>
@@ -237,23 +268,29 @@ function Workspace({ courseId }) {
       )}
       {data && (
         <>
-          <CollapsiblePanel className="cw-card" label="course trailer"
+          <CollapsiblePanel
+            className="cw-card"
+            label="course trailer"
             actions={<VideoStatus video={data.trailerVideo} />}
-            heading={<div className="cw-card-heading">
-              <span className="cw-heading-icon">
-                <Video size={21} aria-hidden="true" />
-              </span>
-              <div>
-                <h2>Course trailer</h2>
-                <p className="cw-muted">
-                  Give learners a short introduction to your course.
-                </p>
+            heading={
+              <div className="cw-card-heading">
+                <span className="cw-heading-icon">
+                  <Video size={21} aria-hidden="true" />
+                </span>
+                <div>
+                  <h2>Course trailer</h2>
+                  <p className="cw-muted">
+                    Give learners a short introduction to your course.
+                  </p>
+                </div>
               </div>
-            </div>}>
+            }
+          >
             <VideoUploadPanel
               path={`${base}/trailer`}
               target={{ courseId }}
               video={data.trailerVideo}
+              playbackSource={trailerPlaybackSource(data, course.data?.trailerPlaybackUrl)}
               disabled={busy || Boolean(course.error)}
               deleting={pendingAction === `delete:${base}/trailer`}
               onBusy={setBusy}
@@ -347,11 +384,18 @@ function Workspace({ courseId }) {
                     aria-label={`Delete section: ${selected.title}`}
                     title="Delete section"
                     loading={pendingAction === `delete:${sectionPath}`}
-                    loadingLabel={<span className="sr-only">Deleting section</span>}
+                    loadingLabel={
+                      <span className="sr-only">Deleting section</span>
+                    }
                     disabled={
                       busy || Boolean(lessons.error) || Boolean(course.error)
                     }
-                    onClick={() => remove(sectionPath, "section", { courseId, sectionId: selected._id })}
+                    onClick={() =>
+                      remove(sectionPath, "section", {
+                        courseId,
+                        sectionId: selected._id,
+                      })
+                    }
                   >
                     <Trash2 size={15} aria-hidden="true" />
                   </AsyncButton>
@@ -369,44 +413,62 @@ function Workspace({ courseId }) {
                 <>
                   <QueryMessage query={lessons} label="Loading lessons" />
                   {lessons.data?.items.map((lesson) => (
-                    <CollapsiblePanel as="article" key={lesson._id} className="cw-lesson"
+                    <CollapsiblePanel
+                      as="article"
+                      key={lesson._id}
+                      className="cw-lesson"
                       label={`lesson: ${lesson.title}`}
-                      heading={<div className="cw-lesson-title">
+                      heading={
+                        <div className="cw-lesson-title">
                           <span className="cw-section-number">
                             {lesson.order}
                           </span>
                           <h3>{lesson.title}</h3>
-                        </div>}
-                      actions={<>
-                        <VideoStatus video={lesson.video} />
-                        <AsyncButton
-                          className="cw-button cw-danger cw-icon-button"
-                          aria-label={`Delete lesson: ${lesson.title}`}
-                          title="Delete lesson"
-                          loading={
-                            pendingAction ===
-                            `delete:${sectionPath}/lessons/${lesson._id}`
-                          }
-                          loadingLabel={<span className="sr-only">Deleting lesson</span>}
-                          disabled={
-                            busy ||
-                            Boolean(lessons.error) ||
-                            Boolean(course.error)
-                          }
-                          onClick={() =>
-                            remove(
-                              `${sectionPath}/lessons/${lesson._id}`,
-                              "lesson",
-                              { courseId, sectionId: selected._id, lessonId: lesson._id },
-                            )
-                          }
-                        >
-                          <Trash2 size={15} aria-hidden="true" />
-                        </AsyncButton>
-                      </>}>
+                        </div>
+                      }
+                      actions={
+                        <>
+                          <VideoStatus video={lesson.video} />
+                          <AsyncButton
+                            className="cw-button cw-danger cw-icon-button"
+                            aria-label={`Delete lesson: ${lesson.title}`}
+                            title="Delete lesson"
+                            loading={
+                              pendingAction ===
+                              `delete:${sectionPath}/lessons/${lesson._id}`
+                            }
+                            loadingLabel={
+                              <span className="sr-only">Deleting lesson</span>
+                            }
+                            disabled={
+                              busy ||
+                              Boolean(lessons.error) ||
+                              Boolean(course.error)
+                            }
+                            onClick={() =>
+                              remove(
+                                `${sectionPath}/lessons/${lesson._id}`,
+                                "lesson",
+                                {
+                                  courseId,
+                                  sectionId: selected._id,
+                                  lessonId: lesson._id,
+                                },
+                              )
+                            }
+                          >
+                            <Trash2 size={15} aria-hidden="true" />
+                          </AsyncButton>
+                        </>
+                      }
+                    >
                       <VideoUploadPanel
                         path={`${sectionPath}/lessons/${lesson._id}/video`}
-                        target={{ courseId, sectionId: selected._id, lessonId: lesson._id }}
+                        target={{
+                          courseId,
+                          sectionId: selected._id,
+                          lessonId: lesson._id,
+                        }}
                         video={lesson.video}
                         deleting={
                           pendingAction ===
@@ -446,9 +508,7 @@ function Workspace({ courseId }) {
                     disabled={
                       busy || Boolean(lessons.error) || Boolean(course.error)
                     }
-                    onCreate={(title) =>
-                      create("lesson", title)
-                    }
+                    onCreate={(title) => create("lesson", title)}
                   />
                 </>
               )}
