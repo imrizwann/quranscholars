@@ -1,11 +1,19 @@
+@import "@vidstack/react/player/styles/base.css";
+
 .qs-video-player {
   --player-accent: var(--primary, #0f766e);
+  --player-radius: 0.75rem;
+  display: block;
   position: relative;
   width: 100%;
+  min-width: 0;
+  aspect-ratio: var(--player-aspect-ratio, 16 / 9);
+  margin: 0;
+  padding: 0;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--foreground) 20%, var(--border));
-  border-radius: 0.75rem;
-  background: #111817;
+  border: 0;
+  border-radius: var(--player-radius);
+  background: #000;
   color: #fff;
   contain: layout;
   isolation: isolate;
@@ -13,15 +21,49 @@
   box-shadow: none;
   font-family: inherit;
 }
-.qs-video-player video,
-.player-poster {
+.qs-video-player > [data-media-provider] {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: #000;
+}
+.qs-video-player video,
+.qs-video-player .player-poster {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
   object-fit: contain;
+}
+.qs-video-player--embedded { --player-radius: 0; }
+.qs-video-player[data-fullscreen],
+.qs-video-player:fullscreen {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: auto;
+  border-radius: 0;
 }
 .player-poster {
   position: absolute;
   inset: 0;
+  pointer-events: none;
+}
+.player-poster:not([data-visible]) {
+  opacity: 0;
+}
+.player-poster[data-hidden] {
+  display: none;
 }
 .player-controls {
   position: absolute;
@@ -233,6 +275,9 @@
   font-size: 0.7rem;
   font-weight: 500;
 }
+.player-time-preview:not([data-visible]) {
+  visibility: hidden;
+}
 .player-time-thumbnail {
   width: 9rem;
   aspect-ratio: 16/9;
@@ -369,7 +414,9 @@
   width: clamp(1.5rem, 6cqw, 2.5rem);
   height: clamp(1.5rem, 6cqw, 2.5rem);
   color: var(--player-accent);
+  animation: player-spin 1s linear infinite;
 }
+@keyframes player-spin { to { transform: rotate(360deg); } }
 .player-spinner-track,
 .player-spinner-fill {
   stroke-width: 8;
@@ -388,7 +435,24 @@
   gap: 0.35rem;
   background: #111817;
   text-align: center;
+  pointer-events: auto;
 }
+.qs-video-player[data-error] .player-controls {
+  visibility: hidden;
+}
+.player-retry-button {
+  margin-top: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1.25rem;
+  border: 1px solid #ffffff70;
+  border-radius: 0.5rem;
+  background: #ffffff18;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.player-retry-button:hover { background: #ffffff30; }
+.player-retry-button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 .player-message strong {
   font-size: 1rem;
 }
@@ -436,6 +500,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .player-spinner { animation: none; }
   .qs-video-player * {
     transition-duration: 0.01ms !important;
   }

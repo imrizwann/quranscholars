@@ -1,3 +1,4 @@
+import { userMessage } from "@/lib/user-messages.js";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   useUpdateMutation,
@@ -65,7 +66,7 @@ export const useEditStudentDetails = () => {
     async (field, value) => {
       setSaveLoading(true);
       if (!value) {
-        setError(`${field} cannot be empty`);
+        setError("Please complete this field before saving.");
         setSaveLoading(false);
         return;
       }
@@ -76,8 +77,7 @@ export const useEditStudentDetails = () => {
         refetch();
         setSaveLoading(false);
       } catch (error) {
-        console.error("Update error:", error);
-        setError("Failed to update. Please try again.");
+        setError(userMessage(error, "We could not save your changes. Please try again."));
         setSaveLoading(false);
       }
     },

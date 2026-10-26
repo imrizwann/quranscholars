@@ -1,3 +1,7 @@
+import {
+  videoErrorMessage,
+  videoPreparationMessage,
+} from "@/lib/user-messages.js";
 import { useEffect, useRef, useState } from "react";
 import {
   unwrapAbortable,
@@ -72,7 +76,7 @@ export default function VideoUploadPanel({
     try {
       metadata = videoMetadata(file);
     } catch (failure) {
-      setError(failure.message);
+      setError(readableError(failure));
       return;
     }
     controller.current = new AbortController();
@@ -101,14 +105,13 @@ export default function VideoUploadPanel({
       });
       uploaded = true;
       setPhase("Preparing video");
-      await unwrapAbortable(
+      const result = await unwrapAbortable(
         processVideo({ ...target, uploadId: reservation.uploadId }),
         signal,
       );
+      const message = videoPreparationMessage(result);
       if (mounted.current) {
-        setNotice(
-          "Upload complete. Your video is being prepared for playback.",
-        );
+        setNotice(message);
         setUploadedPreview({ file, uploadId: reservation.uploadId });
         setFile(null);
         if (input.current) input.current.value = "";
@@ -122,8 +125,8 @@ export default function VideoUploadPanel({
           setUnconfirmedUploadId(uploadId);
         onChanged();
         setError(
-          uploaded
-            ? `The file reached storage, but processing could not be confirmed. Checking status automatically; retry only if it stays waiting for upload. ${readableError(failure)}`
+          uploaded && !failure.userMessage
+            ? "Your video finished uploading, but we could not confirm it is being prepared. We are checking its progress. Refresh the page before uploading it again."
             : readableError(failure),
         );
       }
@@ -154,12 +157,12 @@ export default function VideoUploadPanel({
     setNotice("");
     setUnconfirmedUploadId(null);
     try {
-      await unwrapAbortable(
+      const result = await unwrapAbortable(
         processVideo({ ...target, uploadId: video.uploadId }),
         controller.current.signal,
       );
-      if (mounted.current)
-        setNotice("Your video is being prepared for playback.");
+      const message = videoPreparationMessage(result);
+      if (mounted.current) setNotice(message);
     } catch (failure) {
       if (mounted.current) {
         if (["FETCH_ERROR", "TIMEOUT_ERROR"].includes(failure.status))
@@ -192,7 +195,7 @@ export default function VideoUploadPanel({
       </div>
       {video?.lastError?.message && (
         <p className="cw-error" style={{ marginTop: 12 }}>
-          We could not prepare this video: {video.lastError.message}
+          {videoErrorMessage(video.lastError)}
         </p>
       )}
       {status === "COMPLETED" && (
@@ -231,7 +234,7 @@ export default function VideoUploadPanel({
                     setFile(selectedFile);
                     setUploadedPreview(null);
                   } catch (failure) {
-                    setError(failure.message);
+                    setError(readableError(failure));
                     event.target.value = "";
                     setFile(null);
                   }
@@ -282,7 +285,7 @@ export default function VideoUploadPanel({
                     videoMetadata(file);
                     setConfirmation("upload");
                   } catch (failure) {
-                    setError(failure.message);
+                    setError(readableError(failure));
                   }
                 }}
               >
@@ -335,6 +338,7 @@ export default function VideoUploadPanel({
         <VideoPreview
           file={previewFile}
           hasUploadedVideo={status !== "NOT_UPLOADED"}
+          status={status}
           playbackSource={savedPlaybackSource}
           title={video?.originalFileName || "Video preview"}
         />

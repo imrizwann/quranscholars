@@ -61,11 +61,11 @@ test("storage PUT has no app credentials, tracks progress and propagates failure
     current.status = 200; current.onload(); await pending;
     assert.deepEqual(progress, [50]);
     const failure = uploadVideoFile("https://storage.example/video", file, "video/mp4");
-    current.status = 403; current.onload(); await assert.rejects(failure, /Storage upload failed/);
+    current.status = 403; current.onload(); await assert.rejects(failure, /could not upload this video/);
     const controller = new AbortController();
     const cancelled = uploadVideoFile("https://storage.example/video", file, "video/mp4", { signal: controller.signal });
     controller.abort(); await assert.rejects(cancelled, { name: "AbortError" });
-    assert.throws(() => uploadVideoFile("http://storage.example/video", file, "video/mp4"), /invalid storage URL/);
+    assert.throws(() => uploadVideoFile("http://storage.example/video", file, "video/mp4"), /could not start your upload/);
   } finally { globalThis.XMLHttpRequest = previous; }
 });
 

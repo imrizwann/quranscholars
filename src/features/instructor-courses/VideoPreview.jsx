@@ -7,11 +7,12 @@ const VideoPlayer = lazy(
   () => import("@/components/video-player/VideoPlayer.jsx"),
 );
 
-// playbackSource accepts { src, type } from the future authorized playback API.
+// playbackSource accepts { src, type } from the playback API.
 // Keep storage keys and URL generation outside this presentation component.
 export default function VideoPreview({
   file,
   hasUploadedVideo,
+  status,
   playbackSource = null,
   title = "Video preview",
 }) {
@@ -39,7 +40,7 @@ export default function VideoPreview({
         <h3>Video preview</h3>
         {(file || playbackSource) && (
           <span className="cw-preview-badge">
-            {file ? "Local preview" : "Uploaded video"}
+            {file ? "Preview from your device" : "Uploaded video"}
           </span>
         )}
       </div>
@@ -61,7 +62,7 @@ export default function VideoPreview({
                 errorMessage={
                   file
                     ? "Your browser cannot preview this file. You can still upload it for preparation."
-                    : "This video could not be loaded. Refresh the page to try again."
+                    : "Check your connection and try again. If the problem continues, refresh the page."
                 }
               />
             ) : (
@@ -71,12 +72,19 @@ export default function VideoPreview({
             )}
           </Suspense>
         ) : (
-          <div className="cw-preview-placeholder">
+          <div className="cw-preview-placeholder" role="status">
             <Video size={32} strokeWidth={1.5} aria-hidden="true" />
+            <strong>{status === "FAILED" ? "Video preparation failed" : status === "DELETING" ? "Video is being removed" : ["UPLOADING", "UPLOADED", "QUEUED", "PROCESSING", "PROCESSED"].includes(status) ? "Video is not ready yet" : "No video preview available"}</strong>
             <p>
-              {hasUploadedVideo
-                ? "Select the original file to preview this video."
-                : "Choose a video to preview it here."}
+              {status === "FAILED"
+                ? "Try preparing the video again or upload a replacement."
+                : status === "DELETING"
+                  ? "The preview will be available after you upload a new video."
+                  : ["UPLOADING", "UPLOADED", "QUEUED", "PROCESSING", "PROCESSED"].includes(status)
+                    ? "Follow the upload and preparation status here. The preview will appear when your video is ready."
+                    : hasUploadedVideo
+                      ? "Playback is temporarily unavailable. Refresh to check again."
+                      : "Choose a video to preview it here before uploading."}
             </p>
           </div>
         )}

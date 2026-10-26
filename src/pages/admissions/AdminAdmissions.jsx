@@ -1,3 +1,4 @@
+import { userMessage } from "@/lib/user-messages.js";
 import { useMemo, useState } from "react";
 import "./admin-admissions.css";
 import ConfirmationModal from "@/components/ui/ConfirmationModal.jsx";
@@ -125,7 +126,7 @@ const AdminAdmissions = () => {
       await updateStatus({ id, status: nextStatus }).unwrap();
       toast.success("Admission status updated");
     } catch (error) {
-      toast.error(error?.data?.message || "Failed to update status");
+      toast.error(userMessage(error, "We could not update the admission status. Please try again."));
     }
   };
 
@@ -136,7 +137,7 @@ const AdminAdmissions = () => {
       await deleteAdmission(id).unwrap();
       toast.success("Admission deleted");
     } catch (error) {
-      toast.error(error?.data?.message || "Failed to delete admission");
+      toast.error(userMessage(error, "We could not delete this admission. Please try again."));
     }
   };
 

@@ -48,9 +48,9 @@ const StudentInfo = () => {
 
   const hasData = Object.keys(userDetails || {}).length > 0;
   const selectedCourseLabels = (userDetails?.selectedCourses || [])
-    .map((course) => {
-      if (typeof course === "string") return course;
-      return course?.title || course?.name || course?._id || "";
+    .map((course, index) => {
+      if (typeof course === "string") return /^[a-f\d]{24}$/i.test(course) ? `Selected course ${index + 1}` : course;
+      return course?.title || course?.name || `Selected course ${index + 1}`;
     })
     .filter(Boolean);
 

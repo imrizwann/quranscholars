@@ -1,3 +1,4 @@
+import { userMessage, userFacingError } from "../../lib/user-messages.js";
 // Connect the local upload cancellation signal to an RTK Query mutation.
 // Files, AbortSignals and progress callbacks never enter Redux state.
 export async function unwrapAbortable(request, signal) {
@@ -20,7 +21,7 @@ const types = {
 
 export function videoMetadata(file) {
   if (!file || !Number.isSafeInteger(file.size) || file.size <= 0)
-    throw new Error("Choose a non-empty video file.");
+    throw userFacingError("Please choose a video file that contains a video.");
   const extension = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
   const contentType = types[extension];
   if (
@@ -29,15 +30,15 @@ export function videoMetadata(file) {
       file.type !== contentType &&
       file.type !== "application/octet-stream")
   )
-    throw new Error(
-      "Choose an MP4, MOV, WebM, or MKV file with a matching video type.",
+    throw userFacingError(
+      "Please choose an MP4, MOV, WebM or MKV video.",
     );
   if (
     file.name.length > 255 ||
     /[/\\]/.test(file.name) ||
     [...file.name].some((character) => character.charCodeAt(0) < 32)
   )
-    throw new Error(
+    throw userFacingError(
       "Rename the file using a simple name of at most 255 characters.",
     );
   return { fileName: file.name, contentType, size: file.size };
@@ -56,7 +57,7 @@ export function uploadVideoFile(
 ) {
   const target = new URL(url);
   if (target.protocol !== "https:" || target.username || target.password)
-    throw new Error("The server returned an invalid storage URL.");
+    throw userFacingError("We could not start your upload. Please try again.");
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const abort = () => xhr.abort();
@@ -77,30 +78,30 @@ export function uploadVideoFile(
       finish(
         xhr.status >= 200 && xhr.status < 300
           ? null
-          : new Error(
-              `Storage upload failed (${xhr.status}). Choose the file and upload again.`,
+          : userFacingError(
+              "We could not upload this video. Please select the file and try again.",
             ),
       );
     xhr.onerror = () =>
       finish(
-        new Error(
-          "Upload could not reach storage. Check your connection and the storage CORS settings, then upload again.",
+        userFacingError(
+          "We could not upload your video. Check your internet connection and try again.",
         ),
       );
     xhr.ontimeout = () =>
-      finish(new Error("Upload timed out. Choose the file and upload again."));
+      finish(userFacingError("Upload timed out. Choose the file and upload again."));
     xhr.onabort = () =>
       finish(
         Object.assign(
-          new Error(
-            "Upload cancelled. The server may still show Waiting for upload. Upload again or remove the video.",
+          userFacingError(
+            "Upload cancelled. You can upload the file again or remove this video.",
           ),
           { name: "AbortError" },
         ),
       );
     if (signal?.aborted) {
       finish(
-        Object.assign(new Error("Upload cancelled."), { name: "AbortError" }),
+        Object.assign(userFacingError("Upload cancelled."), { name: "AbortError" }),
       );
       return;
     }
@@ -132,14 +133,5 @@ export const lessonsArePending = (data) =>
 export const deletionIsPending = (data) =>
   data?.storageCleanupPending === true && data.status !== "blocked";
 export function readableError(error) {
-  if (error?.name === "AbortError" || error?.status === "TIMEOUT_ERROR")
-    return "The request was interrupted or timed out. Refresh to check the server before trying again.";
-  if (error?.status === "FETCH_ERROR")
-    return "Could not reach the server. Check your connection and try again.";
-  return (
-    error?.data?.message ||
-    error?.message ||
-    error?.error ||
-    "Something went wrong. Please try again."
-  );
+  return userMessage(error);
 }

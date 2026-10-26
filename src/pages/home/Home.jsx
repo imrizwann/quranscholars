@@ -427,7 +427,7 @@ const Home = () => {
 
               <div className="aspect-video">
                 {/* Video Player */}
-                <VideoPlayer src={video} />
+                <VideoPlayer src={video} className="qs-video-player--embedded" />
               </div>
 
               <div className="grid gap-5 p-5 sm:grid-cols-[1fr_auto] sm:items-center">

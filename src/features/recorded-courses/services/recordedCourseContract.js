@@ -28,3 +28,13 @@ export const normalizeRecordedCourseList = (response) => {
     filters: payload.filters || {},
   };
 };
+
+export const normalizeRecordedCourseDetail = (response) => {
+  if (!response?.data?.course) throw new Error("Invalid course response");
+  const { course, trailerPlaybackUrl } = response.data;
+  return adaptRecordedCourse({
+    ...course,
+    // An explicit null from the API must clear any older playback URL.
+    ...(trailerPlaybackUrl !== undefined && { trailerPlaybackUrl }),
+  });
+};

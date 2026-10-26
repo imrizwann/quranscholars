@@ -1,3 +1,4 @@
+import { userMessage } from "@/lib/user-messages.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { Controller, useForm } from "react-hook-form";
@@ -115,7 +116,6 @@ const Admission = () => {
     });
   const [join, { isLoading: isJoining }] = useJoinMutation();
   const [update, { isLoading: isUpdating }] = useUpdateMutation();
-  console.log("admission", admission);
   const hasExistingAdmission = Boolean(admission?._id);
 
   const defaultValues = useMemo(
@@ -197,7 +197,7 @@ const Admission = () => {
       }
     } catch (error) {
       toast.error(
-        error?.data?.message || "Unable to save admission at the moment.",
+        userMessage(error, "We could not save your application. Please try again."),
       );
     }
   };

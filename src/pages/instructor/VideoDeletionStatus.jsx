@@ -18,8 +18,8 @@ export default function VideoDeletionStatus() {
       <section className="cw-card">
         <QueryMessage query={query} label="Checking deletion status" />
         {data && <div role="status">
-          <h2>{blocked ? "Cleanup needs attention" : data.status === "completed" ? "Deletion complete" : data.status === "retrying" ? "Removing remaining files" : "Removing files"}</h2>
-          <p>{blocked ? "The item has been removed, but file cleanup requires administrator assistance. Automatic retries have stopped." : data.storageCleanupPending ? "Files are being removed. You can safely leave this page and check back later." : "This item and its files have been deleted."}</p>
+          <h2>{blocked ? "Removal needs attention" : data.status === "completed" ? "Deletion complete" : data.status === "retrying" ? "Removing remaining files" : "Removing files"}</h2>
+          <p>{blocked ? "This item is no longer available, but we could not remove all its files. Please contact support to finish removing them." : data.storageCleanupPending ? "Files are being removed. You can safely leave this page and check back later." : "This item and its files have been deleted."}</p>
           {data.completedAt && <p className="cw-muted">Completed: {new Date(data.completedAt).toLocaleString()}</p>}
         </div>}
       </section>

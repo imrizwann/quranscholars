@@ -16,8 +16,8 @@ export function Pagination({ pagination, page, onPage, disabled, loading = false
   return <nav className="cw-pages" aria-label="Pagination"><AsyncButton className="cw-button" loading={loading && direction === "previous"} disabled={disabled || loading || page <= 1} onClick={() => { setDirection("previous"); onPage(page - 1); }}>Previous</AsyncButton><span>Page {page}</span><AsyncButton className="cw-button" loading={loading && direction === "next"} disabled={disabled || loading || !pagination.hasNextPage} onClick={() => { setDirection("next"); onPage(page + 1); }}>Next</AsyncButton></nav>;
 }
 
-const labels = { NOT_UPLOADED: "No video", UPLOADING: "Waiting for upload", UPLOADED: "Ready to prepare", QUEUED: "Waiting to prepare", PROCESSING: "Preparing video", PROCESSED: "Finalizing", COMPLETED: "Ready", FAILED: "Failed", DELETING: "Deleting" };
+const labels = { NOT_UPLOADED: "No video", UPLOADING: "Waiting for upload", UPLOADED: "Ready to prepare", QUEUED: "Waiting to prepare", PROCESSING: "Preparing video", PROCESSED: "Finalizing", COMPLETED: "Ready", FAILED: "Needs attention", DELETING: "Deleting" };
 export function VideoStatus({ video }) {
   const status = video?.status || "NOT_UPLOADED";
-  return <span className="cw-status" data-status={status}>{status === "QUEUED" && video?.waitingForQueue ? "Waiting to prepare" : labels[status] || status}</span>;
+  return <span className="cw-status" data-status={status}>{status === "QUEUED" && video?.waitingForQueue ? "Waiting to prepare" : labels[status] || "Updating video"}</span>;
 }
