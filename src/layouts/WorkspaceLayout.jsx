@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import CollapsibleSidebar, { HamburgerIcon, SidebarToggle } from "@/components/navigation/CollapsibleSidebar.jsx";
-import { useSelector } from "react-redux";
+import WorkspaceAccountMenu from "./WorkspaceAccountMenu.jsx";
 import { ArrowUpRight, BarChart3, BookOpen, ChevronRight, CircleDollarSign, ClipboardCheck, GraduationCap, LayoutDashboard, Library, MessageSquareText, Radio, Settings, UserRound, Users, X } from "lucide-react";
 import "./workspace.css";
 
@@ -24,7 +24,10 @@ const instructorLinks = [
   { to: "/instructor/reviews", label: "Reviews", icon: MessageSquareText },
 ];
 
-const adminLinks = [{ to: "/admin/admissions", label: "Admissions", icon: ClipboardCheck }];
+const adminLinks = [
+  { to: "/admin/admissions", label: "Admissions", icon: ClipboardCheck },
+  { to: "/admin/instructor-applications", label: "Instructor applications", icon: GraduationCap },
+];
 
 function WorkspaceSidebar({ instructor, admin, onNavigate, mobile = false, collapsed = false }) {
   const base = instructor ? "/instructor" : "/dashboard";
@@ -67,12 +70,8 @@ function WorkspaceSidebar({ instructor, admin, onNavigate, mobile = false, colla
 export default function WorkspaceLayout({ type = "student" }) {
   const instructor = type === "instructor";
   const admin = type === "admin";
-  const role = admin ? "Admin" : instructor ? "Instructor" : "Learner";
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const user = useSelector((state) => state.user.user);
-  const name = user?.name?.trim() || role;
-  const initials = name.split(/\s+/).slice(0, 2).map((word) => word[0]).join("");
   const dialog = useRef(null);
   const { pathname } = useLocation();
   const base = instructor ? "/instructor" : "/dashboard";
@@ -109,10 +108,7 @@ export default function WorkspaceLayout({ type = "student" }) {
             <span>{admin ? "Admin" : instructor ? "Instructor" : "My workspace"}</span><ChevronRight size={14} aria-hidden="true" />
             <strong>{activeLink?.label || "Overview"}</strong>
           </div>
-          <NavLink to={admin ? "/profile" : `${base}/profile`} className="workspace-account" aria-label={`Profile for ${name}`}>
-            <span className="workspace-account-name">{name}<small>{role}</small></span>
-            <span className="workspace-avatar">{initials}</span>
-          </NavLink>
+          <WorkspaceAccountMenu type={type} />
         </header>
         <div id="workspace-content" tabIndex={-1}><Outlet /></div>
       </div>

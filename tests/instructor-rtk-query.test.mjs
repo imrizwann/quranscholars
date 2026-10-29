@@ -80,7 +80,9 @@ test("instructor RTK Query integration", async (t) => {
         ["getLessons", { ...target, page: 3 }, "GET", `${root}/course1/sections/section1/lessons?page=3&limit=10`],
         ["getDeletion", { deletionId: "deletion1" }, "GET", `${root}/deletions/deletion1`],
         ["createCourse", { title: "Course", category: "category1" }, "POST", root, { title: "Course", category: "category1" }],
+        ["updateCourse", { courseId: "course1", changes: { title: "Updated course", tags: [] } }, "PATCH", `${root}/course1`, { title: "Updated course", tags: [] }],
         ["createSection", { ...target, title: "Section" }, "POST", `${root}/course1/sections`, { title: "Section" }],
+        ["updateSection", { ...target, title: "Updated section", description: "Introduction", order: 999 }, "PATCH", `${root}/course1/sections/section1`, { title: "Updated section", description: "Introduction" }],
         ["createLesson", { ...target, title: "Lesson" }, "POST", `${root}/course1/sections/section1/lessons`, { title: "Lesson" }],
         ["deleteCourse", target, "DELETE", `${root}/course1`],
         ["deleteSection", target, "DELETE", `${root}/course1/sections/section1`],
@@ -158,6 +160,37 @@ test("instructor RTK Query integration", async (t) => {
       store.dispatch(api.util.resetApiState());
     });
 
+    await t.test("metadata saves refresh the course and list, preserve media, and leave unrelated courses cached", async () => {
+      const store = makeStore();
+      const args = { courseId: "course1" };
+      await Promise.all([
+        store.dispatch(api.endpoints.getCourses.initiate({})).unwrap(),
+        store.dispatch(api.endpoints.getCourse.initiate(args)).unwrap(),
+        store.dispatch(api.endpoints.getCourse.initiate({ courseId: "other" })).unwrap(),
+      ]);
+      const seen = [];
+      globalThis.fetch = async (request) => {
+        seen.push({ method: request.method, path: new URL(request.url).pathname });
+        if (request.method === "PATCH") return Response.json({ success: true, data: { course: { _id: "course1", title: "Saved title", tags: [] } } });
+        // A failed background refresh must not erase the confirmed saved metadata.
+        return Response.json({ success: false }, { status: 503 });
+      };
+      try {
+        await store.dispatch(api.endpoints.updateCourse.initiate({ ...args, changes: { title: "Saved title", tags: [] } })).unwrap();
+        await waitFor(() => seen.length === 3);
+        await waitFor(() => api.endpoints.getCourse.select(args)(store.getState()).status === "rejected");
+        const saved = api.endpoints.getCourse.select(args)(store.getState()).data;
+        assert.equal(saved.course.title, "Saved title");
+        assert.equal(saved.course.trailerVideo.status, "COMPLETED");
+        assert.ok(saved.trailerPlaybackUrl);
+        assert.ok(seen.some((item) => item.method === "GET" && item.path === root));
+        assert.ok(!seen.some((item) => item.path.endsWith("/other")));
+        globalThis.fetch = async () => Response.json({ success: false }, { status: 400 });
+        await assert.rejects(store.dispatch(api.endpoints.updateCourse.initiate({ ...args, changes: { title: "Rejected" } })).unwrap());
+        assert.equal(api.endpoints.getCourse.select(args)(store.getState()).data.course.title, "Saved title");
+      } finally { globalThis.fetch = normalFetch; store.dispatch(api.util.resetApiState()); }
+    });
+
     await t.test("course deletion refreshes the list without requesting a deleted detail again", async () => {
       const store = makeStore();
       await store.dispatch(api.endpoints.getCourses.initiate({})).unwrap();
@@ -183,27 +216,28 @@ test("instructor RTK Query integration", async (t) => {
       store.dispatch(api.util.resetApiState());
     });
 
-    await t.test("processing recovers one lost response with the same upload identity and stops after two failures", async () => {
+    await t.test("processing recovers lost responses with the same upload identity and stops after three failures", async () => {
       const store = makeStore();
       try {
         for (const target of [{ courseId: "course1" }, { courseId: "course1", sectionId: "section1", lessonId: "lesson1" }]) {
           const seen = [];
           globalThis.fetch = async (request) => {
             seen.push({ url: request.url, body: await request.json() });
-            if (seen.length === 1) throw new TypeError("Failed to fetch");
+            if (seen.length <= 2) throw new TypeError("Failed to fetch");
             return Response.json({ success: true, data: { status: "QUEUED", jobId: "existing-job" } });
           };
           const result = await store.dispatch(api.endpoints.processVideo.initiate({ ...target, uploadId: "same-upload" })).unwrap();
           assert.equal(result.jobId, "existing-job");
-          assert.equal(seen.length, 2);
+          assert.equal(seen.length, 3);
           assert.deepEqual(seen[0], seen[1]);
+          assert.deepEqual(seen[0], seen[2]);
           assert.deepEqual(seen[0].body, { uploadId: "same-upload" });
         }
         let attempts = 0;
         globalThis.fetch = async () => { attempts++; throw new TypeError("Failed to fetch"); };
         await assert.rejects(store.dispatch(api.endpoints.processVideo.initiate({ courseId: "course1", uploadId: "same-upload" })).unwrap(),
           error => error.status === "FETCH_ERROR");
-        assert.equal(attempts, 2);
+        assert.equal(attempts, 3);
         for (const name of ["prepareVideoUpload", "createCourse", "deleteCourse"]) {
           attempts = 0;
           await assert.rejects(store.dispatch(api.endpoints[name].initiate({ courseId: "course1" })).unwrap());
@@ -213,6 +247,23 @@ test("instructor RTK Query integration", async (t) => {
         globalThis.fetch = normalFetch;
         store.dispatch(api.util.resetApiState());
       }
+    });
+
+    await t.test("processing retries a temporary database outage once with the same upload; creation is not retried", async () => {
+      const store = makeStore(); const attempts = [];
+      try {
+        globalThis.fetch = async (request) => {
+          attempts.push(await request.json());
+          if (attempts.length === 1) return Response.json({ success: false, code: "DATABASE_UNAVAILABLE" }, { status: 503 });
+          return Response.json({ success: true, data: { status: "QUEUED", uploadId: "upload1" } });
+        };
+        await store.dispatch(api.endpoints.processVideo.initiate({ courseId: "course1", uploadId: "upload1" })).unwrap();
+        assert.deepEqual(attempts, [{ uploadId: "upload1" }, { uploadId: "upload1" }]);
+        attempts.length = 0;
+        globalThis.fetch = async (request) => { attempts.push(await request.json()); return Response.json({}, { status: 503 }); };
+        await assert.rejects(store.dispatch(api.endpoints.createCourse.initiate({ title: "Course" })).unwrap());
+        assert.equal(attempts.length, 1);
+      } finally { globalThis.fetch = normalFetch; store.dispatch(api.util.resetApiState()); }
     });
 
     await t.test("cancelling processing during retry backoff prevents a second request", async () => {

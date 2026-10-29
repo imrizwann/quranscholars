@@ -22,6 +22,7 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
       export { default as LoadingState } from "./src/components/feedback/LoadingState.jsx";
       export { default as CourseVideo } from "./src/features/recorded-courses/components/CourseVideo.jsx";
       export { default as VideoPreview } from "./src/features/instructor-courses/VideoPreview.jsx";
+      export { default as CardMedia } from "./src/features/recorded-courses/components/CourseCardMedia.jsx";
     `, resolveDir: process.cwd() },
     bundle: true, write: false, format: "esm", platform: "node", packages: "external",
     jsx: "automatic", alias: { "@": resolve("src") }, loader: { ".css": "empty" },
@@ -42,7 +43,7 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
       if (url.pathname.endsWith("/with-trailer")) return Response.json({ success: true, data: { course: { ...record, slug: "with-trailer", updatedAt: "invalid-date", outcomes: ["Read with confidence"], requirements: ["A willingness to learn"], audience: ["New learners"], sections: [{ _id: "section-1", title: "Foundations", description: "Start here", lessons: [{ _id: "lesson-1", title: "Understanding the alphabet", durationSeconds: 180, previewable: false }, { _id: "lesson-2", title: "Practice recitation", durationSeconds: null }] }, { _id: "section-2", title: "Next steps", lessons: [] }] }, trailerPlaybackUrl: "https://video.example.test/master.m3u8" } });
       return Response.json({ success: true, data: { courses: [record], pagination: { page: 2, limit: 8, totalCourses: 33, totalPages: 5 }, filters: {} } });
     };
-    const { api, Catalog, Detail, CourseVideo, VideoPreview, LoadingState } = await import(pathToFileURL(outputPath));
+    const { api, Catalog, Detail, CourseVideo, VideoPreview, LoadingState, CardMedia } = await import(pathToFileURL(outputPath));
     store = configureStore({ reducer: { [api.reducerPath]: api.reducer }, middleware: (getDefault) => getDefault().concat(api.middleware) });
     const render = (Component, url, path) => renderToStaticMarkup(React.createElement(Provider, { store },
       React.createElement(MemoryRouter, { initialEntries: [url] }, React.createElement(Routes, null,
@@ -100,6 +101,20 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
     assert.match(loader, /aria-live="polite"/);
     assert.match(loader, /Updating courses/);
     assert.equal((loader.match(/role="status"/g) || []).length, 1);
+    const media = (values) => renderToStaticMarkup(React.createElement(MemoryRouter, null, React.createElement(CardMedia, { course: { id: "course-1", title: "Example course", ...values }, to: "/courses/example-course" })));
+    const thumbnail = "https://images.example.test/cover.webp?signature=cover";
+    const trailerVideo = "https://video.example.test/master.m3u8";
+    const both = media({ thumbnail, trailerVideo });
+    assert.match(both, /<button[^>]+aria-label="Play trailer for Example course"/);
+    assert.match(both, /cover.webp\?signature=cover/);
+    assert.doesNotMatch(both, /<a\b|Loading trailer/);
+    const trailerOnly = media({ trailerVideo });
+    assert.match(trailerOnly, /Loading trailer|qs-video-player/);
+    assert.doesNotMatch(trailerOnly, /catalogue-cover-placeholder/);
+    const thumbnailOnly = media({ thumbnail });
+    assert.match(thumbnailOnly, /href="\/courses\/example-course"/);
+    assert.doesNotMatch(thumbnailOnly, /Play trailer for|Loading trailer/);
+    assert.match(media({}), /Start a new chapter/);
     store.dispatch(api.util.resetApiState());
   } finally {
     globalThis.fetch = originalFetch;

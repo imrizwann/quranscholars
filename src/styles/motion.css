@@ -1,0 +1,34 @@
+:root {
+  --ease-out-ui: cubic-bezier(.22, 1, .36, 1);
+  --ease-in-ui: cubic-bezier(.4, 0, 1, 1);
+}
+
+/* Base UI keeps the popup mounted until its closing transition completes. */
+.qs-popup-motion, .qs-dialog-motion {
+  opacity: 1;
+  scale: 1;
+  transition: opacity 220ms var(--ease-out-ui), scale 260ms var(--ease-out-ui);
+}
+.qs-popup-motion { transform-origin: var(--transform-origin); }
+.qs-popup-motion[data-starting-style], .qs-popup-motion[data-ending-style] { opacity: 0; scale: .97; }
+.qs-dialog-motion[data-starting-style], .qs-dialog-motion[data-ending-style] { opacity: 0; scale: .975; }
+.qs-popup-motion[data-ending-style], .qs-dialog-motion[data-ending-style] { transition-duration: 150ms; transition-timing-function: var(--ease-in-ui); }
+.qs-popup-motion[data-instant] { transition: none; }
+.qs-backdrop-motion { opacity: 1; transition: opacity 200ms var(--ease-out-ui); }
+.qs-backdrop-motion[data-starting-style], .qs-backdrop-motion[data-ending-style] { opacity: 0; }
+
+.qs-navbar-popup {
+  transform-origin: top right;
+  opacity: 0;
+  transform: translateY(-6px) scale(.98);
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 180ms var(--ease-out-ui), transform 240ms var(--ease-out-ui), visibility 0s 240ms;
+}
+.qs-navbar-popup[data-open="true"] { opacity: 1; transform: translateY(0) scale(1); visibility: visible; pointer-events: auto; transition-delay: 0s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qs-popup-motion, .qs-dialog-motion, .qs-backdrop-motion, .qs-navbar-popup { transition: none; }
+  .qs-popup-motion, .qs-dialog-motion { scale: 1; }
+  .qs-navbar-popup { transform: none; }
+}

@@ -1,4 +1,4 @@
-import { apiBaseQuery } from "../base-query.js";
+import { apiBaseQuery, renewSession } from "../base-query.js";
 import { createApi } from "@reduxjs/toolkit/query/react";
 
 const userAuthApi = createApi({
@@ -11,6 +11,15 @@ const userAuthApi = createApi({
         url: "api/auth/me",
         method: "GET",
       }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch({ type: "user/setUser", payload: data });
+        } catch { /* Renewal handles a definitively expired session. */ }
+      },
+    }),
+    refreshSession: builder.mutation({
+      queryFn: (_arg, api, extraOptions) => renewSession(api, extraOptions),
     }),
     register: builder.mutation({
       query: (data) => ({
@@ -44,6 +53,7 @@ const userAuthApi = createApi({
 
 export const {
   useMeQuery,
+  useRefreshSessionMutation,
   useRegisterMutation,
   useLoginMutation,
   useLogoutMutation,

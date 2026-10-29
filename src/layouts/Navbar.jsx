@@ -1,10 +1,9 @@
-import { toast } from "sonner";
-import { userMessage } from "@/lib/user-messages.js";
+import useSignOut from "@/features/auth/useSignOut.js";
 import LoadingState from "@/components/feedback/LoadingState.jsx";
 import Logo from "/images/Logo-4.svg";
 import { useEffect, useState, useRef } from "react";
 import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { IoMdClose } from "react-icons/io";
 import { IoHomeOutline } from "react-icons/io5";
@@ -30,12 +29,10 @@ import {
   ArrowRight,
   LibraryBig,
 } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
-import { useLogoutMutation } from "@/services/api/user/userAuthApis.js";
-import { setUser } from "@/store/slices/userSlice.js";
-import { useGetAvatarUrlQuery } from "@/services/api/user/fileUploadApis.js";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import useProfilePhoto from "@/features/profile/useProfilePhoto.js";
+import AvatarImage from "@/features/profile/components/AvatarImage.jsx";
 import { useGetRecordedCoursesQuery } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
-import admissionApis from "@/services/api/user/admissionApis.js";
 import { cn } from "@/lib/utils.js";
 
 const desktopNavLinkClass = ({ isActive } = {}) =>
@@ -73,12 +70,11 @@ const Navbar = () => {
       .trim()
       .toLowerCase() === "admin";
 
-  const { data } = useGetAvatarUrlQuery();
+  const { data } = useProfilePhoto();
 
 
-  const dispatch = useDispatch();
-
-  const [logout] = useLogoutMutation();
+  const { signOut, isSigningOut } = useSignOut();
+  const reduceMotion = useReducedMotion();
 
   const mobileMenuRef = useRef();
 
@@ -98,7 +94,6 @@ const Navbar = () => {
 
   const location = useLocation();
 
-  const [, setIsloading] = useState(false);
 
   const [isServicesOpen, setIsServicesOpen] = useState(
     location.pathname.startsWith("/services"),
@@ -364,22 +359,9 @@ const Navbar = () => {
 
   const handleLogout = async (e) => {
     e.preventDefault();
-    setIsloading(true);
-    try {
-      const response = await logout();
-      if (response.error) throw response.error;
-      if (response.data) {
-        localStorage.removeItem("user");
-        setIsloading(false);
-        dispatch(admissionApis.util.resetApiState());
-        dispatch(setUser(null));
-        navigate("/");
-        setIsMobileMenuOpen(false);
-        setIsProfileOpen(false);
-      }
-    } catch (error) {
-      toast.error(userMessage(error, "We could not sign you out. Please try again."));
-      setIsloading(false);
+    if (await signOut()) {
+      setIsMobileMenuOpen(false);
+      setIsProfileOpen(false);
     }
   };
   return (
@@ -492,15 +474,7 @@ const Navbar = () => {
                   aria-expanded={isProfileOpen}
                   aria-haspopup="menu"
                 >
-                  {data?.url ? (
-                    <img
-                      className="size-8 rounded-full object-cover"
-                      src={data.url}
-                      alt=""
-                    />
-                  ) : (
-                    <UserCircle2 className="size-8 text-primary" />
-                  )}
+                  <AvatarImage src={data?.smallUrl || data?.url} size={32} className="size-8 rounded-full object-cover" fallback={<UserCircle2 className="size-8 text-primary" />} />
                   <div className="grid gap-0.5 text-left">
                     <p className="m-0 max-w-34 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-extrabold text-foreground">
                       {user?.name}
@@ -511,12 +485,10 @@ const Navbar = () => {
                   </div>
                 </Button>
                 <div
-                  className={cn(
-                    "profile-dropdown absolute right-0 top-[calc(100%+0.75rem)] z-[70] w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-lg border border-border bg-surface shadow-raised transition-all duration-200",
-                    isProfileOpen
-                      ? "visible pointer-events-auto translate-y-0 opacity-100"
-                      : "invisible pointer-events-none -translate-y-1 opacity-0",
-                  )}
+                  className="profile-dropdown qs-navbar-popup absolute right-0 top-[calc(100%+0.75rem)] z-[70] w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-lg border border-border bg-surface shadow-raised"
+                  data-open={isProfileOpen}
+                  aria-hidden={!isProfileOpen}
+                  inert={!isProfileOpen ? true : undefined}
                   ref={userProfileDropdownRef}
                   role="menu"
                 >
@@ -574,9 +546,10 @@ const Navbar = () => {
                     <button
                       className="flex min-h-9 w-full items-center gap-3 rounded-md border-0 bg-transparent px-3 py-2 text-left font-body text-sm font-semibold leading-none text-danger transition-colors duration-200 hover:bg-surface-alt [&_svg]:size-4"
                       onClick={handleLogout}
+                      disabled={isSigningOut}
                     >
                       <LogOut />
-                      <span>Logout</span>
+                      <span>{isSigningOut ? "Signing out…" : "Logout"}</span>
                     </button>
                   </div>
                 </div>
@@ -594,7 +567,7 @@ const Navbar = () => {
                 className="inline-flex min-h-10 items-center justify-center rounded-md border border-primary bg-primary px-4 text-sm font-bold leading-none text-primary-foreground no-underline transition-colors duration-200 hover:border-primary-hover hover:bg-primary/90"
                 to="/get-started"
               >
-                Join QuranScholar
+                Get started
               </Link>
             </>
           )}
@@ -606,10 +579,10 @@ const Navbar = () => {
               id="explore-mega-menu"
               className="absolute inset-x-0 top-full z-40 max-h-[calc(100dvh-4.5rem)] overflow-y-auto overscroll-contain border-b border-border bg-surface shadow-raised max-xl:hidden"
               ref={exploreMenuRef}
-              initial={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              exit={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
+              transition={{ duration: reduceMotion ? 0 : 0.24, ease: [0.22, 1, 0.36, 1] }}
             >
               <div className="mx-auto grid w-full max-w-[90rem] grid-cols-[minmax(15rem,0.9fr)_repeat(3,minmax(0,1fr))] gap-0 px-6 py-6">
                 <section className="rounded-xl bg-surface-alt p-5">
@@ -779,15 +752,7 @@ const Navbar = () => {
             <div className="flex min-w-0 items-center gap-3">
               {user ? (
                 <>
-                  {data?.url ? (
-                    <img
-                      className="size-8 rounded-full object-cover"
-                      src={data.url}
-                      alt=""
-                    />
-                  ) : (
-                    <UserCircle2 className="size-8 text-primary" />
-                  )}
+                  <AvatarImage src={data?.smallUrl || data?.url} size={32} className="size-8 rounded-full object-cover" fallback={<UserCircle2 className="size-8 text-primary" />} />
                   <div className="grid min-w-0 gap-0.5">
                     <p className="m-0 overflow-hidden text-ellipsis whitespace-nowrap font-display text-base font-extrabold text-foreground">
                       {user.name}
@@ -1020,9 +985,10 @@ const Navbar = () => {
                   <button
                     className="flex min-h-11 w-full items-center justify-between gap-3 rounded-md border-0 bg-transparent px-3 py-2 text-left font-body text-[0.95rem] font-bold text-danger transition-colors duration-200 hover:bg-surface-alt [&_svg]:size-[1.1rem]"
                     onClick={handleLogout}
+                    disabled={isSigningOut}
                   >
                     <LogOut />
-                    Logout
+                    {isSigningOut ? "Signing out…" : "Logout"}
                   </button>
                 </>
               ) : (

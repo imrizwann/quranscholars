@@ -41,7 +41,7 @@ const ServiceDetailPage = ({ service }) => {
           />
           <div className="mt-8 grid gap-5 md:grid-cols-3">
             {service.outcomes.map((outcome, index) => (
-              <article key={outcome} className="rounded-2xl border border-[#dfe6e2] bg-white p-6 shadow-[0_10px_34px_rgba(21,54,44,.05)]">
+              <article key={outcome} className="rounded-2xl border border-[#dfe6e2] bg-white p-6">
                 <span className="grid size-10 place-items-center rounded-xl bg-[#e7f3ee] text-sm font-black text-primary">{String(index + 1).padStart(2, "0")}</span>
                 <h3 className="mt-5 text-lg font-black tracking-[-0.02em]">{outcome}</h3>
                 <p className="mt-2 text-sm font-medium leading-7 text-[#697970]">Supported through teacher direction, appropriate resources, and a practical next step.</p>
@@ -78,7 +78,7 @@ const ServiceDetailPage = ({ service }) => {
       </section>
 
       <section className="px-4 py-14 sm:px-6 sm:py-18">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 rounded-2xl bg-[#0b3e38] p-7 text-white shadow-[0_22px_55px_rgba(8,47,43,.16)] sm:p-9 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 rounded-2xl bg-[#0b3e38] p-7 text-white sm:p-9 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
             <p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.15em] text-[#9ed6c8]"><CircleHelp className="size-4 text-[#f4c95d]" />Not sure if this is the right fit?</p>
             <h2 className="mt-3 text-balance font-display text-2xl font-black tracking-[-0.03em] sm:text-3xl">Tell us what you want to learn. We’ll help you find the clearest route.</h2>

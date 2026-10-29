@@ -45,7 +45,7 @@ const ServicesList = () => (
 
         <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {serviceCatalog.map(({ slug, label, category, icon: Icon, shortDescription }) => (
-            <article key={slug} className="group flex min-h-full flex-col rounded-2xl border border-[#dfe6e2] bg-white p-6 shadow-[0_10px_32px_rgba(21,54,44,.045)] transition duration-200 hover:-translate-y-1 hover:border-[#bdd1c8] hover:shadow-[0_20px_46px_rgba(21,54,44,.09)]">
+            <article key={slug} className="group flex min-h-full flex-col rounded-2xl border border-[#dfe6e2] bg-white p-6 transition duration-200 hover:-translate-y-1 hover:border-[#bdd1c8]">
               <div className="flex items-start justify-between gap-4">
                 <span className="grid size-11 place-items-center rounded-xl bg-[#e7f3ee] text-primary"><Icon className="size-5" /></span>
                 <span className="rounded-full bg-[#f3f6f4] px-2.5 py-1 text-[0.63rem] font-black uppercase tracking-[0.1em] text-[#697970]">{category}</span>

@@ -1,232 +1,25 @@
-import { Link, useLocation } from "react-router-dom";
-import { ArrowRight, Plus } from "lucide-react";
-import {
-  AssignmentCard,
-  EmptyState,
-  ResourceCard,
-  StatusBadge,
-} from "@/components/lms/LmsComponents.jsx";
-import { assignments, liveClasses, resources } from "@/data/lmsData.js";
-
+import { useLocation } from "react-router-dom";
+import { BarChart3, ClipboardCheck, Library, MessageSquareText, Radio, Users, Wallet } from "lucide-react";
+import { WorkspaceAccount, WorkspaceEmpty, WorkspaceGuide, WorkspacePage } from "@/components/lms/WorkspaceUI.jsx";
 export { default as InstructorDashboard } from "./InstructorDashboard.jsx";
 
-const pageInfo = {
-  courses: [
-    "Courses",
-    "Create and manage professional self-paced learning.",
-    "Create course",
-    "/instructor/courses/new",
-  ],
-  "live-classes": [
-    "Live Classes",
-    "Teach a subject through scheduled sessions. Manage class topics, enrollment and pricing.",
-    "Create live class",
-    "/instructor/live-classes/new",
-  ],
-  students: [
-    "Students",
-    "See learners enrolled in your courses and live classes.",
-  ],
-  assignments: [
-    "Assignments",
-    "Create work, review submissions and share feedback.",
-  ],
-  resources: [
-    "Resources",
-    "Manage reusable learning materials across your teaching.",
-  ],
-  earnings: [
-    "Earnings",
-    "Track course sales, admission fees and monthly tuition.",
-  ],
-  analytics: [
-    "Analytics",
-    "Understand enrollment, engagement and completion trends.",
-  ],
-  reviews: ["Reviews", "Read learner feedback across your teaching."],
-  profile: ["Public Profile", "Manage how learners discover you."],
-  settings: ["Settings", "Control instructor preferences and notifications."],
+const pages = {
+  "live-classes": { title: "Live classes", intro: "A dedicated space for teaching and learning together.", icon: Radio, empty: "Bring your classroom online", description: "Live-class creation and scheduling are not connected yet. Build a recorded course while your live workspace is being prepared.", steps: [["Plan your sessions", "Choose a topic and a clear outcome for each meeting."], ["Set a steady rhythm", "Consider session length, time zones, and time for practice."], ["Prepare your materials", "Keep your teaching notes and exercises ready for your learners."]] },
+  students: { title: "Your learners", intro: "Support the people learning from your courses.", icon: Users, empty: "A clearer view of your learners", description: "Your enrolled learner directory is not available yet. Personal details and enrollment counts will only be shown from verified records.", steps: [["Build a clear curriculum", "Make the next learning step easy to understand."], ["Set expectations", "Explain the level and requirements in your course details."], ["Guide with care", "Use structured lessons to support different learning paces."]] },
+  assignments: { title: "Assignments", intro: "Turn understanding into practice, one activity at a time.", icon: ClipboardCheck, empty: "Give learning room to grow", description: "Assignment creation, submissions, and feedback are coming soon. No sample student work is shown here.", steps: [["Start with an outcome", "Decide what learners should be able to demonstrate."], ["Keep instructions clear", "Give practical steps and realistic expectations."], ["Plan helpful feedback", "Look for opportunities to guide the next attempt."]] },
+  resources: { title: "Learning resources", intro: "Make room for the materials that support your teaching.", icon: Library, empty: "Your teaching toolkit", description: "The resource library is not connected yet. Continue organizing your sections and lesson videos in the course studio.", steps: [["Organize by topic", "Keep related notes and exercises together."], ["Choose useful formats", "Prepare readable documents and accessible materials."], ["Connect to a lesson", "Give each resource a clear purpose in the learning journey."]] },
+  earnings: { title: "Earnings", intro: "A transparent view of your teaching income.", icon: Wallet, empty: "Your earnings, when sales begin", description: "Earnings and payout reporting are not available yet. Payment-provider integration must be completed before real transactions can be reported.", steps: [["Prepare your course", "Complete the curriculum and preview every lesson."], ["Review your pricing", "Make the value and course requirements clear."], ["Return for reporting", "Revenue and payouts will use verified payment records."]] },
+  analytics: { title: "Course analytics", intro: "Understand how your teaching makes a difference.", icon: BarChart3, empty: "Insights built on real activity", description: "Engagement and completion reporting are not connected yet. Your course overview already shows real draft and published course counts.", steps: [["Start with quality", "Make each lesson purposeful and easy to follow."], ["Review your course", "Check the curriculum, trailer, and lesson previews."], ["Improve with evidence", "Learning insights will appear when activity tracking is available."]] },
+  reviews: { title: "Learner reviews", intro: "Listen, reflect, and keep improving your courses.", icon: MessageSquareText, empty: "A space for learner feedback", description: "Course review management is coming soon. Reviews and ratings will only appear here once connected to learner feedback.", steps: [["Set clear expectations", "Help learners choose a course that fits their goals."], ["Teach with consistency", "Give each lesson a clear structure and purpose."], ["Stay open to feedback", "Use learner perspectives to improve your teaching."]] },
 };
+
 export function InstructorSectionPage() {
   const key = useLocation().pathname.split("/").pop();
-  const [title, intro, action, to] = pageInfo[key] || pageInfo.courses;
-  return (
-    <main className="p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="font-display text-3xl font-black">{title}</h1>
-            <p className="mt-2 text-sm font-medium text-muted-foreground">
-              {intro}
-            </p>
-          </div>
-          {action && (
-            <Link
-              to={to}
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-black text-white no-underline"
-            >
-              <Plus className="size-4" />
-              {action}
-            </Link>
-          )}
-        </div>
-        {key === "live-classes" && (
-          <div className="mt-7 grid gap-5 md:grid-cols-2">
-            {liveClasses.slice(0, 2).map((item) => (
-              <article
-                key={item.id}
-                className="rounded-2xl border border-border bg-white p-6"
-              >
-                <div className="flex justify-between gap-3">
-                  <StatusBadge status={item.status} />
-                  <span className="text-xs font-bold text-muted-foreground">
-                    {item.students}/{item.capacity} students
-                  </span>
-                </div>
-                <h2 className="mt-5 font-display text-xl font-black">
-                  {item.title}
-                </h2>
-                <p className="mt-2 text-sm font-semibold text-muted-foreground">
-                  {item.schedule} · {item.time}
-                </p>
-                <Link
-                  to={`/classroom/${item.slug}`}
-                  className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-black text-primary no-underline"
-                >
-                  Manage classroom <ArrowRight className="size-4" />
-                </Link>
-              </article>
-            ))}
-          </div>
-        )}
-        {key === "assignments" && (
-          <div className="mt-7 grid gap-4 lg:grid-cols-2">
-            {assignments.map((item) => (
-              <AssignmentCard key={item.id} assignment={item} />
-            ))}
-          </div>
-        )}
-        {key === "resources" && (
-          <div className="mt-7 grid gap-4 lg:grid-cols-2">
-            {resources.map((item) => (
-              <ResourceCard key={item.id} resource={item} />
-            ))}
-          </div>
-        )}
-        {!["live-classes", "assignments", "resources"].includes(key) && (
-          <div className="mt-7">
-            <EmptyState
-              title={`${title} workspace is ready`}
-              description="Your teaching activity will appear here as you create and manage your offerings."
-            />
-          </div>
-        )}
-      </div>
-    </main>
-  );
+  if (["profile", "settings"].includes(key)) return <WorkspaceAccount instructor settings={key === "settings"} />;
+  const page = pages[key] || pages["live-classes"];
+  return <WorkspacePage eyebrow="Teaching workspace" title={page.title} description={page.intro}><div className="studio-split"><WorkspaceEmpty icon={page.icon} badge="Coming soon" title={page.empty} description={page.description} to="/instructor/courses" action="Open course studio" /><WorkspaceGuide title="Prepare for your next step" items={page.steps} /></div></WorkspacePage>;
 }
 
-const courseSteps = [
-  "Basics",
-  "Course Details",
-  "Media",
-  "Curriculum",
-  "Content",
-  "Pricing",
-  "Review",
-];
-const liveSteps = [
-  "Basics",
-  "Topics & Requirements",
-  "Sessions & Schedule",
-  "Class Resources",
-  "Enrollment",
-  "Pricing",
-  "Review",
-];
-export function CreationWizard({ type = "course" }) {
-  const steps = type === "course" ? courseSteps : liveSteps;
-  const title = type === "course" ? "Create video course" : "Create live class";
-  return (
-    <main className="p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[.14em] text-primary">
-              New draft
-            </p>
-            <h1 className="mt-2 font-display text-3xl font-black">{title}</h1>
-          </div>
-          <button className="min-h-11 rounded-xl border border-border bg-white px-4 text-sm font-black">
-            Preview as student
-          </button>
-        </div>
-        <ol className="mt-8 flex gap-2 overflow-x-auto pb-2">
-          {steps.map((step, index) => (
-            <li
-              key={step}
-              className={`flex min-h-10 shrink-0 items-center gap-2 rounded-full px-4 text-xs font-black ${index === 0 ? "bg-primary text-white" : "border border-border bg-white text-muted-foreground"}`}
-            >
-              <span>{index + 1}</span>
-              {step}
-            </li>
-          ))}
-        </ol>
-        <form className="mt-6 rounded-2xl border border-border bg-white p-6 sm:p-8">
-          <h2 className="font-display text-2xl font-black">
-            Start with the basics
-          </h2>
-          <p className="mt-2 text-sm font-medium text-muted-foreground">
-            Give learners a clear first impression. You can save this as a draft
-            at any time.
-          </p>
-          <div className="mt-7 grid gap-5 sm:grid-cols-2">
-            <label className="grid gap-2 text-sm font-black sm:col-span-2">
-              Title
-              <input
-                className="h-12 rounded-lg border border-input px-3 font-medium outline-none focus:ring-2 focus:ring-primary/20"
-                placeholder={
-                  type === "course"
-                    ? "e.g. Tajweed Foundations"
-                    : "e.g. Quran Reading for Beginners"
-                }
-              />
-            </label>
-            <label className="grid gap-2 text-sm font-black sm:col-span-2">
-              Short description
-              <textarea
-                rows="4"
-                className="rounded-lg border border-input p-3 font-medium outline-none focus:ring-2 focus:ring-primary/20"
-                placeholder="What will students learn and who is this for?"
-              />
-            </label>
-            {["Category", "Level", "Language"].map((label) => (
-              <label key={label} className="grid gap-2 text-sm font-black">
-                {label}
-                <select className="h-12 rounded-lg border border-input bg-white px-3 font-medium">
-                  <option>Select {label.toLowerCase()}</option>
-                  <option>Beginner</option>
-                  <option>Intermediate</option>
-                </select>
-              </label>
-            ))}
-          </div>
-          <div className="mt-8 flex flex-wrap justify-between gap-3 border-t border-border pt-6">
-            <button
-              type="button"
-              className="min-h-11 rounded-lg border border-border px-5 text-sm font-black"
-            >
-              Save draft
-            </button>
-            <button
-              type="button"
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-black text-white"
-            >
-              Continue to details <ArrowRight className="size-4" />
-            </button>
-          </div>
-        </form>
-      </div>
-    </main>
-  );
+export function CreationWizard() {
+  return <WorkspacePage eyebrow="Live teaching" title="Create a live class" description="A new way to bring your learners together."><WorkspaceEmpty icon={Radio} badge="Coming soon" title="Live-class creation is being prepared" description="Scheduling and enrollment are not available yet. You can create and manage recorded courses now." to="/instructor/courses/new" action="Create a recorded course" /></WorkspacePage>;
 }

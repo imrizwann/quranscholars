@@ -25,7 +25,7 @@ export function userMessage(error, fallback = fallbackMessage) {
     return messages.length ? messages.join(" ") : error.data.userMessage;
   }
   if (typeof error?.userMessage === "string" && error.userMessage.trim()) return error.userMessage;
-  if (error?.status === "FETCH_ERROR") return "We could not connect. Check your internet connection and try again.";
+  if (error?.status === "FETCH_ERROR") return "We could not reach the server. Please try again shortly.";
   if (error?.status === "TIMEOUT_ERROR" || error?.name === "AbortError") return "This action was interrupted. Refresh the page to check before trying again.";
   if (error?.data?.code === "CSRF_REJECTED") return "We could not verify this action. Refresh the page and try again. If it continues, contact support.";
   const status = Number(error?.originalStatus || error?.status);

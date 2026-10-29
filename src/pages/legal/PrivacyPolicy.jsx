@@ -106,7 +106,7 @@ const PrivacyPolicy = () => (
 
     <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-18 lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start">
       <aside className="lg:sticky lg:top-24">
-        <nav className="rounded-2xl border border-[#dfe6e2] bg-white p-3 shadow-[0_10px_32px_rgba(21,54,44,.04)]" aria-label="Privacy policy sections">
+        <nav className="rounded-2xl border border-[#dfe6e2] bg-white p-3" aria-label="Privacy policy sections">
           <p className="px-3 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#718078]">On this page</p>
           <ul className="mt-1 grid gap-1">
             {sections.map((section) => (
@@ -125,7 +125,7 @@ const PrivacyPolicy = () => (
 
         <div className="mt-8 grid gap-6">
           {sections.map(({ id, title, icon: Icon, intro, items }) => (
-            <section key={id} id={id} className="scroll-mt-28 rounded-2xl border border-[#dfe6e2] bg-white p-6 shadow-[0_10px_32px_rgba(21,54,44,.04)] sm:p-8" aria-labelledby={`${id}-title`}>
+            <section key={id} id={id} className="scroll-mt-28 rounded-2xl border border-[#dfe6e2] bg-white p-6 sm:p-8" aria-labelledby={`${id}-title`}>
               <div className="flex items-start gap-4">
                 <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#e6f2ed] text-primary"><Icon className="size-5" /></span>
                 <div><p className="text-xs font-black uppercase tracking-[0.13em] text-primary">Policy section</p><h2 id={`${id}-title`} className="mt-1 font-display text-2xl font-black tracking-[-0.035em] sm:text-3xl">{title}</h2></div>

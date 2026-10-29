@@ -11,6 +11,10 @@ const paymentApi = createApi({
   baseQuery: apiBaseQuery,
   keepUnusedDataFor: 0,
   endpoints: (builder) => ({
+    getLearningLibrary: builder.query({
+      query: ({ page = 1, limit = 12 } = {}) => ({ url: "/api/purchases/library", params: { page, limit } }),
+      transformResponse: unwrap,
+    }),
     // Generate crypto.randomUUID() once per checkout attempt; reuse that key for
     // network retries. Persist it per account/course if checkout must survive reload.
     // No amount, userId, payment status, or entitlement flag comes from the client.
@@ -31,7 +35,7 @@ const paymentApi = createApi({
   }),
 });
 
-export const { useCreateCourseCheckoutMutation, useGetCoursePaymentStatusQuery, useLazyGetCoursePaymentStatusQuery, useGetCourseAccessQuery } = paymentApi;
+export const { useGetLearningLibraryQuery, useCreateCourseCheckoutMutation, useGetCoursePaymentStatusQuery, useLazyGetCoursePaymentStatusQuery, useGetCourseAccessQuery } = paymentApi;
 // Compatibility for the old unused import; arguments now follow the strict contract.
 export const useCoursePaymentMutation = useCreateCourseCheckoutMutation;
 export default paymentApi;

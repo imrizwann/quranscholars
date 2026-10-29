@@ -255,6 +255,7 @@ const Login = () => {
               <span>New to Quran Scholars?</span>
               <Link
                 to="/register"
+                state={location.state}
                 className="inline-flex items-center gap-2 font-bold text-primary transition hover:text-accent-foreground"
               >
                 <ArrowLeft className="size-4" />

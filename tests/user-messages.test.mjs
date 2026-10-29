@@ -6,7 +6,7 @@ test("network and gateway failures have usable messages without leaking technica
   for (const error of [new Error("TypeError: fetch failed"), { status: "PARSING_ERROR", originalStatus: 504, data: "<html>Vercel stack trace</html>" }, { status: 400, data: { message: "BSON cast failed" } }]) {
     assert.doesNotMatch(userMessage(error), /TypeError|fetch|Vercel|html|BSON|cast|stack/);
   }
-  assert.match(userMessage({ status: "FETCH_ERROR" }), /internet connection/);
+  assert.match(userMessage({ status: "FETCH_ERROR" }), /reach the server.*try again/i);
   assert.match(userMessage({ status: 429 }), /wait a few minutes/);
   assert.match(userMessage({ status: 403, data: { code: "CSRF_REJECTED" } }), /Refresh the page/);
   assert.match(userMessage({ status: 401, data: { message: "Invalid email or password" } }), /email or password is incorrect/);

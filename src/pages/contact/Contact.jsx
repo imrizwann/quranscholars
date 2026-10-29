@@ -115,7 +115,7 @@ const Contact = () => {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#dfe6e2] bg-white p-6 shadow-[0_18px_50px_rgba(21,54,44,.07)] sm:p-8">
+          <div className="rounded-2xl border border-[#dfe6e2] bg-white p-6 sm:p-8">
             <p className="text-xs font-black uppercase tracking-[0.16em] text-primary">Send a message</p>
             <h2 id="contact-form-title" className="mt-2 font-display text-3xl font-black tracking-[-0.04em]">How can we help?</h2>
             <p className="mt-3 text-sm font-medium leading-7 text-[#687970]">Complete the form and your email app will open with the message prepared.</p>
@@ -137,7 +137,7 @@ const Contact = () => {
               </label>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="flex max-w-sm items-start gap-2 text-xs font-semibold leading-5 text-[#718078]"><ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-primary" />Do not include passwords, payment details, or other sensitive information.</p>
-                <button type="submit" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#0f766e] px-5 text-sm font-black text-white shadow-[0_10px_24px_rgba(15,118,110,.18)] transition hover:bg-[#0b665f] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-primary">Prepare email <Send className="size-4" /></button>
+                <button type="submit" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#0f766e] px-5 text-sm font-black text-white transition hover:bg-[#0b665f] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-primary">Prepare email <Send className="size-4" /></button>
               </div>
               {notice && <p className="rounded-xl border border-[#bcd8cd] bg-[#edf7f3] px-4 py-3 text-sm font-bold leading-6 text-[#245e50]" role="status">{notice}</p>}
             </form>

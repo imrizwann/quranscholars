@@ -99,7 +99,7 @@ const Mission = () => (
 
     <section className="px-4 py-14 sm:px-6 sm:py-18" aria-labelledby="focus-title">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(22rem,1fr)_minmax(0,1fr)] lg:items-center">
-        <div className="rounded-2xl border border-[#dfe6e2] bg-white p-6 shadow-[0_16px_44px_rgba(21,54,44,.055)] sm:p-8">
+        <div className="rounded-2xl border border-[#dfe6e2] bg-white p-6 sm:p-8">
           <p className="text-xs font-black uppercase tracking-[0.15em] text-primary">What we are building toward</p>
           <ul className="mt-5 grid gap-3.5">
             {focusAreas.map((item) => (

@@ -1,6 +1,6 @@
 import { userMessage } from "@/lib/user-messages.js";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   AlertCircle,
   ArrowRight,
@@ -24,17 +24,17 @@ const onboardingSteps = [
   {
     icon: UserPlus,
     label: "Create profile",
-    value: "Parent or student account",
+    value: "One account for your next steps",
   },
   {
     icon: FileCheck2,
-    label: "Submit admission",
-    value: "Share goals and course needs",
+    label: "Explore your options",
+    value: "Courses, guided learning, and teaching",
   },
   {
     icon: GraduationCap,
     label: "Start learning",
-    value: "Join your assigned class",
+    value: "Find your subject and starting point",
   },
 ];
 
@@ -50,6 +50,8 @@ const Register = () => {
   const [redirectCountdown, setRedirectCountdown] = useState(3);
   const [register] = useRegisterMutation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = location.state?.from;
 
   useEffect(() => {
     if (!isRedirecting) return undefined;
@@ -59,14 +61,14 @@ const Register = () => {
     }, 1000);
 
     const timeout = setTimeout(() => {
-      navigate("/login");
+      navigate("/login", { state: returnTo ? { from: returnTo } : undefined });
     }, 3000);
 
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, [isRedirecting, navigate]);
+  }, [isRedirecting, navigate, returnTo]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -100,13 +102,13 @@ const Register = () => {
             <div>
               <p className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                 <UserPlus className="size-3.5" />
-                Create your learning profile
+                Create your account
               </p>
               <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground">
-                Join Quran Scholars
+                Get started
               </h1>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Open your student portal and begin the admission journey.
+                Explore courses, apply for guided learning, or discover teaching opportunities.
               </p>
             </div>
 
@@ -245,6 +247,7 @@ const Register = () => {
               <span>Already registered?</span>
               <Link
                 to="/login"
+                state={returnTo ? { from: returnTo } : undefined}
                 className="inline-flex items-center gap-2 font-bold text-primary transition hover:text-accent-foreground"
               >
                 <span>Sign in</span>
@@ -274,11 +277,11 @@ const Register = () => {
                 Guided onboarding
               </p>
               <h2 className="mt-5 max-w-lg text-4xl font-bold leading-tight tracking-tight text-foreground">
-                A focused start for every learner and family.
+                One account. Room to learn and teach.
               </h2>
               <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">
-                Create your account once, then manage admissions, course access,
-                and learning progress through the portal.
+                Explore courses, manage your admission, and discover teaching
+                opportunities without choosing a permanent role.
               </p>
             </div>
           </div>

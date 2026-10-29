@@ -1,43 +1,23 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen, CircleDollarSign, Plus, Radio, Users } from "lucide-react";
-import { DashboardAssignments, DashboardHeading, DashboardMetrics, DashboardPreviewNote, DashboardSchedule, DashboardSection } from "@/components/lms/DashboardParts.jsx";
-import { assignments, liveClasses } from "@/data/lmsData.js";
+import { ArrowRight, BookOpen, FileEdit, Plus, UserRound } from "lucide-react";
+import { WorkspacePage, WorkspaceEmpty } from "@/components/lms/WorkspaceUI.jsx";
+import { DashboardMetrics } from "@/components/lms/DashboardParts.jsx";
+import useCourseQuery from "@/features/instructor-courses/useCourseQuery.js";
+import { QueryMessage } from "@/features/instructor-courses/WorkspaceParts.jsx";
+import InstructorCourseCard from "@/features/instructor-courses/InstructorCourseCard.jsx";
 
 export default function InstructorDashboard() {
-  return <main className="dashboard-page">
-    <DashboardHeading eyebrow="Your teaching workspace" title="Share knowledge. Inspire growth." description="A thoughtful space to manage your courses and support your learners.">
-      <Link to="/instructor/courses/new" className="dashboard-button dashboard-button-primary"><Plus size={17} aria-hidden="true" />Create course</Link>
-    </DashboardHeading>
-    <DashboardPreviewNote />
-    <DashboardMetrics items={[
-      { icon: Users, label: "Total learners", value: "1,284", note: "Across your courses and classes" },
-      { icon: BookOpen, label: "Active courses", value: "4", note: "1 additional course in draft" },
-      { icon: Radio, label: "Live classes", value: "2", note: "Recurring weekly sessions" },
-      { icon: CircleDollarSign, label: "Monthly earnings", value: "SAR 8,420", note: "After platform fees" },
-    ]} />
-    <div className="dashboard-teaching-grid">
-      <section className="dashboard-teaching-card">
-        <div className="dashboard-teaching-copy"><p className="dashboard-eyebrow">From your knowledge to their journey</p>
-          <h2>Your next lesson<br />starts here.</h2>
-          <p>Shape your curriculum, upload your lessons, and build a course that learners can return to.</p>
-          <Link to="/instructor/courses" className="dashboard-button dashboard-button-light">Manage courses <ArrowRight size={16} aria-hidden="true" /></Link>
-        </div>
-        <div className="dashboard-book-art" aria-hidden="true"><div className="dashboard-book-spine" /><BookOpen size={46} strokeWidth={1} /><span>KNOWLEDGE<br /><i>with purpose</i></span><span className="dashboard-book-rule" /></div>
-      </section>
-      <section className="dashboard-quick-links">
-        <p className="dashboard-eyebrow">Your workspace</p><h2>Ready for your next step?</h2>
-        <Link to="/instructor/courses/new"><span className="dashboard-row-icon"><BookOpen size={19} aria-hidden="true" /></span><span><strong>Create a course</strong><small>Turn a subject into a learning journey</small></span><ArrowRight size={17} aria-hidden="true" /></Link>
-        <Link to="/instructor/resources"><span className="dashboard-row-icon dashboard-row-icon-neutral"><Plus size={19} aria-hidden="true" /></span><span><strong>Learning resources</strong><small>Keep your teaching materials together</small></span><ArrowRight size={17} aria-hidden="true" /></Link>
-        <Link to="/instructor/live-classes"><span className="dashboard-row-icon"><Radio size={19} aria-hidden="true" /></span><span><strong>Live classes</strong><small>See your scheduled sessions</small></span><ArrowRight size={17} aria-hidden="true" /></Link>
-      </section>
-    </div>
-    <div className="dashboard-detail-grid">
-      <DashboardSection title="Teaching schedule" subtitle="Your recurring sessions, at a glance." to="/instructor/live-classes">
-        <DashboardSchedule classes={liveClasses.slice(0, 2)} instructor />
-      </DashboardSection>
-      <DashboardSection title="Assignments" subtitle="Keep track of practice and coursework." to="/instructor/assignments">
-        <DashboardAssignments items={assignments.slice(0, 2)} instructor />
-      </DashboardSection>
-    </div>
-  </main>;
+  const query = useCourseQuery("getCourses", { limit: 3 });
+  const drafts = useCourseQuery("getCourses", { limit: 1, status: "Draft" });
+  const published = useCourseQuery("getCourses", { limit: 1, status: "Published" });
+  const count = (result) => result.error ? "Unavailable" : result.data?.pagination?.totalCourses;
+  const loadingCount = result => !result.data && !result.error;
+  return <WorkspacePage eyebrow="Teaching workspace" title="Good teaching starts here." description="A clear view of your courses, with room to build something meaningful." action={<Link to="/instructor/courses/new" className="cw-button cw-primary"><Plus size={16} aria-hidden="true" />Create course</Link>}>
+    <DashboardMetrics items={[{ icon: BookOpen, label: "Your courses", value: count(query), loading: loadingCount(query), note: "All recorded courses" }, { icon: FileEdit, label: "In draft", value: count(drafts), loading: loadingCount(drafts), note: "Keep shaping your next course" }, { icon: BookOpen, label: "Published", value: count(published), loading: loadingCount(published), note: "Available in the course catalog" }]} />
+    <div className="studio-split"><section className="studio-hero"><div><span className="studio-label">Your knowledge. Their next step.</span><h2>Bring your next lesson to life.</h2><p>Organize your curriculum, add lesson videos, and preview the experience before learners arrive.</p><Link to="/instructor/courses" className="cw-button">Open course studio <ArrowRight size={16} aria-hidden="true" /></Link></div><div className="studio-hero-art" aria-hidden="true"><BookOpen strokeWidth={1} /></div></section><section className="studio-panel"><span className="studio-label">Quick access</span><h2>Keep your teaching moving</h2><div className="studio-shortcuts"><Link to="/instructor/courses/new"><Plus /><span><strong>Create a course</strong><small>Start with a simple draft</small></span><ArrowRight /></Link><Link to="/instructor/courses"><BookOpen /><span><strong>Manage your curriculum</strong><small>Sections, lessons and video</small></span><ArrowRight /></Link><Link to="/instructor/profile"><UserRound /><span><strong>Your profile</strong><small>Review your account details</small></span><ArrowRight /></Link></div></section></div>
+    <div className="studio-section-heading"><div><h2>Recently updated courses</h2><p>Pick up right where you left off.</p></div><Link to="/instructor/courses">View all courses →</Link></div>
+    <QueryMessage query={query} label="Loading your courses" />
+    {!query.error && query.data?.courses?.length === 0 && <WorkspaceEmpty title="A new chapter starts with one course" description="Create your first draft and build your curriculum at your own pace." to="/instructor/courses/new" action="Create a course" />}
+    <div className="studio-course-grid">{query.data?.courses?.map((course) => <InstructorCourseCard key={course._id} course={course} />)}</div>
+  </WorkspacePage>;
 }

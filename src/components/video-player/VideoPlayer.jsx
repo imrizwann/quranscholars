@@ -31,11 +31,12 @@ const PlayerCenterControl = () => {
   return <div className="player-center-controls"><PlayerPlayButton large /></div>;
 };
 
-const VideoPlayer = ({ src, title = "Course lesson", poster, tracks = [], thumbnails, className = "", autoPlay = false, muted = false, loop = false, playsInline = true, crossOrigin = "anonymous", onEnded, onTimeUpdate, aspectRatio = "16 / 9", errorMessage }) => {
+const VideoPlayer = ({ src, title = "Course lesson", poster, tracks = [], thumbnails, className = "", autoPlay = false, muted = false, loop = false, playsInline = true, crossOrigin = "anonymous", onEnded, onTimeUpdate, aspectRatio = "16 / 9", errorMessage, playerRef, onProviderSetup, onCanPlay, onPlay, onPause, onRetry }) => {
   const [attempt, setAttempt] = useState(0);
   const sourceKey = typeof src === "string" ? src : src?.src;
   return (
     <MediaPlayer
+      ref={playerRef}
       key={`${sourceKey}-${attempt}`}
       className={`qs-video-player ${className}`}
       style={{ "--player-aspect-ratio": aspectRatio }}
@@ -45,17 +46,18 @@ const VideoPlayer = ({ src, title = "Course lesson", poster, tracks = [], thumbn
       streamType="on-demand"
       load="visible"
       preload="metadata"
-      onProviderChange={configureProvider}
+      onProviderChange={(provider) => { configureProvider(provider); onProviderSetup?.(provider); }}
       autoPlay={autoPlay} muted={muted} loop={loop} playsInline={playsInline} crossOrigin={crossOrigin}
       keyShortcuts={{ togglePaused: "k Space", toggleMuted: "m", toggleFullscreen: "f", seekBackward: "ArrowLeft", seekForward: "ArrowRight", toggleCaptions: "c" }}
       onEnded={onEnded} onTimeUpdate={onTimeUpdate}
+      onCanPlay={onCanPlay} onPlay={onPlay} onPause={onPause}
     >
       <MediaProvider>
         {poster && <Poster src={poster} alt={`${title} poster`} className="player-poster" />}
         {tracks.map((track) => <Track key={`${track.src}-${track.srclang || track.language}`} {...track} />)}
       </MediaProvider>
       <Captions className="player-captions" />
-      <PlayerStatus errorMessage={errorMessage} onRetry={() => setAttempt((value) => value + 1)} />
+      <PlayerStatus errorMessage={errorMessage} onRetry={() => { onRetry?.(); setAttempt((value) => value + 1); }} />
       <Gesture className="absolute inset-0" event="pointerup" action="toggle:paused" />
       <Gesture className="absolute inset-0" event="dblpointerup" action="toggle:fullscreen" />
       <Controls.Root className="player-controls">

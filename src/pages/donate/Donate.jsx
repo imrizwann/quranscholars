@@ -74,7 +74,7 @@ const Donate = () => (
         />
         <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {causes.map(({ title, description, icon: Icon }) => (
-            <article key={title} className="rounded-2xl border border-[#dfe6e2] bg-white p-6 shadow-[0_10px_32px_rgba(21,54,44,.045)]">
+            <article key={title} className="rounded-2xl border border-[#dfe6e2] bg-white p-6">
               <span className="grid size-11 place-items-center rounded-xl bg-[#e6f2ed] text-primary"><Icon className="size-5" /></span>
               <h2 className="mt-5 text-lg font-black tracking-[-0.02em]">{title}</h2>
               <p className="mt-2 text-sm font-medium leading-7 text-[#687970]">{description}</p>

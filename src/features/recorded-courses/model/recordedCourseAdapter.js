@@ -9,6 +9,7 @@ const formatDuration = (totalSeconds = 0) => {
 };
 
 const normalizeLesson = (lesson, sectionId, index) => ({
+  sectionId,
   id: lesson?._id || lesson?.id || `${sectionId}-lesson-${index + 1}`,
   title: lesson?.title || `Lesson ${index + 1}`,
   description: lesson?.description || "",
@@ -77,7 +78,7 @@ const adaptRecordedCourse = (record = {}) => {
       bio: record?.instructor?.bio || "",
       avatar: record?.instructor?.avatar || null,
     },
-    thumbnail: resolveCourseImage(record?.thumbnail),
+    thumbnail: resolveCourseImage(record?.thumbnailUrl || record?.thumbnail),
     trailerVideo: trailerPlaybackSource(record)?.src || null,
     language: record?.language || "Not specified",
     level: record?.level || "Not specified",

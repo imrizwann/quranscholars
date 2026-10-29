@@ -1,9 +1,14 @@
 import { courseStatusLabel } from "@/lib/user-messages.js";
 import { useEffect, useRef, useState } from "react";
+import { Tabs } from "@base-ui/react/tabs";
+import SectionDetailsEditor from "@/features/instructor-courses/SectionDetailsEditor.jsx";
+import { CourseDetailsPanel, CoursePricingPanel, CoursePublishPanel } from "@/features/instructor-courses/StudioInformation.jsx";
+import { curriculumOrder, studioTabs } from "@/features/instructor-courses/studio-layout.js";
 import { Link, useBlocker, useNavigate, useParams } from "react-router-dom";
 import {
   useCreateSectionMutation,
   useCreateLessonMutation,
+  useUpdateSectionMutation,
   useDeleteCourseMutation,
   useDeleteSectionMutation,
   useDeleteLessonMutation,
@@ -35,8 +40,10 @@ import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import ConfirmationModal from "@/components/ui/ConfirmationModal.jsx";
 import CollapsiblePanel from "@/components/ui/CollapsiblePanel.jsx";
 import VideoUploadPanel from "@/features/instructor-courses/VideoUploadPanel.jsx";
+import CourseThumbnailEditor from "@/features/instructor-courses/CourseThumbnailEditor.jsx";
 import { trailerPlaybackSource } from "@/lib/trailer-playback.js";
 import "@/features/instructor-courses/course-workspace.css";
+import "@/components/lms/workspace-ui.css";
 
 function AddTitleForm({ label, disabled, loading, onCreate }) {
   const [title, setTitle] = useState("");
@@ -91,6 +98,7 @@ function Workspace({ courseId }) {
   const course = useCourseQuery("getCourse", { courseId }, courseIsPending);
   const [createSection] = useCreateSectionMutation();
   const [createLesson] = useCreateLessonMutation();
+  const [updateSection] = useUpdateSectionMutation();
   const [deleteCourse] = useDeleteCourseMutation();
   const [deleteSection] = useDeleteSectionMutation();
   const [deleteLesson] = useDeleteLessonMutation();
@@ -98,6 +106,18 @@ function Workspace({ courseId }) {
   const [sectionPage, setSectionPage] = useState(1);
   const [lessonPage, setLessonPage] = useState(1);
   const [selected, setSelected] = useState(null);
+  const [activeTab, setActiveTab] = useState("details");
+  const studio = useRef(null);
+  const editingRef = useRef(false);
+  const metadataEditingRef = useRef(false);
+  const [metadataEditing, setMetadataEditing] = useState(false);
+  function changeMetadataEditing(value) { metadataEditingRef.current = value; setMetadataEditing(value); }
+  const [sectionEditing, setSectionEditing] = useState(false);
+  function changeSectionEditing(value) { editingRef.current = value; setSectionEditing(value); }
+  function changeTab(value) {
+    studio.current?.querySelectorAll("video, audio").forEach((media) => media.pause());
+    setActiveTab(value);
+  }
   const sections = useCourseQuery(
     "getSections",
     { courseId, page: sectionPage },
@@ -111,6 +131,13 @@ function Workspace({ courseId }) {
     !selected || !course.data,
   );
   const [busy, updateBusy] = useState(false);
+  const sectionItems = curriculumOrder(sections.data?.items);
+  const lessonItems = curriculumOrder(lessons.data?.items);
+  useEffect(() => {
+    if (!sections.data || sections.loading || editingRef.current) return;
+    const next = sections.data.items.find((section) => section._id === selected?._id) || curriculumOrder(sections.data.items)[0] || null;
+    if (next !== selected) setSelected(next);
+  }, [sections.data, sections.loading, selected, sectionEditing]);
   const busyRef = useRef(false);
   function setBusy(value) {
     busyRef.current = value;
@@ -121,16 +148,16 @@ function Workspace({ courseId }) {
   const [deletions, setDeletions] = useState([]);
   const [deletion, setDeletion] = useState(null);
   const saving = useRef(false);
-  const blocker = useBlocker(() => busyRef.current);
+  const blocker = useBlocker(() => busyRef.current || editingRef.current || metadataEditingRef.current);
   useEffect(() => {
-    if (!busy) return;
+    if (!busy && !sectionEditing && !metadataEditing) return;
     const warn = (event) => {
       event.preventDefault();
       event.returnValue = "";
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [busy]);
+  }, [busy, sectionEditing, metadataEditing]);
 
   function refresh() {
     course.refresh();
@@ -162,6 +189,16 @@ function Workspace({ courseId }) {
       setBusy(false);
       setPendingAction("");
     }
+  }
+  async function saveSection(fields) {
+    if (saving.current || busyRef.current) return false;
+    saving.current = true; setBusy(true); setPendingAction("update:section"); setError("");
+    try {
+      await updateSection({ courseId, sectionId: selected._id, ...fields }).unwrap();
+      setSelected((previous) => ({ ...previous, ...fields }));
+      return true;
+    } catch (failure) { setError(readableError(failure)); return false; }
+    finally { saving.current = false; setBusy(false); setPendingAction(""); }
   }
   function remove(path, label, target = { courseId }) {
     if (saving.current || busyRef.current) return;
@@ -205,12 +242,11 @@ function Workspace({ courseId }) {
     }
   }
 
-  console.log(course);
   const data = course.data?.course;
   const refreshing = course.loading || sections.loading || lessons.loading;
   const sectionPath = selected ? `${base}/sections/${selected._id}` : null;
   return (
-    <main className="course-workspace">
+    <main ref={studio} className="course-workspace cw-studio">
       <Link className="cw-back" to="/instructor/courses">
         <ArrowLeft size={16} aria-hidden="true" />
         Back to courses
@@ -225,7 +261,7 @@ function Workspace({ courseId }) {
         </div>
         <AsyncButton
           className="cw-button"
-          disabled={busy}
+          disabled={busy || sectionEditing}
           loading={refreshing}
           loadingLabel="Refreshing"
           onClick={refresh}
@@ -268,36 +304,12 @@ function Workspace({ courseId }) {
       )}
       {data && (
         <>
-          <CollapsiblePanel
-            className="cw-card"
-            label="course trailer"
-            actions={<VideoStatus video={data.trailerVideo} />}
-            heading={
-              <div className="cw-card-heading">
-                <span className="cw-heading-icon">
-                  <Video size={21} aria-hidden="true" />
-                </span>
-                <div>
-                  <h2>Course trailer</h2>
-                  <p className="cw-muted">
-                    Give learners a short introduction to your course.
-                  </p>
-                </div>
-              </div>
-            }
-          >
-            <VideoUploadPanel
-              path={`${base}/trailer`}
-              target={{ courseId }}
-              video={data.trailerVideo}
-              playbackSource={trailerPlaybackSource(data, course.data?.trailerPlaybackUrl)}
-              disabled={busy || Boolean(course.error)}
-              deleting={pendingAction === `delete:${base}/trailer`}
-              onBusy={setBusy}
-              onChanged={course.refresh}
-              onDelete={remove}
-            />
-          </CollapsiblePanel>
+          <Tabs.Root value={activeTab} onValueChange={changeTab}>
+            <Tabs.List className="studio-tabs cw-studio-tabs" aria-label="Course studio">
+              {studioTabs.map(([value, label]) => <Tabs.Tab key={value} value={value}>{label}</Tabs.Tab>)}
+            </Tabs.List>
+            <Tabs.Panel value="details" keepMounted className="cw-studio-panel"><CourseDetailsPanel course={data} disabled={busy || Boolean(course.error)} onBusy={setBusy} onEditing={changeMetadataEditing} /></Tabs.Panel>
+            <Tabs.Panel value="curriculum" keepMounted className="cw-studio-panel">
           <div className="cw-curriculum-heading">
             <div>
               <p className="cw-eyebrow">Build your curriculum</p>
@@ -319,8 +331,8 @@ function Workspace({ courseId }) {
                 </div>
               </div>
               <QueryMessage query={sections} label="Loading sections" />
-              <div className="cw-stack">
-                {sections.data?.items.map((section) => (
+              <div className="cw-stack cw-section-list">
+                {sectionItems.map((section, index) => (
                   <button
                     className="cw-button cw-section"
                     key={section._id}
@@ -329,13 +341,13 @@ function Workspace({ courseId }) {
                       (selected?._id === section._id && lessons.loading) ||
                       undefined
                     }
-                    disabled={busy}
+                    disabled={busy || sectionEditing}
                     onClick={() => {
                       setSelected(section);
                       setLessonPage(1);
                     }}
                   >
-                    <span className="cw-section-number">{section.order}</span>
+                    <span className="cw-section-number">{index + 1}</span>
                     <span>{section.title}</span>
                     {selected?._id === section._id && lessons.loading ? (
                       <Spinner size={16} decorative />
@@ -354,7 +366,7 @@ function Workspace({ courseId }) {
               <Pagination
                 pagination={sections.data?.pagination}
                 page={sectionPage}
-                disabled={busy}
+                disabled={busy || sectionEditing}
                 loading={sections.loading}
                 onPage={(page) => {
                   setSectionPage(page);
@@ -370,7 +382,7 @@ function Workspace({ courseId }) {
                 onCreate={(title) => create("section", title)}
               />
             </section>
-            <section className="cw-card cw-lessons">
+            <section key={selected?._id || "no-section"} className="cw-card cw-lessons">
               <div className="cw-row cw-between cw-item-heading">
                 <div>
                   <p className="cw-eyebrow">
@@ -388,7 +400,7 @@ function Workspace({ courseId }) {
                       <span className="sr-only">Deleting section</span>
                     }
                     disabled={
-                      busy || Boolean(lessons.error) || Boolean(course.error)
+                      busy || sectionEditing || Boolean(lessons.error) || Boolean(course.error)
                     }
                     onClick={() =>
                       remove(sectionPath, "section", {
@@ -402,7 +414,7 @@ function Workspace({ courseId }) {
                 )}
               </div>
               {!selected ? (
-                <div className="cw-empty cw-empty-large">
+                <div className="cw-empty">
                   <FolderOpen size={34} strokeWidth={1.5} aria-hidden="true" />
                   <h3>A place for every lesson</h3>
                   <p>
@@ -411,17 +423,20 @@ function Workspace({ courseId }) {
                 </div>
               ) : (
                 <>
-                  <QueryMessage query={lessons} label="Loading lessons" />
-                  {lessons.data?.items.map((lesson) => (
+                  <SectionDetailsEditor key={`section-editor:${selected._id}`} section={selected} disabled={busy || Boolean(course.error) || Boolean(sections.error)} saving={pendingAction === "update:section"} onSave={saveSection} onEditing={changeSectionEditing} />
+                  {sectionEditing && <p className="cw-field-hint">Save or cancel your section edits before choosing another section.</p>}
+                  <QueryMessage query={lessons} label="Loading lessons" compact />
+                  {lessonItems.map((lesson, index) => (
                     <CollapsiblePanel
                       as="article"
-                      key={lesson._id}
+                      key={`lesson:${lesson._id}`}
                       className="cw-lesson"
+                      defaultOpen={index === 0}
                       label={`lesson: ${lesson.title}`}
                       heading={
                         <div className="cw-lesson-title">
                           <span className="cw-section-number">
-                            {lesson.order}
+                            {index + 1}
                           </span>
                           <h3>{lesson.title}</h3>
                         </div>
@@ -462,6 +477,7 @@ function Workspace({ courseId }) {
                         </>
                       }
                     >
+                      <div className="cw-lesson-metadata cw-row cw-between"><span className="cw-status">{lesson.published ? "Published" : "Draft"}</span><span className="cw-field-hint">Lesson title editing is not available yet.</span></div>
                       <VideoUploadPanel
                         path={`${sectionPath}/lessons/${lesson._id}/video`}
                         target={{
@@ -502,7 +518,7 @@ function Workspace({ courseId }) {
                     loading={lessons.loading}
                   />
                   <AddTitleForm
-                    key={selected._id}
+                    key={`lesson-form:${selected._id}`}
                     label="Lesson"
                     loading={pendingAction === `create:${sectionPath}/lessons`}
                     disabled={
@@ -514,6 +530,46 @@ function Workspace({ courseId }) {
               )}
             </section>
           </div>
+            </Tabs.Panel>
+            <Tabs.Panel value="media" keepMounted className="cw-studio-panel">
+          <CourseThumbnailEditor key={data._id} course={data} disabled={busy || Boolean(course.error)} onBusy={setBusy} />
+          <CollapsiblePanel
+            className="cw-card"
+            label="course trailer"
+            actions={<VideoStatus video={data.trailerVideo} />}
+            heading={
+              <div className="cw-card-heading">
+                <span className="cw-heading-icon">
+                  <Video size={21} aria-hidden="true" />
+                </span>
+                <div>
+                  <h2>Course trailer</h2>
+                  <p className="cw-muted">
+                    Give learners a short introduction to your course.
+                  </p>
+                </div>
+              </div>
+            }
+          >
+            <VideoUploadPanel
+              path={`${base}/trailer`}
+              target={{ courseId }}
+              video={data.trailerVideo}
+              playbackSource={trailerPlaybackSource(data, course.data?.trailerPlaybackUrl)}
+              disabled={busy || sectionEditing || metadataEditing || Boolean(course.error)}
+              deleting={pendingAction === `delete:${base}/trailer`}
+              onBusy={setBusy}
+              onChanged={course.refresh}
+              onDelete={remove}
+            />
+          </CollapsiblePanel>
+            </Tabs.Panel>
+            <Tabs.Panel value="pricing" keepMounted className="cw-studio-panel"><CoursePricingPanel course={data} /></Tabs.Panel>
+            <Tabs.Panel value="publish" keepMounted className="cw-studio-panel">
+              <CoursePublishPanel course={data} sectionsTotal={sections.data?.pagination?.total ?? data.stats?.totalSections} onReview={(tab) => {
+                changeTab(tab);
+                requestAnimationFrame(() => studio.current?.querySelector('[role="tab"][aria-selected="true"]')?.focus());
+              }} />
           <section className="cw-card cw-danger-zone cw-row cw-between">
             <div>
               <h2>Delete course</h2>
@@ -533,6 +589,8 @@ function Workspace({ courseId }) {
               Delete course
             </AsyncButton>
           </section>
+            </Tabs.Panel>
+          </Tabs.Root>
         </>
       )}
       <ConfirmationModal
@@ -547,7 +605,7 @@ function Workspace({ courseId }) {
       <ConfirmationModal
         open={blocker.state === "blocked"}
         title="Leave this page?"
-        description="Your changes are still being saved. Leaving will cancel any active upload. Check your course when you return."
+        description="You have an active upload or unsaved course edits. Leaving will discard those edits and cancel any active upload."
         confirmLabel="Leave page"
         cancelLabel="Stay on page"
         danger

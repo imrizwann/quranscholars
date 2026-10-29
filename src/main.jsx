@@ -122,6 +122,8 @@ const Blogs = lazy(() => import("@/pages/blog/Blogs.jsx"));
 const AdminAdmissions = lazy(
   () => import("@/pages/admissions/AdminAdmissions.jsx"),
 );
+const AdminInstructorApplications = lazy(() => import("@/pages/instructor/AdminInstructorApplications.jsx"));
+const AdminInstructorApplication = lazy(() => import("@/pages/instructor/AdminInstructorApplication.jsx"));
 
 const router = createBrowserRouter([
   {
@@ -182,6 +184,10 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "learn/:courseSlug",
+        element: <ProtectedRoute><RecordedCoursePlayer /></ProtectedRoute>,
+      },
+      {
         path: "learn/:courseSlug/:lessonId",
         element: <ProtectedRoute>{<RecordedCoursePlayer />}</ProtectedRoute>,
       },
@@ -192,7 +198,7 @@ const router = createBrowserRouter([
       { path: "classroom/:liveClassSlug", element: <Classroom /> },
       {
         path: "dashboard",
-        element: <WorkspaceLayout type="student" />,
+        element: <ProtectedRoute><WorkspaceLayout type="student" /></ProtectedRoute>,
         children: [
           { index: true, element: <StudentDashboard /> },
           { path: "learning", element: <MyLearning /> },
@@ -206,41 +212,25 @@ const router = createBrowserRouter([
       { path: "instructor/application", element: <InstructorApplication /> },
       {
         path: "instructor",
-        element: <WorkspaceLayout type="instructor" />,
+        element: <InstructorCourseAccess><WorkspaceLayout type="instructor" /></InstructorCourseAccess>,
         children: [
           { index: true, element: <InstructorDashboard /> },
           { path: "dashboard", element: <InstructorDashboard /> },
           {
             path: "courses",
-            element: (
-              <InstructorCourseAccess>
-                <InstructorCourses />
-              </InstructorCourseAccess>
-            ),
+            element: <InstructorCourses />,
           },
           {
             path: "courses/new",
-            element: (
-              <InstructorCourseAccess>
-                <CreateRecordedCourse />
-              </InstructorCourseAccess>
-            ),
+            element: <CreateRecordedCourse />,
           },
           {
             path: "courses/deletions/:deletionId",
-            element: (
-              <InstructorCourseAccess>
-                <VideoDeletionStatus />
-              </InstructorCourseAccess>
-            ),
+            element: <VideoDeletionStatus />,
           },
           {
             path: "courses/:courseId",
-            element: (
-              <InstructorCourseAccess>
-                <RecordedCourseWorkspace />
-              </InstructorCourseAccess>
-            ),
+            element: <RecordedCourseWorkspace />,
           },
           { path: "live-classes", element: <InstructorSectionPage /> },
           { path: "live-classes/new", element: <CreationWizard type="live" /> },
@@ -347,6 +337,14 @@ const router = createBrowserRouter([
         children: [{ index: true, element: <AdminAdmissions /> }],
       },
       { path: "/test", element: <TestPage /> },
+      {
+        path: "/admin/instructor-applications",
+        element: <AdminRoute><WorkspaceLayout type="admin" /></AdminRoute>,
+        children: [
+          { index: true, element: <AdminInstructorApplications /> },
+          { path: ":id", element: <AdminInstructorApplication /> },
+        ],
+      },
       { path: "*", element: <NotFound /> },
     ],
   },

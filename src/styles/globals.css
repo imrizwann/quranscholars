@@ -3,7 +3,10 @@
 @import "./fonts.css";
 @import "./theme.css";
 @import "./components.css";
+@import "./buttons.css";
+@import "./public-pages.css";
 @import "./utilities.css";
+@import "./motion.css";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";

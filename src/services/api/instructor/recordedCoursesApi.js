@@ -1,5 +1,6 @@
 import { createApi, retry } from "@reduxjs/toolkit/query/react";
 import { apiBaseQuery } from "../base-query.js";
+import { transientRetryOptions } from "../transient-retry.js";
 
 const root = "/api/instructor/recorded-courses";
 
@@ -56,12 +57,7 @@ const deletionResult = { validate: (data) => hasId(data?.deletionId) };
 
 // Processing is idempotent for an uploadId, including when its response is lost.
 // Never retry upload reservations, creation or deletion automatically.
-const processRequest = retry(apiBaseQuery, {
-  retryCondition: (error, _args, { attempt, baseQueryApi }) =>
-    attempt <= 1 &&
-    !baseQueryApi.signal.aborted &&
-    ["FETCH_ERROR", "TIMEOUT_ERROR"].includes(error.status),
-});
+const processRequest = retry(apiBaseQuery, transientRetryOptions);
 
 const instructorCoursesApi = createApi({
   reducerPath: "instructorCoursesApi",
@@ -99,6 +95,11 @@ const instructorCoursesApi = createApi({
   // Private workspace data is retained only while a screen subscribes to it.
   keepUnusedDataFor: 0,
   endpoints: (builder) => ({
+    getLessonPlayback: builder.query({
+      query: ({ courseId, sectionId, lessonId }) => ({ url: `/api/learning/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/lessons/${encodeURIComponent(lessonId)}/playback` }),
+      extraOptions: { validate: (data) => typeof data.playbackUrl === "string" && typeof data.expiresAt === "string" },
+      providesTags: (_result, _error, args) => [lessonTag(args), courseTag(args)],
+    }),
     getCategories: builder.query({
       query: ({ page = 1, limit = 50 } = {}) => ({
         url: `${root}/categories`,
@@ -107,9 +108,9 @@ const instructorCoursesApi = createApi({
       extraOptions: { validate: isPage("items", "name") },
     }),
     getCourses: builder.query({
-      query: ({ page = 1, limit = 12, search = "" } = {}) => ({
+      query: ({ page = 1, limit = 12, search = "", status = "" } = {}) => ({
         url: root,
-        params: { page, limit, sort: "updated", ...(search && { search }) },
+        params: { page, limit, sort: "updated", ...(search && { search }), ...(status && { status }) },
       }),
       extraOptions: { validate: isPage("courses") },
       providesTags: (result) => [
@@ -158,6 +159,28 @@ const instructorCoursesApi = createApi({
       extraOptions: { validate: (data) => hasId(data?.courseId) },
       invalidatesTags: onSuccess(() => [listTag]),
     }),
+    updateCourse: builder.mutation({
+      query: ({ courseId, changes }) => ({ url: courseUrl({ courseId }), method: "PATCH", body: changes }),
+      extraOptions: { validate: (data) => hasId(data?.course?._id) && typeof data.course.title === "string" },
+      async onQueryStarted({ courseId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(instructorCoursesApi.util.updateQueryData("getCourse", { courseId }, (draft) => {
+            Object.assign(draft.course, data.course);
+          }));
+        } catch { /* The form handles errors; keep saved data unchanged. */ }
+      },
+      invalidatesTags: onSuccess((args) => [listTag, courseTag(args)]),
+    }),
+    uploadThumbnail: builder.mutation({
+      query: ({ courseId, file }) => {
+        const body = new FormData();
+        body.append("thumbnail", file);
+        return { url: `/api/recorded-course/${encodeURIComponent(courseId)}/thumbnail`, method: "POST", body };
+      },
+      extraOptions: { validate: (data) => typeof data.thumbnailKey === "string" },
+      invalidatesTags: onSuccess((args) => [listTag, courseTag(args)]),
+    }),
     createSection: builder.mutation({
       query: (args) => ({
         url: sectionsUrl(args),
@@ -173,6 +196,13 @@ const instructorCoursesApi = createApi({
         body: { title: args.title },
       }),
       invalidatesTags: onSuccess((args) => [lessonTag(args), courseTag(args)]),
+    }),
+    updateSection: builder.mutation({
+      query: (args) => ({
+        url: sectionUrl(args), method: "PATCH",
+        body: { title: args.title, description: args.description },
+      }),
+      invalidatesTags: onSuccess((args) => [sectionTag(args), courseTag(args)]),
     }),
     deleteCourse: builder.mutation({
       query: (args) => ({ url: courseUrl(args), method: "DELETE" }),
@@ -222,8 +252,10 @@ const instructorCoursesApi = createApi({
 
 export const {
   useCreateCourseMutation,
+  useUpdateCourseMutation,
   useCreateSectionMutation,
   useCreateLessonMutation,
+  useUpdateSectionMutation,
   useDeleteCourseMutation,
   useDeleteSectionMutation,
   useDeleteLessonMutation,

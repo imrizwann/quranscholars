@@ -7,6 +7,7 @@ import { Pagination, QueryMessage } from "@/features/instructor-courses/Workspac
 import { ArrowLeft, BookOpen, Check, FileText, Layers, Plus } from "lucide-react";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import SelectField from "@/components/ui/SelectField.jsx";
+import { coursePrice } from "@/features/instructor-courses/course-price.js";
 import "@/features/instructor-courses/course-workspace.css";
 
 export default function CreateRecordedCourse() {
@@ -28,7 +29,7 @@ export default function CreateRecordedCourse() {
     try {
       const data = await createCourse({
         title: form.get("title").trim(), description: form.get("description").trim(), category: category._id,
-        language: form.get("language").trim(), level: form.get("level"), price: { original: Number(form.get("price")) }, tags: [],
+        language: form.get("language").trim(), level: form.get("level"), price: coursePrice(form.get("price"), form.get("salePrice")), tags: [],
       }).unwrap();
       navigate(`/instructor/courses/${data.courseId}`, { replace: true });
     } catch (failure) { setError(readableError(failure)); }
@@ -53,6 +54,7 @@ export default function CreateRecordedCourse() {
             <SelectField label="Level" name="level" defaultValue="Beginner" options={["Beginner", "Intermediate", "Advanced"]} disabled={busy} required />
             <label>Language<input name="language" defaultValue="English" required minLength={2} maxLength={50} disabled={busy} /></label>
             <label>Original price (INR)<input name="price" placeholder="e.g. 1500" type="number" min="0.01" step="0.01" required disabled={busy} /><span className="cw-field-hint">Enter an amount greater than zero.</span></label>
+            <label>Sale price (INR, optional)<input name="salePrice" placeholder="e.g. 1200" type="number" min="0" step="0.01" disabled={busy} /><span className="cw-field-hint">Leave empty for no discount. Must not exceed the original price.</span></label>
           </div>
           {error && <p className="cw-error" role="alert">{error}</p>}
         </div>

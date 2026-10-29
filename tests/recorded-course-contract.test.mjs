@@ -80,6 +80,20 @@ test("pagination totals use the server envelope and do not slice or reorder its 
   assert.equal(result.pagination.page, 2);
 });
 
+test("catalogue DTO preserves thumbnail and trailer URLs independently", () => {
+  const trailerPlaybackUrl = "https://video.example.test/master.m3u8?token=a%2Fb";
+  const thumbnailUrl = "https://r2.example.test/cover.webp?signature=a%2Fb";
+  const { courses } = normalizeRecordedCourseList({ data: { courses: [
+    { _id: "both", thumbnailUrl, trailerPlaybackUrl, trailerVideo: { status: "COMPLETED" } },
+    { _id: "video", trailerPlaybackUrl },
+    { _id: "image", thumbnailUrl },
+    { _id: "neither" },
+  ], pagination: { page: 1 } } });
+  assert.deepEqual(courses.map(({ thumbnail, trailerVideo }) => [thumbnail, trailerVideo]), [
+    [thumbnailUrl, trailerPlaybackUrl], [null, trailerPlaybackUrl], [thumbnailUrl, null], [null, null],
+  ]);
+});
+
 test("empty pages preserve zero totals and malformed envelopes fail visibly", () => {
   assert.equal(normalizeRecordedCourseList({ data: { courses: [], pagination: { totalCourses: 0, totalPages: 0 } } }).pagination.totalPages, 0);
   assert.throws(() => normalizeRecordedCourseList({ data: [] }), /Invalid course list response/);

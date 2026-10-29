@@ -40,7 +40,7 @@ const RecordedCourses = () => {
   }, [search]);
   const { data, currentData, isFetching, isError, refetch } = useGetRecordedCoursesQuery({
     page, limit: PAGE_SIZE, search: debouncedSearch, category, level, language,
-  }, { skip: search !== debouncedSearch });
+  }, { skip: search !== debouncedSearch, refetchOnMountOrArgChange: 60, refetchOnFocus: true, refetchOnReconnect: true });
   const isLoading = isFetching || search !== debouncedSearch;
   const hasError = isError && !isLoading;
   // Retain the last page while a replacement request runs, avoiding layout collapse.
@@ -284,17 +284,17 @@ const RecordedCourses = () => {
                 <BookOpen className="size-5" />
               </span>
               <h3 className="mt-4 font-display text-xl font-black">
-                No courses match those filters
+                {hasActiveFilters ? "No courses match those filters" : "No courses available yet"}
               </h3>
               <p className="mt-2 text-sm font-medium text-[#718079]">
-                Try a broader search or clear the selected filters.
+                {hasActiveFilters ? "Try a broader search or clear the selected filters." : "Check again soon for new courses, or refresh to see the latest catalogue."}
               </p>
               <button
                 type="button"
-                onClick={clearFilters}
+                onClick={hasActiveFilters ? clearFilters : refetch}
                 className="mt-5 min-h-10 rounded-lg border border-[#cfd9d4] bg-white px-4 text-sm font-black text-primary transition hover:bg-[#f1f7f4]"
               >
-                Clear filters
+                {hasActiveFilters ? "Clear filters" : "Refresh courses"}
               </button>
             </div>
           )}

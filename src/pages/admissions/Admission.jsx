@@ -12,21 +12,19 @@ import {
 import { useGetCoursesQuery } from "@/services/api/courses/courses.api.js";
 import { toast, Toaster } from "sonner";
 import {
-  ArrowRight,
   BookOpenCheck,
   CalendarClock,
   Check,
   CheckCircle2,
-  ClipboardCheck,
   Loader2,
   LockKeyhole,
   MapPin,
   Send,
   ShieldCheck,
-  Sparkles,
   UserRound,
 } from "lucide-react";
 import DobPicker from "@/hooks/useDobPicker.jsx";
+import WelcomeActions from "./WelcomeActions.jsx";
 
 const countryOptions = [
   "United States",
@@ -76,14 +74,6 @@ const inputClassName =
 const labelClassName = "text-sm font-bold text-foreground";
 const errorClassName = "mt-1.5 text-xs font-semibold text-destructive";
 const helperClassName = "mt-1.5 text-xs leading-5 text-muted-foreground";
-
-const statusTone = {
-  pending: "border-[#e4c77d]/30 bg-[#e4c77d]/10 text-[#f0d995]",
-  "in-review": "border-sky-200/25 bg-sky-200/10 text-sky-200",
-  accepted: "border-emerald-200/25 bg-emerald-200/10 text-emerald-200",
-  rejected: "border-red-300/30 bg-red-300/10 text-red-200",
-  "not submitted": "border-white/15 bg-white/10 text-white/90",
-};
 
 const formatStatus = (value) =>
   value
@@ -215,128 +205,40 @@ const Admission = () => {
 
   const handleStartAdmission = () => {
     setShowForm(true);
-    window.requestAnimationFrame(() =>
+    window.requestAnimationFrame(() => {
+      formSectionRef.current?.focus({ preventScroll: true });
       formSectionRef.current?.scrollIntoView({
-        behavior: "smooth",
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
         block: "start",
-      }),
-    );
+      });
+    });
   };
 
-  const displayStatus = admission?.status || "not submitted";
   const snapshotStatusLabel = admission?.status || "pending";
 
   return (
     <main className="min-h-screen bg-background pb-16 text-foreground">
       <Toaster richColors position="top-center" />
 
-      <section className="border-b border-[#24564e] bg-[#123d36] text-white">
-        <div className="page-container py-10 sm:py-12 lg:py-14">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold tracking-wide text-[#e4c77d]">
-                <Sparkles className="size-3.5" /> ADMISSION CENTER
-              </div>
-              <h1 className="mt-5 max-w-2xl text-3xl font-bold tracking-[-0.035em] sm:text-4xl lg:text-5xl">
-                Your pathway to guided Quran learning
-              </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/70 sm:text-base">
-                Tell us about your goals and study preferences. Our admissions
-                team will review your details and help shape the right learning
-                plan for you.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2 lg:max-w-sm lg:justify-end">
-              <span
-                className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-bold ${statusTone[displayStatus] || statusTone.pending}`}
-              >
-                <span className="size-1.5 rounded-full bg-current" />
-                {formatStatus(displayStatus)}
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-bold text-white/80">
-                <ShieldCheck className="size-3.5 text-[#e4c77d]" />
-                {hasExistingAdmission ? "Profile editable" : "Private & secure"}
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+      <WelcomeActions
+        name={user?.name}
+        hasAdmission={hasExistingAdmission}
+        formOpen={hasExistingAdmission || showForm}
+        onStartAdmission={handleStartAdmission}
+      />
 
-      <div className="page-container pt-7 sm:pt-9">
-        {!hasExistingAdmission && !showForm && (
-          <section className="overflow-hidden rounded-2xl border border-border bg-surface shadow-card">
-            <div className="grid lg:grid-cols-[1.2fr_0.8fr]">
-              <div className="p-6 sm:p-9 lg:p-12">
-                <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary">
-                  <ClipboardCheck className="size-3.5" /> No application
-                  submitted
-                </span>
-                <h2 className="mt-5 max-w-xl text-2xl font-bold tracking-tight sm:text-3xl">
-                  Start your admission in a few simple steps
-                </h2>
-                <p className="mt-3 max-w-xl text-sm leading-7 text-muted-foreground sm:text-base">
-                  Complete your profile once, choose the courses that interest
-                  you, and return at any time to keep your information current.
-                </p>
-                <button
-                  type="button"
-                  onClick={handleStartAdmission}
-                  className="mt-7 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/25"
-                >
-                  Start admission form <ArrowRight className="size-4" />
-                </button>
-                <div className="mt-7 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                  <LockKeyhole className="size-4 text-primary" />
-                  Your details are only shared with the admissions team.
-                </div>
-              </div>
-              <div className="border-t border-border bg-primary/5 p-6 sm:p-9 lg:border-l lg:border-t-0 lg:p-10">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
-                  What happens next
-                </p>
-                <div className="mt-6 grid gap-6">
-                  {[
-                    [
-                      "01",
-                      "Share your details",
-                      "Tell us about you and your learning goals.",
-                    ],
-                    [
-                      "02",
-                      "Get the right match",
-                      "We review your needs and recommend the best path.",
-                    ],
-                    [
-                      "03",
-                      "Begin your journey",
-                      "Confirm your schedule and meet your teacher.",
-                    ],
-                  ].map(([number, title, copy]) => (
-                    <div key={number} className="flex gap-4">
-                      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#123d36] text-xs font-bold text-white">
-                        {number}
-                      </span>
-                      <div>
-                        <p className="text-sm font-bold">{title}</p>
-                        <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                          {copy}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
+      <div className="page-container">
         {(hasExistingAdmission || showForm) && (
           <div
             ref={formSectionRef}
+            id="admission-form"
+            tabIndex={-1}
+            role="region"
+            aria-label="Admission application"
             className="grid scroll-mt-24 gap-6 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start"
           >
             <form onSubmit={submitForm(onSubmit)} className="grid gap-5">
-              <section className="rounded-2xl border border-border bg-surface shadow-card">
+              <section className="rounded-2xl border border-border bg-surface">
                 <SectionHeader
                   icon={UserRound}
                   title="Primary details"
@@ -417,7 +319,7 @@ const Admission = () => {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-border bg-surface shadow-card">
+              <section className="rounded-2xl border border-border bg-surface">
                 <SectionHeader
                   icon={MapPin}
                   title="Where you live"
@@ -508,7 +410,7 @@ const Admission = () => {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-border bg-surface shadow-card">
+              <section className="rounded-2xl border border-border bg-surface">
                 <SectionHeader
                   icon={BookOpenCheck}
                   title="Learning preferences"
@@ -668,7 +570,7 @@ const Admission = () => {
             </form>
 
             <aside className="grid gap-5 lg:sticky lg:top-24">
-              <section className="overflow-hidden rounded-2xl border border-border bg-surface shadow-card">
+              <section className="overflow-hidden rounded-2xl border border-border bg-surface">
                 <div className="bg-[#123d36] p-5 text-white">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="size-5 text-[#e4c77d]" />
@@ -745,7 +647,7 @@ const Admission = () => {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+              <section className="rounded-2xl border border-border bg-surface p-5">
                 <h3 className="text-sm font-bold">Your next steps</h3>
                 <div className="mt-4 grid gap-4">
                   {[

@@ -1,0 +1,17 @@
+.cw-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 10px 14px; border: 1px solid var(--input); border-radius: 7px; background: var(--surface); font-weight: 600; font-size: .8rem; line-height: 1.5; text-decoration: none; color: var(--foreground); cursor: pointer; }
+.cw-button:hover:not(:disabled) { background: color-mix(in srgb, var(--primary) 5%, var(--surface)); border-color: color-mix(in srgb, var(--primary) 35%, var(--border)); }
+.cw-primary { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
+.cw-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--primary) 88%, var(--foreground)); color: var(--primary-foreground); }
+.cw-danger { color: var(--destructive); border-color: color-mix(in srgb, var(--destructive) 25%, var(--border)); }
+.cw-danger:hover:not(:disabled) { background: color-mix(in srgb, var(--destructive) 5%, var(--surface)); border-color: var(--destructive); }
+.cw-button-compact { flex: 0 0 auto; width: fit-content; min-height: 40px; padding: 8px 11px; gap: 6px; white-space: nowrap; }
+.cw-button-compact > span { gap: 6px; }
+.cw-icon-button { flex: 0 0 44px; width: 44px; min-height: 44px; padding: 0; gap: 0; }
+.cw-icon-button.cw-danger { border-color: transparent; background: transparent; color: var(--muted-foreground); }
+.cw-icon-button.cw-danger:hover:not(:disabled), .cw-icon-button.cw-danger:focus-visible { color: var(--destructive); border-color: color-mix(in srgb, var(--destructive) 20%, var(--border)); background: color-mix(in srgb, var(--destructive) 5%, var(--surface)); }
+.cw-button svg { flex-shrink: 0; }
+@media (pointer: coarse) { .cw-button-compact, .cw-icon-button { min-height: 44px; } .cw-icon-button { width: 44px; flex-basis: 44px; } }
+.cw-danger-zone { border-color: color-mix(in srgb, var(--destructive) 18%, var(--border)); }
+.cw-danger-zone h2 { margin-bottom: 5px; }
+.cw-button:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+.cw-button:disabled { opacity: .55; cursor: not-allowed; }

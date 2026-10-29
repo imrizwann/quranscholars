@@ -2,6 +2,7 @@ import {
   videoErrorMessage,
   videoPreparationMessage,
 } from "@/lib/user-messages.js";
+import ProtectedLessonVideo from "@/features/recorded-courses/components/ProtectedLessonVideo.jsx";
 import { useEffect, useRef, useState } from "react";
 import {
   unwrapAbortable,
@@ -20,6 +21,10 @@ import {
   usePrepareVideoUploadMutation,
   useProcessVideoMutation,
 } from "@/services/api/instructor/recordedCoursesApi.js";
+import { isTemporaryConnectionError } from "@/services/api/transient-retry.js";
+
+const processingConnectionMessage =
+  "Your video finished uploading, but we could not confirm that preparation started. Select Prepare video to retry using the uploaded file. You do not need to upload it again.";
 
 export default function VideoUploadPanel({
   path,
@@ -64,6 +69,7 @@ export default function VideoUploadPanel({
       ? uploadedPreview?.file
       : null);
   const processingConfirmed = processingWasAccepted(video, unconfirmedUploadId);
+  const processingUploadId = unconfirmedUploadId || video?.uploadId;
   const busy = Boolean(phase);
   const locked = disabled || busy;
   const serverBusy = ["QUEUED", "PROCESSING", "PROCESSED", "DELETING"].includes(
@@ -118,15 +124,17 @@ export default function VideoUploadPanel({
       }
     } catch (failure) {
       if (mounted.current) {
-        if (
-          uploaded &&
-          ["FETCH_ERROR", "TIMEOUT_ERROR"].includes(failure.status)
-        )
+        const preparationUnconfirmed = uploaded && isTemporaryConnectionError(failure);
+        if (preparationUnconfirmed) {
           setUnconfirmedUploadId(uploadId);
+          setUploadedPreview({ file, uploadId });
+          setFile(null);
+          if (input.current) input.current.value = "";
+        }
         onChanged();
         setError(
-          uploaded && !failure.userMessage
-            ? "Your video finished uploading, but we could not confirm it is being prepared. We are checking its progress. Refresh the page before uploading it again."
+          preparationUnconfirmed
+            ? processingConnectionMessage
             : readableError(failure),
         );
       }
@@ -145,8 +153,9 @@ export default function VideoUploadPanel({
     if (
       controller.current ||
       locked ||
-      !video?.uploadId ||
-      !["UPLOADING", "UPLOADED", "FAILED"].includes(status)
+      !processingUploadId ||
+      processingConfirmed ||
+      (!unconfirmedUploadId && !["UPLOADING", "UPLOADED", "FAILED"].includes(status))
     )
       return;
     controller.current = new AbortController();
@@ -155,19 +164,21 @@ export default function VideoUploadPanel({
     setPhase("Preparing video");
     setError("");
     setNotice("");
-    setUnconfirmedUploadId(null);
     try {
       const result = await unwrapAbortable(
-        processVideo({ ...target, uploadId: video.uploadId }),
+        processVideo({ ...target, uploadId: processingUploadId }),
         controller.current.signal,
       );
       const message = videoPreparationMessage(result);
-      if (mounted.current) setNotice(message);
+      if (mounted.current) {
+        setUnconfirmedUploadId(null);
+        setNotice(message);
+      }
     } catch (failure) {
       if (mounted.current) {
-        if (["FETCH_ERROR", "TIMEOUT_ERROR"].includes(failure.status))
-          setUnconfirmedUploadId(video.uploadId);
-        setError(readableError(failure));
+        if (isTemporaryConnectionError(failure))
+          setUnconfirmedUploadId(processingUploadId);
+        setError(isTemporaryConnectionError(failure) ? processingConnectionMessage : readableError(failure));
         onChanged();
       }
     } finally {
@@ -293,8 +304,9 @@ export default function VideoUploadPanel({
                 {video?.uploadId ? "Replace video" : "Upload video"}
               </AsyncButton>
             )}
-            {video?.uploadId &&
+            {processingUploadId && !processingConfirmed &&
               (["UPLOADING", "UPLOADED", "FAILED"].includes(status) ||
+                unconfirmedUploadId ||
                 action === "process") && (
                 <AsyncButton
                   className="cw-button"
@@ -304,7 +316,7 @@ export default function VideoUploadPanel({
                   onClick={() => setConfirmation("process")}
                 >
                   <RefreshCw size={16} aria-hidden="true" />
-                  {status === "FAILED" ? "Try again" : "Prepare video"}
+                  {status === "FAILED" && !unconfirmedUploadId ? "Try again" : "Prepare video"}
                 </AsyncButton>
               )}
             {phase === "Uploading" && (
@@ -335,13 +347,13 @@ export default function VideoUploadPanel({
             )}
           </div>
         </div>
-        <VideoPreview
+        {target.lessonId && status === "COMPLETED" && !file ? <section className="cw-video-preview" aria-label="Lesson preview"><div className="cw-preview-heading"><h3>Lesson preview</h3></div><ProtectedLessonVideo key={`${target.lessonId}/${video?.uploadId}`} target={target} title={video?.originalFileName || "Lesson preview"} /><p className="cw-field-hint cw-preview-caption">Only you and learners with course access can play this lesson.</p></section> : <VideoPreview
           file={previewFile}
           hasUploadedVideo={status !== "NOT_UPLOADED"}
           status={status}
           playbackSource={savedPlaybackSource}
           title={video?.originalFileName || "Video preview"}
-        />
+        />}
       </div>
       <ConfirmationModal
         open={confirmation !== null}

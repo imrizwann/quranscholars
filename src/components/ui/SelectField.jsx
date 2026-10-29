@@ -34,7 +34,7 @@ export default function SelectField({
       </Select.Trigger>
       <Select.Portal>
         <Select.Positioner sideOffset={6} align={menuAlign === "right" ? "end" : "start"} alignItemWithTrigger={false} className="z-[100] outline-none">
-          <Select.Popup className="w-[var(--anchor-width)] min-w-32 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border bg-white p-1 shadow-xl outline-none">
+          <Select.Popup className="qs-popup-motion w-[var(--anchor-width)] min-w-32 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border bg-white p-1 shadow-xl outline-none">
             <Select.List className="max-h-[min(18rem,calc(var(--available-height)-0.75rem))] overflow-y-auto overscroll-contain outline-none">{items.length ? items.map((option) => <SelectOption key={option.value} {...option} />) : <div className="px-3 py-3 text-sm text-muted-foreground">{emptyMessage}</div>}</Select.List>
           </Select.Popup>
         </Select.Positioner>

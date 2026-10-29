@@ -9,10 +9,10 @@ export function DashboardHeading({ eyebrow, title, description, children }) {
 }
 
 export function DashboardMetrics({ items }) {
-  return <dl className="dashboard-metrics">{items.map(({ icon: Icon, label, value, note }) => (
+  return <dl className="dashboard-metrics">{items.map(({ icon: Icon, label, value, note, loading = false }) => (
     <div className="dashboard-metric" key={label}>
       <dt><span>{label}</span><Icon size={18} aria-hidden="true" /></dt>
-      <dd>{value}</dd><p>{note}</p>
+      <dd aria-busy={loading}>{loading ? <span className="inline-block h-8 w-16 rounded-md bg-muted motion-safe:animate-pulse" role="status"><span className="sr-only">Loading {label.toLowerCase()}</span></span> : value}</dd><p>{note}</p>
     </div>
   ))}</dl>;
 }

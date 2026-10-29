@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Clock3, PlayCircle, Users } from "lucide-react";
+import { ArrowRight, BookOpen, Clock3, Users } from "lucide-react";
+import CourseCardMedia from "./CourseCardMedia.jsx";
 import CoursePrice from "@/features/recorded-courses/components/CoursePrice.jsx";
 import CourseRating from "@/features/recorded-courses/components/CourseRating.jsx";
 
@@ -16,37 +17,7 @@ const RecordedCourseCard = ({ course }) => {
   const linkState = courseCatalog ? { courseCatalog } : undefined;
   return (
   <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-[#dfe6e2] bg-white shadow-[0_8px_30px_rgba(21,54,44,.055)] transition duration-300 hover:-translate-y-1 hover:border-[#bfd1c9] hover:shadow-[0_20px_48px_rgba(21,54,44,.11)]">
-    <Link
-      to={`/courses/${course.slug}`} state={linkState}
-      className="relative block aspect-16/10 overflow-hidden bg-[#e5f0eb] no-underline"
-      aria-label={`View self-paced course: ${course.title}`}
-    >
-      {course.thumbnail ? (
-        <img
-          src={course.thumbnail}
-          alt={`${course.title} course thumbnail`}
-          className="size-full object-contain p-5 transition duration-500 group-hover:scale-[1.035]"
-          loading="lazy"
-          decoding="async"
-        />
-      ) : (
-        <span className="grid size-full place-items-center text-primary">
-          <BookOpen className="size-12" />
-        </span>
-      )}
-      <span
-        className="absolute inset-0 bg-[linear-gradient(180deg,transparent_55%,rgba(4,29,25,.5)_100%)]"
-        aria-hidden="true"
-      />
-      <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/90 px-3 py-1.5 text-[0.65rem] font-black uppercase tracking-[0.11em] text-[#23453c] backdrop-blur">
-        <PlayCircle className="size-3.5" /> Self-paced
-      </span>
-      {(course.bestseller || course.featured) && (
-        <span className="absolute bottom-4 left-4 rounded-md bg-[#f4c95d] px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-[0.08em] text-[#17372f]">
-          {course.bestseller ? "Bestseller" : "Featured"}
-        </span>
-      )}
-    </Link>
+    <CourseCardMedia key={`${course.id}:${course.trailerVideo || ""}`} course={course} to={`/courses/${course.slug}`} linkState={linkState} />
 
     <div className="flex flex-1 flex-col p-5">
       <div className="flex items-center justify-between gap-3">
@@ -85,8 +56,9 @@ const RecordedCourseCard = ({ course }) => {
           {course.totalLessons == null ? "See course details" : `${course.totalLessons} lessons`}
         </span>
       </div>
-      <div className="mt-auto pt-5">
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-5">
         <CoursePrice price={course.price} />
+        <Link to={`/courses/${course.slug}`} state={linkState} className="inline-flex min-h-11 items-center gap-2 text-xs font-bold text-primary no-underline">View course <ArrowRight size={15} aria-hidden="true" /></Link>
       </div>
     </div>
   </article>

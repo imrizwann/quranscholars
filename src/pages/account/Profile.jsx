@@ -5,8 +5,9 @@ import { Toaster } from "sonner";
 import { useSelector } from "react-redux";
 import {
   useUploadAvatarMutation,
-  useGetAvatarUrlQuery,
 } from "@/services/api/user/fileUploadApis.js";
+import useProfilePhoto from "@/features/profile/useProfilePhoto.js";
+import AvatarImage from "@/features/profile/components/AvatarImage.jsx";
 import ProfileDeleteModal from "@/features/profile/components/ProfileDeleteModal.jsx";
 import {
   Camera,
@@ -26,7 +27,7 @@ const inputClass = "mt-2 min-h-11 w-full rounded-xl border border-[#d8e2dd] bg-w
 
 const ProfilePage = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const { data } = useGetAvatarUrlQuery();
+  const { data, refetch } = useProfilePhoto();
   const [uploadAvatar, { isLoading: isUploading }] = useUploadAvatarMutation();
   const { user } = useSelector((state) => state.user);
   const [file, setFile] = useState(null);
@@ -55,13 +56,14 @@ const ProfilePage = () => {
 
   const handleImageChange = (event) => {
     const selectedFile = event.target.files?.[0];
+    event.target.value = "";
     if (!selectedFile) return;
     if (!ALLOWED_TYPES.includes(selectedFile.type)) {
       setError("Choose a JPG, PNG, or WebP image.");
       return;
     }
-    if (selectedFile.size > 5 * 1024 * 1024) {
-      setError("Choose an image smaller than 5 MB.");
+    if (!selectedFile.size || selectedFile.size > 3 * 1024 * 1024) {
+      setError("Choose a non-empty image no larger than 3 MB.");
       return;
     }
     setFile(selectedFile);
@@ -70,11 +72,12 @@ const ProfilePage = () => {
   };
 
   const handleImageUpload = async () => {
-    if (!file) return;
+    if (!file || isUploading) return;
     const formData = new FormData();
     formData.append("file", file);
     try {
       await uploadAvatar(formData).unwrap();
+      await refetch();
       setMessage("Avatar updated.");
       setFile(null);
       setError(null);
@@ -116,12 +119,12 @@ const ProfilePage = () => {
           <div className="grid gap-6 px-6 pb-7 sm:grid-cols-[8rem_1fr] sm:px-8">
             <div className="-mt-12">
               <div className="relative grid size-28 place-items-center overflow-hidden rounded-2xl border-4 border-white bg-[#dcece6] text-2xl font-black text-primary shadow-lg">
-                {previewUrl || data?.url ? <img src={previewUrl || data?.url} alt="Profile" className="size-full object-cover" /> : initials}
-                <label className="absolute bottom-1.5 right-1.5 grid size-9 cursor-pointer place-items-center rounded-lg bg-[#0f766e] text-white shadow-md transition hover:bg-[#0b665f]" aria-label="Choose avatar"><Camera className="size-4" /><input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={handleImageChange} /></label>
+                <AvatarImage src={previewUrl || data?.url} alt="Profile" size={112} className="size-full object-cover" fallback={initials} />
+                <label className="absolute bottom-1.5 right-1.5 grid size-9 cursor-pointer place-items-center rounded-lg bg-[#0f766e] text-white shadow-md transition hover:bg-[#0b665f]" aria-label="Choose avatar"><Camera className="size-4" /><input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={isUploading} onChange={handleImageChange} /></label>
               </div>
             </div>
             <div className="pt-1 sm:pt-5">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"><div><h2 id="profile-summary-title" className="text-2xl font-black tracking-[-0.03em]">{userDetails.name || "QuranScholar student"}</h2><p className="mt-1 text-sm font-semibold text-[#718078]">{userDetails.email}</p></div>{file && <div className="flex gap-2"><button type="button" onClick={handleImageUpload} disabled={isUploading} className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-[#0f766e] px-3.5 text-xs font-black text-white disabled:opacity-60">{isUploading && <Loader2 className="size-3.5 animate-spin" />}Save photo</button><button type="button" onClick={() => setFile(null)} className="min-h-10 rounded-lg border border-[#d8e2dd] px-3.5 text-xs font-black text-[#52655c]">Cancel</button></div>}</div>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"><div><h2 id="profile-summary-title" className="text-2xl font-black tracking-[-0.03em]">{userDetails.name || "QuranScholar student"}</h2><p className="mt-1 text-sm font-semibold text-[#718078]">{userDetails.email}</p></div>{file && <div className="flex gap-2"><button type="button" onClick={handleImageUpload} disabled={isUploading} className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-[#0f766e] px-3.5 text-xs font-black text-white disabled:opacity-60">{isUploading && <Loader2 className="size-3.5 animate-spin" />}Save photo</button><button type="button" onClick={() => setFile(null)} disabled={isUploading} className="min-h-10 rounded-lg border border-[#d8e2dd] px-3.5 text-xs font-black text-[#52655c]">Cancel</button></div>}</div>
               <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-[#5f7268]">{userDetails.bio}</p>
               <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-[#718078]"><span className="inline-flex items-center gap-1.5"><MapPin className="size-3.5 text-primary" />{userDetails.location || "Location not added"}</span><span className="inline-flex items-center gap-1.5"><Phone className="size-3.5 text-primary" />{userDetails.phone || "Phone not added"}</span><span className="inline-flex items-center gap-1.5"><Globe2 className="size-3.5 text-primary" />Timezone detected automatically</span></div>
               {(error || message) && <p className={`mt-4 rounded-lg px-3 py-2 text-xs font-bold ${error ? "bg-red-50 text-red-700" : "bg-[#e7f4ef] text-[#176255]"}`} role="status">{error || message}</p>}

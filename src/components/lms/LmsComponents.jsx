@@ -54,7 +54,7 @@ export const ResourceCard = ({ resource, dark = false }) => (
 );
 
 export const AssignmentCard = ({ assignment, compact = false }) => (
-  <article className="rounded-xl border border-border bg-white p-5 shadow-sm">
+  <article className="rounded-xl border border-border bg-white p-5">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
         <p className="text-xs font-bold text-primary">

@@ -12,7 +12,7 @@ const fileUploadApi = createApi({
                 method: "POST",
                 body: file
             }),
-            invalidatesTags: ['uploadFiles']
+            invalidatesTags: (result, error) => error ? [] : ['uploadFiles']
         }),
         getAvatarUrl: builder.query({
             query: () => ({
