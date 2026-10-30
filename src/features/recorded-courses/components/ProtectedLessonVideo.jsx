@@ -32,14 +32,14 @@ export default function ProtectedLessonVideo({ target, title = "Lesson preview",
     setNative(!hls);
     if (hls) provider.config = {
       ...provider.config,
-      xhrSetup: (xhr, url) => xhr.open("GET", renewLessonRequest(url, grant.current), true),
-      fetchSetup: (context, init) => new Request(renewLessonRequest(context.url, grant.current), init),
+      xhrSetup: (xhr, url) => { xhr.open("GET", renewLessonRequest(url, grant.current), true); xhr.withCredentials = true; },
+      fetchSetup: (context, init) => new Request(renewLessonRequest(context.url, grant.current), { ...init, credentials: "include" }),
     };
   }, []);
   const denied = query.error && [401, 403, 404].includes(query.error.status);
   if (query.isLoading) return <div className="cw-preview-placeholder"><LoadingState label="Checking video access" /></div>;
   if (!source || expired || denied) return <div className="cw-preview-placeholder" role={query.error ? "alert" : "status"}><LockKeyhole size={28} aria-hidden="true" /><strong>{denied ? "Lesson access required" : "Playback unavailable"}</strong><p>{query.error ? userMessage(query.error) : "Your playback session has expired. Refresh to check your access again."}</p><button type="button" className="cw-button" disabled={query.isFetching} onClick={query.refetch}>{query.isFetching ? "Checking access…" : "Refresh playback"}</button></div>;
-  return <div className="protected-lesson-video"><Suspense fallback={<div className="cw-preview-placeholder"><LoadingState label="Opening lesson" /></div>}><VideoPlayer src={native ? source : firstSource.current} title={title} poster={poster} className="cw-preview-player" playerRef={player} onProviderSetup={configure}
+  return <div className="protected-lesson-video"><Suspense fallback={<div className="cw-preview-placeholder"><LoadingState label="Opening lesson" /></div>}><VideoPlayer src={native ? source : firstSource.current} crossOrigin="use-credentials" title={title} poster={poster} className="cw-preview-player" playerRef={player} onProviderSetup={configure}
     onTimeUpdate={() => { if (player.current?.currentTime > 0) position.current.time = player.current.currentTime; }}
     onPlay={() => { position.current.playing = true; }} onPause={() => { if (player.current?.canPlay) position.current.playing = false; }}
     onCanPlay={() => { if (player.current && position.current.time > 0 && player.current.currentTime < 1) { player.current.currentTime = position.current.time; if (position.current.playing) player.current.play().catch(() => {}); } }}

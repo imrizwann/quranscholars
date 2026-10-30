@@ -14,7 +14,6 @@ import { toast, Toaster } from "sonner";
 import {
   BookOpenCheck,
   CalendarClock,
-  Check,
   CheckCircle2,
   Loader2,
   LockKeyhole,
@@ -23,8 +22,10 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react";
-import DobPicker from "@/hooks/useDobPicker.jsx";
+import DateOfBirthPicker from "@/components/ui/DateOfBirthPicker.jsx";
+import SelectField from "@/components/ui/SelectField.jsx";
 import WelcomeActions from "./WelcomeActions.jsx";
+import "./admission.css";
 
 const countryOptions = [
   "United States",
@@ -69,9 +70,8 @@ const normalizeDate = (value) => {
   return Number.isNaN(date.getTime()) ? "" : date.toISOString().split("T")[0];
 };
 
-const inputClassName =
-  "mt-2 h-12 w-full rounded-xl border border-input bg-background px-3.5 text-sm font-medium text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary focus:ring-3 focus:ring-primary/15 read-only:cursor-not-allowed read-only:bg-muted read-only:text-muted-foreground";
-const labelClassName = "text-sm font-bold text-foreground";
+const inputClassName = "admission-input";
+const labelClassName = "admission-label";
 const errorClassName = "mt-1.5 text-xs font-semibold text-destructive";
 const helperClassName = "mt-1.5 text-xs leading-5 text-muted-foreground";
 
@@ -82,8 +82,8 @@ const formatStatus = (value) =>
     .join(" ");
 
 const SectionHeader = ({ icon: Icon, title, description }) => (
-  <div className="flex items-start gap-4 border-b border-border px-5 py-5 sm:px-7">
-    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+  <div className="admission-section-header">
+    <span className="public-icon">
       <Icon className="size-5" />
     </span>
     <div>
@@ -97,7 +97,7 @@ const Admission = () => {
   const [showForm, setShowForm] = useState(false);
   const formSectionRef = useRef(null);
   const { user } = useSelector((state) => state.user);
-  const { data } = useGetCoursesQuery();
+  const { data, isLoading: isCoursesLoading, isError: isCoursesError, refetch: refetchCourses } = useGetCoursesQuery();
   const courses = data?.data || [];
   const { data: admission, isFetching: isAdmissionLoading } =
     useGetMyAdmissionQuery(user?._id, {
@@ -200,8 +200,10 @@ const Admission = () => {
     (watch("dob") ? 1 : 0) +
     (watch("address") ? 1 : 0) +
     (watch("city") ? 1 : 0) +
-    (watch("country") ? 1 : 0);
-  const completeness = Math.min(100, Math.round((completenessScore / 7) * 100));
+    (watch("country") ? 1 : 0) +
+    (watch("state") ? 1 : 0) +
+    (watch("gender") ? 1 : 0);
+  const completeness = Math.min(100, Math.round((completenessScore / 9) * 100));
 
   const handleStartAdmission = () => {
     setShowForm(true);
@@ -214,10 +216,10 @@ const Admission = () => {
     });
   };
 
-  const snapshotStatusLabel = admission?.status || "pending";
+  const snapshotStatusLabel = admission?.status || "draft";
 
   return (
-    <main className="min-h-screen bg-background pb-16 text-foreground">
+    <main className="admission-page min-h-screen bg-background text-foreground">
       <Toaster richColors position="top-center" />
 
       <WelcomeActions
@@ -227,7 +229,7 @@ const Admission = () => {
         onStartAdmission={handleStartAdmission}
       />
 
-      <div className="page-container">
+      <div className="public-page admission-container">
         {(hasExistingAdmission || showForm) && (
           <div
             ref={formSectionRef}
@@ -235,16 +237,16 @@ const Admission = () => {
             tabIndex={-1}
             role="region"
             aria-label="Admission application"
-            className="grid scroll-mt-24 gap-6 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start"
+            className="admission-layout"
           >
-            <form onSubmit={submitForm(onSubmit)} className="grid gap-5">
-              <section className="rounded-2xl border border-border bg-surface">
+            <form onSubmit={submitForm(onSubmit)} className="admission-form">
+              <section className="admission-panel">
                 <SectionHeader
                   icon={UserRound}
                   title="Primary details"
                   description="Basic information we use to identify and contact you."
                 />
-                <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-7">
+                <div className="admission-fields">
                   <div>
                     <label className={labelClassName} htmlFor="full-name">
                       Full name <span className="text-destructive">*</span>
@@ -253,10 +255,12 @@ const Admission = () => {
                       id="full-name"
                       placeholder="Your legal name"
                       className={inputClassName}
+                      aria-invalid={Boolean(errors.fullName)}
+                      aria-describedby={errors.fullName ? "admission-fullName-error" : undefined}
                       {...register("fullName")}
                     />
                     {errors.fullName && (
-                      <p className={errorClassName}>
+                      <p id="admission-fullName-error" className={errorClassName}>
                         {errors.fullName.message}
                       </p>
                     )}
@@ -269,10 +273,10 @@ const Admission = () => {
                       <input
                         id="email"
                         readOnly
-                        className={`${inputClassName} pr-10`}
+                        className={`${inputClassName} admission-email`}
                         {...register("email")}
                       />
-                      <LockKeyhole className="absolute right-3.5 top-[1.45rem] size-4 text-muted-foreground" />
+                      <LockKeyhole className="absolute right-3.5 top-1/2 size-4 text-muted-foreground" />
                     </div>
                     <p className={helperClassName}>
                       Linked to your verified account.
@@ -287,46 +291,90 @@ const Admission = () => {
                       placeholder="+966 50 123 4567"
                       type="tel"
                       className={inputClassName}
+                      aria-invalid={Boolean(errors.contactNumber)}
+                      aria-describedby={errors.contactNumber ? "admission-contactNumber-error" : undefined}
                       {...register("contactNumber")}
                     />
                     <p className={helperClassName}>
                       WhatsApp is preferred for coordination.
                     </p>
                     {errors.contactNumber && (
-                      <p className={errorClassName}>
+                      <p id="admission-contactNumber-error" className={errorClassName}>
                         {errors.contactNumber.message}
                       </p>
                     )}
                   </div>
                   <div>
-                    <label className={labelClassName}>
+                    <label className={labelClassName} htmlFor="date-of-birth">
                       Date of birth <span className="text-destructive">*</span>
                     </label>
                     <Controller
                       control={control}
                       name="dob"
                       render={({ field }) => (
-                        <DobPicker
+                        <div className="mt-2"><DateOfBirthPicker
+                          id="date-of-birth"
                           value={field.value}
                           onChange={field.onChange}
-                        />
+                          onBlur={field.onBlur}
+                          triggerRef={field.ref}
+                          error={errors.dob?.message}
+                        /></div>
                       )}
                     />
-                    {errors.dob && (
-                      <p className={errorClassName}>{errors.dob.message}</p>
-                    )}
                   </div>
+                  <fieldset className="admission-wide">
+                    <legend className={labelClassName}>
+                      Gender <span className="text-destructive">*</span>
+                    </legend>
+                    <Controller
+                      control={control}
+                      name="gender"
+                      render={({ field }) => (
+                        <div className="admission-gender-options">
+                          {["male", "female", "other"].map((option) => {
+                            const active = field.value === option;
+                            return (
+                              <label
+                                key={option}
+                                className={`admission-gender-option${active ? " is-selected" : ""}`}
+                              >
+                                <input
+                                  type="radio"
+                                  name={field.name}
+                                  onBlur={field.onBlur}
+                                  ref={field.ref}
+                                  aria-invalid={Boolean(errors.gender)}
+                                  aria-describedby={errors.gender ? "admission-gender-error" : undefined}
+                                  className="admission-choice-input"
+                                  value={option}
+                                  checked={active}
+                                  onChange={(event) =>
+                                    field.onChange(event.target.value)
+                                  }
+                                />
+                                {option}
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+                    />
+                    {errors.gender && (
+                      <p id="admission-gender-error" className={errorClassName}>{errors.gender.message}</p>
+                    )}
+                  </fieldset>
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-border bg-surface">
+              <section className="admission-panel">
                 <SectionHeader
                   icon={MapPin}
                   title="Where you live"
                   description="This helps us coordinate teachers and class times."
                 />
-                <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-7">
-                  <div className="sm:col-span-2">
+                <div className="admission-fields">
+                  <div className="admission-wide">
                     <label className={labelClassName} htmlFor="address">
                       Address <span className="text-destructive">*</span>
                     </label>
@@ -334,10 +382,12 @@ const Admission = () => {
                       id="address"
                       placeholder="Street, building, area"
                       className={inputClassName}
+                      aria-invalid={Boolean(errors.address)}
+                      aria-describedby={errors.address ? "admission-address-error" : undefined}
                       {...register("address")}
                     />
                     {errors.address && (
-                      <p className={errorClassName}>{errors.address.message}</p>
+                      <p id="admission-address-error" className={errorClassName}>{errors.address.message}</p>
                     )}
                   </div>
                   <div>
@@ -348,10 +398,12 @@ const Admission = () => {
                       id="city"
                       placeholder="City"
                       className={inputClassName}
+                      aria-invalid={Boolean(errors.city)}
+                      aria-describedby={errors.city ? "admission-city-error" : undefined}
                       {...register("city")}
                     />
                     {errors.city && (
-                      <p className={errorClassName}>{errors.city.message}</p>
+                      <p id="admission-city-error" className={errorClassName}>{errors.city.message}</p>
                     )}
                   </div>
                   <div>
@@ -363,10 +415,12 @@ const Admission = () => {
                       id="state"
                       placeholder="State or province"
                       className={inputClassName}
+                      aria-invalid={Boolean(errors.state)}
+                      aria-describedby={errors.state ? "admission-state-error" : undefined}
                       {...register("state")}
                     />
                     {errors.state && (
-                      <p className={errorClassName}>{errors.state.message}</p>
+                      <p id="admission-state-error" className={errorClassName}>{errors.state.message}</p>
                     )}
                   </div>
                   <div>
@@ -377,24 +431,20 @@ const Admission = () => {
                       control={control}
                       name="country"
                       render={({ field }) => (
-                        <select
+                        <SelectField
                           id="country"
-                          className={inputClassName}
-                          value={field.value || ""}
+                          name={field.name}
+                          className="mt-2"
+                          value={field.value || null}
+                          options={countryOptions}
+                          placeholder="Choose a country"
                           onChange={field.onChange}
-                        >
-                          <option value="">Choose a country</option>
-                          {countryOptions.map((country) => (
-                            <option key={country} value={country}>
-                              {country}
-                            </option>
-                          ))}
-                        </select>
+                          onBlur={field.onBlur}
+                          triggerRef={field.ref}
+                          error={errors.country?.message}
+                        />
                       )}
                     />
-                    {errors.country && (
-                      <p className={errorClassName}>{errors.country.message}</p>
-                    )}
                   </div>
                   <div>
                     <label className={labelClassName} htmlFor="zip-code">
@@ -410,57 +460,21 @@ const Admission = () => {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-border bg-surface">
+              <section className="admission-panel">
                 <SectionHeader
                   icon={BookOpenCheck}
                   title="Learning preferences"
                   description="Select the study tracks that best match your goals."
                 />
-                <div className="grid gap-7 p-5 sm:p-7">
-                  <div>
-                    <label className={labelClassName}>
-                      Gender <span className="text-destructive">*</span>
-                    </label>
-                    <Controller
-                      control={control}
-                      name="gender"
-                      render={({ field }) => (
-                        <div className="mt-2 grid grid-cols-3 gap-2">
-                          {["male", "female", "other"].map((option) => {
-                            const active = field.value === option;
-                            return (
-                              <label
-                                key={option}
-                                className={`flex h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border text-sm font-bold capitalize transition ${active ? "border-primary bg-primary/10 text-primary ring-2 ring-primary/10" : "border-input bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"}`}
-                              >
-                                <input
-                                  type="radio"
-                                  className="sr-only"
-                                  value={option}
-                                  checked={active}
-                                  onChange={(event) =>
-                                    field.onChange(event.target.value)
-                                  }
-                                />
-                                {active && <Check className="size-3.5" />}
-                                {option}
-                              </label>
-                            );
-                          })}
-                        </div>
-                      )}
-                    />
-                    {errors.gender && (
-                      <p className={errorClassName}>{errors.gender.message}</p>
-                    )}
-                  </div>
+                <div className="admission-preferences">
 
-                  <div>
-                    <div className="flex items-center justify-between gap-3">
-                      <label className={labelClassName}>
-                        Choose course(s){" "}
+
+                  <div role="group" aria-labelledby="admission-courses-label">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <p id="admission-courses-label" className={labelClassName}>
+                        Choose courses{" "}
                         <span className="text-destructive">*</span>
-                      </label>
+                      </p>
                       <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-muted-foreground">
                         {selectedCount} selected
                       </span>
@@ -469,18 +483,24 @@ const Admission = () => {
                       control={control}
                       name="selectedCourses"
                       render={({ field }) => (
-                        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        <div className="admission-course-options">
                           {courses.map((course) => {
                             const courseId = String(course._id);
                             const checked = field.value?.includes(courseId);
                             return (
                               <label
                                 key={course._id}
-                                className={`group relative flex min-h-24 cursor-pointer items-start gap-3 rounded-xl border p-4 transition ${checked ? "border-primary bg-primary/5 ring-2 ring-primary/10" : "border-border bg-background hover:border-primary/40 hover:bg-muted/50"}`}
+                                className={`admission-course-option${checked ? " is-selected" : ""}`}
                               >
                                 <input
                                   type="checkbox"
-                                  className="sr-only"
+                                  name={field.name}
+                                  value={courseId}
+                                  onBlur={field.onBlur}
+                                  ref={field.ref}
+                                  aria-invalid={Boolean(errors.selectedCourses)}
+                                  aria-describedby={errors.selectedCourses ? "admission-courses-error" : undefined}
+                                  className="admission-choice-input"
                                   checked={checked}
                                   onChange={(event) => {
                                     const current = field.value || [];
@@ -493,11 +513,6 @@ const Admission = () => {
                                     );
                                   }}
                                 />
-                                <span
-                                  className={`mt-0.5 grid size-5 shrink-0 place-items-center rounded-md border transition ${checked ? "border-primary bg-primary text-primary-foreground" : "border-input bg-surface group-hover:border-primary/50"}`}
-                                >
-                                  {checked && <Check className="size-3.5" />}
-                                </span>
                                 <span className="min-w-0">
                                   <span className="block text-sm font-bold leading-5">
                                     {course.title}
@@ -510,16 +525,18 @@ const Admission = () => {
                             );
                           })}
                           {courses.length === 0 && (
-                            <div className="sm:col-span-2 rounded-xl border border-dashed border-border bg-muted/40 px-4 py-8 text-center text-sm font-semibold text-muted-foreground">
-                              Course options are loading or currently
-                              unavailable.
+                            <div className="admission-course-state" role={isCoursesError ? "alert" : "status"}>
+                              {isCoursesLoading ? <><Loader2 className="size-4 animate-spin" aria-hidden="true" />Loading courses...</> : isCoursesError ? <>
+                                <span>We could not load the courses.</span>
+                                <button type="button" className="cw-button cw-button-compact" onClick={refetchCourses}>Try again</button>
+                              </> : "No courses are available for admission right now."}
                             </div>
                           )}
                         </div>
                       )}
                     />
                     {errors.selectedCourses && (
-                      <p className={errorClassName}>
+                      <p id="admission-courses-error" className={errorClassName}>
                         {errors.selectedCourses.message}
                       </p>
                     )}
@@ -537,16 +554,18 @@ const Admission = () => {
                     <textarea
                       id="notes"
                       rows={4}
-                      className={`${inputClassName} h-auto min-h-28 resize-y py-3`}
+                      className={`${inputClassName} admission-notes`}
                       placeholder="Tell us about your goals, timing preferences, or any accommodations you need."
+                      aria-invalid={Boolean(errors.notes)}
+                      aria-describedby={errors.notes ? "admission-notes-error" : undefined}
                       {...register("notes")}
                     />
                     {errors.notes && (
-                      <p className={errorClassName}>{errors.notes.message}</p>
+                      <p id="admission-notes-error" className={errorClassName}>{errors.notes.message}</p>
                     )}
                   </div>
                 </div>
-                <div className="flex flex-col gap-4 border-t border-border bg-muted/45 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+                <div className="admission-submit-row">
                   <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
                     <ShieldCheck className="size-4 shrink-0 text-primary" />
                     {selectedCount
@@ -556,7 +575,7 @@ const Admission = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-60"
+                    className="cw-button cw-primary"
                   >
                     {isSubmitting ? (
                       <Loader2 className="size-4 animate-spin" />
@@ -569,16 +588,16 @@ const Admission = () => {
               </section>
             </form>
 
-            <aside className="grid gap-5 lg:sticky lg:top-24">
-              <section className="overflow-hidden rounded-2xl border border-border bg-surface">
-                <div className="bg-[#123d36] p-5 text-white">
+            <aside className="admission-sidebar">
+              <section className="admission-panel overflow-hidden">
+                <div className="admission-snapshot-header">
                   <div className="flex items-center gap-2">
-                    <ShieldCheck className="size-5 text-[#e4c77d]" />
+                    <ShieldCheck className="size-5 text-primary" />
                     <h3 className="text-base font-bold">
                       Application snapshot
                     </h3>
                   </div>
-                  <p className="mt-2 text-xs leading-5 text-white/65">
+                  <p className="mt-2 text-xs leading-5 text-muted-foreground">
                     A quick overview of what our team will review.
                   </p>
                 </div>
@@ -597,9 +616,7 @@ const Admission = () => {
                         Courses
                       </p>
                       <p className="mt-1.5 text-sm font-bold">
-                        {selectedCount ||
-                          admission?.selectedCourses?.length ||
-                          0}{" "}
+                        {selectedCount}{" "}
                         selected
                       </p>
                     </div>
@@ -647,7 +664,7 @@ const Admission = () => {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-border bg-surface p-5">
+              <section className="admission-panel p-5">
                 <h3 className="text-sm font-bold">Your next steps</h3>
                 <div className="mt-4 grid gap-4">
                   {[

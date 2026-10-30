@@ -95,6 +95,28 @@ const instructorCoursesApi = createApi({
   // Private workspace data is retained only while a screen subscribes to it.
   keepUnusedDataFor: 0,
   endpoints: (builder) => ({
+    getStudents: builder.query({
+      query: (params) => ({ url: `${root}/students`, params }),
+      extraOptions: { validate: (data) => Array.isArray(data?.items) && Number.isInteger(data?.pagination?.total) },
+      providesTags: [listTag],
+    }),
+    getReadiness: builder.query({
+      query: (args) => ({ url: `${courseUrl(args)}/readiness` }),
+      extraOptions: { validate: (data) => typeof data?.ready === "boolean" && Array.isArray(data.checks) },
+      providesTags: (_result, _error, args) => [courseTag(args), sectionTag(args)],
+    }),
+    updatePricing: builder.mutation({
+      query: ({ courseId, price }) => ({ url: `${courseUrl({ courseId })}/pricing`, method: "PATCH", body: price }),
+      invalidatesTags: onSuccess((args) => [courseTag(args), listTag]),
+    }),
+    publishCourse: builder.mutation({
+      query: (args) => ({ url: `${courseUrl(args)}/publish`, method: "POST", body: { confirm: true } }),
+      invalidatesTags: onSuccess((args) => [courseTag(args), sectionTag(args), listTag, { type: "InstructorLessons" }]),
+    }),
+    updateLesson: builder.mutation({
+      query: (args) => ({ url: lessonUrl(args), method: "PATCH", body: { title: args.title } }),
+      invalidatesTags: onSuccess((args) => [lessonTag(args), courseTag(args)]),
+    }),
     getLessonPlayback: builder.query({
       query: ({ courseId, sectionId, lessonId }) => ({ url: `/api/learning/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/lessons/${encodeURIComponent(lessonId)}/playback` }),
       extraOptions: { validate: (data) => typeof data.playbackUrl === "string" && typeof data.expiresAt === "string" },

@@ -1,3 +1,4 @@
+import SelectField from "@/components/ui/SelectField.jsx";
 import { WorkspacePage } from "@/components/lms/WorkspaceUI.jsx";
 import { DashboardMetrics } from "@/components/lms/DashboardParts.jsx";
 import { userMessage } from "@/lib/user-messages.js";
@@ -12,7 +13,6 @@ import {
   ChevronRight,
   Clock3,
   FileText,
-  Filter,
   Inbox,
   Loader2,
   Mail,
@@ -178,24 +178,13 @@ const AdminAdmissions = () => {
             </form>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <label className="flex h-11 items-center gap-2 rounded-lg border border-input bg-background px-3 text-sm font-semibold text-muted-foreground">
-                <Filter className="size-4" />
-                <select
-                  aria-label="Filter admissions by status"
-                  value={status}
-                  onChange={(event) => {
-                    setPage(1);
-                    setStatus(event.target.value);
-                  }}
-                  className="min-w-36 bg-transparent text-sm font-semibold text-foreground outline-none"
-                >
-                  {statusOptions.map((item) => (
-                    <option key={item || "all"} value={item}>
-                      {item ? formatStatus(item) : "All statuses"}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <SelectField
+                aria-label="Filter admissions by status"
+                value={status || "all"}
+                options={statusOptions.map((item) => ({ value: item || "all", label: item ? formatStatus(item) : "All statuses" }))}
+                onChange={(value) => { setPage(1); setStatus(value === "all" ? "" : value); }}
+                className="w-full sm:w-44"
+              />
 
               {(search || status) && (
                 <button
@@ -280,21 +269,14 @@ const AdminAdmissions = () => {
                     <td data-label="Status" role="cell" className="px-5 py-4 align-top">
                       <div className="grid gap-2">
                         <StatusBadge value={admission.status} />
-                        <select
+                        <SelectField
                           aria-label={`Admission status for ${admission.fullName || admission.email || "learner"}`}
                           value={admission.status || "pending"}
-                          onChange={(event) =>
-                            handleStatusChange(admission._id, event.target.value)
-                          }
+                          onChange={(value) => handleStatusChange(admission._id, value)}
                           disabled={isUpdatingStatus || Boolean(error)}
-                          className="h-9 w-36 rounded-lg border border-input bg-background px-3 text-xs font-bold text-foreground outline-none transition focus:border-primary focus:ring-3 focus:ring-primary/20 disabled:pointer-events-none disabled:opacity-60"
-                        >
-                          {statusOptions.filter(Boolean).map((item) => (
-                            <option key={item} value={item}>
-                              {formatStatus(item)}
-                            </option>
-                          ))}
-                        </select>
+                          options={statusOptions.filter(Boolean).map((item) => ({ value: item, label: formatStatus(item) }))}
+                          className="w-40 max-w-full"
+                        />
                       </div>
                     </td>
                     <td data-label="Actions" role="cell" className="px-5 py-4 text-right align-top">

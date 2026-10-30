@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import MarketingHero from "@/components/marketing/MarketingHero.jsx";
 import SectionIntro from "@/components/marketing/SectionIntro.jsx";
+import "./contact.css";
 
 const contactMethods = [
   {
@@ -45,7 +46,7 @@ const helpTopics = [
   { title: "Learning support", detail: "Get help with access, progress, or an active learning experience.", icon: Headphones },
 ];
 
-const inputClass = "mt-2 min-h-12 w-full rounded-xl border border-[#d8e2dd] bg-white px-4 text-sm font-semibold text-[#1f392f] outline-none transition placeholder:text-[#9aa7a1] focus:border-primary focus:ring-4 focus:ring-[#0f766e]/10";
+const inputClass = "contact-input";
 
 const Contact = () => {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
@@ -66,7 +67,7 @@ const Contact = () => {
   };
 
   return (
-    <main className="bg-[#fbfcfa] text-[#172b24]">
+    <main className="contact-page">
       <MarketingHero
         eyebrow="Contact QuranScholar"
         title="Get the right answer from the right team."
@@ -86,8 +87,8 @@ const Contact = () => {
         labelledBy="contact-title"
       />
 
-      <section className="px-4 py-14 sm:px-6 sm:py-18" aria-labelledby="contact-form-title">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,.72fr)_minmax(26rem,1.28fr)] lg:items-start">
+      <section className="public-page contact-section" aria-labelledby="contact-form-title">
+        <div className="contact-layout">
           <div>
             <SectionIntro
               id="contact-options-title"
@@ -95,65 +96,65 @@ const Contact = () => {
               title="Reach us in the way that works for you."
               description="Email gives us the clearest record of your request. Add your registered email and course name to help us respond faster."
             />
-            <div className="mt-7 grid gap-3">
+            <div className="contact-methods">
               {contactMethods.map(({ label, value, href, detail, icon: Icon }) => (
-                <article key={label} className="rounded-2xl border border-[#dfe6e2] bg-white p-5">
-                  <div className="flex items-start gap-4">
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#e6f2ed] text-primary"><Icon className="size-4.5" /></span>
-                    <div className="min-w-0">
-                      <p className="text-xs font-black uppercase tracking-[0.12em] text-[#718078]">{label}</p>
-                      {href ? <a href={href} className="mt-1 block break-words font-black text-[#173b31] no-underline hover:text-primary">{value}</a> : <p className="mt-1 font-black text-[#173b31]">{value}</p>}
-                      <p className="mt-1.5 text-xs font-medium leading-5 text-[#6b7b73]">{detail}</p>
+                <article key={label} className="contact-method">
+                  <div className="contact-method-content">
+                    <span className="public-icon"><Icon className="size-4.5" aria-hidden="true" /></span>
+                    <div className="contact-method-details">
+                      <p className="contact-method-label">{label}</p>
+                      {href ? <a href={href} className="contact-method-value">{value}</a> : <p className="contact-method-value">{value}</p>}
+                      <p className="contact-method-description">{detail}</p>
                     </div>
                   </div>
                 </article>
               ))}
             </div>
-            <div className="mt-4 flex items-start gap-3 rounded-2xl bg-[#eaf3ef] p-5 text-sm font-semibold leading-6 text-[#476057]">
+            <div className="contact-availability">
               <Clock3 className="mt-0.5 size-4.5 shrink-0 text-primary" />
               Support availability can vary across time zones. Email is monitored on business days.
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#dfe6e2] bg-white p-6 sm:p-8">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-primary">Send a message</p>
-            <h2 id="contact-form-title" className="mt-2 font-display text-3xl font-black tracking-[-0.04em]">How can we help?</h2>
-            <p className="mt-3 text-sm font-medium leading-7 text-[#687970]">Complete the form and your email app will open with the message prepared.</p>
+          <div className="public-panel contact-form-panel">
+            <p className="public-eyebrow">Send a message</p>
+            <h2 id="contact-form-title" className="contact-form-title">How can we help?</h2>
+            <p className="contact-form-description">Complete the form and your email app will open with the message prepared.</p>
 
-            <form className="mt-7 grid gap-5" onSubmit={handleSubmit}>
-              <div className="grid gap-5 sm:grid-cols-2">
-                <label className="text-sm font-black text-[#29443a]">Full name
+            <form className="contact-form" onSubmit={handleSubmit}>
+              <div className="contact-field-row">
+                <label className="contact-field">Full name
                   <input className={inputClass} name="name" value={form.name} onChange={updateField} autoComplete="name" placeholder="Your full name" required />
                 </label>
-                <label className="text-sm font-black text-[#29443a]">Email address
+                <label className="contact-field">Email address
                   <input className={inputClass} type="email" name="email" value={form.email} onChange={updateField} autoComplete="email" placeholder="you@example.com" required />
                 </label>
               </div>
-              <label className="text-sm font-black text-[#29443a]">Subject
+              <label className="contact-field">Subject
                 <input className={inputClass} name="subject" value={form.subject} onChange={updateField} placeholder="Course, admission, account…" required />
               </label>
-              <label className="text-sm font-black text-[#29443a]">Message
-                <textarea className={`${inputClass} min-h-36 resize-y py-3.5`} name="message" value={form.message} onChange={updateField} placeholder="Share enough detail for us to understand the request." required />
+              <label className="contact-field">Message
+                <textarea className={inputClass} name="message" value={form.message} onChange={updateField} placeholder="Share enough detail for us to understand the request." required />
               </label>
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="flex max-w-sm items-start gap-2 text-xs font-semibold leading-5 text-[#718078]"><ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-primary" />Do not include passwords, payment details, or other sensitive information.</p>
-                <button type="submit" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#0f766e] px-5 text-sm font-black text-white transition hover:bg-[#0b665f] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-primary">Prepare email <Send className="size-4" /></button>
+              <div className="contact-form-actions">
+                <p className="contact-privacy"><ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-primary" />Do not include passwords, payment details, or other sensitive information.</p>
+                <button type="submit" className="cw-button cw-primary">Prepare email <Send className="size-4" /></button>
               </div>
-              {notice && <p className="rounded-xl border border-[#bcd8cd] bg-[#edf7f3] px-4 py-3 text-sm font-bold leading-6 text-[#245e50]" role="status">{notice}</p>}
+              {notice && <p className="contact-notice" role="status" aria-live="polite">{notice}</p>}
             </form>
           </div>
         </div>
       </section>
 
-      <section className="border-y border-[#e1e7e3] bg-white px-4 py-14 sm:px-6 sm:py-18" aria-labelledby="contact-help-title">
-        <div className="mx-auto max-w-7xl">
+      <section className="contact-help" aria-labelledby="contact-help-title">
+        <div className="public-page contact-section">
           <SectionIntro id="contact-help-title" eyebrow="Help us route your request" title="Include the detail that matters." align="center" />
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
+          <div className="contact-help-grid">
             {helpTopics.map(({ title, detail, icon: Icon }) => (
-              <article key={title} className="rounded-2xl border border-[#dfe6e2] bg-[#fbfcfa] p-6 text-center"><Icon className="mx-auto size-5 text-primary" /><h3 className="mt-4 font-black">{title}</h3><p className="mt-2 text-sm font-medium leading-6 text-[#687970]">{detail}</p></article>
+              <article key={title} className="public-panel contact-help-card"><Icon className="size-5 text-primary" /><h3 className="contact-help-heading">{title}</h3><p className="contact-help-description">{detail}</p></article>
             ))}
           </div>
-          <div className="mt-8 text-center"><Link to="/courses" className="group inline-flex items-center gap-2 text-sm font-black text-primary no-underline">Browse the course catalog first <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></Link></div>
+          <div className="contact-help-actions"><Link to="/courses" className="cw-button">Browse the course catalog first <ArrowRight className="size-4" /></Link></div>
         </div>
       </section>
     </main>

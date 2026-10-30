@@ -1,0 +1,34 @@
+.qs-select-field { min-width: 0; }
+.qs-select-trigger, .qs-date-trigger { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-width: 0; min-height: 44px; padding: 10px 13px; border: 1px solid var(--input); border-radius: 7px; background: var(--surface); color: var(--foreground); font: inherit; font-size: .85rem; font-weight: 400; line-height: 1.5; text-align: left; cursor: pointer; transition: border-color 160ms var(--ease-out-ui), background-color 160ms var(--ease-out-ui); }
+.qs-select-trigger:hover:not(:disabled), .qs-date-trigger:hover:not(:disabled) { border-color: var(--primary); }
+.qs-select-trigger:focus-visible, .qs-date-trigger:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.qs-select-trigger[data-popup-open], .qs-date-trigger[data-popup-open] { border-color: var(--primary); }
+.qs-select-trigger[data-placeholder], .qs-date-trigger[data-placeholder] { color: var(--muted-foreground); }
+.qs-select-trigger:disabled, .qs-date-trigger:disabled { opacity: .6; cursor: not-allowed; }
+.qs-select-trigger[aria-invalid=true], .qs-date-trigger[aria-invalid=true] { border-color: var(--destructive); }
+.qs-select-trigger svg, .qs-date-trigger svg { flex-shrink: 0; }
+.qs-select-positioner { z-index: 120; outline: none; }
+.qs-select-popup { width: var(--anchor-width); min-width: 128px; max-width: calc(100vw - 24px); border: 1px solid var(--border); border-radius: 10px; padding: 4px; background: var(--surface); color: var(--foreground); box-shadow: 0 4px 16px rgb(0 0 0 / .08); overflow: hidden; outline: none; }
+.qs-select-list { max-height: min(288px, calc(var(--available-height) - 12px)); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; outline: none; }
+.qs-select-option { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 10px 12px; border-radius: 6px; font-size: .85rem; line-height: 1.5; cursor: default; outline: none; }
+.qs-select-option[data-highlighted] { background: color-mix(in srgb, var(--primary) 8%, var(--surface)); }
+.qs-select-option[data-selected] { color: var(--primary); }
+.qs-select-option[data-disabled] { opacity: .45; pointer-events: none; }
+.qs-date-positioner { z-index: 110; outline: none; }
+.qs-date-popup { width: 340px; max-width: calc(100vw - 24px); max-height: var(--available-height); overflow-y: auto; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--foreground); box-shadow: 0 4px 16px rgb(0 0 0 / .08); outline: none; }
+.qs-date-title { margin-bottom: 4px; font-size: .9rem; font-weight: 600; }
+.qs-date-description { margin-bottom: 14px; font-size: .75rem; line-height: 1.6; color: var(--muted-foreground); }
+.qs-date-calendar.rdp-root { --rdp-accent-color: var(--primary); --rdp-accent-background-color: var(--accent); --rdp-day-height: 40px; --rdp-day-width: 40px; --rdp-day_button-height: 38px; --rdp-day_button-width: 38px; --rdp-day_button-border-radius: 7px; --rdp-selected-border: 0; --rdp-selected-font: inherit; font-size: .85rem; }
+.qs-date-calendar .rdp-months { width: 100%; max-width: none; }
+.qs-date-calendar .rdp-month { width: 100%; }
+.qs-date-calendar .rdp-month_grid { width: 100%; table-layout: fixed; }
+.qs-date-calendar .rdp-month_caption { height: auto; padding-bottom: 12px; }
+.qs-date-calendar .rdp-dropdowns { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 8px; width: 100%; }
+.qs-date-calendar .rdp-day_button { margin-inline: auto; max-width: 100%; }
+.qs-date-calendar .rdp-selected .rdp-day_button { background: var(--primary); color: var(--primary-foreground); font-weight: 600; }
+.qs-date-calendar .rdp-day_button:hover:not(:disabled) { background: var(--muted); color: var(--foreground); }
+.qs-date-calendar .rdp-day_button:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
+.qs-date-calendar .rdp-weekday { color: var(--muted-foreground); font-weight: 500; }
+.qs-date-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+@media (max-width: 380px) { .qs-date-popup { padding: 12px; } .qs-date-calendar.rdp-root { --rdp-day-width: 36px; --rdp-day-height: 40px; --rdp-day_button-width: 34px; } }
+@media (prefers-reduced-motion: reduce) { .qs-select-trigger, .qs-date-trigger { transition: none; } }

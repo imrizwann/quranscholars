@@ -54,6 +54,8 @@ test("instructor RTK Query integration", async (t) => {
     const responseFor = (request) => {
       const url = new URL(request.url), path = url.pathname;
       if (request.method === "DELETE") return { deletionId: "deletion1", storageCleanupPending: true };
+      if (path.endsWith("/students")) return { items: [], pagination: { ...pagination, total: 0 } };
+      if (path.endsWith("/readiness")) return { ready: true, checks: [] };
       if (path.endsWith("/upload")) return { uploadId: "upload1", uploadUrl: "https://storage.example/video" };
       if (path.endsWith("/process")) return { status: "QUEUED", uploadId: "upload1" };
       if (request.method === "POST") return { courseId: "course1", sectionId: "section1", _id: "lesson1" };
@@ -75,6 +77,11 @@ test("instructor RTK Query integration", async (t) => {
       const cases = [
         ["getCategories", { page: 2 }, "GET", `${root}/categories?page=2&limit=50`],
         ["getCourses", { page: 2, search: "Quran & Arabic" }, "GET", `${root}?page=2&limit=12&sort=updated&search=Quran+%26+Arabic`],
+        ["getReadiness", target, "GET", `${root}/course1/readiness`],
+        ["getStudents", { page: 1, limit: 20, status: "active" }, "GET", `${root}/students?page=1&limit=20&status=active`],
+        ["updatePricing", { courseId: "course1", price: { original: 100, sale: 0 } }, "PATCH", `${root}/course1/pricing`, { original: 100, sale: 0 }],
+        ["publishCourse", target, "POST", `${root}/course1/publish`, { confirm: true }],
+        ["updateLesson", { ...target, title: "Renamed lesson", order: 99, isPreview: true }, "PATCH", `${root}/course1/sections/section1/lessons/lesson1`, { title: "Renamed lesson" }],
         ["getCourse", target, "GET", `${root}/course1`],
         ["getSections", { ...target, page: 2 }, "GET", `${root}/course1/sections?page=2&limit=20`],
         ["getLessons", { ...target, page: 3 }, "GET", `${root}/course1/sections/section1/lessons?page=3&limit=10`],

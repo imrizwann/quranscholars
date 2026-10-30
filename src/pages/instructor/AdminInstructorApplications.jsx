@@ -1,3 +1,4 @@
+import SelectField from "@/components/ui/SelectField.jsx";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Inbox, RefreshCw, Search, XCircle } from "lucide-react";
@@ -35,7 +36,7 @@ export default function AdminInstructorApplications() {
       <form onSubmit={event => { event.preventDefault(); filter({ search: input.trim() }); }}>
         <label htmlFor="instructor-search">Search applications</label><div className="review-search"><input id="instructor-search" value={input} maxLength={100} onChange={event => setInput(event.target.value)} placeholder="Name, email or specialization" /><button type="submit" className="cw-button"><Search size={16} aria-hidden="true" />Search</button></div>
       </form>
-      <label htmlFor="instructor-status">Status<select id="instructor-status" value={status} onChange={event => filter({ status: event.target.value })}><option value="">All statuses</option><option value="pending">Pending review</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></label>
+      <SelectField id="instructor-status" label="Status" className="w-full sm:w-48" value={status || "all"} onChange={(value) => filter({ status: value === "all" ? "" : value })} options={[{ value: "all", label: "All statuses" }, { value: "pending", label: "Pending review" }, { value: "approved", label: "Approved" }, { value: "rejected", label: "Rejected" }]} />
       {(status || search) && <button className="cw-button" type="button" onClick={() => { setInput(""); setParams({}); }}>Clear filters</button>}
     </section>
     {query.isError ? <ReviewError error={query.error} retry={query.refetch} busy={query.isFetching} /> : !data ? <div className="studio-panel" role="status">Loading applications...</div> : <section className="studio-panel admin-admissions review-list" aria-label="Instructor applications list" aria-busy={query.isFetching}>

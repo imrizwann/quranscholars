@@ -2,7 +2,10 @@ import { courseStatusLabel } from "@/lib/user-messages.js";
 import { useEffect, useRef, useState } from "react";
 import { Tabs } from "@base-ui/react/tabs";
 import SectionDetailsEditor from "@/features/instructor-courses/SectionDetailsEditor.jsx";
-import { CourseDetailsPanel, CoursePricingPanel, CoursePublishPanel } from "@/features/instructor-courses/StudioInformation.jsx";
+import { CourseDetailsPanel } from "@/features/instructor-courses/StudioInformation.jsx";
+import CoursePricingEditor from "@/features/instructor-courses/CoursePricingEditor.jsx";
+import CoursePublishing from "@/features/instructor-courses/CoursePublishing.jsx";
+import LessonTitleEditor from "@/features/instructor-courses/LessonTitleEditor.jsx";
 import { curriculumOrder, studioTabs } from "@/features/instructor-courses/studio-layout.js";
 import { Link, useBlocker, useNavigate, useParams } from "react-router-dom";
 import {
@@ -110,9 +113,13 @@ function Workspace({ courseId }) {
   const studio = useRef(null);
   const editingRef = useRef(false);
   const metadataEditingRef = useRef(false);
+  const pricingEditingRef = useRef(false);
+  const [pricingEditing, setPricingEditing] = useState(false);
+  function changePricingEditing(value) { pricingEditingRef.current = value; setPricingEditing(value); }
   const [metadataEditing, setMetadataEditing] = useState(false);
   function changeMetadataEditing(value) { metadataEditingRef.current = value; setMetadataEditing(value); }
   const [sectionEditing, setSectionEditing] = useState(false);
+  const [editingLessonId, setEditingLessonId] = useState(null);
   function changeSectionEditing(value) { editingRef.current = value; setSectionEditing(value); }
   function changeTab(value) {
     studio.current?.querySelectorAll("video, audio").forEach((media) => media.pause());
@@ -148,16 +155,16 @@ function Workspace({ courseId }) {
   const [deletions, setDeletions] = useState([]);
   const [deletion, setDeletion] = useState(null);
   const saving = useRef(false);
-  const blocker = useBlocker(() => busyRef.current || editingRef.current || metadataEditingRef.current);
+  const blocker = useBlocker(() => busyRef.current || editingRef.current || metadataEditingRef.current || pricingEditingRef.current);
   useEffect(() => {
-    if (!busy && !sectionEditing && !metadataEditing) return;
+    if (!busy && !sectionEditing && !metadataEditing && !pricingEditing) return;
     const warn = (event) => {
       event.preventDefault();
       event.returnValue = "";
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [busy, sectionEditing, metadataEditing]);
+  }, [busy, sectionEditing, metadataEditing, pricingEditing]);
 
   function refresh() {
     course.refresh();
@@ -261,7 +268,7 @@ function Workspace({ courseId }) {
         </div>
         <AsyncButton
           className="cw-button"
-          disabled={busy || sectionEditing}
+          disabled={busy || sectionEditing || metadataEditing || pricingEditing}
           loading={refreshing}
           loadingLabel="Refreshing"
           onClick={refresh}
@@ -308,7 +315,7 @@ function Workspace({ courseId }) {
             <Tabs.List className="studio-tabs cw-studio-tabs" aria-label="Course studio">
               {studioTabs.map(([value, label]) => <Tabs.Tab key={value} value={value}>{label}</Tabs.Tab>)}
             </Tabs.List>
-            <Tabs.Panel value="details" keepMounted className="cw-studio-panel"><CourseDetailsPanel course={data} disabled={busy || Boolean(course.error)} onBusy={setBusy} onEditing={changeMetadataEditing} /></Tabs.Panel>
+            <Tabs.Panel value="details" keepMounted className="cw-studio-panel"><CourseDetailsPanel course={data} disabled={busy || sectionEditing || pricingEditing || Boolean(course.error)} onBusy={setBusy} onEditing={changeMetadataEditing} /></Tabs.Panel>
             <Tabs.Panel value="curriculum" keepMounted className="cw-studio-panel">
           <div className="cw-curriculum-heading">
             <div>
@@ -341,7 +348,7 @@ function Workspace({ courseId }) {
                       (selected?._id === section._id && lessons.loading) ||
                       undefined
                     }
-                    disabled={busy || sectionEditing}
+                    disabled={busy || sectionEditing || metadataEditing || pricingEditing}
                     onClick={() => {
                       setSelected(section);
                       setLessonPage(1);
@@ -366,7 +373,7 @@ function Workspace({ courseId }) {
               <Pagination
                 pagination={sections.data?.pagination}
                 page={sectionPage}
-                disabled={busy || sectionEditing}
+                disabled={busy || sectionEditing || metadataEditing || pricingEditing}
                 loading={sections.loading}
                 onPage={(page) => {
                   setSectionPage(page);
@@ -423,7 +430,7 @@ function Workspace({ courseId }) {
                 </div>
               ) : (
                 <>
-                  <SectionDetailsEditor key={`section-editor:${selected._id}`} section={selected} disabled={busy || Boolean(course.error) || Boolean(sections.error)} saving={pendingAction === "update:section"} onSave={saveSection} onEditing={changeSectionEditing} />
+                  <SectionDetailsEditor key={`section-editor:${selected._id}`} section={selected} disabled={busy || Boolean(editingLessonId) || Boolean(course.error) || Boolean(sections.error)} saving={pendingAction === "update:section"} onSave={saveSection} onEditing={changeSectionEditing} />
                   {sectionEditing && <p className="cw-field-hint">Save or cancel your section edits before choosing another section.</p>}
                   <QueryMessage query={lessons} label="Loading lessons" compact />
                   {lessonItems.map((lesson, index) => (
@@ -477,7 +484,7 @@ function Workspace({ courseId }) {
                         </>
                       }
                     >
-                      <div className="cw-lesson-metadata cw-row cw-between"><span className="cw-status">{lesson.published ? "Published" : "Draft"}</span><span className="cw-field-hint">Lesson title editing is not available yet.</span></div>
+                      <LessonTitleEditor lesson={lesson} target={{ courseId, sectionId: selected._id, lessonId: lesson._id }} disabled={busy || sectionEditing || Boolean(lessons.error) || Boolean(course.error)} onBusy={setBusy} onEditing={(value) => { setEditingLessonId(value ? lesson._id : null); changeSectionEditing(value); }} />
                       <VideoUploadPanel
                         path={`${sectionPath}/lessons/${lesson._id}/video`}
                         target={{
@@ -514,7 +521,7 @@ function Workspace({ courseId }) {
                     pagination={lessons.data?.pagination}
                     page={lessonPage}
                     onPage={setLessonPage}
-                    disabled={busy}
+                    disabled={busy || sectionEditing}
                     loading={lessons.loading}
                   />
                   <AddTitleForm
@@ -522,7 +529,7 @@ function Workspace({ courseId }) {
                     label="Lesson"
                     loading={pendingAction === `create:${sectionPath}/lessons`}
                     disabled={
-                      busy || Boolean(lessons.error) || Boolean(course.error)
+                      busy || sectionEditing || Boolean(lessons.error) || Boolean(course.error)
                     }
                     onCreate={(title) => create("lesson", title)}
                   />
@@ -564,9 +571,9 @@ function Workspace({ courseId }) {
             />
           </CollapsiblePanel>
             </Tabs.Panel>
-            <Tabs.Panel value="pricing" keepMounted className="cw-studio-panel"><CoursePricingPanel course={data} /></Tabs.Panel>
+            <Tabs.Panel value="pricing" keepMounted className="cw-studio-panel"><CoursePricingEditor course={data} disabled={busy || metadataEditing || sectionEditing || Boolean(course.error)} onBusy={setBusy} onEditing={changePricingEditing} /></Tabs.Panel>
             <Tabs.Panel value="publish" keepMounted className="cw-studio-panel">
-              <CoursePublishPanel course={data} sectionsTotal={sections.data?.pagination?.total ?? data.stats?.totalSections} onReview={(tab) => {
+              <CoursePublishing course={data} active={activeTab === "publish"} disabled={busy || metadataEditing || pricingEditing || sectionEditing || Boolean(course.error)} onBusy={setBusy} onReview={(tab) => {
                 changeTab(tab);
                 requestAnimationFrame(() => studio.current?.querySelector('[role="tab"][aria-selected="true"]')?.focus());
               }} />

@@ -1,0 +1,43 @@
+.admission-page .admission-container { padding-top: 0; }
+.admission-layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; align-items: start; gap: 24px; scroll-margin-top: 96px; }
+.admission-layout:focus-visible { outline: 2px solid var(--ring); outline-offset: 4px; border-radius: 12px; }
+.admission-layout > *, .admission-fields > *, .admission-preferences > * { min-width: 0; }
+.admission-form { display: grid; gap: 20px; min-width: 0; }
+.admission-panel { min-width: 0; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.admission-section-header { display: flex; align-items: start; gap: 12px; padding: 20px; border-bottom: 1px solid var(--border); }
+.admission-section-header h2 { font-size: 1.1rem; font-weight: 650; }
+.admission-section-header p { font-size: .85rem; line-height: 1.65; }
+.admission-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding: 20px; }
+.admission-wide { grid-column: 1 / -1; }
+.admission-label { font-size: .85rem; font-weight: 600; }
+.admission-input { display: block; margin-top: 8px; width: 100%; min-width: 0; min-height: 44px; border: 1px solid var(--input); border-radius: 7px; padding: 10px 13px; background: var(--surface); color: var(--foreground); font-size: .85rem; line-height: 1.5; }
+.admission-input::placeholder { color: var(--muted-foreground); opacity: .85; }
+.admission-input:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.admission-input:read-only:not(select) { background: var(--muted); color: var(--muted-foreground); }
+.admission-email { padding-right: 40px; }
+.admission-preferences { display: grid; gap: 20px; padding: 20px; }
+.admission-gender-options { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.admission-gender-option, .admission-course-option { display: flex; align-items: center; gap: 10px; min-height: 44px; border: 1px solid var(--input); border-radius: 7px; padding: 10px 12px; background: var(--surface); cursor: pointer; }
+.admission-gender-option { font-size: .85rem; font-weight: 600; text-transform: capitalize; }
+.admission-course-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.admission-course-option { min-width: 0; align-items: start; overflow-wrap: anywhere; }
+.admission-course-option .admission-choice-input { margin-top: 3px; }
+.admission-choice-input { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--primary); cursor: pointer; }
+.admission-gender-option:hover, .admission-course-option:hover { border-color: var(--primary); }
+.admission-gender-option.is-selected, .admission-course-option.is-selected { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 5%, var(--surface)); }
+.admission-gender-option:has(:focus-visible), .admission-course-option:has(:focus-visible) { outline: 2px solid var(--ring); outline-offset: 2px; }
+.admission-course-state { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 16px; border: 1px solid var(--border); border-radius: 7px; background: var(--muted); font-size: .85rem; color: var(--muted-foreground); }
+.admission-notes { min-height: 100px; resize: vertical; }
+.admission-submit-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; border-top: 1px solid var(--border); }
+.admission-submit-row > div { flex: 1 1 220px; }
+.admission-submit-row .cw-button { flex-shrink: 0; }
+.admission-sidebar { display: grid; gap: 20px; position: sticky; top: 96px; }
+.admission-snapshot-header { padding: 20px; border-bottom: 1px solid var(--border); background: var(--muted); }
+@media (max-width: 1000px) { .admission-layout { grid-template-columns: minmax(0, 1fr); } .admission-sidebar { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } }
+@media (max-width: 600px) {
+  .admission-fields, .admission-course-options, .admission-sidebar { grid-template-columns: minmax(0, 1fr); }
+  .admission-section-header, .admission-fields, .admission-preferences { padding: 16px; }
+  .admission-submit-row { padding: 16px; }
+  .admission-submit-row .cw-button { width: 100%; }
+}
+

@@ -59,12 +59,15 @@
 :root {
   --background: #fcfcfa;
   --surface: #ffffff;
+  --surface-alt: var(--muted);
   --foreground: #18201d;
+  --faint-foreground: #998a76;
   --card-foreground: #18201d;
-  --popd: #ffffff;
-  --carover: #ffffff;
+  --card: var(--surface);
+  --popover: var(--surface);
   --popover-foreground: #18201d;
   --primary: #0f766e;
+  --primary-hover: #115e59;
   --primary-foreground: #ffffff;
   --secondary: #f1f4f2;
   --secondary-foreground: #25312c;
@@ -83,6 +86,7 @@
   --info-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
+  --danger: var(--destructive);
 
   --border: #e3e8e5;
   --border-strong: #cbb593;
