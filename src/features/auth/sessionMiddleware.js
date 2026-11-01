@@ -1,4 +1,5 @@
 import fileUploadApi from "../../services/api/user/fileUploadApis.js";
+import learnerApi from "../../services/api/user/learnerApi.js";
 import admissionApis from "../../services/api/user/admissionApis.js";
 import adminAdmissionApis from "../../services/api/admin/adminAdmissionApis.js";
 import instructorApplicationApi from "../../services/api/user/instructorApplicationApi.js";
@@ -11,7 +12,7 @@ export const authSessionMiddleware = ({ getState, dispatch }) => (next) => (acti
   if (action.type === "user/setUser") {
     const current = getState().user?.user;
     if (previous?._id !== current?._id || previous?.role !== current?.role) {
-      for (const api of [fileUploadApi, admissionApis, adminAdmissionApis, instructorApplicationApi, adminInstructorApplicationsApi]) {
+      for (const api of [learnerApi, fileUploadApi, admissionApis, adminAdmissionApis, instructorApplicationApi, adminInstructorApplicationsApi]) {
         dispatch(api.util.getRunningQueriesThunk()).forEach((request) => request.abort());
         dispatch(api.util.getRunningMutationsThunk()).forEach((request) => request.abort());
         dispatch(api.util.resetApiState());

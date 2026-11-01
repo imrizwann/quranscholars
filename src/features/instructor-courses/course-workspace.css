@@ -110,6 +110,27 @@
 }
 .cw-item-heading { flex-wrap: nowrap; align-items: flex-start; }
 .cw-item-heading > div { flex: 1; min-width: 0; }
+.course-workspace .cw-curriculum-delete {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0;
+  gap: 0;
+  border-radius: 3px;
+  transition: background-color 160ms, color 160ms, border-color 160ms;
+}
+@media (pointer: coarse) {
+  .course-workspace .cw-curriculum-delete {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .course-workspace .cw-curriculum-delete { transition: none; }
+}
 .cw-empty { padding: 28px 12px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; color: var(--muted-foreground); font-size: .8rem; }
 .cw-empty svg { color: var(--primary); }
 .cw-empty-large { min-height: 290px; justify-content: center; }

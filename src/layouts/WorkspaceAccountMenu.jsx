@@ -19,6 +19,7 @@ export default function WorkspaceAccountMenu({ type }) {
   const base = type === "instructor" ? "/instructor" : "/dashboard";
   const links = [
     { to: "/profile", label: "My profile", icon: UserRound },
+    ...(user?.role === "instructor" ? [{ to: "/instructor/dashboard", label: "Instructor dashboard", icon: Presentation }] : []),
     ...(type === "admin" ? [] : [{ to: `${base}/settings`, label: "Account settings", icon: Settings }]),
     { to: type === "admin" ? "/admin/admissions" : type === "instructor" ? `${base}/courses` : `${base}/learning`, label: type === "admin" ? "Admissions" : type === "instructor" ? "Manage courses" : "My learning", icon: LayoutDashboard },
     { to: "/courses", label: "Browse courses", icon: BookOpen },
@@ -35,7 +36,7 @@ export default function WorkspaceAccountMenu({ type }) {
 
   return <Menu.Root open={open} onOpenChange={setOpen} modal={false}>
     <Menu.Trigger className="workspace-account" aria-label={`Account menu for ${name}`}>
-      <span className="workspace-account-name">{name}<small>{role}</small></span>
+      <span className="workspace-account-name">{name}</span>
       <span className="workspace-avatar" aria-hidden="true">
         <AvatarImage src={data?.smallUrl || data?.url} fallback={initials} size={37} />
       </span>

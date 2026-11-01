@@ -44,7 +44,7 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
       return Response.json({ success: true, data: { courses: [record], pagination: { page: 2, limit: 8, totalCourses: 33, totalPages: 5 }, filters: {} } });
     };
     const { api, Catalog, Detail, CourseVideo, VideoPreview, LoadingState, CardMedia } = await import(pathToFileURL(outputPath));
-    store = configureStore({ reducer: { [api.reducerPath]: api.reducer }, middleware: (getDefault) => getDefault().concat(api.middleware) });
+    store = configureStore({ reducer: { [api.reducerPath]: api.reducer, user: () => ({ user: null }) }, middleware: (getDefault) => getDefault().concat(api.middleware) });
     const render = (Component, url, path) => renderToStaticMarkup(React.createElement(Provider, { store },
       React.createElement(MemoryRouter, { initialEntries: [url] }, React.createElement(Routes, null,
         React.createElement(Route, { path, element: React.createElement(Component) })))));
@@ -64,7 +64,7 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
     assert.match(detail, /Instructor not listed/);
     assert.match(detail, /Lesson count not listed/);
     assert.match(detail, /The lesson outline is not available yet/);
-    assert.match(detail, /Enrollment coming soon/);
+    assert.match(detail, /Sign in to enroll/);
     assert.match(detail, /No trailer available/);
     assert.doesNotMatch(detail, /aria-label="Preview course trailer"|Preview this course/);
     assert.doesNotMatch(detail, /Verified learner|undefined|\[object Object\]/);

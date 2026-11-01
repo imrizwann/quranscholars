@@ -10,10 +10,12 @@ const paymentApi = createApi({
   reducerPath: "paymentApi",
   baseQuery: apiBaseQuery,
   keepUnusedDataFor: 0,
+  tagTypes: ["CourseAccess", "LearningLibrary"],
   endpoints: (builder) => ({
     getLearningLibrary: builder.query({
       query: ({ page = 1, limit = 12 } = {}) => ({ url: "/api/purchases/library", params: { page, limit } }),
       transformResponse: unwrap,
+      providesTags: ["LearningLibrary"],
     }),
     // Generate crypto.randomUUID() once per checkout attempt; reuse that key for
     // network retries. Persist it per account/course if checkout must survive reload.
@@ -23,14 +25,16 @@ const paymentApi = createApi({
         url: "/api/payments/checkout", method: "POST", body: { courseId, idempotencyKey }, timeout: 30_000,
       }),
       transformResponse: unwrap,
+      invalidatesTags: (result, _error, { courseId }) => result?.state === "paid" ? [{ type: "CourseAccess", id: courseId }, "LearningLibrary"] : [],
     }),
     getCoursePaymentStatus: builder.query({
-      query: (intentId) => `/api/payments/${encodeURIComponent(intentId)}`,
+      query: (intentId) => ({ url: `/api/payments/${encodeURIComponent(intentId)}`, timeout: 15_000 }),
       transformResponse: unwrap,
     }),
     getCourseAccess: builder.query({
-      query: (courseId) => `/api/purchases/${encodeURIComponent(courseId)}/access`,
+      query: (courseId) => ({ url: `/api/purchases/${encodeURIComponent(courseId)}/access`, timeout: 15_000 }),
       transformResponse: unwrap,
+      providesTags: (_result, _error, courseId) => [{ type: "CourseAccess", id: courseId }],
     }),
   }),
 });

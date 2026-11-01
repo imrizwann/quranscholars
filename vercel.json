@@ -1,1 +1,21 @@
-{ "routes": [{ "src": "/[^.]+", "dest": "/", "status": 200 }] }
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://quranscholars-apis.vercel.app/api/:path*"
+    },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/api/:path*",
+      "headers": [
+        { "key": "Cache-Control", "value": "private, no-store" },
+        { "key": "CDN-Cache-Control", "value": "no-store" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store" },
+        { "key": "x-vercel-enable-rewrite-caching", "value": "0" }
+      ]
+    }
+  ]
+}

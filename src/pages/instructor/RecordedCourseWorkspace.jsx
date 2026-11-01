@@ -209,12 +209,12 @@ function Workspace({ courseId }) {
   }
   function remove(path, label, target = { courseId }) {
     if (saving.current || busyRef.current) return;
+    setError("");
     setDeletion({ path, label, target });
   }
   async function confirmDeletion() {
     if (!deletion || saving.current || busyRef.current) return;
     const { path, label, target } = deletion;
-    setDeletion(null);
     saving.current = true;
     setBusy(true);
     setPendingAction(`delete:${path}`);
@@ -227,6 +227,7 @@ function Workspace({ courseId }) {
         video: deleteVideo,
       };
       const result = await mutations[label](target).unwrap();
+      setDeletion(null);
       if (label === "course") {
         // Finish the local operation before navigating through the upload guard.
         setBusy(false);
@@ -399,7 +400,8 @@ function Workspace({ courseId }) {
                 </div>
                 {selected && (
                   <AsyncButton
-                    className="cw-button cw-danger cw-icon-button"
+                    className="cw-button cw-danger cw-icon-button cw-curriculum-delete"
+                    aria-haspopup="dialog"
                     aria-label={`Delete section: ${selected.title}`}
                     title="Delete section"
                     loading={pendingAction === `delete:${sectionPath}`}
@@ -416,7 +418,7 @@ function Workspace({ courseId }) {
                       })
                     }
                   >
-                    <Trash2 size={15} aria-hidden="true" />
+                    <Trash2 size={14} aria-hidden="true" />
                   </AsyncButton>
                 )}
               </div>
@@ -452,7 +454,8 @@ function Workspace({ courseId }) {
                         <>
                           <VideoStatus video={lesson.video} />
                           <AsyncButton
-                            className="cw-button cw-danger cw-icon-button"
+                            className="cw-button cw-danger cw-icon-button cw-curriculum-delete"
+                            aria-haspopup="dialog"
                             aria-label={`Delete lesson: ${lesson.title}`}
                             title="Delete lesson"
                             loading={
@@ -479,7 +482,7 @@ function Workspace({ courseId }) {
                               )
                             }
                           >
-                            <Trash2 size={15} aria-hidden="true" />
+                            <Trash2 size={14} aria-hidden="true" />
                           </AsyncButton>
                         </>
                       }
@@ -605,10 +608,14 @@ function Workspace({ courseId }) {
         title={`Delete this ${deletion?.label || "item"}?`}
         description={`${deletion?.label === "course" ? "The course, its sections, lessons and videos will be removed. " : deletion?.label === "section" ? "This section and all its lessons and videos will be removed. " : deletion?.label === "lesson" ? "This lesson and its video will be removed. " : "This video will be removed. "}This cannot be undone.`}
         confirmLabel={`Delete ${deletion?.label || "item"}`}
+        busy={busy && pendingAction.startsWith("delete:")}
+        busyLabel={`Deleting ${deletion?.label || "item"}`}
         danger
         onCancel={() => setDeletion(null)}
         onConfirm={confirmDeletion}
-      />
+      >
+        {error && <p className="qs-confirm-error" role="alert">{error}</p>}
+      </ConfirmationModal>
       <ConfirmationModal
         open={blocker.state === "blocked"}
         title="Leave this page?"
