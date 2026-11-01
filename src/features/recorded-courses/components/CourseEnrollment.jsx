@@ -8,6 +8,7 @@ import paymentApi, { useCreateCourseCheckoutMutation, useGetCourseAccessQuery, u
 import { useEnrollFreeCourseMutation } from "@/services/api/user/learnerApi.js";
 import { checkoutAttempt, hostedCheckoutUrl, readCheckout, saveCheckout } from "@/features/payments/checkout-session.js";
 import { userMessage } from "@/lib/user-messages.js";
+import { enrollmentFailureMessage } from "@/features/payments/enrollment-feedback.js";
 
 export default function CourseEnrollment({ course }) {
   const user = useSelector(state => state.user.user);
@@ -68,7 +69,7 @@ function EnrollmentAction({ course, user }) {
       }
       if (mounted.current) await access.refetch();
     } catch (failure) {
-      if (mounted.current) setError(failure?.status === 404 ? "This course is not open for enrollment yet." : failure?.status === 503 ? "Enrollment is temporarily unavailable. Please try again later. If you already started payment, retry here to resume the same checkout." : userMessage(failure));
+      if (mounted.current) setError(enrollmentFailureMessage(failure));
     } finally { lock.current = false; }
   }
 
