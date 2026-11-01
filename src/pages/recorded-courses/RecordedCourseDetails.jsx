@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowUpRight, BookOpen, Check, ChevronRight, Clock3, Globe2, GraduationCap, Layers3, LockKeyhole, MessageCircle, MonitorPlay, PlayCircle, Signal, Star, Users, VideoOff } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, BookOpen, Check, ChevronRight, Clock3, Globe2, GraduationCap, Layers3, MessageCircle, MonitorPlay, PlayCircle, Signal, Star, Users, VideoOff } from "lucide-react";
 import AppLoader from "@/components/feedback/AppLoader.jsx";
 import LoadingState from "@/components/feedback/LoadingState.jsx";
 import CoursePrice from "@/features/recorded-courses/components/CoursePrice.jsx";
+import CourseEnrollment from "@/features/recorded-courses/components/CourseEnrollment.jsx";
 import CourseRating from "@/features/recorded-courses/components/CourseRating.jsx";
 import CourseVideo from "@/features/recorded-courses/components/CourseVideo.jsx";
 import PublicCourseCurriculum from "@/features/recorded-courses/components/PublicCourseCurriculum.jsx";
@@ -80,8 +81,7 @@ function CourseDetailsContent({ course, catalogUrl, catalogState, relatedCourses
           <div className="cd-enrollment">
             <p className="cd-eyebrow">Your next chapter</p><h2>Start learning at your pace</h2>
             <div className="cd-price"><CoursePrice price={course.price} size="large" />{course.price.discounted && <span className="cd-sale-label">Sale price</span>}</div>
-            <button className="cd-enroll-button" type="button" disabled>Enrollment coming soon<LockKeyhole aria-hidden="true" /></button>
-            <p className="cd-enrollment-note">Enrollment is not available yet. Explore the course before joining.</p>
+            <CourseEnrollment course={course} />
             {trailerSource && <a className="cd-preview-link" href="#course-preview"><PlayCircle aria-hidden="true" />Watch the course trailer</a>}
             <div className="cd-facts"><h3>Course at a glance</h3><dl>
               <div><dt><MonitorPlay aria-hidden="true" />Format</dt><dd>Recorded lessons</dd></div>
