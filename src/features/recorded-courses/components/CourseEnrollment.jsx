@@ -31,6 +31,7 @@ function EnrollmentAction({ course, user }) {
   });
   const payment = status.currentData || latest;
   const free = course.price.current === 0;
+  const mockCheckout = access.currentData?.mockCheckoutAvailable === true;
   const active = access.currentData?.canAccessCourse === true && !access.error;
   const busy = enrolling.isLoading || paying.isLoading;
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
@@ -71,16 +72,17 @@ function EnrollmentAction({ course, user }) {
     } finally { lock.current = false; }
   }
 
-  if (active) return <><p className="cd-enrollment-status" role="status"><CheckCircle2 size={17} />You have access to this course</p><Link className="cw-button cw-primary cd-enrollment-action" to={`/learn/${encodeURIComponent(course.slug)}`}>Start learning<ArrowRight size={16} /></Link><Link className="cd-preview-link" to="/dashboard/learning">My learning</Link></>;
+  if (active) return <><p className="cd-enrollment-status" role="status"><CheckCircle2 size={17} />You have access to this course</p>{mockCheckout && !free && <p className="cd-enrollment-note">Test payments are enabled. Simulated purchases do not charge money.</p>}<Link className="cw-button cw-primary cd-enrollment-action" to={`/learn/${encodeURIComponent(course.slug)}`}>Start learning<ArrowRight size={16} /></Link><Link className="cd-preview-link" to="/dashboard/learning">My learning</Link></>;
   if (access.isLoading || (!access.currentData && access.isFetching)) return <LoadingState variant="inline" label="Checking course access" />;
   if (access.error) return <div className="cd-enrollment-feedback" role="alert"><p>{userMessage(access.error)}</p><AsyncButton className="cw-button" loading={access.isFetching} loadingLabel="Checking access" onClick={access.refetch}>Check access again</AsyncButton></div>;
   if (user.role === "instructor" && String(course.instructor.id) === String(user._id)) return <Link className="cw-button cw-primary cd-enrollment-action" to={`/instructor/courses/${course.id}`}>Open course studio<ArrowRight size={16} /></Link>;
   return <div>
-    {payment?.state === "paid" ? <><p className="cd-enrollment-status" role="status">Payment confirmed. Checking your course access.</p><AsyncButton className="cw-button" loading={access.isFetching} loadingLabel="Checking access" onClick={access.refetch}>Check course access</AsyncButton></> : payment?.state === "review_required" ? <p className="cd-enrollment-feedback" role="status">Your payment needs review. Please <Link to="/contact">contact our team</Link> before paying again.</p> : <>
+    {mockCheckout && !free && <p className="cd-enrollment-feedback" role="status"><strong>Test purchase</strong><br />No payment will be charged. This enrollment is for testing.</p>}
+    {payment?.state === "paid" ? <><p className="cd-enrollment-status" role="status">{payment.isMockPayment ? mockCheckout ? "Test purchase completed. Checking your course access." : "Test payments are disabled. This simulated purchase no longer grants course access." : "Payment confirmed. Checking your course access."}</p><AsyncButton className="cw-button" loading={access.isFetching} loadingLabel="Checking access" onClick={access.refetch}>Check course access</AsyncButton></> : payment?.state === "review_required" ? <p className="cd-enrollment-feedback" role="status">Your payment needs review. Please <Link to="/contact">contact our team</Link> before paying again.</p> : <>
       {payment?.state === "pending" && <p className="cd-enrollment-note" role="status">Your payment is awaiting confirmation. If you have already paid, check its status before continuing.</p>}
       {["failed", "refunded", "disputed"].includes(payment?.state) && <p className="cd-enrollment-note" role="status">{payment.state === "failed" ? "The payment was not completed." : "This payment no longer provides course access."}</p>}
-      <AsyncButton className="cw-button cw-primary cd-enrollment-action" loading={busy} loadingLabel={free && !intentId ? "Enrolling" : "Preparing checkout"} disabled={Boolean(intentId && status.isLoading) || access.isFetching} onClick={join}>{payment?.state === "pending" ? "Continue payment" : free && !intentId ? "Enroll for free" : "Buy course"}<ArrowRight size={16} /></AsyncButton>
-      <p className="cd-enrollment-note">{free && !intentId ? "Join now and learn at your own pace." : "Course access starts after payment is confirmed."}</p>
+      <AsyncButton className="cw-button cw-primary cd-enrollment-action" loading={busy} loadingLabel={free && !intentId ? "Enrolling" : mockCheckout ? "Completing test purchase" : "Preparing checkout"} disabled={Boolean(intentId && status.isLoading) || access.isFetching} onClick={join}>{payment?.state === "pending" ? "Continue payment" : free && !intentId ? "Enroll for free" : mockCheckout ? "Complete test purchase" : "Buy course"}<ArrowRight size={16} /></AsyncButton>
+      <p className="cd-enrollment-note">{free && !intentId ? "Join now and learn at your own pace." : mockCheckout ? "Your test course will appear in My learning after enrollment." : "Course access starts after payment is confirmed."}</p>
     </>}
     {intentId && !active && <AsyncButton className="cw-button cd-payment-check" loading={status.isFetching} loadingLabel="Checking payment" onClick={() => status.refetch()}>Check payment status</AsyncButton>}
     {(error || status.error) && <p className="cd-enrollment-feedback" role="alert">{error || "We could not check your payment. Try again; do not start a second payment."}</p>}
