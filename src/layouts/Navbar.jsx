@@ -533,6 +533,10 @@ const Navbar = () => {
                       <Sparkles />
                       <span>Admission</span>
                     </Link>
+                    {user?.role === "instructor" && <Link
+                      className="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-surface-alt hover:text-foreground"
+                      onClick={handleUserProfileDropdownToggle} to="/instructor/dashboard"
+                    ><MdDashboard aria-hidden="true" /><span>Instructor dashboard</span></Link>}
                     {isAdmin && (
                       <Link
                         className="flex min-h-9 w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold leading-none text-muted-foreground no-underline transition-colors duration-200 hover:bg-surface-alt hover:text-foreground [&_svg]:size-4"
@@ -973,6 +977,10 @@ const Navbar = () => {
                   >
                     Admission <Sparkles />
                   </Link>
+                  {user?.role === "instructor" && <Link
+                    className="flex min-h-11 items-center justify-between gap-3 rounded-md px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-surface-alt hover:text-foreground"
+                    onClick={closeMobileMenu} to="/instructor/dashboard"
+                  >Instructor dashboard <MdDashboard aria-hidden="true" /></Link>}
                   {isAdmin && (
                     <Link
                       className="flex min-h-11 items-center justify-between gap-3 rounded-md px-3 py-2 text-[0.95rem] font-bold text-muted-foreground no-underline transition-colors duration-200 hover:bg-surface-alt hover:text-foreground [&_svg]:size-[1.1rem]"

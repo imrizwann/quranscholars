@@ -7,6 +7,10 @@ import { setUser } from "../../store/slices/userSlice.js";
 export async function logoutSession(logout, dispatch) {
   // Keep the current session intact if the server cannot clear its cookie.
   await logout().unwrap();
+  clearAuthenticatedState(dispatch);
+}
+
+export function clearAuthenticatedState(dispatch) {
   for (const api of [userAuthApi, fileUploadApi, admissionApis, adminAdmissionApis]) {
     dispatch(api.util.getRunningQueriesThunk()).forEach((request) => request.abort());
     dispatch(api.util.getRunningMutationsThunk()).forEach((request) => request.abort());
