@@ -119,7 +119,7 @@ const instructorCoursesApi = createApi({
     }),
     getLessonPlayback: builder.query({
       query: ({ courseId, sectionId, lessonId }) => ({ url: `/api/learning/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/lessons/${encodeURIComponent(lessonId)}/playback` }),
-      extraOptions: { validate: (data) => typeof data.playbackUrl === "string" && typeof data.expiresAt === "string" },
+      extraOptions: { validate: (data) => typeof data.playbackUrl === "string" && typeof data.playbackToken === "string" && typeof data.expiresAt === "string" },
       providesTags: (_result, _error, args) => [lessonTag(args), courseTag(args)],
     }),
     getCategories: builder.query({
