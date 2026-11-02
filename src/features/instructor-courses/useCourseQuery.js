@@ -33,9 +33,10 @@ export default function useCourseQuery(
   });
   const state = useQueryState(args, { skip });
   const interval = pollingInterval(state.currentData, state.error, shouldPoll);
+  const live = useSelector(store => store.realtime?.connected === true);
   const query = useQuery(args, {
     skip,
-    pollingInterval: canPoll ? interval : 0,
+    pollingInterval: canPoll ? (live && interval > 0 ? Math.max(60_000, interval) : interval) : 0,
     skipPollingIfUnfocused: true,
     refetchOnFocus: interval > 0,
     refetchOnReconnect: true,

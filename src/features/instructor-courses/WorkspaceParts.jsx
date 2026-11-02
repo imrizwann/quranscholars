@@ -1,6 +1,7 @@
 import { readableError } from "./courseApi.js";
 import LoadingState from "@/components/feedback/LoadingState.jsx";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
+import Spinner from "@/components/feedback/Spinner.jsx";
 import { useEffect, useState } from "react";
 
 export function QueryMessage({ query, label = "Loading course content", compact = false }) {
@@ -17,7 +18,9 @@ export function Pagination({ pagination, page, onPage, disabled, loading = false
 }
 
 const labels = { NOT_UPLOADED: "No video", UPLOADING: "Waiting for upload", UPLOADED: "Ready to prepare", QUEUED: "Waiting to prepare", PROCESSING: "Preparing video", PROCESSED: "Finalizing", COMPLETED: "Ready", FAILED: "Needs attention", DELETING: "Deleting" };
-export function VideoStatus({ video }) {
+export function VideoStatus({ video, activity }) {
   const status = video?.status || "NOT_UPLOADED";
-  return <span className="cw-status" data-status={status}>{status === "QUEUED" && video?.waitingForQueue ? "Waiting to prepare" : labels[status] || "Updating video"}</span>;
+  const working = Boolean(activity) || ["QUEUED", "PROCESSING", "PROCESSED", "DELETING"].includes(status);
+  const label = activity ? activity.phase === "Uploading" ? `Uploading ${Math.max(0, Math.min(100, Math.round(activity.progress)))}%` : activity.phase === "Starting upload" ? "Starting upload" : "Confirming preparation" : status === "QUEUED" && video?.waitingForQueue ? "Waiting to prepare" : labels[status] || "Updating video";
+  return <span className="cw-status" data-status={activity ? "UPLOADING" : status}>{working && <Spinner size={12} decorative />}{label}</span>;
 }

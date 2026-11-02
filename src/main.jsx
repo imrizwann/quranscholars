@@ -10,7 +10,6 @@ import AdminRoute from "@/components/guards/AdminRoute.jsx";
 import InstructorCourseAccess from "@/features/instructor-courses/InstructorCourseAccess.jsx";
 import NotLoggedIn from "@/components/guards/NotLoggedIn.jsx";
 import CourseRouteRedirect from "@/components/navigation/CourseRouteRedirect.jsx";
-import WebSocketClient from "@/realtime/WebSocketClient.jsx";
 import BerrySandLmsDemo from "./assets/example themes/berry-sand-lms";
 const Home = lazy(() => import("@/pages/home/Home.jsx"));
 const Services = lazy(() => import("@/pages/services/Services.jsx"));
@@ -296,10 +295,6 @@ const router = createBrowserRouter([
             element: <YouthPrograms />,
           },
         ],
-      },
-      {
-        path: "websocket-test",
-        element: <WebSocketClient />,
       },
       {
         path: "blogs",

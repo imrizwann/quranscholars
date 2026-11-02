@@ -217,3 +217,67 @@
   .cw-studio .cw-lesson { padding: 15px; }
   .cw-readiness-list > li { align-items: start; }
 }
+
+/* Secondary curriculum actions keep the existing compact control sizing. */
+.cw-actions-trigger { display: grid; place-items: center; flex: 0 0 28px; width: 28px; height: 28px; padding: 0; border: 1px solid var(--border); border-radius: 3px; background: transparent; color: var(--muted-foreground); cursor: pointer; }
+.cw-actions-trigger:hover, .cw-actions-trigger[data-popup-open] { color: var(--primary); border-color: var(--primary); background: color-mix(in srgb, var(--primary) 6%, var(--surface)); }
+.cw-actions-trigger:focus-visible, .cw-actions-popup [role=menuitem]:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+.cw-actions-positioner { z-index: 120; }
+.cw-actions-popup { min-width: 190px; max-width: calc(100vw - 24px); padding: 5px; border: 1px solid var(--border); border-radius: 8px; color: var(--foreground); background: var(--surface); box-shadow: none; font-family: var(--font-body); }
+.cw-actions-item { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 8px 10px; border-radius: 5px; outline: none; font-size: .8125rem; cursor: pointer; }
+.cw-actions-item[data-highlighted] { background: var(--muted); }
+.cw-actions-item[data-danger] { color: var(--destructive); }
+.cw-actions-item[data-disabled] { opacity: .5; cursor: default; }
+.cw-actions-item > svg { flex-shrink: 0; }
+.cw-actions-separator { height: 1px; margin: 4px 5px; background: var(--border); }
+.cw-lessons > .collapsible-panel-header { align-items: flex-start; }
+.cw-video-file { display: grid; justify-items: start; gap: 10px; }
+.cw-video-file > strong { font-size: .85rem; font-weight: 600; }
+.cw-video-upload > .cw-row:empty { display: none; }
+.cw-transfer { padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: color-mix(in srgb, var(--primary) 3%, var(--surface)); min-width: 0; }
+.cw-transfer-file { display: flex; align-items: flex-start; gap: 9px; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+.cw-transfer-file > svg { flex-shrink: 0; margin-top: 2px; color: var(--primary); }
+.cw-transfer-file > div { min-width: 0; display: grid; gap: 4px; }
+.cw-transfer-file strong { overflow-wrap: anywhere; font-size: .75rem; font-weight: 500; }
+.cw-transfer-file span { font-size: .7rem; color: var(--muted-foreground); }
+.cw-transfer-heading { display: flex; align-items: center; gap: 9px; color: var(--primary); }
+.cw-transfer-heading > svg { flex-shrink: 0; }
+.cw-transfer-heading > strong { font-size: .85rem; font-weight: 600; }
+.cw-transfer > p { font-size: .75rem; color: var(--muted-foreground); margin-top: 8px; }
+.cw-transfer[data-state=failed] { border-color: color-mix(in srgb, var(--destructive) 30%, var(--border)); background: color-mix(in srgb, var(--destructive) 3%, var(--surface)); }
+.cw-transfer[data-state=failed] .cw-transfer-heading { color: var(--destructive); }
+.cw-transfer-percent { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; font-size: .75rem; }
+.cw-transfer-percent > strong { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--primary); }
+.cw-video .cw-transfer-progress { display: block; width: 100%; height: 6px; margin: 8px 0 0; border: 0; border-radius: 6px; overflow: hidden; appearance: none; background: var(--border); color: var(--primary); }
+.cw-transfer-progress::-webkit-progress-bar { background: var(--border); }
+.cw-transfer-progress::-webkit-progress-value { background: var(--primary); }
+.cw-transfer-progress::-moz-progress-bar { background: var(--primary); }
+.cw-transfer-indeterminate { position: relative; height: 5px; overflow: hidden; margin-top: 14px; border-radius: 6px; background: var(--border); }
+.cw-transfer-indeterminate > span { position: absolute; inset-block: 0; left: 0; width: 30%; border-radius: inherit; background: var(--primary); animation: cw-transfer-pulse 1.8s cubic-bezier(.4, 0, .2, 1) infinite; }
+@keyframes cw-transfer-pulse { from { transform: translateX(-110%); } to { transform: translateX(350%); } }
+.cw-transfer-steps { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 0 0; margin: 0; list-style: none; }
+.cw-transfer-steps li { display: flex; align-items: center; gap: 5px; color: var(--muted-foreground); font-size: .7rem; }
+.cw-transfer-steps li > span:first-child { display: grid; place-items: center; width: 18px; height: 18px; flex-shrink: 0; border: 1px solid var(--border); border-radius: 50%; font-size: 10px; font-variant-numeric: tabular-nums; }
+.cw-transfer-steps li[data-state=done], .cw-transfer-steps li[data-state=current] { color: var(--primary); }
+.cw-transfer-steps li[data-state=done] > span:first-child { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
+.cw-transfer-steps li[data-state=current] > span:first-child { border-color: var(--primary); }
+.cw-transfer-steps li[data-state=failed] { color: var(--destructive); }
+.cw-transfer-live { display: block; font-size: .7rem; color: var(--muted-foreground); margin-top: 12px; line-height: 1.6; }
+@media (pointer: coarse) { .cw-actions-trigger { flex-basis: 44px; width: 44px; height: 44px; } .cw-actions-item { min-height: 44px; } }
+@media (max-width: 600px) {
+  .cw-lesson > .collapsible-panel-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 10px; }
+  .cw-lesson > .collapsible-panel-header .collapsible-panel-actions { display: grid; grid-template-columns: auto auto; gap: 6px; }
+  .cw-lesson > .collapsible-panel-header .cw-status { grid-row: 2; grid-column: 1 / -1; justify-self: end; max-width: 100%; padding-inline: 6px; }
+  .cw-transfer { padding: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .cw-transfer-indeterminate > span { animation: none; left: 35%; } }
+
+.cw-transfer-file > div { flex: 1; }
+
+.cw-status { gap: 6px; }
+
+.cw-lessons > .collapsible-panel-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; }
+.cw-lesson .cw-video { margin-top: 12px; padding-top: 14px; }
+.cw-lesson .cw-video-layout { margin-top: 0; gap: 16px; }
+.cw-lesson .cw-video-file { padding: 14px; }
+.cw-video-preview { overflow: hidden; }

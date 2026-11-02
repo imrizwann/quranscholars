@@ -8,6 +8,7 @@ import { useMeQuery } from "@/services/api/user/userAuthApis.js";
 import AppLoader from "@/components/feedback/AppLoader.jsx";
 import DevelopmentWelcome from "@/components/feedback/DevelopmentWelcome.jsx";
 import RouteScrollManager from "@/components/navigation/RouteScrollManager.jsx";
+import WebSocketClient from "@/realtime/WebSocketClient.jsx";
 function App() {
   useMeQuery();
   useSessionRenewal();
@@ -22,6 +23,7 @@ function App() {
   return (
     <>
       <RouteScrollManager />
+      <WebSocketClient />
       <div>
         {!isWorkspace && <Navbar />}
         <div className={!isWorkspace ? "public-route-content" : undefined}>

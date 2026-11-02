@@ -32,6 +32,7 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import useProfilePhoto from "@/features/profile/useProfilePhoto.js";
 import AvatarImage from "@/features/profile/components/AvatarImage.jsx";
+import NotificationBell from "@/realtime/NotificationBell.jsx";
 import { useGetRecordedCoursesQuery } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
 import { cn } from "@/lib/utils.js";
 
@@ -459,6 +460,7 @@ const Navbar = () => {
         <div className="flex shrink-0 items-center justify-end gap-2 max-xl:hidden">
           {user ? (
             <>
+              <NotificationBell />
               <Link
                 className="inline-flex min-h-10 items-center justify-center rounded-md px-3 text-sm font-bold leading-none text-foreground no-underline transition-colors duration-200 hover:bg-surface-alt"
                 to="/donate"
@@ -702,6 +704,8 @@ const Navbar = () => {
         </AnimatePresence>
 
         {/* Mobile Menu Button */}
+        <div className="hidden items-center gap-2 max-xl:flex">
+        {user && <NotificationBell />}
         <button
           className="hidden size-10 place-items-center rounded-md border border-border bg-surface text-foreground max-xl:grid [&_svg]:size-5"
           ref={mobileMenuButtonRef}
@@ -715,6 +719,7 @@ const Navbar = () => {
         >
           <RxHamburgerMenu />
         </button>
+        </div>
       </nav>
 
       </header>
