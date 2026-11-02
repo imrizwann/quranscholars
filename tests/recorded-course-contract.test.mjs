@@ -4,6 +4,11 @@ import { adaptRecordedCourse, formatDuration, resolveCourseImage } from "../src/
 import { buildRecordedCourseQuery, normalizeRecordedCourseList, normalizeRecordedCourseDetail } from "../src/features/recorded-courses/services/recordedCourseContract.js";
 import { trailerPlaybackSource } from "../src/lib/trailer-playback.js";
 
+test("short processed videos show seconds and missing duration never appears as a zero-minute course", () => {
+  assert.equal(formatDuration(12), "12 sec"); assert.equal(formatDuration(24), "24 sec");
+  assert.equal(adaptRecordedCourse({ totalDuration: 0 }).durationLabel, "Duration not listed");
+});
+
 test("public and instructor trailers use the sibling playback URL without modifying signed queries", () => {
   const url = "https://video.example.test/course/trailer/master.m3u8?token=abc%2F123&expires=999";
   const course = { _id: "course-1", trailerVideo: { status: "COMPLETED", hls: { masterKey: "private/master.m3u8" } } };

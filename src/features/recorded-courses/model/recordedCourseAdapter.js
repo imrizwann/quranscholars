@@ -1,7 +1,9 @@
 import { trailerPlaybackSource } from "../../../lib/trailer-playback.js";
 
 const formatDuration = (totalSeconds = 0) => {
-  const totalMinutes = Math.round(Math.max(0, Number(totalSeconds) || 0) / 60);
+  const seconds = Math.max(0, Number(totalSeconds) || 0);
+  if (seconds > 0 && seconds < 60) return `${Math.max(1, Math.round(seconds))} sec`;
+  const totalMinutes = seconds > 0 ? Math.max(1, Math.round(seconds / 60)) : 0;
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   if (!hours) return `${minutes} min`;
@@ -92,7 +94,7 @@ const adaptRecordedCourse = (record = {}) => {
     totalDurationSeconds:
       record.totalDuration == null ? null : Number(record.totalDuration),
     durationLabel:
-      record.totalDuration == null
+      !(Number(record.totalDuration) > 0)
         ? "Duration not listed"
         : formatDuration(record.totalDuration),
     totalSections:

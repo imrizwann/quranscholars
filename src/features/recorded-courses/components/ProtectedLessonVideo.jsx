@@ -12,7 +12,7 @@ export default function ProtectedLessonVideo(props) {
   return <LessonVideo key={`${courseId}/${sectionId}/${lessonId}`} {...props} />;
 }
 
-function LessonVideo({ target, title = "Lesson preview", poster }) {
+function LessonVideo({ target, title = "Lesson preview", poster, startTime = 0, onPlaybackProgress, onPlaybackPlay, onPlaybackPause, onPlaybackSeek, onEnded }) {
   const query = instructorCoursesApi.endpoints.getLessonPlayback.useQuery(target, {
     pollingInterval: 120_000, refetchOnFocus: true, refetchOnReconnect: true, refetchOnMountOrArgChange: true,
   });
@@ -21,7 +21,8 @@ function LessonVideo({ target, title = "Lesson preview", poster }) {
   const refresh = useRef(query.refetch);
   const session = useRef(null);
   const player = useRef(null);
-  const position = useRef({ time: 0, playing: false });
+  const position = useRef({ time: Number.isFinite(startTime) && startTime > 0 ? startTime : 0, playing: false });
+  const restorePending = useRef(true);
   const [unsupported, setUnsupported] = useState(false);
   grant.current = query.currentData || null;
   refresh.current = query.refetch;
@@ -34,6 +35,7 @@ function LessonVideo({ target, title = "Lesson preview", poster }) {
   useEffect(() => () => { session.current?.dispose(); grant.current = null; }, []);
   const configure = useCallback((provider) => {
     if (!provider) return;
+    restorePending.current = true;
     session.current?.dispose();
     if (!isHLSProvider(provider)) { setUnsupported(true); return; }
     const requests = createPlaybackSession({
@@ -65,8 +67,10 @@ function LessonVideo({ target, title = "Lesson preview", poster }) {
   if (unsupported) return <div className="cw-preview-placeholder" role="status"><LockKeyhole size={28} aria-hidden="true" /><strong>Browser update needed</strong><p>Please use a current browser to watch this protected lesson.</p></div>;
   if (!source.current || denied) return <div className="cw-preview-placeholder" role={query.error ? "alert" : "status"}><LockKeyhole size={28} aria-hidden="true" /><strong>{denied ? "Lesson access required" : "Playback unavailable"}</strong><p>{query.error ? userMessage(query.error) : "Refresh to check your access to this lesson."}</p><button type="button" className="cw-button" disabled={query.isFetching} onClick={query.refetch}>{query.isFetching ? "Checking access…" : "Refresh playback"}</button></div>;
   return <div className="protected-lesson-video"><Suspense fallback={<div className="cw-preview-placeholder"><LoadingState label="Opening lesson" /></div>}><VideoPlayer src={source.current} crossOrigin="anonymous" title={title} poster={poster} className="cw-preview-player" playerRef={player} onProviderSetup={configure}
-    onTimeUpdate={() => { if (player.current?.currentTime > 0) position.current.time = player.current.currentTime; }}
-    onPlay={() => { position.current.playing = true; }} onPause={() => { if (player.current?.canPlay) position.current.playing = false; }}
-    onCanPlay={() => { if (player.current && position.current.time > 0 && player.current.currentTime < 1) { player.current.currentTime = position.current.time; if (position.current.playing) player.current.play().catch(() => {}); } }}
+    onTimeUpdate={() => { if (player.current && !restorePending.current) { position.current.time = player.current.currentTime; onPlaybackProgress?.({ currentTime: player.current.currentTime, duration: player.current.duration }); } }}
+    onPlay={() => { position.current.playing = true; onPlaybackPlay?.({ currentTime: player.current?.currentTime || 0 }); }} onPause={() => { if (player.current?.canPlay) position.current.playing = false; onPlaybackPause?.({ currentTime: player.current?.currentTime || 0 }); }}
+    onSeeked={() => { onPlaybackSeek?.({ currentTime: player.current?.currentTime || 0 }); }}
+    onCanPlay={() => { if (player.current && restorePending.current) { restorePending.current = false; const duration = player.current.duration; const time = Number.isFinite(duration) && duration > 0 && position.current.time >= duration - 2 ? 0 : position.current.time; if (time > 0) player.current.currentTime = time; if (position.current.playing) player.current.play().catch(() => {}); } }}
+    onEnded={() => { position.current.time = 0; position.current.playing = false; onEnded?.({ currentTime: player.current?.duration || 0 }); }}
     onRetry={query.refetch} errorMessage="Your video could not load. Try again to refresh your playback access." /></Suspense></div>;
 }

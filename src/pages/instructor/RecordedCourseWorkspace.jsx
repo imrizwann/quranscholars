@@ -2,6 +2,7 @@ import { courseStatusLabel } from "@/lib/user-messages.js";
 import { useEffect, useRef, useState } from "react";
 import { Tabs } from "@base-ui/react/tabs";
 import SectionDetailsEditor from "@/features/instructor-courses/SectionDetailsEditor.jsx";
+import SectionQuizEditor from "@/features/instructor-courses/SectionQuizEditor.jsx";
 import { CourseDetailsPanel } from "@/features/instructor-courses/StudioInformation.jsx";
 import CoursePricingEditor from "@/features/instructor-courses/CoursePricingEditor.jsx";
 import CoursePublishing from "@/features/instructor-courses/CoursePublishing.jsx";
@@ -119,8 +120,10 @@ function Workspace({ courseId }) {
   const [metadataEditing, setMetadataEditing] = useState(false);
   function changeMetadataEditing(value) { metadataEditingRef.current = value; setMetadataEditing(value); }
   const [sectionEditing, setSectionEditing] = useState(false);
+  const [quizEditing, setQuizEditing] = useState(false);
   const [editingLessonId, setEditingLessonId] = useState(null);
   function changeSectionEditing(value) { editingRef.current = value; setSectionEditing(value); }
+  function changeQuizEditing(value) { setQuizEditing(value); changeSectionEditing(value); }
   function changeTab(value) {
     studio.current?.querySelectorAll("video, audio").forEach((media) => media.pause());
     setActiveTab(value);
@@ -432,7 +435,7 @@ function Workspace({ courseId }) {
                 </div>
               ) : (
                 <>
-                  <SectionDetailsEditor key={`section-editor:${selected._id}`} section={selected} disabled={busy || Boolean(editingLessonId) || Boolean(course.error) || Boolean(sections.error)} saving={pendingAction === "update:section"} onSave={saveSection} onEditing={changeSectionEditing} />
+                  <SectionDetailsEditor key={`section-editor:${selected._id}`} section={selected} disabled={busy || quizEditing || Boolean(editingLessonId) || Boolean(course.error) || Boolean(sections.error)} saving={pendingAction === "update:section"} onSave={saveSection} onEditing={changeSectionEditing} />
                   {sectionEditing && <p className="cw-field-hint">Save or cancel your section edits before choosing another section.</p>}
                   <QueryMessage query={lessons} label="Loading lessons" compact />
                   {lessonItems.map((lesson, index) => (
@@ -536,6 +539,7 @@ function Workspace({ courseId }) {
                     }
                     onCreate={(title) => create("lesson", title)}
                   />
+                  <SectionQuizEditor key={`quiz:${selected._id}`} courseId={courseId} sectionId={selected._id} disabled={busy || (sectionEditing && !quizEditing) || Boolean(course.error) || Boolean(sections.error)} onBusy={setBusy} onEditing={changeQuizEditing} />
                 </>
               )}
             </section>

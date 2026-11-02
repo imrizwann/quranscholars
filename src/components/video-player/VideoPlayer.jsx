@@ -31,8 +31,9 @@ const PlayerCenterControl = () => {
   return <div className="player-center-controls"><PlayerPlayButton large /></div>;
 };
 
-const VideoPlayer = ({ src, title = "Course lesson", poster, tracks = [], thumbnails, className = "", autoPlay = false, muted = false, loop = false, playsInline = true, crossOrigin = "anonymous", onEnded, onTimeUpdate, aspectRatio = "16 / 9", errorMessage, playerRef, onProviderSetup, onCanPlay, onPlay, onPause, onRetry }) => {
+const VideoPlayer = ({ src, title = "Course lesson", poster, tracks = [], thumbnails, className = "", autoPlay = false, muted = false, loop = false, playsInline = true, crossOrigin = "anonymous", onEnded, onTimeUpdate, onSeeked, aspectRatio = "16 / 9", errorMessage, playerRef, onProviderSetup, onCanPlay, onPlay, onPause, onRetry }) => {
   const [attempt, setAttempt] = useState(0);
+  const [failedPoster, setFailedPoster] = useState(null);
   const sourceKey = typeof src === "string" ? src : src?.src;
   return (
     <MediaPlayer
@@ -49,15 +50,15 @@ const VideoPlayer = ({ src, title = "Course lesson", poster, tracks = [], thumbn
       onProviderChange={(provider) => { configureProvider(provider); onProviderSetup?.(provider); }}
       autoPlay={autoPlay} muted={muted} loop={loop} playsInline={playsInline} crossOrigin={crossOrigin}
       keyShortcuts={{ togglePaused: "k Space", toggleMuted: "m", toggleFullscreen: "f", seekBackward: "ArrowLeft", seekForward: "ArrowRight", toggleCaptions: "c" }}
-      onEnded={onEnded} onTimeUpdate={onTimeUpdate}
+      onEnded={onEnded} onTimeUpdate={onTimeUpdate} onSeeked={onSeeked}
       onCanPlay={onCanPlay} onPlay={onPlay} onPause={onPause}
     >
       <MediaProvider>
-        {poster && <Poster src={poster} alt={`${title} poster`} className="player-poster" />}
+        {poster && failedPoster !== poster && <Poster src={poster} alt="" className="player-poster" onError={() => setFailedPoster(poster)} />}
         {tracks.map((track) => <Track key={`${track.src}-${track.srclang || track.language}`} {...track} />)}
       </MediaProvider>
       <Captions className="player-captions" />
-      <PlayerStatus errorMessage={errorMessage} onRetry={() => { onRetry?.(); setAttempt((value) => value + 1); }} />
+      <PlayerStatus errorMessage={errorMessage} onRetry={() => { onRetry?.(); setFailedPoster(null); setAttempt((value) => value + 1); }} />
       <Gesture className="absolute inset-0" event="pointerup" action="toggle:paused" />
       <Gesture className="absolute inset-0" event="dblpointerup" action="toggle:fullscreen" />
       <Controls.Root className="player-controls">
@@ -65,7 +66,7 @@ const VideoPlayer = ({ src, title = "Course lesson", poster, tracks = [], thumbn
         <PlayerCenterControl />
         <Controls.Group className="player-bottom-controls">
           <PlayerTimeSlider thumbnails={thumbnails} />
-          <div className="player-control-row"><div className="player-control-cluster"><PlayerPlayButton /><SeekButton seconds={-10} className="player-control-button player-skip-button" aria-label="Rewind 10 seconds"><RotateCcw /><span>10</span></SeekButton><SeekButton seconds={10} className="player-control-button player-skip-button" aria-label="Forward 10 seconds"><RotateCw /><span>10</span></SeekButton><PlayerVolumeControl /><div className="player-time"><Time type="current" /><span>/</span><Time type="duration" /></div></div><div className="player-control-cluster"><CaptionButton className="player-control-button player-caption-button" aria-label="Toggle captions"><CaptionsIcon className="caption-off" /><Subtitles className="caption-on" /></CaptionButton><PlayerSettings /><PIPButton className="player-control-button player-pip-button" aria-label="Picture in picture"><PictureInPicture /></PIPButton><FullscreenButton className="player-control-button" aria-label="Toggle fullscreen"><Maximize className="fullscreen-enter" /><Minimize className="fullscreen-exit" /></FullscreenButton></div></div>
+          <div className="player-control-row"><div className="player-control-cluster"><PlayerPlayButton /><SeekButton seconds={-10} className="player-control-button player-skip-button" aria-label="Rewind 10 seconds"><RotateCcw /><span>10</span></SeekButton><SeekButton seconds={10} className="player-control-button player-skip-button" aria-label="Forward 10 seconds"><RotateCw /><span>10</span></SeekButton><PlayerVolumeControl /><div className="player-time"><Time type="current" /><span className="player-time-divider">/</span><Time type="duration" className="player-total-time" /></div></div><div className="player-control-cluster"><CaptionButton className="player-control-button player-caption-button" aria-label="Toggle captions"><CaptionsIcon className="caption-off" /><Subtitles className="caption-on" /></CaptionButton><PlayerSettings /><PIPButton className="player-control-button player-pip-button" aria-label="Picture in picture"><PictureInPicture /></PIPButton><FullscreenButton className="player-control-button" aria-label="Toggle fullscreen"><Maximize className="fullscreen-enter" /><Minimize className="fullscreen-exit" /></FullscreenButton></div></div>
         </Controls.Group>
       </Controls.Root>
     </MediaPlayer>
