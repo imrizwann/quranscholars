@@ -9,11 +9,15 @@ export default function CollapsiblePanel({
   label,
   heading,
   actions,
+  endActions,
   children,
   className = "",
   defaultOpen = true,
+  open: controlledOpen,
+  onOpenChange,
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [localOpen, setLocalOpen] = useState(defaultOpen);
+  const open = controlledOpen ?? localOpen;
   const id = useId();
   const content = useRef(null);
   const reducedMotion = useReducedMotion();
@@ -25,7 +29,8 @@ export default function CollapsiblePanel({
         ?.querySelectorAll("video, audio")
         .forEach((media) => media.pause());
     }
-    setOpen((value) => !value);
+    if (controlledOpen === undefined) setLocalOpen(value => !value);
+    onOpenChange?.(!open);
   }
 
   return (
@@ -45,6 +50,7 @@ export default function CollapsiblePanel({
           >
             <ChevronDown size={18} aria-hidden="true" />
           </button>
+          {endActions}
         </div>
       </div>
       <motion.div

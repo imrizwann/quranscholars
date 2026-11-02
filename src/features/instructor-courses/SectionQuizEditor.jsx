@@ -7,10 +7,10 @@ import { QueryMessage } from "./WorkspaceParts.jsx";
 import { userMessage } from "@/lib/user-messages.js";
 
 const question = () => ({ prompt: "", options: ["", "", "", ""], correctOption: 0 });
-export default function SectionQuizEditor({ courseId, sectionId, disabled, onEditing, onBusy }) {
-  const [open, setOpen] = useState(false);
+export default function SectionQuizEditor({ courseId, sectionId, open, onOpenChange, disabled, onEditing, onBusy }) {
   const [dirty, setDirty] = useState(false);
-  return <section className="cw-section-quiz"><div className="cw-row cw-between"><div className="cw-row"><ClipboardCheck size={18} aria-hidden="true" /><h3>Section quiz</h3></div><button type="button" className="cw-button cw-button-compact" aria-expanded={open} disabled={disabled || dirty} onClick={() => setOpen(value => !value)}>{open ? "Close quiz editor" : "Manage quiz"}<ChevronDown size={15} aria-hidden="true" /></button></div><p className="cw-field-hint">Add a knowledge check. Learners unlock it after completing every lesson in this section.</p>{open && <QuizEditor courseId={courseId} sectionId={sectionId} disabled={disabled} onBusy={onBusy} onEditing={value => { setDirty(value); onEditing(value); }} />}</section>;
+  if (!open) return null;
+  return <section className="cw-section-quiz"><div className="cw-row cw-between"><div className="cw-row"><ClipboardCheck size={18} aria-hidden="true" /><h3>Section quiz</h3></div><button type="button" className="cw-button cw-button-compact" disabled={disabled || dirty} onClick={() => onOpenChange(false)}>Close quiz editor<ChevronDown size={15} aria-hidden="true" /></button></div><p className="cw-field-hint">Add a knowledge check. Learners unlock it after completing every lesson in this section.</p><QuizEditor courseId={courseId} sectionId={sectionId} disabled={disabled} onBusy={onBusy} onEditing={value => { setDirty(value); onEditing(value); }} /></section>;
 }
 function QuizEditor({ courseId, sectionId, disabled, onEditing, onBusy }) {
   const query = api.endpoints.getSectionQuiz.useQuery({ courseId, sectionId }, { refetchOnMountOrArgChange: true });

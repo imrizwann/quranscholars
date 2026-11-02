@@ -15,8 +15,12 @@ import courseApi from "@/services/api/courses/courses.api.js";
 import adminAdmissionApis from "@/services/api/admin/adminAdmissionApis.js";
 import instructorApplicationApi from "@/services/api/user/instructorApplicationApi.js";
 import adminInstructorApplicationsApi from "@/services/api/admin/instructorApplicationsApi.js";
+import notificationsApi from "@/services/api/user/notificationsApi.js";
+import realtime from "@/realtime/realtimeSlice.js";
 export const store = configureStore({
   reducer: {
+    realtime,
+    [notificationsApi.reducerPath]: notificationsApi.reducer,
     [adminInstructorApplicationsApi.reducerPath]: adminInstructorApplicationsApi.reducer,
     [instructorApplicationApi.reducerPath]: instructorApplicationApi.reducer,
     course: courseReducer,
@@ -33,6 +37,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
       .concat(authSessionMiddleware)
+      .concat(notificationsApi.middleware)
       .concat(adminInstructorApplicationsApi.middleware)
       .concat(instructorApplicationApi.middleware)
       .concat(instructorSessionMiddleware, instructorCoursesApi.middleware)

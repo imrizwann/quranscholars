@@ -6,7 +6,8 @@ import SectionQuizEditor from "@/features/instructor-courses/SectionQuizEditor.j
 import { CourseDetailsPanel } from "@/features/instructor-courses/StudioInformation.jsx";
 import CoursePricingEditor from "@/features/instructor-courses/CoursePricingEditor.jsx";
 import CoursePublishing from "@/features/instructor-courses/CoursePublishing.jsx";
-import LessonTitleEditor from "@/features/instructor-courses/LessonTitleEditor.jsx";
+import CurriculumLesson from "@/features/instructor-courses/CurriculumLesson.jsx";
+import CurriculumActions from "@/features/instructor-courses/CurriculumActions.jsx";
 import { curriculumOrder, studioTabs } from "@/features/instructor-courses/studio-layout.js";
 import { Link, useBlocker, useNavigate, useParams } from "react-router-dom";
 import {
@@ -33,6 +34,8 @@ import {
   ArrowLeft,
   ChevronRight,
   FolderOpen,
+  Pencil,
+  ClipboardCheck,
   Layers,
   Plus,
   RefreshCw,
@@ -111,6 +114,7 @@ function Workspace({ courseId }) {
   const [lessonPage, setLessonPage] = useState(1);
   const [selected, setSelected] = useState(null);
   const [activeTab, setActiveTab] = useState("details");
+  const [trailerActivity, setTrailerActivity] = useState(null);
   const studio = useRef(null);
   const editingRef = useRef(false);
   const metadataEditingRef = useRef(false);
@@ -121,6 +125,11 @@ function Workspace({ courseId }) {
   function changeMetadataEditing(value) { metadataEditingRef.current = value; setMetadataEditing(value); }
   const [sectionEditing, setSectionEditing] = useState(false);
   const [quizEditing, setQuizEditing] = useState(false);
+  const [sectionDetailsEditing, setSectionDetailsEditing] = useState(false);
+  const [sectionOpen, setSectionOpen] = useState(true);
+  const [quizOpen, setQuizOpen] = useState(false);
+  const quizEditor = useRef(null);
+  useEffect(() => { setSectionOpen(true); setQuizOpen(false); setSectionDetailsEditing(false); }, [selected?._id]);
   const [editingLessonId, setEditingLessonId] = useState(null);
   function changeSectionEditing(value) { editingRef.current = value; setSectionEditing(value); }
   function changeQuizEditing(value) { setQuizEditing(value); changeSectionEditing(value); }
@@ -388,161 +397,33 @@ function Workspace({ courseId }) {
                 label="Section"
                 loading={pendingAction === `create:${base}/sections`}
                 disabled={
-                  busy || Boolean(course.error) || Boolean(sections.error)
+                  busy || sectionEditing || metadataEditing || pricingEditing || Boolean(course.error) || Boolean(sections.error)
                 }
                 onCreate={(title) => create("section", title)}
               />
             </section>
-            <section key={selected?._id || "no-section"} className="cw-card cw-lessons">
-              <div className="cw-row cw-between cw-item-heading">
-                <div>
-                  <p className="cw-eyebrow">
-                    {selected ? "Selected section" : "Lesson workspace"}
-                  </p>
-                  <h2>{selected?.title || "Your lessons"}</h2>
-                </div>
-                {selected && (
-                  <AsyncButton
-                    className="cw-button cw-danger cw-icon-button cw-curriculum-delete"
-                    aria-haspopup="dialog"
-                    aria-label={`Delete section: ${selected.title}`}
-                    title="Delete section"
-                    loading={pendingAction === `delete:${sectionPath}`}
-                    loadingLabel={
-                      <span className="sr-only">Deleting section</span>
-                    }
-                    disabled={
-                      busy || sectionEditing || Boolean(lessons.error) || Boolean(course.error)
-                    }
-                    onClick={() =>
-                      remove(sectionPath, "section", {
-                        courseId,
-                        sectionId: selected._id,
-                      })
-                    }
-                  >
-                    <Trash2 size={14} aria-hidden="true" />
-                  </AsyncButton>
-                )}
-              </div>
-              {!selected ? (
-                <div className="cw-empty">
-                  <FolderOpen size={34} strokeWidth={1.5} aria-hidden="true" />
-                  <h3>A place for every lesson</h3>
-                  <p>
-                    Select a section to add lessons and upload their videos.
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <SectionDetailsEditor key={`section-editor:${selected._id}`} section={selected} disabled={busy || quizEditing || Boolean(editingLessonId) || Boolean(course.error) || Boolean(sections.error)} saving={pendingAction === "update:section"} onSave={saveSection} onEditing={changeSectionEditing} />
-                  {sectionEditing && <p className="cw-field-hint">Save or cancel your section edits before choosing another section.</p>}
-                  <QueryMessage query={lessons} label="Loading lessons" compact />
-                  {lessonItems.map((lesson, index) => (
-                    <CollapsiblePanel
-                      as="article"
-                      key={`lesson:${lesson._id}`}
-                      className="cw-lesson"
-                      defaultOpen={index === 0}
-                      label={`lesson: ${lesson.title}`}
-                      heading={
-                        <div className="cw-lesson-title">
-                          <span className="cw-section-number">
-                            {index + 1}
-                          </span>
-                          <h3>{lesson.title}</h3>
-                        </div>
-                      }
-                      actions={
-                        <>
-                          <VideoStatus video={lesson.video} />
-                          <AsyncButton
-                            className="cw-button cw-danger cw-icon-button cw-curriculum-delete"
-                            aria-haspopup="dialog"
-                            aria-label={`Delete lesson: ${lesson.title}`}
-                            title="Delete lesson"
-                            loading={
-                              pendingAction ===
-                              `delete:${sectionPath}/lessons/${lesson._id}`
-                            }
-                            loadingLabel={
-                              <span className="sr-only">Deleting lesson</span>
-                            }
-                            disabled={
-                              busy ||
-                              Boolean(lessons.error) ||
-                              Boolean(course.error)
-                            }
-                            onClick={() =>
-                              remove(
-                                `${sectionPath}/lessons/${lesson._id}`,
-                                "lesson",
-                                {
-                                  courseId,
-                                  sectionId: selected._id,
-                                  lessonId: lesson._id,
-                                },
-                              )
-                            }
-                          >
-                            <Trash2 size={14} aria-hidden="true" />
-                          </AsyncButton>
-                        </>
-                      }
-                    >
-                      <LessonTitleEditor lesson={lesson} target={{ courseId, sectionId: selected._id, lessonId: lesson._id }} disabled={busy || sectionEditing || Boolean(lessons.error) || Boolean(course.error)} onBusy={setBusy} onEditing={(value) => { setEditingLessonId(value ? lesson._id : null); changeSectionEditing(value); }} />
-                      <VideoUploadPanel
-                        path={`${sectionPath}/lessons/${lesson._id}/video`}
-                        target={{
-                          courseId,
-                          sectionId: selected._id,
-                          lessonId: lesson._id,
-                        }}
-                        video={lesson.video}
-                        deleting={
-                          pendingAction ===
-                          `delete:${sectionPath}/lessons/${lesson._id}/video`
-                        }
-                        disabled={
-                          busy ||
-                          Boolean(lessons.error) ||
-                          Boolean(course.error)
-                        }
-                        onBusy={setBusy}
-                        onChanged={lessons.refresh}
-                        onDelete={remove}
-                      />
-                    </CollapsiblePanel>
-                  ))}
-                  {lessons.data?.items.length === 0 && (
-                    <div className="cw-empty">
-                      <Video size={28} aria-hidden="true" />
-                      <p>
-                        No lessons yet. Add a title below, then upload your
-                        video.
-                      </p>
-                    </div>
-                  )}
-                  <Pagination
-                    pagination={lessons.data?.pagination}
-                    page={lessonPage}
-                    onPage={setLessonPage}
-                    disabled={busy || sectionEditing}
-                    loading={lessons.loading}
-                  />
-                  <AddTitleForm
-                    key={`lesson-form:${selected._id}`}
-                    label="Lesson"
-                    loading={pendingAction === `create:${sectionPath}/lessons`}
-                    disabled={
-                      busy || sectionEditing || Boolean(lessons.error) || Boolean(course.error)
-                    }
-                    onCreate={(title) => create("lesson", title)}
-                  />
-                  <SectionQuizEditor key={`quiz:${selected._id}`} courseId={courseId} sectionId={selected._id} disabled={busy || (sectionEditing && !quizEditing) || Boolean(course.error) || Boolean(sections.error)} onBusy={setBusy} onEditing={changeQuizEditing} />
-                </>
-              )}
-            </section>
+            <CollapsiblePanel as="section" key={selected?._id || "no-section"} className="cw-card cw-lessons" label={selected ? 'section: ' + selected.title : 'lesson workspace'} open={sectionOpen} onOpenChange={setSectionOpen}
+              heading={<div><p className="cw-eyebrow">{selected ? "Selected section" : "Lesson workspace"}</p><h2>{selected?.title || "Your lessons"}</h2></div>}
+              endActions={selected && <CurriculumActions label={`Section actions: ${selected.title}`} disabled={busy || sectionEditing || metadataEditing || pricingEditing || Boolean(lessons.error) || Boolean(course.error)} loading={pendingAction === `delete:${sectionPath}`} items={[
+                { label: "Edit section", icon: Pencil, onClick: () => { setSectionOpen(true); setSectionDetailsEditing(true); changeSectionEditing(true); } },
+                { label: "Manage quiz", icon: ClipboardCheck, onClick: () => { setSectionOpen(true); setQuizOpen(true); requestAnimationFrame(() => quizEditor.current?.querySelector('button')?.focus()); } },
+                { label: "Delete section", icon: Trash2, danger: true, onClick: () => remove(sectionPath, "section", { courseId, sectionId: selected._id }) },
+              ]} />}>
+              {!selected ? <div className="cw-empty"><FolderOpen size={34} strokeWidth={1.5} aria-hidden="true" /><h3>A place for every lesson</h3><p>Select a section to add lessons and upload their videos.</p></div> : <>
+                <SectionDetailsEditor key={`section-editor:${selected._id}:${sectionDetailsEditing}`} section={selected} editing={sectionDetailsEditing} disabled={busy || quizEditing || Boolean(editingLessonId) || Boolean(course.error) || Boolean(sections.error)} saving={pendingAction === "update:section"} onSave={saveSection} onEditing={value => { setSectionDetailsEditing(value); changeSectionEditing(value); }} />
+                {sectionEditing && <p className="cw-field-hint">Save or cancel your edits before choosing another section.</p>}
+                <QueryMessage query={lessons} label="Loading lessons" compact />
+                {lessonItems.map((lesson, index) => <CurriculumLesson key={lesson._id} lesson={lesson} index={index}
+                  target={{ courseId, sectionId: selected._id, lessonId: lesson._id }} path={`${sectionPath}/lessons/${lesson._id}`}
+                  disabled={busy || sectionDetailsEditing || quizEditing || metadataEditing || pricingEditing || Boolean(editingLessonId && editingLessonId !== lesson._id) || Boolean(lessons.error) || Boolean(course.error)}
+                  deleting={pendingAction === `delete:${sectionPath}/lessons/${lesson._id}`} removingVideo={pendingAction === `delete:${sectionPath}/lessons/${lesson._id}/video`}
+                  onBusy={setBusy} onEditing={value => { setEditingLessonId(value ? lesson._id : null); changeSectionEditing(value); }} onRefresh={lessons.refresh} onRemove={remove} />)}
+                {lessons.data?.items.length === 0 && <div className="cw-empty"><Video size={28} aria-hidden="true" /><p>No lessons yet. Add a title below, then upload your video.</p></div>}
+                <Pagination pagination={lessons.data?.pagination} page={lessonPage} onPage={setLessonPage} disabled={busy || sectionEditing} loading={lessons.loading} />
+                <AddTitleForm key={`lesson-form:${selected._id}`} label="Lesson" loading={pendingAction === `create:${sectionPath}/lessons`} disabled={busy || sectionEditing || Boolean(lessons.error) || Boolean(course.error)} onCreate={title => create("lesson", title)} />
+                <div ref={quizEditor}><SectionQuizEditor key={`quiz:${selected._id}`} open={quizOpen} onOpenChange={setQuizOpen} courseId={courseId} sectionId={selected._id} disabled={busy || (sectionEditing && !quizEditing) || Boolean(course.error) || Boolean(sections.error)} onBusy={setBusy} onEditing={changeQuizEditing} /></div>
+              </>}
+            </CollapsiblePanel>
           </div>
             </Tabs.Panel>
             <Tabs.Panel value="media" keepMounted className="cw-studio-panel">
@@ -550,7 +431,7 @@ function Workspace({ courseId }) {
           <CollapsiblePanel
             className="cw-card"
             label="course trailer"
-            actions={<VideoStatus video={data.trailerVideo} />}
+            actions={<VideoStatus video={data.trailerVideo} activity={trailerActivity} />}
             heading={
               <div className="cw-card-heading">
                 <span className="cw-heading-icon">
@@ -568,6 +449,7 @@ function Workspace({ courseId }) {
             <VideoUploadPanel
               path={`${base}/trailer`}
               target={{ courseId }}
+              onActivityChange={setTrailerActivity}
               video={data.trailerVideo}
               playbackSource={trailerPlaybackSource(data, course.data?.trailerPlaybackUrl)}
               disabled={busy || sectionEditing || metadataEditing || Boolean(course.error)}

@@ -9,12 +9,13 @@
 .learning-topbar .workspace-account-name { font-size: .8125rem; }
 .learning-main:focus, .learning-details:focus, #learning-lesson-title:focus { outline: none; }
 .learning-topbar { position: sticky; top: 0; z-index: 30; min-height: 60px; padding: 7px clamp(16px, 3vw, 40px); display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
-.learning-topbar > .workspace-account { justify-self: end; grid-column: 3; grid-row: 1; }
+.learning-topbar > .workspace-header-actions { justify-self: end; grid-column: 3; grid-row: 1; }
 .learning-topbar > .learning-back { grid-column: 1; grid-row: 1; }
 .learning-topbar > .learning-brand { grid-column: 2; grid-row: 1; }
 .learning-back, .learning-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; width: fit-content; }
 .learning-back { font-size: .875rem; color: var(--muted-foreground); }
 .learning-back:hover { color: var(--primary); }
+@media (max-width: 380px) { .learning-topbar .learning-brand > span { display: none; } }
 .learning-brand { color: var(--primary); font: 650 1rem/1.4 var(--font-display); }
 .learning-main { max-width: 1440px; padding: 26px clamp(16px, 3vw, 40px) 30px; margin-inline: auto; min-width: 0; }
 .learning-course-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 24px; }
@@ -69,7 +70,7 @@
 .learning-section li a[aria-current=page] .learning-lesson-number { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
 .learning-lesson-copy { min-width: 0; }
 .learning-lesson-copy { flex: 1; }
-.learning-completion-check { display: grid; place-items: center; flex: 0 0 22px; height: 22px; margin-top: 2px; border: 2px solid color-mix(in srgb, var(--muted-foreground) 65%, var(--border)); border-radius: 4px; color: var(--primary-foreground); background: var(--surface); }
+.learning-completion-check { display: grid; place-items: center; flex: 0 0 20px; height: 20px; margin-top: 2px; border: 1px solid color-mix(in srgb, var(--muted-foreground) 65%, var(--border)); border-radius: 4px; color: var(--primary-foreground); background: var(--surface); }
 .learning-completion-check[aria-checked=true] { background: var(--primary); border-color: var(--primary); }
 .learning-completion-check[aria-checked=mixed] { background: var(--muted); opacity: .7; }
 .learning-course-progress { padding: 0 20px 18px; font-size: .8125rem; }

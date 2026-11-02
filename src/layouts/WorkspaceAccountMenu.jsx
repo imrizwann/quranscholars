@@ -6,6 +6,7 @@ import { ArrowUpRight, BookOpen, ChevronDown, ClipboardCheck, LayoutDashboard, L
 import useProfilePhoto from "@/features/profile/useProfilePhoto.js";
 import AvatarImage from "@/features/profile/components/AvatarImage.jsx";
 import useSignOut from "@/features/auth/useSignOut.js";
+import NotificationBell from "@/realtime/NotificationBell.jsx";
 
 export default function WorkspaceAccountMenu({ type }) {
   const user = useSelector((state) => state.user.user);
@@ -34,7 +35,7 @@ export default function WorkspaceAccountMenu({ type }) {
 
   useEffect(() => { setOpen(false); }, [locationKey]);
 
-  return <Menu.Root open={open} onOpenChange={setOpen} modal={false}>
+  return <div className="workspace-header-actions"><NotificationBell /><Menu.Root open={open} onOpenChange={setOpen} modal={false}>
     <Menu.Trigger className="workspace-account" aria-label={`Account menu for ${name}`}>
       <span className="workspace-account-name">{name}</span>
       <span className="workspace-avatar" aria-hidden="true">
@@ -63,5 +64,5 @@ export default function WorkspaceAccountMenu({ type }) {
         </Menu.Popup>
       </Menu.Positioner>
     </Menu.Portal>
-  </Menu.Root>;
+  </Menu.Root></div>;
 }

@@ -89,13 +89,11 @@ export default function VideoPreview({
           </div>
         )}
       </div>
-      <p className="cw-field-hint cw-preview-caption">
+      {(file || playbackSource) && <p className="cw-field-hint cw-preview-caption">
         {file
           ? "Previewing the file on your device. Selecting a file does not upload or replace your video."
-          : playbackSource
-            ? "Previewing your uploaded video."
-            : "Review your video before uploading. Some formats may not play in your browser."}
-      </p>
+          : "Previewing your uploaded video."}
+      </p>}
     </section>
   );
 }

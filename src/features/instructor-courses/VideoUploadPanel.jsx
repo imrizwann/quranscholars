@@ -1,7 +1,4 @@
-import {
-  videoErrorMessage,
-  videoPreparationMessage,
-} from "@/lib/user-messages.js";
+import { videoPreparationMessage } from "@/lib/user-messages.js";
 import ProtectedLessonVideo from "@/features/recorded-courses/components/ProtectedLessonVideo.jsx";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -11,11 +8,10 @@ import {
   videoMetadata,
   processingWasAccepted,
 } from "./courseApi.js";
-import { VideoStatus } from "./WorkspaceParts.jsx";
+import VideoProgress from "./VideoProgress.jsx";
 import VideoPreview from "./VideoPreview.jsx";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import ConfirmationModal from "@/components/ui/ConfirmationModal.jsx";
-import LoadingState from "@/components/feedback/LoadingState.jsx";
 import { Upload, RefreshCw, Trash2 } from "lucide-react";
 import {
   usePrepareVideoUploadMutation,
@@ -36,6 +32,8 @@ export default function VideoUploadPanel({
   onBusy,
   onChanged,
   onDelete,
+  showRemoveAction = true,
+  onActivityChange,
 }) {
   const [prepareUpload, { reset: resetUpload }] =
     usePrepareVideoUploadMutation();
@@ -75,6 +73,7 @@ export default function VideoUploadPanel({
   const serverBusy = ["QUEUED", "PROCESSING", "PROCESSED", "DELETING"].includes(
     status,
   );
+  useEffect(() => { onActivityChange?.(phase ? { phase, progress } : null); }, [phase, progress, onActivityChange]);
 
   async function upload() {
     if (controller.current || locked || serverBusy) return;
@@ -127,6 +126,8 @@ export default function VideoUploadPanel({
         const preparationUnconfirmed = uploaded && isTemporaryConnectionError(failure);
         if (preparationUnconfirmed) {
           setUnconfirmedUploadId(uploadId);
+        }
+        if (uploaded) {
           setUploadedPreview({ file, uploadId });
           setFile(null);
           if (input.current) input.current.value = "";
@@ -193,53 +194,24 @@ export default function VideoUploadPanel({
 
   return (
     <div className="cw-video">
-      <div className="cw-row cw-between">
-        <VideoStatus video={video} />
-        {video?.originalFileName && (
-          <span className="cw-muted cw-file">
-            {video.originalFileName}
-            {video.fileSize
-              ? ` · ${(video.fileSize / 1024 / 1024).toFixed(1)} MB`
-              : ""}
-          </span>
-        )}
-      </div>
-      {video?.lastError?.message && (
-        <p className="cw-error" style={{ marginTop: 12 }}>
-          {videoErrorMessage(video.lastError)}
-        </p>
-      )}
-      {status === "COMPLETED" && (
-        <p className="cw-muted">
-          Your video is ready
-          {video?.hls?.qualities?.length
-            ? ` · ${video.hls.qualities.map((item) => item.quality).join(", ")}`
-            : ""}
-          .
-        </p>
-      )}
-      {status === "UPLOADING" && !busy && (
-        <p className="cw-muted">
-          If your file has finished uploading, select Prepare video. Otherwise,
-          choose the file and upload it again.
-        </p>
-      )}
       <div className="cw-video-layout">
         <div className="cw-stack cw-video-upload">
-          {!serverBusy && (
-            <label className="cw-video-file">
-              Choose a video
+          <VideoProgress video={video} phase={phase} progress={progress} file={file} unconfirmed={Boolean(unconfirmedUploadId)} accepted={Boolean(notice) && !error && ["UPLOADING", "UPLOADED"].includes(status)} onClear={!locked ? () => { setFile(null); setError(""); setNotice(""); if (input.current) input.current.value = ""; } : undefined} />
+          {!serverBusy && !busy && (
+            <div className="cw-video-file">
+              <strong>{file ? "Video selected" : video?.uploadId ? "Replace your video" : "Add a video"}</strong>
               <input
                 ref={input}
+                hidden
                 type="file"
                 accept=".mp4,.mov,.webm,.mkv"
                 disabled={locked}
                 onChange={(event) => {
+                  const selectedFile = event.target.files?.[0];
+                  if (!selectedFile) return;
                   setError("");
                   setNotice("");
                   setUnconfirmedUploadId(null);
-                  const selectedFile = event.target.files?.[0];
-                  if (!selectedFile) return;
                   try {
                     videoMetadata(selectedFile);
                     setFile(selectedFile);
@@ -255,21 +227,7 @@ export default function VideoUploadPanel({
                 MP4, MOV, WebM or MKV. Your video is prepared for playback
                 automatically after upload.
               </span>
-            </label>
-          )}
-          {busy && (
-            <div>
-              <LoadingState
-                variant="inline"
-                label={`${phase}${phase === "Uploading" ? ` · ${progress}%` : ""}`}
-              />
-              {phase === "Uploading" && (
-                <progress
-                  value={progress}
-                  max="100"
-                  aria-label="File upload progress"
-                />
-              )}
+              <button type="button" className="cw-button cw-button-compact" disabled={locked} onClick={() => input.current?.click()}><Upload size={15} aria-hidden="true" />{file ? "Choose another file" : video?.uploadId ? "Choose replacement" : "Choose video"}</button>
             </div>
           )}
           {error && !processingConfirmed && (
@@ -277,15 +235,8 @@ export default function VideoUploadPanel({
               {error}
             </p>
           )}
-          {(notice || processingConfirmed) && status !== "COMPLETED" && (
-            <p className="cw-notice" role="status">
-              {processingConfirmed
-                ? "Your video is being prepared for playback."
-                : notice}
-            </p>
-          )}
           <div className="cw-row">
-            {(!serverBusy || action === "upload") && (
+            {((!serverBusy && file) || action === "upload") && (
               <AsyncButton
                 className="cw-button cw-primary"
                 loading={action === "upload"}
@@ -304,7 +255,7 @@ export default function VideoUploadPanel({
                 {video?.uploadId ? "Replace video" : "Upload video"}
               </AsyncButton>
             )}
-            {processingUploadId && !processingConfirmed &&
+            {!file && processingUploadId && !processingConfirmed &&
               (["UPLOADING", "UPLOADED", "FAILED"].includes(status) ||
                 unconfirmedUploadId ||
                 action === "process") && (
@@ -327,7 +278,7 @@ export default function VideoUploadPanel({
                 Cancel upload
               </button>
             )}
-            {status !== "NOT_UPLOADED" && (
+            {showRemoveAction && status !== "NOT_UPLOADED" && (
               <AsyncButton
                 className="cw-button cw-danger cw-button-compact"
                 aria-label={
