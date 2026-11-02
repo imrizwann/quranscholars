@@ -449,11 +449,11 @@ const Courses = () => {
 
           <div className="mt-8 border-y border-[#dfe6e2] py-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-center">
-              <label className="relative min-w-0 flex-1 md:max-w-2xl">
+              <label className="qs-search-field relative min-w-0 flex-1 md:max-w-2xl">
                 <span className="sr-only">Search the course catalog</span>
                 <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#718078]" />
                 <input
-                  className="h-11 w-full rounded-lg border border-[#d8e1dc] bg-white py-2 pl-10 pr-11 text-sm font-semibold text-[#20332c] outline-none transition placeholder:font-medium placeholder:text-[#95a19c] hover:border-[#bdccc5] focus:border-primary focus:ring-3 focus:ring-primary/10"
+                  className="h-11 w-full rounded-lg border border-[#d8e1dc] bg-white py-2 pl-10 pr-11 text-sm font-semibold text-[#20332c] outline-none transition placeholder:font-medium placeholder:text-[#95a19c] hover:border-[#bdccc5] focus:border-primary"
                   type="search"
                   value={searchTerm}
                   onChange={handleSearchChange}

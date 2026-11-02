@@ -1,3 +1,6 @@
+.qs-search-field { border-radius: 8px; }
+.qs-search-field:focus-within { outline: 2px solid var(--ring); outline-offset: 2px; }
+.qs-search-field input:focus-visible { outline: none; box-shadow: none; }
 @layer components {
   .profile-dropdown.dropdown-active {
     @apply visible pointer-events-auto translate-y-0 opacity-100;

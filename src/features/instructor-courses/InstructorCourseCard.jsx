@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, BookOpen, Layers, PlayCircle } from "lucide-react";
-import { resolveCourseImage } from "@/features/recorded-courses/model/recordedCourseAdapter.js";
+import { ArrowUpRight, BookOpen, Clock3, Layers, PlayCircle } from "lucide-react";
+import { resolveCourseImage, formatDuration } from "@/features/recorded-courses/model/recordedCourseAdapter.js";
 import { courseStatusLabel } from "@/lib/user-messages.js";
 import { VideoStatus } from "./WorkspaceParts.jsx";
 
@@ -60,6 +60,7 @@ export default function InstructorCourseCard({ course }) {
             {course.stats?.totalLessons ?? 0} lessons
           </span>
         </div>
+        <p className="studio-course-duration"><Clock3 size={14} aria-hidden="true" />{course.totalDuration > 0 ? formatDuration(course.totalDuration) : "Duration not listed"}</p>
         <div className="studio-course-footer">
           <span className="studio-course-trailer">
             Trailer <VideoStatus video={course.trailerVideo} />

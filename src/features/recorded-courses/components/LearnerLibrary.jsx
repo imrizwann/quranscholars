@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen, Clock3 } from "lucide-react";
 import { useGetLearningLibraryQuery } from "@/services/api/user/paymentApi.js";
-import { resolveCourseImage } from "../model/recordedCourseAdapter.js";
+import { resolveCourseImage, formatDuration } from "../model/recordedCourseAdapter.js";
 import { WorkspaceEmpty } from "@/components/lms/WorkspaceUI.jsx";
 import { Pagination, QueryMessage } from "@/features/instructor-courses/WorkspaceParts.jsx";
 
 function LibraryCard({ course }) {
   const image = resolveCourseImage(course.thumbnailUrl || course.thumbnail);
   const [failed, setFailed] = useState(null);
-  return <article className="studio-course-card"><Link to={`/learn/${course.slug}`} className="studio-course-cover" aria-label={`Open ${course.title}`}>{image && failed !== image ? <img src={image} alt="" loading="lazy" onError={() => setFailed(image)} /> : <div className="studio-course-placeholder"><BookOpen size={42} strokeWidth={1.25} aria-hidden="true" /><span>QURANSCHOLAR</span></div>}<span className="studio-course-status">{course.isMockPurchase ? "Test enrollment" : "In your library"}</span></Link><div className="studio-course-body"><p className="studio-label">{course.level || "Recorded course"}</p><h2><Link to={`/learn/${course.slug}`}>{course.title}</Link></h2><p className="studio-course-description">{course.totalLessons ?? 0} lessons{course.language ? ` · ${course.language}` : ""}</p><div className="studio-course-footer"><Link className="cw-button cw-primary" to={`/learn/${course.slug}`}>Open course <ArrowRight size={16} aria-hidden="true" /></Link></div></div></article>;
+  return <article className="studio-course-card"><Link to={`/learn/${course.slug}`} className="studio-course-cover" aria-label={`Open ${course.title}`}>{image && failed !== image ? <img src={image} alt="" loading="lazy" onError={() => setFailed(image)} /> : <div className="studio-course-placeholder"><BookOpen size={42} strokeWidth={1.25} aria-hidden="true" /><span>QURANSCHOLAR</span></div>}<span className="studio-course-status">{course.isMockPurchase ? "Test enrollment" : "In your library"}</span></Link><div className="studio-course-body"><p className="studio-label">{course.level || "Recorded course"}</p><h2><Link to={`/learn/${course.slug}`}>{course.title}</Link></h2><p className="studio-course-description">{course.totalLessons ?? 0} lessons{course.language ? ` · ${course.language}` : ""}</p><p className="studio-course-duration"><Clock3 size={14} aria-hidden="true" />{course.totalDuration > 0 ? formatDuration(course.totalDuration) : "Duration not listed"}</p><div className="studio-course-footer"><Link className="cw-button cw-primary" to={`/learn/${course.slug}`}>Open course <ArrowRight size={16} aria-hidden="true" /></Link></div></div></article>;
 }
 export default function LearnerLibrary({ compact = false }) {
   const [page, setPage] = useState(1);

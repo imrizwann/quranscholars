@@ -59,6 +59,10 @@
 .studio-search { padding: 18px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
 .studio-search label { flex: 1 1 200px; display: flex; align-items: center; gap: 10px; color: var(--muted-foreground); }
 .studio-search input { min-width: 0; width: 100%; min-height: 44px; font-size: .85rem; background: transparent; color: var(--foreground); }
+.studio-course-duration { display: flex; align-items: center; gap: 7px; margin-top: 10px; color: var(--muted-foreground); font-size: .75rem; }
+.studio-search label { border-radius: 6px; padding-inline: 10px; }
+.studio-search label:focus-within { outline: 2px solid var(--ring); outline-offset: 2px; }
+.studio-page .studio-search input:focus-visible { outline: none; box-shadow: none; }
 .studio-course-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
 .studio-course-card { min-width: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); display: flex; flex-direction: column; transition: border-color .2s, box-shadow .2s; }
 .studio-course-card:hover { border-color: color-mix(in srgb, var(--primary) 35%, var(--border)); box-shadow: 0 8px 26px #163b3210; }

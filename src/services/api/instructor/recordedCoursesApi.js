@@ -91,10 +91,18 @@ const instructorCoursesApi = createApi({
     }
     return { data, meta: result.meta };
   },
-  tagTypes: ["InstructorCourse", "InstructorSections", "InstructorLessons"],
+  tagTypes: ["InstructorCourse", "InstructorSections", "InstructorLessons", "InstructorQuiz"],
   // Private workspace data is retained only while a screen subscribes to it.
   keepUnusedDataFor: 0,
   endpoints: (builder) => ({
+    getSectionQuiz: builder.query({
+      query: args => ({ url: `${sectionUrl(args)}/quiz` }),
+      providesTags: (_result, _error, args) => [{ type: "InstructorQuiz", id: `${args.courseId}/${args.sectionId}` }],
+    }),
+    saveSectionQuiz: builder.mutation({
+      query: ({ courseId, sectionId, quiz }) => ({ url: `${sectionUrl({ courseId, sectionId })}/quiz`, method: "PUT", body: quiz }),
+      invalidatesTags: onSuccess(args => [{ type: "InstructorQuiz", id: `${args.courseId}/${args.sectionId}` }]),
+    }),
     getStudents: builder.query({
       query: (params) => ({ url: `${root}/students`, params }),
       extraOptions: { validate: (data) => Array.isArray(data?.items) && Number.isInteger(data?.pagination?.total) },

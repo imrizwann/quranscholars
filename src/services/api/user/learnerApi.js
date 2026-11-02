@@ -8,8 +8,30 @@ const unwrap = (response) => {
 };
 const learnerApi = createApi({
   reducerPath: "learnerApi", baseQuery: apiBaseQuery, keepUnusedDataFor: 0,
-  tagTypes: ["LearnerProfile", "Enrollment"],
+  tagTypes: ["LearnerProfile", "Enrollment", "LearningProgress", "SectionQuiz"],
   endpoints: builder => ({
+    getCourseProgress: builder.query({
+      query: courseId => ({ url: `/api/learner/courses/${encodeURIComponent(courseId)}/progress`, timeout: 15_000 }),
+      transformResponse: unwrap, providesTags: (_result, _error, id) => [{ type: "LearningProgress", id }],
+    }),
+    startLessonWatch: builder.mutation({
+      query: ({ courseId, sectionId, lessonId, position }) => ({ url: `/api/learner/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/lessons/${encodeURIComponent(lessonId)}/watch`, method: "POST", body: { position }, timeout: 15_000 }),
+      transformResponse: unwrap,
+    }),
+    recordLessonWatch: builder.mutation({
+      query: ({ courseId, sectionId, lessonId, watchId, sequence, position, event }) => ({ url: `/api/learner/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/lessons/${encodeURIComponent(lessonId)}/watch/heartbeat`, method: "POST", body: { watchId, sequence, position, event }, timeout: 15_000 }),
+      transformResponse: unwrap,
+      invalidatesTags: (result, _error, { courseId }) => result?.lesson.completed ? [{ type: "LearningProgress", id: courseId }] : [],
+    }),
+    getSectionQuiz: builder.query({
+      query: ({ courseId, sectionId }) => ({ url: `/api/learner/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/quiz`, timeout: 15_000 }),
+      transformResponse: unwrap, providesTags: (_result, _error, { courseId, sectionId }) => [{ type: "SectionQuiz", id: `${courseId}/${sectionId}` }],
+    }),
+    submitSectionQuiz: builder.mutation({
+      query: ({ courseId, sectionId, version, idempotencyKey, answers }) => ({ url: `/api/learner/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/quiz/attempts`, method: "POST", body: { version, idempotencyKey, answers }, timeout: 20_000 }),
+      transformResponse: unwrap,
+      invalidatesTags: (result, _error, { courseId, sectionId }) => result ? [{ type: "SectionQuiz", id: `${courseId}/${sectionId}` }, { type: "LearningProgress", id: courseId }] : [],
+    }),
     getLearnerProfile: builder.query({
       query: () => ({ url: "/api/learner/profile", timeout: 15_000 }), transformResponse: unwrap, providesTags: ["LearnerProfile"],
     }),
@@ -37,5 +59,5 @@ const learnerApi = createApi({
     }),
   }),
 });
-export const { useGetLearnerProfileQuery, useUpdateLearnerProfileMutation, useGetEnrollmentQuery, useEnrollFreeCourseMutation } = learnerApi;
+export const { useGetLearnerProfileQuery, useUpdateLearnerProfileMutation, useGetEnrollmentQuery, useEnrollFreeCourseMutation, useGetCourseProgressQuery, useStartLessonWatchMutation, useRecordLessonWatchMutation, useGetSectionQuizQuery, useSubmitSectionQuizMutation } = learnerApi;
 export default learnerApi;
