@@ -26,7 +26,6 @@ const instructorLinks = [
 ];
 
 const adminLinks = [
-  { to: "/admin/admissions", label: "Admissions", icon: ClipboardCheck },
   { to: "/admin/instructor-applications", label: "Instructor applications", icon: GraduationCap },
 ];
 

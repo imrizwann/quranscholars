@@ -19,21 +19,70 @@ test("seeks are sent as baseline resets after an in-flight heartbeat, without ov
   const watch = createLearningWatch({ start: async () => ({ watchId: "watch", sequence: 0, lesson: lesson(false) }), heartbeat: body => { beats.push(body); return beats.length === 1 ? new Promise(resolve => { release = () => resolve({ sequence: body.sequence, lesson: lesson(false) }); }) : Promise.resolve({ sequence: body.sequence, lesson: lesson(false) }); }, onStatus() {}, onLesson() {} });
   watch.play(0); await settle(); watch.update(10); watch.tick(); watch.seek(90); watch.update(91);
   assert.equal(beats.length, 1); release(); await settle();
-  assert.equal(beats[1].event, "seek"); assert.equal(beats[1].position, 91); assert.equal(beats[1].sequence, 2); watch.dispose();
+  assert.equal(beats[1].event, "seek"); assert.equal(beats[1].position, 90); assert.equal(beats[1].sequence, 2); watch.dispose();
 });
 test("pause and resume during a pending request creates a fresh baseline after that request finishes", async () => {
-  let release; let starts = 0;
-  const watch = createLearningWatch({ start: async () => ({ watchId: `watch-${++starts}`, sequence: 0, lesson: lesson(false) }), heartbeat: body => new Promise(resolve => { release = () => resolve({ sequence: body.sequence, lesson: lesson(false) }); }), onStatus() {}, onLesson() {} });
+  let release; let starts = 0, beats = 0;
+  const watch = createLearningWatch({ start: async () => ({ watchId: `watch-${++starts}`, sequence: 0, lesson: lesson(false) }), heartbeat: body => ++beats === 1 ? new Promise(resolve => { release = () => resolve({ sequence: body.sequence, lesson: lesson(false) }); }) : Promise.resolve({ sequence: body.sequence, lesson: lesson(false) }), onStatus() {}, onLesson() {} });
   watch.play(0); await settle(); watch.update(10); watch.tick(); watch.pause(10); watch.play(10); release(); await settle();
   assert.equal(starts, 2); watch.dispose();
 });
-test("failed saving pauses reporting, explicit retry reconnects, and unmounted lessons ignore late results", async () => {
+
+test("pause, resume and ending during a pending save preserves the final coverage", async () => {
+  let release; const beats = [], received = [];
+  const watch = createLearningWatch({ start: async () => ({ watchId: "watch", sequence: 0, lesson: lesson(false) }), heartbeat: body => { beats.push(body); return beats.length === 1 ? new Promise(resolve => { release = () => resolve({ sequence: body.sequence, lesson: lesson(false) }); }) : Promise.resolve({ sequence: body.sequence, lesson: lesson(body.position === 100) }); }, onStatus() {}, onLesson: value => received.push(value) });
+  watch.play(0); await settle(); watch.update(80); watch.tick(); watch.pause(80); watch.play(80); watch.pause(100); release(); await settle();
+  assert.equal(beats.at(-1).position, 100); assert.equal(received.at(-1).completed, true); watch.dispose();
+});
+test("failed saving pauses reporting, retries the same heartbeat, and unmounted lessons ignore late results", async () => {
   const states = []; let attempts = 0, starts = 0;
   const watch = createLearningWatch({ start: async () => ({ watchId: `watch-${++starts}`, sequence: 0, lesson: lesson(false) }), heartbeat: async body => { attempts++; if (attempts === 1) throw { status: 503 }; return { sequence: body.sequence, lesson: lesson(false) }; }, onStatus: state => states.push(state), onLesson() {} });
   watch.play(0); await settle(); watch.update(10); watch.tick(); await settle(); assert.equal(states.at(-1), "error");
   watch.tick(); await settle(); assert.equal(attempts, 1);
-  watch.retry(); await settle(); assert.equal(starts, 2); watch.update(20); watch.tick(); await settle(); assert.equal(states.at(-1), "saved");
+  watch.retry(); await settle(); assert.equal(starts, 1); watch.update(20); watch.tick(); await settle(); assert.equal(states.at(-1), "saved");
   let release;
   const stale = createLearningWatch({ start: () => new Promise(resolve => { release = resolve; }), heartbeat() {}, onLesson() { assert.fail("unmounted lesson updated"); }, onStatus() {} });
   stale.play(0); stale.dispose(); release({ watchId: "late", sequence: 0, lesson: lesson(false) }); await settle(); watch.dispose();
+});
+
+test("a failed final save can be retried after the video has ended", async () => {
+  const beats = [], received = []; let fail = true;
+  const watch = createLearningWatch({ start: async () => ({ watchId: "watch", sequence: 0, lesson: lesson(false) }), heartbeat: async body => { beats.push(body); if (fail) { fail = false; throw { status: 503 }; } return { sequence: body.sequence, lesson: lesson(true) }; }, onStatus() {}, onLesson: value => received.push(value) });
+  watch.play(0); await settle(); watch.pause(100); await settle(); watch.update(0); watch.retry(); await settle();
+  assert.deepEqual(beats, [{ watchId: "watch", sequence: 1, position: 100, event: "tick" }, { watchId: "watch", sequence: 1, position: 100, event: "tick" }]);
+  assert.equal(received.at(-1).completed, true); watch.dispose();
+});
+
+test("media updates keep reporting when background timers are throttled", async () => {
+  let now = 0; const beats = [];
+  const watch = createLearningWatch({ now: () => now, start: async () => ({ watchId: "watch", sequence: 0, lesson: lesson(false) }), heartbeat: async body => { beats.push(body); return { sequence: body.sequence, lesson: lesson(body.position >= 90) }; }, onStatus() {}, onLesson() {} });
+  watch.play(0); await settle();
+  for (let position = 1; position <= 100; position++) { now = position * 1000; watch.update(position); await settle(); }
+  assert.deepEqual(beats.map(body => body.position), [10, 20, 30, 40, 50, 60, 70, 80, 90]);
+  watch.dispose();
+});
+
+test("the final position is saved even if playback resets while a heartbeat is pending", async () => {
+  let release; const beats = [];
+  const watch = createLearningWatch({ start: async () => ({ watchId: "watch", sequence: 0, lesson: lesson(false) }), heartbeat: body => { beats.push(body); return beats.length === 1 ? new Promise(resolve => { release = () => resolve({ sequence: body.sequence, lesson: lesson(false) }); }) : Promise.resolve({ sequence: body.sequence, lesson: lesson(body.position === 100) }); }, onStatus() {}, onLesson() {} });
+  watch.play(0); await settle(); watch.update(80); watch.tick(); watch.pause(100); watch.update(0);
+  release(); await settle();
+  assert.deepEqual(beats.map(body => body.position), [80, 100]);
+  watch.dispose();
+});
+
+test("seek baselines retain their position while later playback waits for a response", async () => {
+  let release; const beats = [];
+  const watch = createLearningWatch({ start: async () => ({ watchId: "watch", sequence: 0, lesson: lesson(false) }), heartbeat: body => { beats.push(body); return beats.length === 1 ? new Promise(resolve => { release = () => resolve({ sequence: body.sequence, lesson: lesson(false) }); }) : Promise.resolve({ sequence: body.sequence, lesson: lesson(false) }); }, onStatus() {}, onLesson() {} });
+  watch.play(0); await settle(); watch.update(10); watch.tick(); watch.seek(50); watch.update(60); watch.tick(); release(); await settle(); await settle();
+  assert.deepEqual(beats.map(body => [body.event, body.position]), [["tick", 10], ["seek", 50], ["tick", 60]]);
+  watch.dispose();
+});
+
+test("leaving a lesson drains its final pending save without updating the departed UI", async () => {
+  let release; const beats = [], received = [];
+  const watch = createLearningWatch({ start: async () => ({ watchId: "watch", sequence: 0, lesson: lesson(false) }), heartbeat: body => { beats.push(body); return beats.length === 1 ? new Promise(resolve => { release = () => resolve({ sequence: body.sequence, lesson: lesson(false) }); }) : Promise.resolve({ sequence: body.sequence, lesson: lesson(true) }); }, onStatus() {}, onLesson: value => received.push(value) });
+  watch.play(0); await settle(); watch.update(80); watch.tick(); watch.update(100); watch.dispose(); release(); await settle(); await settle();
+  assert.deepEqual(beats.map(body => body.position), [80, 100]);
+  assert.equal(received.length, 1);
 });

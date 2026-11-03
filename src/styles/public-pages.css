@@ -164,28 +164,10 @@
   font-size: 0.85rem;
   line-height: 1.65;
 }
-.public-highlights-wide {
-  grid-column: 1 / -1;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
-}
-.public-highlights-wide > div {
-  border-top: 0;
-  border-left: 1px solid var(--border);
-}
-.public-highlights-wide > div:first-child {
-  border-left: 0;
-}
 @media (max-width: 760px) {
   .public-access-grid,
   .public-hero-grid {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .public-highlights-wide {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .public-highlights-wide > div + div {
-    border-left: 0;
-    border-top: 1px solid var(--border);
   }
 }
 @media (max-width: 420px) {

@@ -51,14 +51,13 @@ export default function LiveClassDetails() {
               {item.shortDescription}
             </p>
             <p className="mt-6 text-sm font-bold text-white/70">
-              Taught by{" "}
+              Instructor details will be confirmed before enrollment.{" "}
               <Link
-                to={`/instructors/${item.instructorSlug}`}
+                to="/instructors"
                 className="text-white"
               >
-                {item.instructor}
+                Meet our instructors
               </Link>{" "}
-              · {item.rating} learner rating
             </p>
           </div>
           <aside className="rounded-2xl border border-white/15 bg-white/[.08] p-6 backdrop-blur">
@@ -154,7 +153,7 @@ export default function LiveClassDetails() {
         </div>
         <aside className="h-fit rounded-2xl border border-border bg-white p-6 shadow-[0_16px_45px_rgba(18,48,40,.09)] lg:sticky lg:top-24">
           <p className="text-xs font-black uppercase tracking-[.12em] text-muted-foreground">
-            Admission fee
+            Enrollment fee
           </p>
           <p className="mt-1 font-display text-2xl font-black">
             SAR {item.admissionFee}
@@ -168,10 +167,10 @@ export default function LiveClassDetails() {
             <span className="text-sm text-muted-foreground"> / month</span>
           </p>
           <Link
-            to="/get-started/student"
+            to="/contact"
             className="mt-6 flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-black text-white no-underline"
           >
-            Apply to join <ArrowRight className="size-4" />
+            Ask about this class <ArrowRight className="size-4" />
           </Link>
           <p className="mt-4 flex gap-2 text-xs font-semibold leading-5 text-muted-foreground">
             <ShieldCheck className="size-4 shrink-0 text-primary" />

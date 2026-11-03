@@ -429,7 +429,7 @@ function Workspace({ courseId }) {
             <Tabs.Panel value="media" keepMounted className="cw-studio-panel">
           <CourseThumbnailEditor key={data._id} course={data} disabled={busy || Boolean(course.error)} onBusy={setBusy} />
           <CollapsiblePanel
-            className="cw-card"
+            className="cw-card cw-trailer"
             label="course trailer"
             actions={<VideoStatus video={data.trailerVideo} activity={trailerActivity} />}
             heading={

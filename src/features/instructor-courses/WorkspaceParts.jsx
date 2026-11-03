@@ -22,5 +22,5 @@ export function VideoStatus({ video, activity }) {
   const status = video?.status || "NOT_UPLOADED";
   const working = Boolean(activity) || ["QUEUED", "PROCESSING", "PROCESSED", "DELETING"].includes(status);
   const label = activity ? activity.phase === "Uploading" ? `Uploading ${Math.max(0, Math.min(100, Math.round(activity.progress)))}%` : activity.phase === "Starting upload" ? "Starting upload" : "Confirming preparation" : status === "QUEUED" && video?.waitingForQueue ? "Waiting to prepare" : labels[status] || "Updating video";
-  return <span className="cw-status" data-status={activity ? "UPLOADING" : status}>{working && <Spinner size={12} decorative />}{label}</span>;
+  return <span className="cw-status cw-video-status" data-status={activity ? "UPLOADING" : status}>{working && <Spinner size={12} decorative />}<span className="cw-video-status-label">{label}</span></span>;
 }

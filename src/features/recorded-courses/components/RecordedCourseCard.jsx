@@ -3,6 +3,7 @@ import { ArrowRight, BookOpen, Clock3, Users } from "lucide-react";
 import CourseCardMedia from "./CourseCardMedia.jsx";
 import CoursePrice from "@/features/recorded-courses/components/CoursePrice.jsx";
 import CourseRating from "@/features/recorded-courses/components/CourseRating.jsx";
+import InstructorByline from "@/features/profile/components/InstructorByline.jsx";
 
 const compactNumber = new Intl.NumberFormat("en-IN", {
   notation: "compact",
@@ -32,7 +33,7 @@ const RecordedCourseCard = ({ course }) => {
         </h3>
       </Link>
       <p className="mt-2 text-sm font-semibold text-[#718079]">
-        By {course.instructor.name}
+        <InstructorByline instructor={course.instructor} />
       </p>
       <p className="mt-3 line-clamp-2 text-sm font-medium leading-6 text-[#6a7872]">
         {course.shortDescription}

@@ -1,6 +1,6 @@
 import React, { lazy } from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
 import App from "@/app/App.jsx";
 import "@/styles/globals.css";
@@ -18,7 +18,6 @@ const About = lazy(() => import("@/pages/about/About.jsx"));
 const Contact = lazy(() => import("@/pages/contact/Contact.jsx"));
 const Donate = lazy(() => import("@/pages/donate/Donate.jsx"));
 const Mission = lazy(() => import("@/pages/about/Mission.jsx"));
-const Admission = lazy(() => import("@/pages/admissions/Admission.jsx"));
 const Login = lazy(() => import("@/pages/auth/Login.jsx"));
 const Register = lazy(() => import("@/pages/auth/Register.jsx"));
 
@@ -118,9 +117,6 @@ const YouthPrograms = lazy(() => import("@/pages/services/YouthPrograms.jsx"));
 const AccountDeleted = lazy(() => import("@/pages/account/AccountDeleted.jsx"));
 const Blogs = lazy(() => import("@/pages/blog/Blogs.jsx"));
 
-const AdminAdmissions = lazy(
-  () => import("@/pages/admissions/AdminAdmissions.jsx"),
-);
 const AdminInstructorApplications = lazy(() => import("@/pages/instructor/AdminInstructorApplications.jsx"));
 const AdminInstructorApplication = lazy(() => import("@/pages/instructor/AdminInstructorApplication.jsx"));
 
@@ -310,7 +306,8 @@ const router = createBrowserRouter([
       },
       {
         path: "admission",
-        element: <ProtectedRoute>{<Admission />}</ProtectedRoute>,
+        // Retired pages remain in source; existing bookmarks use the current flow.
+        element: <Navigate to="/courses" replace />,
       },
       {
         path: "login",
@@ -328,8 +325,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/admin/admissions",
-        element: <AdminRoute><WorkspaceLayout type="admin" /></AdminRoute>,
-        children: [{ index: true, element: <AdminAdmissions /> }],
+        element: <AdminRoute><Navigate to="/admin/instructor-applications" replace /></AdminRoute>,
       },
       { path: "/test", element: <TestPage /> },
       {

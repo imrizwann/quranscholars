@@ -10,17 +10,13 @@ const ServicesList = () => (
       eyebrow="Learner services"
       title="More than courses. Support for the whole learning journey."
       description="Find the right mix of structured study, teacher guidance, family support, and community learning—without having to navigate a confusing list of disconnected programs."
-      urdu={{
-        title: "صرف کورس نہیں، آپ کے پورے تعلیمی سفر میں رہنمائی",
-        description: "درست کورس کے انتخاب سے لے کر ذاتی، خاندانی اور تعلیمی معاونت تک، قرآن اسکالر آپ کو واضح اور منظم انداز میں آگے بڑھنے میں مدد دیتا ہے۔",
-      }}
       icon={Headphones}
       primaryAction={{ to: "/courses", label: "Browse courses" }}
       secondaryAction={{ to: "/contact", label: "Talk to learner support" }}
       highlights={[
-        { label: "Learning formats", value: "Live instruction and flexible self-paced study" },
-        { label: "Support model", value: "Human guidance before, during, and after enrolment" },
-        { label: "Built for", value: "Individuals, young learners, families, and communities" },
+        { label: "Start with your goal", value: "Choose the service that matches the help you need" },
+        { label: "Check the fit", value: "Review who the service is for and what it may include" },
+        { label: "Confirm next steps", value: "Contact our team to discuss format, availability, and any fees" },
       ]}
       labelledBy="services-title"
     />

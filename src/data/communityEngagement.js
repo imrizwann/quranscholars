@@ -56,14 +56,12 @@ export const outcomes = [
 export const motivationTexts = [
     {
         arabic: "وَقُلْ رَبِّ زِدْنِي عِلْمًا",
-        urdu: "اور دعا کریں: اے میرے رب! میرے علم میں اضافہ فرما۔",
         reference: "Surah Taha 20:114",
         insight:
             "Every community initiative starts with this mindset: keep growing in beneficial knowledge.",
     },
     {
         arabic: "خَيْرُ النَّاسِ أَنْفَعُهُمْ لِلنَّاسِ",
-        urdu: "سب سے بہترین لوگ وہ ہیں جو لوگوں کو سب سے زیادہ فائدہ پہنچائیں۔",
         reference: "Hadith meaning",
         insight:
             "Service and education together create the most impactful form of community leadership.",

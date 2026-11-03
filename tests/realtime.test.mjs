@@ -3,6 +3,11 @@ import assert from "node:assert/strict";
 import { createRealtimeClient, parseRealtimeEvent, realtimeUrl } from "../src/realtime/client.js";
 
 const courseId = "a".repeat(24), sectionId = "b".repeat(24), lessonId = "c".repeat(24);
+test("inbox invalidations contain no user identity, content or permission changes", () => {
+  const event = { v: 1, type: "notifications.changed" };
+  assert.deepEqual(parseRealtimeEvent(JSON.stringify(event)), event);
+  for (const extra of [{ userId: courseId }, { role: "instructor" }, { title: "Injected" }, { token: "secret" }]) assert.equal(parseRealtimeEvent(JSON.stringify({ ...event, ...extra })), null);
+});
 test("realtime URLs use the existing API origin without tokens and reject insecure production endpoints", () => {
   assert.equal(realtimeUrl("/", "https://www.quranscholar.in"), "wss://www.quranscholar.in/api/realtime");
   assert.equal(realtimeUrl("http://localhost:3000", "http://localhost:3001"), "ws://localhost:3000/api/realtime");

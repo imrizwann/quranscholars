@@ -1,0 +1,2 @@
+.profile-avatar-badge { display: grid; place-items: center; flex-shrink: 0; overflow: hidden; border-radius: 50%; background: #115e59; color: #fff; font-family: var(--font-body); font-size: .8125rem; font-weight: 650; line-height: 1; letter-spacing: .3px; user-select: none; }
+.profile-avatar-badge img { display: block; width: 100%; height: 100%; object-fit: cover; }

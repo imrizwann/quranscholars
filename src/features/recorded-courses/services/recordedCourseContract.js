@@ -15,6 +15,7 @@ export const buildRecordedCourseQuery = (args = {}) => {
   if (args.category && args.category !== "All") params.category = String(args.category).trim().toLowerCase().slice(0, 100);
   if (recordedCourseLevels.includes(args.level) && args.level !== "All") params.level = args.level;
   if (args.language && args.language !== "All") params.language = String(args.language).trim().slice(0, 50);
+  if (typeof args.instructor === "string" && /^[a-f\d]{24}$/i.test(args.instructor)) params.instructor = args.instructor;
   // The strict public schema has no sort parameter; the server returns newest first.
   return params;
 };

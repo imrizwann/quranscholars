@@ -1,7 +1,7 @@
 import Logo from "/images/Logo-4.svg";
-import { FaFacebook, FaInstagram, FaTwitter, FaYoutube } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
+import { contactDetails } from "@/data/contactDetails.js";
 
 const footerColumns = [
   {
@@ -11,7 +11,7 @@ const footerColumns = [
       { to: "/live-classes", label: "Live Classes" },
       { to: "/instructors", label: "Instructors" },
       { to: "/services", label: "Services" },
-      { to: "/admission", label: "Admission" },
+      { to: "/get-started/instructor", label: "Teach on QuranScholar" },
       { to: "/blogs", label: "Blogs" },
     ],
   },
@@ -35,13 +35,6 @@ const footerColumns = [
   },
 ];
 
-const socialLinks = [
-  { icon: FaFacebook, label: "Facebook" },
-  { icon: FaInstagram, label: "Instagram" },
-  { icon: FaTwitter, label: "Twitter" },
-  { icon: FaYoutube, label: "YouTube" },
-];
-
 const Footer = () => {
   return (
     <footer className="border-t border-border bg-surface text-foreground">
@@ -49,33 +42,20 @@ const Footer = () => {
         <div className="flex flex-col gap-6 border-b border-border py-8 lg:flex-row lg:items-center lg:justify-between">
           <Link
             to="/"
-            aria-label="QuranScholars home"
-            className="flex min-w-0 items-center gap-4 no-underline"
+            aria-label="QuranScholar home"
+            className="flex min-w-0 flex-col items-start gap-4 no-underline sm:flex-row sm:items-center"
           >
             <img className="h-auto w-36 shrink-0 object-contain" src={Logo} alt="" />
             <span className="hidden h-8 w-px bg-border sm:block" />
             <span className="max-w-sm text-sm font-medium leading-6 text-muted-foreground">
-              Online Quran and Islamic learning with guided admissions,
-              structured courses, and trusted teacher support.
+              Online Quran and Islamic learning with structured courses,
+              clear lessons, and trusted teacher support.
             </span>
           </Link>
 
-          <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto lg:min-w-[30rem]">
-            <label className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-lg border border-input bg-background px-3 transition focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/20">
-              <Mail className="size-4 shrink-0 text-muted-foreground" />
-              <input
-                placeholder="Get weekly learning updates"
-                type="email"
-                className="h-full min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-              />
-            </label>
-            <button
-              type="button"
-              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
-            >
-              Subscribe
-              <ArrowRight className="size-4" />
-            </button>
+          <div className="flex min-w-0 flex-col items-start gap-3 lg:shrink-0">
+            <p className="text-sm font-semibold">Need help choosing where to begin?</p>
+            <Link to="/contact" className="cw-button cw-primary min-h-11">Contact our team<ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
         </div>
 
@@ -102,42 +82,27 @@ const Footer = () => {
           </div>
 
           <div className="grid gap-5 lg:justify-items-end">
-            <div className="grid gap-2 text-sm font-medium text-muted-foreground sm:grid-cols-3 lg:grid-cols-1 lg:text-right">
-              <p className="inline-flex items-center gap-2 lg:justify-end">
-                <Mail className="size-4 text-primary" />
-                support@quranscholars.com
-              </p>
-              <p className="inline-flex items-center gap-2 lg:justify-end">
-                <Phone className="size-4 text-primary" />
-                Student support by appointment
-              </p>
+            <div className="grid gap-3 text-sm font-medium text-muted-foreground lg:text-right">
+              <a className="inline-flex min-h-10 min-w-0 items-center gap-2 break-all hover:text-primary lg:justify-end" href={`mailto:${contactDetails.email}`}>
+                <Mail className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                {contactDetails.email}
+              </a>
+              <a className="inline-flex min-h-10 items-center gap-2 hover:text-primary lg:justify-end" href={contactDetails.phoneHref}>
+                <Phone className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                {contactDetails.phone}
+              </a>
               <p className="inline-flex items-center gap-2 lg:justify-end">
                 <MapPin className="size-4 text-primary" />
                 Online classes worldwide
               </p>
             </div>
 
-            <div className="flex items-center gap-2 lg:justify-end">
-              {socialLinks.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.label}
-                    to="#"
-                    aria-label={item.label}
-                    className="grid size-10 place-items-center rounded-lg border border-border bg-background text-muted-foreground transition hover:border-primary hover:bg-primary hover:text-primary-foreground"
-                  >
-                    <Icon className="size-4" />
-                  </Link>
-                );
-              })}
-            </div>
           </div>
         </div>
 
         <div className="flex flex-col gap-3 border-t border-border py-5 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p className="font-medium">
-            &copy; {new Date().getFullYear()} QuranScholars. All rights reserved.
+            &copy; {new Date().getFullYear()} QuranScholar. All rights reserved.
           </p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <Link

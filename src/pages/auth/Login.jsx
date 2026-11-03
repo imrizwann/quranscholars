@@ -107,8 +107,8 @@ const Login = () => {
                 Continue your Quran learning journey with clarity.
               </h1>
               <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">
-                Access admissions, class updates, learning records, and student
-                support from one focused workspace.
+                Open your courses, continue your lessons, and track your
+                learning from one focused workspace.
               </p>
             </div>
           </div>

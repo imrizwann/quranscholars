@@ -19,6 +19,7 @@
 .notification-link > svg { flex-shrink: 0; margin-top: 2px; color: var(--primary); }
 .notification-link > span { min-width: 0; display: grid; gap: 5px; overflow-wrap: anywhere; }
 .notification-link strong { font-size: 13px; font-weight: 600; }
+.notification-category { font-size: 10px; font-weight: 600; color: var(--primary); }
 .notification-link span span { font-size: 12px; line-height: 1.6; color: var(--muted-foreground); }
 .notification-link time { font-size: 11px; color: var(--muted-foreground); }
 .notification-message { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px 20px; font-size: 13px; text-align: center; }
