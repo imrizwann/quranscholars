@@ -78,12 +78,8 @@
 @media (max-width: 650px) { .cw-thumbnail-layout { grid-template-columns: 1fr; } }
 .cw-pages { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; font-size: .8rem; }
 .cw-loading { margin-block: 16px; width: 100%; }
-.cw-steps { display: flex; flex-wrap: wrap; gap: 24px; padding: 18px 0; border-block: 1px solid var(--border); margin-bottom: 6px; }
-.cw-steps li { display: flex; align-items: center; gap: 9px; font-size: .8rem; font-weight: 500; color: var(--muted-foreground); }
-.cw-steps li span { display: grid; place-items: center; width: 27px; height: 27px; border: 1px solid var(--border); border-radius: 50%; font-size: .75rem; background: var(--surface); }
-.cw-steps li[aria-current=step] { color: var(--primary); font-weight: 650; }
-.cw-steps li[aria-current=step] span { color: var(--primary-foreground); background: var(--primary); border-color: var(--primary); }
 .cw-create-grid { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 24px; align-items: start; }
+.cw-create-grid > .cw-card { margin-top: 0; }
 .cw-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
 .cw-form-grid > * { min-width: 0; }
 .cw-form-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; border-top: 1px solid var(--border); padding-top: 22px; margin-top: 28px; }
@@ -150,7 +146,7 @@
   .cw-search-form > label { flex-basis: 100%; }
   .cw-search-form > button { flex: 1; }
 }
-@media (max-width: 600px) { .course-workspace { padding: 22px 16px; } .cw-card { padding: 20px; } .cw-form-grid { grid-template-columns: 1fr; } .cw-steps { gap: 12px; } .cw-steps li { font-size: .7rem; gap: 6px; } .cw-steps li span { width: 22px; height: 22px; } .cw-form-footer > button { width: 100%; } .cw-lesson { padding: 15px; } .cw-heading { align-items: start; } .cw-heading > div { flex-basis: 100%; } }
+@media (max-width: 600px) { .course-workspace { padding: 22px 16px; } .cw-card { padding: 20px; } .cw-form-grid { grid-template-columns: 1fr; } .cw-form-footer > button { width: 100%; } .cw-lesson { padding: 15px; } .cw-heading { align-items: start; } .cw-heading > div { flex-basis: 100%; } }
 
 /* Course Studio layout only: existing type, controls, colors and surfaces are reused. */
 .cw-studio { max-width: 1480px; padding: 24px; }
