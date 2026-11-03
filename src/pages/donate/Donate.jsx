@@ -49,10 +49,6 @@ const Donate = () => (
       eyebrow="Support the mission"
       title="Help make beneficial learning more accessible."
       description="Your support can help students learn, teachers serve, and communities build stronger educational foundations. Contact us for the current verified campaigns and contribution options."
-      urdu={{
-        title: "علمِ نافع کو زیادہ لوگوں تک پہنچانے میں حصہ لیجیے",
-        description: "آپ کا تعاون طلبہ کے لیے تعلیم تک رسائی، اساتذہ کی خدمت اور مضبوط علمی ماحول کی تشکیل میں مدد دے سکتا ہے۔ موجودہ تصدیق شدہ مہمات کی معلومات کے لیے ہم سے رابطہ کریں۔",
-      }}
       icon={HeartHandshake}
       primaryAction={{ to: "/contact", label: "Request donation details" }}
       secondaryAction={{ to: "/mission", label: "Read our mission" }}

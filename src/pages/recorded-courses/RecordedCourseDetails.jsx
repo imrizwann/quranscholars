@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight, BookOpen, Check, ChevronRight, Clock3, Globe2, GraduationCap, Layers3, MessageCircle, MonitorPlay, PlayCircle, Signal, Star, Users, VideoOff } from "lucide-react";
 import AppLoader from "@/components/feedback/AppLoader.jsx";
@@ -11,15 +11,10 @@ import PublicCourseCurriculum from "@/features/recorded-courses/components/Publi
 import RecordedCourseCard from "@/features/recorded-courses/components/RecordedCourseCard.jsx";
 import { useGetRecordedCourseBySlugQuery, useGetRecordedCoursesQuery } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
 import "./course-detail.css";
+import ProfileAvatar from "@/features/profile/components/ProfileAvatar.jsx";
+import { instructorProfileUrl } from "@/features/profile/instructor-link.js";
 
 const number = new Intl.NumberFormat("en-IN");
-
-function InstructorAvatar({ instructor }) {
-  const [failed, setFailed] = useState(false);
-  return instructor.avatar && !failed
-    ? <img className="cd-instructor-avatar" src={instructor.avatar} alt="" loading="lazy" onError={() => setFailed(true)} />
-    : <span className="cd-instructor-avatar" aria-hidden="true">{instructor.name.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]).join("")}</span>;
-}
 
 function CourseDetailsContent({ course, catalogUrl, catalogState, relatedCourses, relatedLoading, relatedError }) {
   const trailerSource = useMemo(() => course.trailerVideo ? { src: course.trailerVideo, type: "application/x-mpegurl" } : null, [course.trailerVideo]);
@@ -70,7 +65,7 @@ function CourseDetailsContent({ course, catalogUrl, catalogState, relatedCourses
           </section>}
           <section id="course-instructor" className="cd-content-section" aria-labelledby="instructor-heading">
             <p className="cd-eyebrow">Learn with guidance</p><h2 id="instructor-heading">Meet your instructor</h2>
-            <div className="cd-instructor-card"><InstructorAvatar key={course.instructor.avatar} instructor={course.instructor} /><div><h3>{course.instructor.name}</h3><p className="cd-instructor-role">{course.instructor.title}</p>{course.instructor.bio && <p className="cd-description">{course.instructor.bio}</p>}</div></div>
+            <div className="cd-instructor-card"><ProfileAvatar name={course.instructor.name} src={course.instructor.avatar} size={56} /><div><h3>{course.instructor.name}</h3><p className="cd-instructor-role">{course.instructor.title}</p>{course.instructor.bio && <p className="cd-description">{course.instructor.bio}</p>}{instructorProfileUrl(course.instructor) && <Link className="cw-button mt-4" to={instructorProfileUrl(course.instructor)}>View instructor profile<ArrowUpRight size={16} aria-hidden="true" /></Link>}</div></div>
           </section>
           <section id="course-reviews" className="cd-content-section" aria-labelledby="reviews-heading">
             <div className="cd-section-heading"><div><p className="cd-eyebrow">The learner perspective</p><h2 id="reviews-heading">Learner feedback</h2></div>{course.totalReviews > 0 && <CourseRating rating={course.rating} reviews={course.totalReviews} />}</div>

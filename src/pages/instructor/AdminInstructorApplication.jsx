@@ -46,26 +46,28 @@ function ApplicationReview({ id }) {
   const location = useLocation();
   const from = location.state?.from;
   const back = typeof from === "string" && /^\/admin\/instructor-applications(?:\?[^#]*)?$/.test(from) ? from : "/admin/instructor-applications";
-  const application = mutation.data?.application || query.currentData?.application;
+  const application = query.currentData?.application;
+  useEffect(() => { setReason(""); setChecked(false); setDecision(null); setError(""); }, [application?.revision]);
   const canReview = application?.status === "pending" && query.currentData?.applicantRole === "user" && id !== admin?._id && application.documents.length > 0;
   const busy = mutation.isLoading;
   function confirm(status) {
     if (!checked || !canReview || busy) return;
     if (status === "rejected" && reason.trim().length < 10) { setError("Explain the rejection in at least 10 characters so the applicant knows why."); return; }
-    setError(""); setDecision(status);
+    setError(""); setDecision({ status, revision: application.revision || 1 });
   }
   async function decide() {
     if (busy || !decision) return;
-    try { await review({ id, status: decision, reason: reason.trim() }).unwrap(); setError(""); setDecision(null); }
+    try { await review({ id, ...decision, reason: reason.trim() }).unwrap(); setError(""); setDecision(null); }
     catch (cause) { setError(userMessage(cause)); setDecision(null); }
   }
   return <WorkspacePage eyebrow="Administration" title={application?.fullName || "Review application"} description="Check the applicant's teaching background and supporting certificates before recording your decision." action={<button type="button" className="cw-button" disabled={query.isFetching || busy} onClick={query.refetch}><RefreshCw size={16} aria-hidden="true" />Refresh</button>}>
     <Link className="public-back" to={back}><ArrowLeft size={16} aria-hidden="true" />All instructor applications</Link>
     {query.isError ? <ReviewError error={query.error} retry={query.refetch} busy={query.isFetching} /> : !application ? <div className="studio-panel" role="status">Loading application...</div> : <>
-      <div className="review-overview" role="status"><ReviewStatus status={application.status} /><span>Submitted {reviewDate(application.submittedAt)}</span></div>
+      <div className="review-overview" role="status"><ReviewStatus status={application.status} /><span>Submitted {reviewDate(application.submittedAt)}{application.revision > 1 ? ` · Submission ${application.revision}` : ""}</span></div>
       <div className="studio-split review-layout"><div className="review-main">
         <section className="studio-panel"><div className="studio-section-title"><ShieldCheck size={20} /><h2>Teaching background</h2></div><dl className="application-summary-grid"><div><dt>Full name</dt><dd>{application.fullName}</dd></div><div><dt>Account email</dt><dd>{application.email}</dd></div><div><dt>Specialization</dt><dd>{application.specialization}</dd></div><div><dt>Teaching experience</dt><dd>{application.experienceYears} years</dd></div><div><dt>Teaching languages</dt><dd>{application.languages}</dd></div><div className="application-wide"><dt>Biography</dt><dd className="whitespace-pre-wrap">{application.biography}</dd></div></dl></section>
-        <section className="studio-panel"><div className="studio-section-title"><FileText size={20} /><h2>Supporting certificates</h2></div><p>Download certificates to review them. Access is restricted to administrators; public course links cannot serve these documents.</p><ul className="review-documents">{application.documents.map((document, index) => <Certificate key={index} id={id} document={document} index={index} />)}</ul>{!application.documents.length && <p>No certificates were submitted.</p>}</section>
+        <section className="studio-panel"><div className="studio-section-title"><FileText size={20} /><h2>Supporting certificates</h2></div><p>Download certificates to review them. Access is restricted to administrators; public course links cannot serve these documents.</p><ul className="review-documents">{application.documents.map((document, index) => <Certificate key={`${application.revision || 1}-${index}`} id={id} document={document} index={index} />)}</ul>{!application.documents.length && <p>No certificates were submitted.</p>}</section>
+        {application.reviewHistory?.length > 0 && <section className="studio-panel"><h2>Previous reviews</h2>{application.reviewHistory.map(entry => <div className="mt-4" key={entry.revision}><h3>Submission {entry.revision}</h3><p>{entry.reviewerName || "Administrator"} · {reviewDate(entry.reviewedAt)}</p><p className="whitespace-pre-wrap">{entry.reason}</p></div>)}</section>}
       </div><aside className="studio-panel review-decision" aria-label="Application decision">
         <h2>{application.status === "pending" ? "Review decision" : "Decision recorded"}</h2>
         {application.status === "pending" ? <>
@@ -78,6 +80,6 @@ function ApplicationReview({ id }) {
         {error && <p className="review-error-text" role="alert">{error}</p>}
       </aside></div>
     </>}
-    <ConfirmationModal open={Boolean(decision)} title={decision === "approved" ? "Approve this instructor?" : "Reject this application?"} description={decision === "approved" ? "This will grant the applicant instructor access and record your approval." : "The applicant will see your reason. Instructor access will not be granted."} confirmLabel={busy ? "Saving decision..." : decision === "approved" ? "Approve instructor" : "Reject application"} danger={decision === "rejected"} busy={busy} onConfirm={decide} onCancel={() => setDecision(null)} />
+    <ConfirmationModal open={Boolean(decision)} title={decision?.status === "approved" ? "Approve this instructor?" : "Reject this application?"} description={decision?.status === "approved" ? "This will grant the applicant instructor access and record your approval." : "The applicant will see your reason. Instructor access will not be granted."} confirmLabel={busy ? "Saving decision..." : decision?.status === "approved" ? "Approve instructor" : "Reject application"} danger={decision?.status === "rejected"} busy={busy} onConfirm={decide} onCancel={() => setDecision(null)} />
   </WorkspacePage>;
 }

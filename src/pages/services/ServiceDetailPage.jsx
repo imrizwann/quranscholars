@@ -13,10 +13,6 @@ const ServiceDetailPage = ({ service }) => {
         eyebrow={service.category}
         title={service.hero}
         description={service.shortDescription}
-        urdu={{
-          title: service.urduTitle,
-          description: service.urduDescription,
-        }}
         icon={Icon}
         primaryAction={{ to: "/contact", label: "Discuss your needs" }}
         secondaryAction={{ to: "/services", label: "Explore all services" }}

@@ -49,10 +49,6 @@ const Mission = () => (
       eyebrow="Our mission"
       title="Help Muslims learn with depth, confidence, and continuity."
       description="We exist to make trustworthy Islamic learning easier to begin, easier to understand, and easier to carry into daily life—wherever a student lives and whatever pace they can sustain."
-      urdu={{
-        title: "مسلمانوں کو علم، عمل اور اعتماد کے ساتھ آگے بڑھانا",
-        description: "ہمارا مقصد معتبر اسلامی تعلیم کو ایسا قابلِ رسائی اور قابلِ فہم بنانا ہے کہ ہر طالب علم اسے اپنی رفتار سے سیکھ سکے اور اپنی روزمرہ زندگی میں اختیار کر سکے۔",
-      }}
       icon={Sparkles}
       primaryAction={{ to: "/courses", label: "Start learning" }}
       secondaryAction={{ to: "/about", label: "About QuranScholar" }}
@@ -75,7 +71,7 @@ const Mission = () => (
         <div className="rounded-2xl bg-[#0b3e38] p-7 text-white sm:p-9">
           <HeartHandshake className="size-6 text-[#f4c95d]" />
           <blockquote className="mt-5 text-balance font-display text-2xl font-black leading-tight tracking-[-0.03em] sm:text-3xl">
-            “Build an LMS that respects sacred knowledge and the realities of modern learners.”
+            “Make room for meaningful learning, one lesson and one good habit at a time.”
           </blockquote>
           <p className="mt-5 text-sm font-medium leading-7 text-white/68">That principle guides how we design courses, support families, and decide what belongs on the platform.</p>
         </div>

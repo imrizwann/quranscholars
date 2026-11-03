@@ -1,18 +1,14 @@
-import LoadingState from "@/components/feedback/LoadingState.jsx";
-import { useState } from "react";
+import { useId, useState } from "react";
+import InstructorByline from "@/features/profile/components/InstructorByline.jsx";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
-import video from "../../assets/videos/13029950-hd_1920_1080_24fps.mp4";
-import "@vidstack/react/player/styles/base.css";
-import "@vidstack/react/player/styles/default/theme.css";
-import "@vidstack/react/player/styles/default/layouts/video.css";
 import {
   ArrowRight,
-  CalendarCheck,
+  BookOpen,
+  GraduationCap,
+  UsersRound,
   Check,
   ChevronDown,
-  Headphones,
-  Play,
   Quote,
   ShieldCheck,
 } from "lucide-react";
@@ -20,7 +16,6 @@ import heroWomanTransparent from "@/assets/images/hero-woman-transparent.svg";
 
 import {
   showcaseStats,
-  showcasePath,
   learningFormats,
   platformFeatures,
   teachers,
@@ -32,7 +27,8 @@ import RecordedCourseCard from "@/features/recorded-courses/components/RecordedC
 import { useGetRecordedCoursesQuery } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
 import { liveClasses } from "@/data/lmsData.js";
 import { LiveClassCard } from "@/pages/live-classes/LiveClasses.jsx";
-import VideoPlayer from "@/components/video-player/VideoPlayer";
+import CourseCardMedia from "@/features/recorded-courses/components/CourseCardMedia.jsx";
+import "./home.css";
 
 
 
@@ -51,7 +47,9 @@ const SectionLabel = ({ children, light = false }) => (
 const Home = () => {
   const { data: recordedData, isLoading: coursesLoading, isError: coursesError, refetch: retryCourses } = useGetRecordedCoursesQuery({ limit: 3 });
   const homeRecordedCourses = recordedData?.courses || [];
+  const featuredCourse = homeRecordedCourses.find(course => course.trailerVideo) || homeRecordedCourses[0];
   const [openFaq, setOpenFaq] = useState(0);
+  const faqId = useId();
   const prefersReducedMotion = useReducedMotion();
 
   const reveal = {
@@ -70,11 +68,11 @@ const Home = () => {
   };
 
   return (
-    <main className="overflow-hidden bg-[#fbfcfa] text-[#14231e] z-0">
+    <main className="home-page overflow-hidden bg-[#fbfcfa] text-[#14231e] z-0">
       {/* Showcase */}
       <section
         id="main"
-        className="relative isolate overflow-hidden bg-[#082f2b] text-white"
+        className="home-hero relative isolate overflow-hidden bg-[#082f2b] text-white"
         aria-labelledby="home-hero-title"
       >
         <div
@@ -97,7 +95,7 @@ const Home = () => {
           aria-hidden="true"
         />
 
-        <div className="mx-auto grid min-h-[calc(100svh-7.5rem)] w-full max-w-7xl content-start gap-10 px-6 pb-18 pt-14 lg:min-h-[640px] lg:grid-cols-[minmax(0,0.94fr)_minmax(22rem,0.66fr)] lg:content-center lg:items-end lg:pb-16 lg:pt-18 max-sm:min-h-[calc(100svh-6rem)] max-sm:px-4 max-sm:pb-12 max-sm:pt-9">
+        <div className="home-hero-layout mx-auto grid min-h-[calc(100svh-7.5rem)] w-full max-w-7xl content-start gap-10 px-6 pb-18 pt-14 lg:min-h-[640px] lg:grid-cols-[minmax(0,0.94fr)_minmax(22rem,0.66fr)] lg:content-center lg:items-end lg:pb-16 lg:pt-18 max-sm:min-h-[calc(100svh-6rem)] max-sm:px-4 max-sm:pb-12 max-sm:pt-9">
           <motion.div
             className="min-w-0 py-4"
             initial="hidden"
@@ -113,10 +111,10 @@ const Home = () => {
           >
             <motion.div
               variants={reveal}
-              className="mb-5 inline-flex max-w-full items-center gap-2 rounded-md border border-white/[.18] bg-white/[.09] px-3.5 py-2 text-[0.68rem] font-black uppercase tracking-[0.15em] text-[#d6efe8] shadow-sm backdrop-blur max-sm:text-[0.6rem] max-sm:tracking-[0.1em]"
+              className="mb-5 inline-flex max-w-full items-center gap-2 rounded-md border border-white/[.18] bg-white/[.09] px-3.5 py-2 text-[0.68rem] font-black uppercase tracking-[0.15em] text-[#d6efe8] backdrop-blur max-sm:text-[0.6rem] max-sm:tracking-[0.1em]"
             >
               <ShieldCheck className="size-3.5 text-[#f4c95d]" />
-              Trusted Islamic LMS for every learning rhythm
+              Quran & Islamic learning, at your pace
             </motion.div>
 
             <motion.h1
@@ -126,7 +124,6 @@ const Home = () => {
             >
               <span>IQRA</span> <span className="text-[#f4c95d]">ILM</span>{" "}
               <span className="">DEEN</span>
-              {/* <span className="text-[#f4c95d] ml-2 opacity-10 absolute top-10 left-[50%]">تَعَلَّمْ وَارْتَقِ</span> */}
             </motion.h1>
 
             <motion.p
@@ -134,33 +131,34 @@ const Home = () => {
               className="mt-6 max-w-172 text-pretty text-[clamp(1.05rem,1.45vw,1.24rem)] font-medium leading-[1.75] text-white/[.74]"
             >
               Learn Quran, Tajweed, Hadith, Fiqh, and family-focused Islamic
-              studies through live scholar-led classes and high-quality
-              self-paced courses designed for flexible, structured learning.
+              studies with structured courses, practical lessons, and guidance
+              to help you build a consistent learning routine.
             </motion.p>
 
             <motion.div
               variants={reveal}
-              className="mt-8 flex flex-wrap items-center gap-3"
+              className="home-hero-actions mt-8 flex flex-wrap items-center gap-3"
             >
               <Link
                 to="/courses"
-                className="group inline-flex min-h-12 items-center justify-center gap-2.5 rounded-lg bg-[#f4c95d] px-6 text-sm font-black text-[#102f2a] no-underline shadow-[0_16px_38px_rgba(0,0,0,.22)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#ffd978] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f4c95d]"
+                className="group inline-flex min-h-12 items-center justify-center gap-2.5 rounded-lg bg-[#f4c95d] px-6 text-sm font-black text-[#102f2a] no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-[#ffd978] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f4c95d]"
               >
                 Explore courses
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
-                to="/live-classes"
+                to="/get-started"
                 className="inline-flex min-h-12 items-center justify-center gap-2.5 rounded-lg border border-white/[.24] bg-white/10 px-6 text-sm font-black text-white no-underline backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:bg-white/[.16] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
               >
-                <Headphones className="size-[1.1rem] text-[#9ad8ca]" />
-                Join live class
+                <GraduationCap className="size-[1.1rem] text-[#9ad8ca]" aria-hidden="true" />
+                Get started
               </Link>
+              <Link to="/instructor/application" className="home-mobile-instructor-link">Become an instructor<ArrowRight size={15} aria-hidden="true" /></Link>
             </motion.div>
 
             <motion.div
               variants={reveal}
-              className="mt-8 grid max-w-2xl grid-cols-3 overflow-hidden rounded-lg border border-white/[.12] bg-white/10 backdrop-blur max-sm:grid-cols-1"
+              className="mt-8 grid max-w-2xl grid-cols-3 overflow-hidden rounded-lg border border-white/[.12] bg-white/10 backdrop-blur home-hero-highlights"
               aria-label="Platform highlights"
             >
               {showcaseStats.map((stat) => (
@@ -179,80 +177,14 @@ const Home = () => {
             </motion.div>
           </motion.div>
 
-          <motion.div
-            className="relative hidden min-h-136 w-full lg:block"
-            initial={{
-              opacity: 0,
-              x: prefersReducedMotion ? 0 : 24,
-            }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{
-              duration: prefersReducedMotion ? 0 : 0.8,
-              delay: prefersReducedMotion ? 0 : 0.15,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-          >
-            <div className="absolute bottom-0 right-0 hidden w-[min(27rem,100%)] rounded-lg border border-white/[.14] bg-[#061f1c]/[.78] p-4 shadow-[0_30px_70px_rgba(0,0,0,.32)] backdrop-blur-xl lg:block">
-              <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-4">
-                <div>
-                  <p className="text-[0.66rem] font-black uppercase tracking-[0.14em] text-[#9ad8ca]">
-                    Course showcase
-                  </p>
-                  <h2 className="mt-1 text-lg font-black leading-tight">
-                    Foundations of Tajweed
-                  </h2>
-                </div>
-                <Link
-                  to="/courses/tajweed-foundations-recite-with-confidence"
-                  aria-label="Play course preview"
-                  className="grid size-11 shrink-0 place-items-center rounded-lg bg-white text-[#0f766e] transition hover:scale-105"
-                >
-                  <Play className="ml-0.5 size-5 fill-current" />
-                </Link>
-              </div>
-
-              <div className="py-4">
-                <div className="mb-2 flex items-center justify-between text-xs font-bold text-white/[.64]">
-                  <span>Lesson progress</span>
-                  <span>68%</span>
-                </div>
-                <div className="h-2 overflow-hidden rounded-md bg-white/12">
-                  <div className="h-full w-[68%] rounded-md bg-[#f4c95d]" />
-                </div>
-              </div>
-
-              <div className="grid gap-3">
-                {showcasePath.map(({ icon: Icon, title, text }) => (
-                  <div
-                    className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[.055] p-3"
-                    key={title}
-                  >
-                    <span className="grid size-10 shrink-0 place-items-center rounded-md bg-white/10 text-[#f4c95d]">
-                      <Icon className="size-5" />
-                    </span>
-                    <div>
-                      <p className="text-sm font-black text-white">{title}</p>
-                      <p className="mt-0.5 text-xs font-semibold text-white/[.56]">
-                        {text}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="absolute right-0 top-4 hidden w-[17.5rem] rounded-lg border border-white/[.16] bg-white p-3.5 text-[#17332d] shadow-[0_18px_48px_rgba(0,0,0,.22)] lg:flex lg:items-center lg:gap-3">
-              <span className="grid size-10 place-items-center rounded-md bg-[#e8f4f0] text-primary">
-                <CalendarCheck className="size-5" />
-              </span>
-              <div>
-                <p className="text-xs font-black">Next live class</p>
-                <p className="mt-0.5 text-[0.68rem] font-bold text-[#6b7772]">
-                  Quran recitation with teacher feedback
-                </p>
-              </div>
-            </div>
-          </motion.div>
+          <motion.aside className="home-start-panel" initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: prefersReducedMotion ? 0 : .5, ease: [.16, 1, .3, 1] }} aria-labelledby="home-start-title">
+            <p className="public-eyebrow">A place to begin</p><h2 id="home-start-title">Make room for meaningful learning.</h2><p>Choose your next step. You can always explore the other paths later.</p>
+            <div className="home-start-links">{[
+              { to: "/courses", title: "Explore courses", detail: "Find a subject and level that fit you.", icon: BookOpen },
+              { to: "/dashboard/learning", title: "My learning", detail: "Return to your courses and saved progress.", icon: GraduationCap },
+              { to: "/get-started/instructor", title: "Become an instructor", detail: "Share your knowledge with learners.", icon: UsersRound },
+            ].map(({ to, title, detail, icon: Icon }) => <Link key={to} to={to}><span className="home-start-icon"><Icon size={19} aria-hidden="true" /></span><span><strong>{title}</strong><small>{detail}</small></span><ArrowRight size={16} aria-hidden="true" /></Link>)}</div>
+          </motion.aside>
         </div>
       </section>
 
@@ -317,11 +249,11 @@ const Home = () => {
             </Link>
           </div>
 
-          {coursesLoading && <LoadingState variant="inline" label="Loading courses..." className="mt-6" />}
-          <div className="mt-12 grid gap-6 lg:grid-cols-3" aria-busy={coursesLoading}>
+          <div className="home-course-grid mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3" aria-busy={coursesLoading}>
+            {coursesLoading && <span className="sr-only" role="status">Loading courses</span>}
             {coursesLoading ? Array.from({ length: 3 }, (_, index) => <RecordedCourseSkeleton key={index} />) : coursesError ? (
-              <p className="text-sm text-[#66736e]" role="alert">Courses could not be loaded. <button type="button" onClick={retryCourses} className="font-bold text-primary">Try again</button></p>
-            ) : !homeRecordedCourses.length ? <p className="text-sm text-[#66736e]">No courses are available yet.</p> : homeRecordedCourses.map((course) => (
+              <div className="home-course-state" role="alert"><BookOpen size={24} aria-hidden="true" /><div><h3>Courses are temporarily unavailable</h3><p>Please try again in a moment.</p></div><button type="button" onClick={retryCourses} className="cw-button">Try again</button></div>
+            ) : !homeRecordedCourses.length ? <div className="home-course-state" role="status"><BookOpen size={24} aria-hidden="true" /><div><h3>New courses are on the way</h3><p>Contact our team for help finding your next learning opportunity.</p></div><Link to="/contact" className="cw-button">Contact us<ArrowRight size={15} aria-hidden="true" /></Link></div> : homeRecordedCourses.map((course) => (
               <RecordedCourseCard key={course.id} course={course} />
             ))}
           </div>
@@ -356,7 +288,7 @@ const Home = () => {
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
-          <div className="mt-12 grid gap-6 lg:grid-cols-3">
+          <div className="home-course-grid mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {liveClasses.map((item) => (
               <LiveClassCard key={item.id} item={item} />
             ))}
@@ -383,9 +315,9 @@ const Home = () => {
               Self-paced courses that feel thoughtfully taught.
             </h2>
             <p className="mt-6 max-w-xl text-base font-medium leading-[1.8] text-white/68">
-              A complete video processing pipeline works quietly in the
-              background, so learners experience reliable playback, clear lesson
-              structure, and a smooth return to where they left off.
+              Focus on the lesson, with clear course sections, video that
+              adapts to your connection, and saved progress that helps you
+              pick up where you left off.
             </p>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -415,37 +347,8 @@ const Home = () => {
             viewport={{ once: true, amount: 0.2 }}
             variants={reveal}
           >
-            <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#092f2b] shadow-[0_35px_90px_rgba(0,0,0,.28)]">
-              <div className="flex items-center gap-2 border-b border-white/10 px-5 py-4">
-                <span className="size-2.5 rounded-full bg-[#ef6b63]" />
-                <span className="size-2.5 rounded-full bg-[#e9bd4f]" />
-                <span className="size-2.5 rounded-full bg-[#78c6a4]" />
-                <span className="ml-3 text-[0.65rem] font-bold uppercase tracking-[0.15em] text-white/38">
-                  Course player
-                </span>
-              </div>
-
-              <div className="aspect-video">
-                {/* Video Player */}
-                <VideoPlayer src={video} className="qs-video-player--embedded" />
-              </div>
-
-              <div className="grid gap-5 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
-                <div>
-                  <p className="text-[0.66rem] font-bold uppercase tracking-[0.15em] text-[#8ecdbd]">
-                    Section 2 · Lesson 4
-                  </p>
-                  <h3 className="mt-2 font-display text-lg font-black">
-                    Understanding the rules of Madd
-                  </h3>
-                </div>
-                <Link
-                  to="/courses/tajweed-foundations-recite-with-confidence"
-                  className="rounded-xl bg-white px-4 py-2.5 text-center text-xs font-black text-[#133a33] no-underline"
-                >
-                  Next lesson
-                </Link>
-              </div>
+            <div className="home-course-spotlight">
+              {featuredCourse ? <><CourseCardMedia key={featuredCourse.id} course={featuredCourse} to={`/courses/${featuredCourse.slug}`} /><div className="home-spotlight-copy"><div><p>Course spotlight</p><h3>{featuredCourse.title}</h3><span><InstructorByline instructor={featuredCourse.instructor} photo={false} /></span></div><Link to={`/courses/${featuredCourse.slug}`} className="cw-button">View course<ArrowRight size={15} aria-hidden="true" /></Link></div></> : <div className="home-spotlight-empty"><BookOpen size={32} aria-hidden="true" /><h3>Your next chapter starts here.</h3><p>Find a subject that inspires you, then follow a clear path through each lesson.</p><Link to="/courses" className="cw-button">Explore courses<ArrowRight size={16} aria-hidden="true" /></Link></div>}
             </div>
           </motion.div>
         </div>
@@ -521,7 +424,7 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {teachers.map((teacher) => (
               <article
                 className="overflow-hidden rounded-[1.5rem] border border-[#dfddd4] bg-white"
@@ -529,7 +432,7 @@ const Home = () => {
               >
                 <div className="aspect-[1.2] overflow-hidden bg-[#deebe6]">
                   <img
-                    className="size-full object-cover object-top transition duration-500 hover:scale-[1.03]"
+                    loading="lazy" decoding="async" width="480" height="400" className="size-full object-cover object-top transition duration-500 hover:scale-[1.03]"
                     src={teacher.image}
                     alt={teacher.name}
                   />
@@ -545,10 +448,10 @@ const Home = () => {
                     {teacher.focus}
                   </p>
                   <Link
-                    to="/register"
+                    to="/instructors"
                     className="mt-5 inline-flex items-center gap-2 text-sm font-black text-[#26483f] no-underline"
                   >
-                    Learn with this mentor
+                    Meet the instructors
                     <ArrowRight className="size-4" />
                   </Link>
                 </div>
@@ -583,7 +486,7 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-5 lg:grid-cols-3">
+          <div className="home-testimonials mt-8 grid gap-5 lg:grid-cols-3">
             {testimonials.map((testimonial, index) => (
               <figure
                 className={
@@ -658,7 +561,9 @@ const Home = () => {
                 <div className="border-b border-[#dfe4df]" key={faq.question}>
                   <button
                     type="button"
-                    className="flex w-full items-center justify-between gap-6 py-6 text-left"
+                    className="home-faq-trigger flex w-full items-center justify-between gap-6 py-5 text-left"
+                    id={`${faqId}-question-${index}`}
+                    aria-controls={`${faqId}-answer-${index}`}
                     aria-expanded={isOpen}
                     onClick={() => setOpenFaq(isOpen ? -1 : index)}
                   >
@@ -675,8 +580,13 @@ const Home = () => {
                     </span>
                   </button>
                   <div
+                    id={`${faqId}-answer-${index}`}
+                    role="region"
+                    aria-labelledby={`${faqId}-question-${index}`}
+                    aria-hidden={!isOpen}
+                    inert={!isOpen}
                     className={
-                      "grid transition-[grid-template-rows] duration-300 " +
+                      "home-faq-panel grid transition-[grid-template-rows] duration-300 " +
                       (isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]")
                     }
                   >

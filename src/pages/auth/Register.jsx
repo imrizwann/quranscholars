@@ -108,7 +108,7 @@ const Register = () => {
                 Get started
               </h1>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Explore courses, apply for guided learning, or discover teaching opportunities.
+                Enroll in courses, track your learning, or apply to become an instructor.
               </p>
             </div>
 
@@ -280,7 +280,7 @@ const Register = () => {
                 One account. Room to learn and teach.
               </h2>
               <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">
-                Explore courses, manage your admission, and discover teaching
+                Explore courses, keep your progress, and discover teaching
                 opportunities without choosing a permanent role.
               </p>
             </div>

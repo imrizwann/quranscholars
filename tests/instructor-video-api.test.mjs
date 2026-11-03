@@ -18,7 +18,7 @@ test("instructor sign-in returns to known local workspace pages only", () => {
   const instructor = { role: "instructor" };
   assert.equal(loginDestination(instructor, "/instructor/courses/new"), "/instructor/courses/new");
   for (const path of ["https://example.test", "//example.test", "/instructor/courses/../..", undefined]) assert.equal(loginDestination(instructor, path), "/instructor/courses");
-  assert.equal(loginDestination({ role: "user" }, "/instructor/courses"), "/admission");
+  assert.equal(loginDestination({ role: "user" }, "/instructor/courses"), "/dashboard/learning");
 });
 
 test("video metadata matches the server formats and rejects empty, disguised and unsafe files", () => {

@@ -12,16 +12,16 @@ import MuslimMan from "@/assets/images/muslim.png";
 import HijabImage from "@/assets/images/hijab.png";
 const showcaseStats = [
     {
-        value: "Live",
-        label: "scholar-led classes",
+        value: "Flexible",
+        label: "study at your pace",
     },
     {
-        value: "HD",
-        label: "processed video courses",
+        value: "Guided",
+        label: "structured lessons",
     },
     {
-        value: "24/7",
-        label: "self-paced access",
+        value: "Online",
+        label: "learn from anywhere",
     },
 ];
 

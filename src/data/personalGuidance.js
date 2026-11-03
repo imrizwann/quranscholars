@@ -74,14 +74,12 @@ export const moralsFocus = [
 export const islamicMotivation = [
     {
         arabic: "إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ",
-        urdu: "اعمال کا دارومدار نیتوں پر ہے۔",
         ref: "Hadith meaning",
         insight:
             "Our guidance begins with intention, then builds disciplined action around it.",
     },
     {
         arabic: "وَالْعَصْرِ إِنَّ الْإِنسَانَ لَفِي خُسْرٍ",
-        urdu: "زمانے کی قسم! انسان خسارے میں ہے، مگر وہ جو ایمان و عملِ صالح اختیار کرے۔",
         ref: "Surah Al-Asr 103:1-3",
         insight:
             "Time management, righteous action, and mutual advice are central to personal growth.",

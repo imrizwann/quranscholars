@@ -2,10 +2,10 @@
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Camera, ArrowLeft, ShieldCheck, Trash2, Upload } from "lucide-react";
-import { Toaster } from "sonner";
 import { useUploadAvatarMutation } from "@/services/api/user/fileUploadApis.js";
 import useProfilePhoto from "@/features/profile/useProfilePhoto.js";
 import AvatarImage from "@/features/profile/components/AvatarImage.jsx";
+import { getProfileInitials } from "@/features/profile/profile-initials.js";
 import ProfileDeleteModal from "@/features/profile/components/ProfileDeleteModal.jsx";
 import LearnerProfileForm from "@/features/profile/components/LearnerProfileForm.jsx";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
@@ -27,9 +27,9 @@ export default function ProfilePage() {
   const deleteButton = useRef(null);
   const uploading = useRef(false);
   const name = user?.name?.trim() || "Your account";
-  const initials = name.split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase();
+  const initials = getProfileInitials(user?.name);
   const role = ({ admin: "Administrator", instructor: "Instructor", user: "Learner", student: "Learner" })[user?.role] || "Member";
-  const dashboard = user?.role === "admin" ? "/admin/admissions" : user?.role === "instructor" ? "/instructor/dashboard" : "/dashboard";
+  const dashboard = user?.role === "admin" ? "/admin/instructor-applications" : user?.role === "instructor" ? "/instructor/dashboard" : "/dashboard";
 
   useEffect(() => {
     if (!file) { setPreviewUrl(""); return; }
@@ -63,7 +63,6 @@ export default function ProfilePage() {
   }
 
   return <main className="public-page profile-page">
-    <Toaster position="top-center" />
     <ProfileDeleteModal returnFocus={deleteButton} open={modalVisible} onClose={() => setModalVisible(false)} />
     <Link className="public-back" to={dashboard}><ArrowLeft size={16} aria-hidden="true" />Back to dashboard</Link>
     <header className="public-heading"><p className="public-eyebrow">Your account</p><h1>Your profile</h1><p>Manage your profile photo, review your account details, and control your account access.</p></header>

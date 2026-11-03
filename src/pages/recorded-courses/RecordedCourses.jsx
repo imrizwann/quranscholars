@@ -1,6 +1,6 @@
 import LoadingState from "@/components/feedback/LoadingState.jsx";
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowRight,
   BookOpen,
@@ -12,7 +12,7 @@ import {
 import CustomSelect from "@/components/ui/CustomSelect.jsx";
 import RecordedCourseCard from "@/features/recorded-courses/components/RecordedCourseCard.jsx";
 import RecordedCourseSkeleton from "@/features/recorded-courses/components/RecordedCourseSkeleton.jsx";
-import UrduCompanion from "@/components/marketing/UrduCompanion.jsx";
+import CatalogueHero from "@/components/marketing/CatalogueHero.jsx";
 import { useGetRecordedCoursesQuery } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
 import { recordedCourseLevels, recordedCourseLanguages } from "@/features/recorded-courses/services/recordedCourseContract.js";
 const PAGE_SIZE = 8;
@@ -107,49 +107,15 @@ const RecordedCourses = () => {
   const clearFilters = () => setSearchParams({});
 
   return (
-    <main className="bg-[#fbfcfa] text-[#172b24]">
-      <section className="relative isolate overflow-hidden border-b border-white/10 bg-[#082f2b] px-4 py-16 text-white sm:px-6 sm:py-20">
-        <div className="absolute inset-0 -z-10 opacity-50 [background-image:radial-gradient(circle_at_82%_18%,rgba(122,198,176,.28),transparent_27%),radial-gradient(circle_at_15%_80%,rgba(244,201,93,.12),transparent_25%)]" />
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(22rem,.72fr)] lg:items-center lg:gap-14">
-          <div>
-            <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-[#9ed6c8]">
-              <Sparkles className="size-4 text-[#f4c95d]" />
-              On-demand learning
-            </div>
-            <h1 className="mt-5 max-w-4xl text-balance font-display text-[clamp(2.65rem,5.5vw,5rem)] font-black leading-[1.02] tracking-[-0.045em]">
-              Video courses. Learn at your own pace.
-            </h1>
-            <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-white/70 sm:text-lg">
-              Explore instructor-created courses in Quran, Tajweed, Arabic, and
-              Islamic studies. Review what each course covers, explore its
-              lesson outline, and choose the right starting point for your
-              learning.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href="#self-paced-catalog"
-                className="inline-flex min-h-12 items-center gap-2 rounded-lg bg-[#f4c95d] px-5 text-sm font-black text-[#11342e] no-underline transition hover:bg-[#ffda79]"
-              >
-                Browse courses <ArrowRight className="size-4" />
-              </a>
-              <a
-                href="#how-courses-work"
-                className="inline-flex min-h-12 items-center rounded-lg border border-white/20 px-5 text-sm font-black text-white no-underline"
-              >
-                How courses work
-              </a>
-            </div>
-          </div>
-          <UrduCompanion
-            title="اپنی رفتار سے، اپنے وقت کے مطابق دینی تعلیم حاصل کریں"
-            description="قرآن، تجوید، عربی اور اسلامی علوم کے ویڈیو کورسز اپنی رفتار سے پڑھیں۔ داخلہ لینے سے پہلے اسباق، استاد، قیمت اور کورس کی تفصیلات دیکھیں۔"
-          />
-        </div>
-      </section>
+    <main className="catalogue-page bg-[#fbfcfa] text-[#172b24]">
+      <CatalogueHero id="course-catalogue-title" eyebrow="Self-paced courses" title="Learn at your own pace." description="Explore Quran, Tajweed, Arabic, and Islamic studies. Review course outlines, instructors, and pricing before you enroll." icon={Sparkles} highlights={["Video lessons", "Course previews", "Saved progress"]}>
+        <Link to="/live-classes" className="cw-button">Live classes<ArrowRight size={15} aria-hidden="true" /></Link>
+        <a href="#how-courses-work">How courses work</a>
+      </CatalogueHero>
 
       <section
         id="self-paced-catalog"
-        className="scroll-mt-24 px-4 py-14 sm:px-6 sm:py-18"
+        className="catalogue-results scroll-mt-24 px-4 sm:px-6"
       >
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

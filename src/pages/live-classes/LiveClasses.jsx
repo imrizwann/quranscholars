@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import {
@@ -7,14 +8,16 @@ import {
   Radio,
   Search,
   Users,
+  X,
 } from "lucide-react";
 
 import { liveClasses } from "@/data/lmsData.js";
 
 import { StatusBadge } from "@/components/lms/LmsComponents.jsx";
+import CatalogueHero from "@/components/marketing/CatalogueHero.jsx";
 
 export const LiveClassCard = ({ item }) => (
-  <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-[0_12px_35px_rgba(18,48,40,.06)] transition hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(18,48,40,.11)]">
+  <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-white transition-colors hover:border-primary/30">
     <div className="bg-[#0a3b35] p-5 text-white">
       <div className="flex items-center justify-between gap-3">
         <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.12em] text-[#a8dace]">
@@ -27,7 +30,7 @@ export const LiveClassCard = ({ item }) => (
         {item.title}
       </h2>
       <p className="mt-2 text-sm font-semibold text-white/60">
-        with {item.instructor}
+        Instructor details will be confirmed.
       </p>
     </div>
     <div className="flex flex-1 flex-col p-5">
@@ -51,7 +54,7 @@ export const LiveClassCard = ({ item }) => (
       <div className="mt-6 flex items-end justify-between gap-3 border-t border-border pt-5">
         <div>
           <p className="text-xs font-bold text-muted-foreground">
-            Admission SAR {item.admissionFee}
+            Enrollment fee SAR {item.admissionFee}
           </p>
           <p className="font-display text-xl font-black">
             SAR {item.monthlyTuition}
@@ -75,62 +78,46 @@ export const LiveClassCard = ({ item }) => (
 
 export default function LiveClasses() {
   const [params, setParams] = useSearchParams();
+  const searchInput = useRef(null);
   const query = params.get("search") || "";
   const filtered = liveClasses.filter((item) =>
     `${item.title} ${item.category} ${item.instructor}`
       .toLowerCase()
-      .includes(query.toLowerCase()),
+      .includes(query.trim().toLowerCase()),
   );
+  const updateSearch = value => setParams(previous => {
+    const next = new URLSearchParams(previous);
+    if (value) next.set("search", value);
+    else next.delete("search");
+    return next;
+  }, { replace: true });
+  const clearSearch = () => {
+    updateSearch("");
+    searchInput.current?.focus();
+  };
 
   return (
-    <main className="min-h-screen bg-[#f7f9f7] text-foreground">
-      <section className="bg-[#082f2b] px-4 py-16 text-white sm:px-6 lg:py-20">
-        <div className="mx-auto max-w-7xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[.14em] text-[#b7e2d7]">
-            <Radio className="size-4 text-[#f4c95d]" />
-            Live learning
-          </span>
-          <h1 className="mt-6 max-w-4xl text-balance font-display text-[clamp(2.8rem,6vw,5.2rem)] font-black leading-none tracking-[-.05em]">
-            Learn live, with guidance that keeps you moving.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg font-medium leading-8 text-white/68">
-            Learn a subject with an instructor through scheduled online
-            sessions. Compare topics, class times and pricing to find a class
-            that fits your goals.
-          </p>
-          <div className="mt-8 max-w-xl rounded-xl border border-white/15 bg-white/10 p-2 backdrop-blur">
-            <label className="flex items-center gap-3">
-              <Search className="ml-2 size-5 text-white/55" />
-              <span className="sr-only">Search live classes</span>
-              <input
-                value={query}
-                onChange={(event) =>
-                  setParams(
-                    event.target.value ? { search: event.target.value } : {},
-                  )
-                }
-                className="h-11 flex-1 bg-transparent text-sm font-semibold text-white outline-none placeholder:text-white/45"
-                placeholder="Search topics or instructors"
-              />
-            </label>
-          </div>
-        </div>
-      </section>
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+    <main className="catalogue-page bg-[#f7f9f7] text-foreground">
+      <CatalogueHero id="live-class-catalogue-title" eyebrow="Live classes" title="Learn with an instructor." description="Compare class topics, schedules, and fees. Choose guided study that fits your goals and availability." icon={Radio} highlights={["Scheduled sessions", "Instructor guidance", "Class time zones"]}>
+        <Link to="/courses" className="cw-button">Video courses<ArrowRight size={15} aria-hidden="true" /></Link>
+      </CatalogueHero>
+      <section className="catalogue-results mx-auto max-w-7xl px-4 sm:px-6" aria-labelledby="live-class-results-title">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-xs font-black uppercase tracking-[.14em] text-primary">
               Scheduled learning
             </p>
-            <h2 className="mt-2 font-display text-3xl font-black">
+            <h2 id="live-class-results-title" className="mt-2 font-display text-3xl font-black">
               Find your live class
             </h2>
           </div>
-          <p className="text-sm font-bold text-muted-foreground">
-            {filtered.length} classes · Times shown in each class timezone
-          </p>
         </div>
-        <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="live-class-search-row">
+          <label className="live-class-search qs-search-field"><Search size={17} aria-hidden="true" /><span className="sr-only">Search live classes</span><input ref={searchInput} type="search" value={query} onChange={event => updateSearch(event.target.value)} placeholder="Search topics or instructors" maxLength={100} />{query && <button type="button" aria-label="Clear live class search" onClick={clearSearch}><X size={16} aria-hidden="true" /></button>}</label>
+          <p role="status" aria-live="polite">{filtered.length} {filtered.length === 1 ? "class" : "classes"} · Times shown in each class timezone</p>
+        </div>
+        <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {!filtered.length && <div className="public-panel live-class-empty"><Search size={24} aria-hidden="true" /><div><h3>No matching classes</h3><p>Try another topic or instructor name.</p></div><button className="cw-button" type="button" onClick={clearSearch}>Clear search</button></div>}
           {filtered.map((item) => (
             <LiveClassCard key={item.id} item={item} />
           ))}

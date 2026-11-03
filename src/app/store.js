@@ -17,6 +17,7 @@ import instructorApplicationApi from "@/services/api/user/instructorApplicationA
 import adminInstructorApplicationsApi from "@/services/api/admin/instructorApplicationsApi.js";
 import notificationsApi from "@/services/api/user/notificationsApi.js";
 import realtime from "@/realtime/realtimeSlice.js";
+import { actionFeedbackMiddleware } from "@/components/feedback/actionFeedbackMiddleware.js";
 export const store = configureStore({
   reducer: {
     realtime,
@@ -36,6 +37,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
+      .concat(actionFeedbackMiddleware)
       .concat(authSessionMiddleware)
       .concat(notificationsApi.middleware)
       .concat(adminInstructorApplicationsApi.middleware)

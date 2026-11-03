@@ -13,7 +13,7 @@ import { enrollmentFailureMessage } from "@/features/payments/enrollment-feedbac
 export default function CourseEnrollment({ course }) {
   const user = useSelector(state => state.user.user);
   const location = useLocation();
-  if (!user?._id) return <><Link className="cw-button cw-primary cd-enrollment-action" to="/login" state={{ from: `/courses/${encodeURIComponent(course.slug)}${location.search}` }}>Sign in to enroll<ArrowRight size={16} /></Link><p className="cd-enrollment-note">Use your account to join this course. No additional admission form is needed.</p></>;
+  if (!user?._id) return <><Link className="cw-button cw-primary cd-enrollment-action" to="/login" state={{ from: `/courses/${encodeURIComponent(course.slug)}${location.search}` }}>Sign in to enroll<ArrowRight size={16} /></Link><p className="cd-enrollment-note">Use your account to enroll and keep your learning in one place.</p></>;
   return <EnrollmentAction key={`${user._id}/${course.id}`} course={course} user={user} />;
 }
 

@@ -7,17 +7,6 @@
   font-display: swap;
 }
 
-.font-urdu {
-  font-family:
-    "Urdu Typesetting", "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq",
-    "Noto Naskh Arabic", "Segoe UI", Tahoma, serif;
-  font-feature-settings: "kern" 1, "liga" 1;
-  text-rendering: optimizeLegibility;
-}
-
-[lang="ur"] {
-  unicode-bidi: plaintext;
-}
 @font-face {
   font-family: "Instrument Sans";
   src: url("../assets/fonts/Instrument_Sans/InstrumentSans-VariableFont_wdth,wght.ttf")

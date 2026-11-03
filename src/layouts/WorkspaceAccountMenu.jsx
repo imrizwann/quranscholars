@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Menu } from "@base-ui/react/menu";
-import { ArrowUpRight, BookOpen, ChevronDown, ClipboardCheck, LayoutDashboard, LogOut, Presentation, Settings, UserRound } from "lucide-react";
+import { ArrowUpRight, BookOpen, LayoutDashboard, LogOut, Presentation, Settings, UserRound } from "lucide-react";
 import useProfilePhoto from "@/features/profile/useProfilePhoto.js";
-import AvatarImage from "@/features/profile/components/AvatarImage.jsx";
+import ProfileAvatar from "@/features/profile/components/ProfileAvatar.jsx";
 import useSignOut from "@/features/auth/useSignOut.js";
 import NotificationBell from "@/realtime/NotificationBell.jsx";
 
@@ -16,16 +16,14 @@ export default function WorkspaceAccountMenu({ type }) {
   const { key: locationKey } = useLocation();
   const role = type === "admin" ? "Admin" : type === "instructor" ? "Instructor" : "Learner";
   const name = user?.name?.trim() || "Your account";
-  const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
   const base = type === "instructor" ? "/instructor" : "/dashboard";
   const links = [
     { to: "/profile", label: "My profile", icon: UserRound },
     ...(user?.role === "instructor" ? [{ to: "/instructor/dashboard", label: "Instructor dashboard", icon: Presentation }] : []),
     ...(type === "admin" ? [] : [{ to: `${base}/settings`, label: "Account settings", icon: Settings }]),
-    { to: type === "admin" ? "/admin/admissions" : type === "instructor" ? `${base}/courses` : `${base}/learning`, label: type === "admin" ? "Admissions" : type === "instructor" ? "Manage courses" : "My learning", icon: LayoutDashboard },
+    { to: type === "admin" ? "/admin/instructor-applications" : type === "instructor" ? `${base}/courses` : `${base}/learning`, label: type === "admin" ? "Instructor applications" : type === "instructor" ? "Manage courses" : "My learning", icon: LayoutDashboard },
     { to: "/courses", label: "Browse courses", icon: BookOpen },
     ...(type === "admin" ? [] : [
-      { to: "/admission", label: "Admission", icon: ClipboardCheck },
       type === "instructor"
         ? { to: "/dashboard/learning", label: "My learning", icon: BookOpen }
         : { to: "/get-started/instructor", label: "Explore teaching", icon: Presentation },
@@ -37,11 +35,7 @@ export default function WorkspaceAccountMenu({ type }) {
 
   return <div className="workspace-header-actions"><NotificationBell /><Menu.Root open={open} onOpenChange={setOpen} modal={false}>
     <Menu.Trigger className="workspace-account" aria-label={`Account menu for ${name}`}>
-      <span className="workspace-account-name">{name}</span>
-      <span className="workspace-avatar" aria-hidden="true">
-        <AvatarImage src={data?.smallUrl || data?.url} fallback={initials} size={37} />
-      </span>
-      <ChevronDown size={15} className="workspace-account-chevron" aria-hidden="true" />
+      <ProfileAvatar src={data?.smallUrl || data?.url} name={user?.name} />
     </Menu.Trigger>
     <Menu.Portal>
       <Menu.Positioner align="end" sideOffset={10} collisionPadding={12} className="workspace-account-positioner">

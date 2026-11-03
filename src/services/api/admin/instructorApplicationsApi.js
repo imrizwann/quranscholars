@@ -13,6 +13,14 @@ const instructorApplicationsApi = createApi({
     }),
     reviewInstructorApplication: builder.mutation({
       query: ({ id, ...body }) => ({ url: `${root}/${id}/decision`, method: "PATCH", body }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(instructorApplicationsApi.util.updateQueryData("getAdminInstructorApplication", id, draft => {
+            draft.application = data.application;
+          }));
+        } catch { /* Refetch reconciles the authoritative application after an error. */ }
+      },
       invalidatesTags: ["Applications"],
     }),
     accessInstructorCertificate: builder.mutation({

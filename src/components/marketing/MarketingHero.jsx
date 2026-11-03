@@ -1,15 +1,14 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import UrduCompanion from "@/components/marketing/UrduCompanion.jsx";
 
-const HighlightGrid = ({ highlights, wide = false }) => (
-  <dl className={`public-highlights${wide ? " public-highlights-wide" : ""}`}>
+const HighlightGrid = ({ highlights }) => (
+  <dl className="public-highlights" aria-label="At a glance">
     {highlights.map(({ label, value }) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
   </dl>
 );
 
-export default function MarketingHero({ eyebrow, title, description, icon: Icon, primaryAction, secondaryAction, highlights = [], urdu, children, labelledBy = "marketing-hero-title" }) {
-  const hasAside = urdu || children || highlights.length > 0;
+export default function MarketingHero({ eyebrow, title, description, icon: Icon, primaryAction, secondaryAction, highlights = [], children, labelledBy = "marketing-hero-title" }) {
+  const hasAside = children || highlights.length > 0;
   return <section className="public-hero" aria-labelledby={labelledBy}>
     <div className="public-page">
       <div className={hasAside ? "public-hero-grid" : ""}>
@@ -22,8 +21,7 @@ export default function MarketingHero({ eyebrow, title, description, icon: Icon,
             {secondaryAction && <Link to={secondaryAction.to} className="cw-button">{secondaryAction.label}</Link>}
           </div>}
         </header>
-        {urdu ? <UrduCompanion title={urdu.title} description={urdu.description} tone="light" /> : children || (highlights.length > 0 && <HighlightGrid highlights={highlights} />)}
-        {urdu && highlights.length > 0 && <HighlightGrid highlights={highlights} wide />}
+        {children || (highlights.length > 0 && <HighlightGrid highlights={highlights} />)}
       </div>
     </div>
   </section>;

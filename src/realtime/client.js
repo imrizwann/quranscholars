@@ -5,6 +5,7 @@ export function parseRealtimeEvent(text) {
     const event = JSON.parse(text);
     if (event.v !== 1) return null;
     if (["ready", "pong"].includes(event.type)) return Object.keys(event).length === 2 ? event : null;
+    if (event.type === "notifications.changed") return Object.keys(event).length === 2 ? event : null;
     const keys = ["v", "type", "courseId", "sectionId", "lessonId", "status", "notificationsChanged"];
     if (event.type !== "video.updated" || Object.keys(event).some(key => !keys.includes(key)) || !id(event.courseId)) return null;
     if (!['QUEUED', 'PROCESSING', 'COMPLETED', 'FAILED'].includes(event.status)) return null;
