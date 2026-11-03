@@ -3,8 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Dialog } from "@base-ui/react/dialog";
 import { Menu } from "@base-ui/react/menu";
-import { Popover } from "@base-ui/react/popover";
-import { ArrowRight, BookOpen, ChevronDown, Compass, Headphones, Info, LayoutDashboard, LogOut, Mail, Menu as MenuIcon, NotebookPen, Presentation, Search, ShieldCheck, UserRound, UsersRound, Video, X } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronDown, Compass, Headphones, Info, LayoutDashboard, LogOut, Mail, Menu as MenuIcon, NotebookPen, Presentation, Search, ShieldCheck, UserRound, Video, X } from "lucide-react";
 import Logo from "/images/Logo-4.svg";
 import useSignOut from "@/features/auth/useSignOut.js";
 import useProfilePhoto from "@/features/profile/useProfilePhoto.js";
@@ -15,7 +14,6 @@ import "./navbar.css";
 const primaryLinks = [
   { to: "/courses", label: "Courses", icon: BookOpen },
   { to: "/live-classes", label: "Live classes", icon: Video },
-  { to: "/instructors", label: "Instructors", icon: UsersRound },
 ];
 const moreLinks = [
   { to: "/blogs", label: "Resources", icon: NotebookPen },
@@ -47,6 +45,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [search, setSearch] = useState("");
   const searchInput = useRef(null);
+  const searchForm = useRef(null);
+  const searchTrigger = useRef(null);
   const mobileClose = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -55,6 +55,7 @@ export default function Navbar() {
   const photoUrl = photo?.smallUrl || photo?.url;
   const links = user ? accountLinks(user) : [];
   const moreActive = moreLinks.some(link => location.pathname === link.to || location.pathname.startsWith(`${link.to}/`));
+  const searchOpen = openPopup === "search";
 
   useEffect(() => {
     setOpenPopup(null);
@@ -67,6 +68,28 @@ export default function Navbar() {
     desktop.addEventListener("change", closeMenus);
     return () => desktop.removeEventListener("change", closeMenus);
   }, []);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    searchInput.current?.focus({ preventScroll: true });
+    const dismiss = event => {
+      if (!searchForm.current?.contains(event.target)) {
+        setOpenPopup(current => current === "search" ? null : current);
+      }
+    };
+    const escape = event => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setOpenPopup(current => current === "search" ? null : current);
+      searchTrigger.current?.focus({ preventScroll: true });
+    };
+    document.addEventListener("pointerdown", dismiss);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", dismiss);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [searchOpen]);
 
   const changePopup = name => open => {
     setOpenPopup(current => open ? name : current === name ? null : current);
@@ -89,7 +112,7 @@ export default function Navbar() {
 
   return <Dialog.Root open={mobileOpen} onOpenChange={changeMobile}>
     <header className="navbar-shell">
-      <nav className="navbar-inner" aria-label="Main navigation">
+      <nav className="navbar-inner" aria-label="Main navigation" data-search-open={searchOpen || undefined}>
         <Link className="navbar-logo" to="/" aria-label="QuranScholar home"><img src={Logo} alt="" width="160" height="40" /></Link>
         <div className="navbar-primary">
           {primaryLinks.map(({ to, label }) => <NavLink key={to} to={to} className="navbar-link">{label}</NavLink>)}
@@ -99,13 +122,13 @@ export default function Navbar() {
           </Menu.Root>
         </div>
         <div className="navbar-actions">
-          <Popover.Root open={openPopup === "search"} onOpenChange={changePopup("search")}>
-            <Popover.Trigger className="navbar-icon-button" aria-label="Search courses"><Search size={20} aria-hidden="true" /></Popover.Trigger>
-            <Popover.Portal><Popover.Positioner align="end" sideOffset={10} collisionPadding={12} className="navbar-positioner"><Popover.Popup className="navbar-search-popup qs-popup-motion" initialFocus={searchInput}>
-              <Popover.Title className="navbar-search-title">Find a course</Popover.Title>
-              <form className="navbar-search-form qs-search-field" onSubmit={searchCourses} role="search"><label className="sr-only" htmlFor="navbar-course-search">Course title, subject, or keyword</label><input ref={searchInput} id="navbar-course-search" type="search" autoComplete="off" maxLength={100} value={search} onChange={event => setSearch(event.target.value)} placeholder="Search courses or subjects" /><button type="submit" aria-label="Submit course search"><ArrowRight size={18} aria-hidden="true" /></button></form>
-            </Popover.Popup></Popover.Positioner></Popover.Portal>
-          </Popover.Root>
+          <form ref={searchForm} className="navbar-search-form" data-open={searchOpen || undefined} onSubmit={searchCourses} onBlur={event => {
+            if (!event.currentTarget.contains(event.relatedTarget)) setOpenPopup(current => current === "search" ? null : current);
+          }} role="search" aria-label="Course search">
+            <label className="sr-only" htmlFor="navbar-course-search">Course title, subject, or keyword</label>
+            <input ref={searchInput} id="navbar-course-search" type="search" autoComplete="off" enterKeyHint="search" maxLength={100} value={search} onChange={event => setSearch(event.target.value)} placeholder="Search courses or subjects" disabled={!searchOpen} tabIndex={searchOpen ? 0 : -1} aria-hidden={!searchOpen} />
+            <button ref={searchTrigger} type="button" className="navbar-icon-button" aria-label={searchOpen ? "Close course search" : "Search courses"} aria-expanded={searchOpen} aria-controls="navbar-course-search" onClick={() => { setOpenPopup(current => current === "search" ? null : "search"); setMobileOpen(false); }}>{searchOpen ? <X size={20} aria-hidden="true" /> : <Search size={20} aria-hidden="true" />}</button>
+          </form>
           {user ? <>
             <NotificationBell />
             <Menu.Root open={openPopup === "profile"} onOpenChange={changePopup("profile")} modal={false}>

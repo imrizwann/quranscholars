@@ -4,10 +4,12 @@ import { useCreateCourseMutation } from "@/services/api/instructor/recordedCours
 import useCourseQuery from "@/features/instructor-courses/useCourseQuery.js";
 import { readableError } from "@/features/instructor-courses/courseApi.js";
 import { Pagination, QueryMessage } from "@/features/instructor-courses/WorkspaceParts.jsx";
-import { ArrowLeft, BookOpen, Check, FileText, Layers, Plus } from "lucide-react";
+import { ArrowLeft, BookOpen, ClipboardCheck, FileText, Image, Layers, Plus } from "lucide-react";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import SelectField from "@/components/ui/SelectField.jsx";
 import { coursePrice } from "@/features/instructor-courses/course-price.js";
+import CourseMetadataLists from "@/features/instructor-courses/CourseMetadataLists.jsx";
+import { courseLearningLists, parseCourseMetadataLists } from "@/features/instructor-courses/course-metadata-lists.js";
 import "@/features/instructor-courses/course-workspace.css";
 
 export default function CreateRecordedCourse() {
@@ -16,6 +18,8 @@ export default function CreateRecordedCourse() {
   const categories = useCourseQuery("getCategories", { page });
   const [category, setCategory] = useState(null);
   const [error, setError] = useState("");
+  const [learningDetails, setLearningDetails] = useState({ outcomes: "", requirements: "", audience: "" });
+  const [fieldErrors, setFieldErrors] = useState({});
   const [createCourse, { isLoading: busy }] = useCreateCourseMutation();
   const saving = useRef(false);
   const categoryOptions = (categories.data?.items || []).map((item) => ({ value: item._id, label: item.name }));
@@ -25,20 +29,26 @@ export default function CreateRecordedCourse() {
     if (saving.current) return;
     const form = new FormData(event.currentTarget);
     if (!category) { setError("Choose a course category."); return; }
+    const { lists, errors } = parseCourseMetadataLists(learningDetails, courseLearningLists);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      setError("");
+      event.currentTarget.elements.namedItem(Object.keys(errors)[0])?.focus();
+      return;
+    }
     saving.current = true; setError("");
     try {
       const data = await createCourse({
         title: form.get("title").trim(), description: form.get("description").trim(), category: category._id,
-        language: form.get("language").trim(), level: form.get("level"), price: coursePrice(form.get("price"), form.get("salePrice")), tags: [],
+        language: form.get("language").trim(), level: form.get("level"), price: coursePrice(form.get("price"), form.get("salePrice")), tags: [], ...lists,
       }).unwrap();
-      navigate(`/instructor/courses/${data.courseId}`, { replace: true });
+      navigate(`/instructor/courses/${data.courseId}`, { replace: true, state: { startWithCurriculum: true } });
     } catch (failure) { setError(readableError(failure)); }
     finally { saving.current = false; }
   }
   return <main className="course-workspace">
     <Link className="cw-back" to="/instructor/courses"><ArrowLeft size={16} aria-hidden="true" />Back to courses</Link>
-    <header className="cw-heading"><p className="cw-eyebrow">Course studio</p><h1>Create a recorded course</h1><p className="cw-muted">Start with the essentials. Add your curriculum and videos after saving your draft.</p></header>
-    <ol className="cw-steps" aria-label="Course setup"><li aria-current="step"><span>1</span>Course details</li><li><span>2</span>Sections & lessons</li><li><span>3</span>Upload videos</li></ol>
+    <header className="cw-heading"><p className="cw-eyebrow">Course studio</p><h1>Create a recorded course</h1><p className="cw-muted">Save the essentials as a private draft. Continue in Course Studio to add lessons and media, refine pricing, and prepare to publish.</p></header>
     <div className="cw-create-grid">
       <form className="cw-card cw-create-form" onSubmit={submit}>
         <div className="cw-card-heading"><span className="cw-heading-icon"><FileText size={21} aria-hidden="true" /></span><div><h2>Course details</h2><p className="cw-muted">Help learners understand what your course offers.</p></div></div>
@@ -56,11 +66,18 @@ export default function CreateRecordedCourse() {
             <label>Original price (INR)<input name="price" placeholder="e.g. 1500" type="number" min="0.01" step="0.01" required disabled={busy} /><span className="cw-field-hint">Enter an amount greater than zero.</span></label>
             <label>Sale price (INR, optional)<input name="salePrice" placeholder="e.g. 1200" type="number" min="0" step="0.01" disabled={busy} /><span className="cw-field-hint">Leave empty for no discount. Must not exceed the original price.</span></label>
           </div>
+          <div><h3>Learning details</h3><p className="cw-field-hint">Add these now or finish them later in Course Details. You can save a draft without them, but at least one learning outcome is required before publishing.</p></div>
+          <CourseMetadataLists values={learningDetails} onChange={(key, value) => setLearningDetails(previous => ({ ...previous, [key]: value }))} disabled={busy} errors={fieldErrors} fields={courseLearningLists} idPrefix="create-course" wideFields={["outcomes"]} />
           {error && <p className="cw-error" role="alert">{error}</p>}
         </div>
-        <div className="cw-form-footer"><span className="cw-muted">Your course will be saved as a draft.</span><AsyncButton type="submit" className="cw-button cw-primary" loading={busy} loadingLabel="Creating course" disabled={!category}><Plus size={16} aria-hidden="true" />Create course</AsyncButton></div>
+        <div className="cw-form-footer"><span className="cw-muted">Next, add sections and lessons in the Curriculum tab. Your draft stays private until published.</span><AsyncButton type="submit" className="cw-button cw-primary" loading={busy} loadingLabel="Creating draft" disabled={!category}><Plus size={16} aria-hidden="true" />Create draft</AsyncButton></div>
       </form>
-      <aside className="cw-card cw-guide"><span className="cw-heading-icon"><BookOpen size={22} aria-hidden="true" /></span><h2>A strong start</h2><p className="cw-muted">A clear outline makes a course easier to follow.</p><ul><li><Check size={16} aria-hidden="true" /><span>Choose a specific, easy-to-understand title.</span></li><li><Check size={16} aria-hidden="true" /><span>Describe what learners will be able to do.</span></li><li><Layers size={16} aria-hidden="true" /><span>Next, organize your lessons into sections and upload your videos.</span></li></ul><p className="cw-guide-note">Creating a draft does not publish your course.</p></aside>
+      <aside className="cw-card cw-guide" aria-labelledby="course-studio-guide"><span className="cw-heading-icon"><BookOpen size={22} aria-hidden="true" /></span><h2 id="course-studio-guide">Continue in Course Studio</h2><p className="cw-muted">Your draft opens in Curriculum. Use the tabs to build and review your course at your own pace.</p><ul>
+        <li><Layers size={16} aria-hidden="true" /><span><strong className="block font-semibold text-foreground">Curriculum</strong>Create sections, add lessons, and upload lesson videos.</span></li>
+        <li><Image size={16} aria-hidden="true" /><span><strong className="block font-semibold text-foreground">Media</strong>Add your course cover and trailer.</span></li>
+        <li><FileText size={16} aria-hidden="true" /><span><strong className="block font-semibold text-foreground">Course Details & Pricing</strong>Refine your course information and adjust prices.</span></li>
+        <li><ClipboardCheck size={16} aria-hidden="true" /><span><strong className="block font-semibold text-foreground">Publish</strong>Review course readiness before making it available to learners.</span></li>
+      </ul><p className="cw-guide-note">You can return to your draft from your course list.</p></aside>
     </div>
   </main>;
 }

@@ -94,13 +94,14 @@ function ApplicationPage({ user }) {
               <label htmlFor="application-email">Account email<input id="application-email" type="email" autoComplete="email" value={user?.email || ""} readOnly placeholder="Your account email" /></label>
             </div>
           </fieldset>
-          <fieldset disabled={!available || busy}>
+          <fieldset disabled={!available || busy} aria-describedby="application-public-profile-help">
             <legend className="application-section-title"><Presentation size={20} aria-hidden="true" />Teaching background</legend>
+            <p id="application-public-profile-help" className="mb-4">After approval, your account name and photo, teaching biography, specialization, languages, and experience appear on your public instructor profile and course pages. Your account email, certificates, and review feedback stay private.</p>
             <div className="application-fields">
               <label htmlFor="application-subject">Primary specialization<input id="application-subject" name="specialization" defaultValue={revising ? application.specialization : ""} required minLength={2} maxLength={150} placeholder="For example, Tajweed or Quran reading" /></label>
               <label htmlFor="application-experience">Years of teaching experience<input id="application-experience" name="experienceYears" defaultValue={revising ? application.experienceYears : ""} type="number" required min="0" max="80" step="1" placeholder="Years of experience" /></label>
               <label htmlFor="application-languages" className="application-wide">Teaching languages<input id="application-languages" name="languages" defaultValue={revising ? application.languages : ""} required minLength={2} maxLength={200} placeholder="Languages you can teach in" /></label>
-              <label htmlFor="application-bio" className="application-wide">Teaching biography<textarea id="application-bio" name="biography" defaultValue={revising ? application.biography : ""} required minLength={50} maxLength={3000} rows={5} aria-describedby="biography-help" placeholder="Your background, teaching approach, and the learners you support" /><span id="biography-help" className="application-help">50 to 3,000 characters.</span></label>
+              <label htmlFor="application-bio" className="application-wide">Public teaching biography<textarea id="application-bio" name="biography" defaultValue={revising ? application.biography : ""} required minLength={50} maxLength={3000} rows={5} aria-describedby="biography-help application-public-profile-help" placeholder="Your background, teaching approach, and the learners you support" /><span id="biography-help" className="application-help">50 to 3,000 characters. Share your teaching background without personal contact details, home addresses, or document numbers.</span></label>
             </div>
           </fieldset>
           <fieldset disabled={!available || busy}>

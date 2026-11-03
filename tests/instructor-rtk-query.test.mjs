@@ -86,7 +86,7 @@ test("instructor RTK Query integration", async (t) => {
         ["getSections", { ...target, page: 2 }, "GET", `${root}/course1/sections?page=2&limit=20`],
         ["getLessons", { ...target, page: 3 }, "GET", `${root}/course1/sections/section1/lessons?page=3&limit=10`],
         ["getDeletion", { deletionId: "deletion1" }, "GET", `${root}/deletions/deletion1`],
-        ["createCourse", { title: "Course", category: "category1" }, "POST", root, { title: "Course", category: "category1" }],
+        ["createCourse", { title: "Course", category: "category1", outcomes: ["Read confidently"], requirements: [], audience: ["Beginners"] }, "POST", root, { title: "Course", category: "category1", outcomes: ["Read confidently"], requirements: [], audience: ["Beginners"] }],
         ["updateCourse", { courseId: "course1", changes: { title: "Updated course", tags: [] } }, "PATCH", `${root}/course1`, { title: "Updated course", tags: [] }],
         ["createSection", { ...target, title: "Section" }, "POST", `${root}/course1/sections`, { title: "Section" }],
         ["updateSection", { ...target, title: "Updated section", description: "Introduction", order: 999 }, "PATCH", `${root}/course1/sections/section1`, { title: "Updated section", description: "Introduction" }],

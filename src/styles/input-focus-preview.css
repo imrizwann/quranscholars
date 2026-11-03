@@ -1,0 +1,159 @@
+/* Keep the trial isolated so the previous focus styles remain easy to restore. */
+:root body :is(
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="button"], [type="submit"], [type="reset"], [type="image"]),
+  textarea,
+  select,
+  .qs-select-trigger,
+  .qs-date-trigger
+) {
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-ring-offset-shadow: 0 0 #0000;
+}
+
+/* A quiet tint for editable controls; keep the navbar's width animation intact. */
+:root body :is(
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="button"], [type="submit"], [type="reset"], [type="image"]),
+  textarea,
+  select,
+  .qs-select-trigger,
+  .qs-date-trigger,
+  .qs-search-field:not(:has(> input[class~="border"])),
+  .learning-search,
+  .studio-search label,
+  .admissions-search-field,
+  [class~="focus-within:ring-3"]
+):not(.navbar-search-form input) {
+  transition: background-color 220ms var(--ease-out-ui), border-color 220ms var(--ease-out-ui);
+}
+
+:root body :is(
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="button"], [type="submit"], [type="reset"], [type="image"]),
+  textarea,
+  select,
+  .qs-select-trigger,
+  .qs-date-trigger
+):where(:not(:disabled, [readonly])):is(:hover, :focus, [data-popup-open]),
+/* A wrapping label reacts to its input, never to hovering the label itself. */
+:root body :is(
+  .qs-search-field:not(:has(> input[class~="border"])),
+  .learning-search,
+  .studio-search label,
+  .admissions-search-field,
+  [class~="focus-within:ring-3"]
+):has(> input:where(:not(:disabled, [readonly])):is(:hover, :focus)) {
+  background-color: color-mix(in srgb, var(--field-focus-color, var(--primary)) 3%, var(--surface));
+}
+
+:root body :is(
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="button"], [type="submit"], [type="reset"], [type="image"]),
+  textarea,
+  select,
+  .qs-select-trigger,
+  .qs-date-trigger
+):not(:disabled):is(:focus, [data-popup-open]) {
+  border-color: var(--field-focus-color, var(--primary));
+  outline: none;
+  outline-offset: 0;
+  box-shadow: none;
+}
+
+/* Icon and password fields place their visible border on a surrounding element. */
+:root body .studio-search label {
+  border: 1px solid var(--input);
+}
+
+/* Older hover utilities must not activate a field's border. */
+:root body :is(
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="button"], [type="submit"], [type="reset"], [type="image"]),
+  textarea,
+  select,
+  .qs-select-trigger,
+  .qs-date-trigger
+):not(:focus, [data-popup-open]):hover,
+:root body :is(
+  .qs-search-field,
+  .learning-search,
+  .studio-search label,
+  .admissions-search-field,
+  [class~="focus-within:ring-3"]
+):not(:has(> input:focus)) {
+  border-color: var(--field-idle-border, var(--input));
+}
+
+:root body :is(
+  .qs-search-field,
+  .learning-search,
+  .studio-search label,
+  .admissions-search-field,
+  [class~="focus-within:ring-3"]
+):focus-within {
+  outline: none;
+  outline-offset: 0;
+  box-shadow: none;
+}
+
+:root body :is(
+  .qs-search-field,
+  .learning-search,
+  .studio-search label,
+  .admissions-search-field,
+  [class~="focus-within:ring-3"]
+):has(> input:not(:disabled):focus) {
+  border-color: var(--field-focus-color, var(--primary));
+}
+
+/* Show one focus border per control, including search fields with their own border. */
+:root body :is(
+  .qs-search-field,
+  .learning-search,
+  .studio-search label,
+  .admissions-search-field,
+  [class~="focus-within:ring-3"]
+) > input:not([class~="border"]):focus,
+:root body .qs-search-field:has(> input[class~="border"]):focus-within {
+  outline: none;
+  box-shadow: none;
+}
+
+/* The surrounding control owns the tint, including the icon and password toggle. */
+:root body :is(
+  .qs-search-field,
+  .learning-search,
+  .studio-search label,
+  .admissions-search-field,
+  [class~="focus-within:ring-3"]
+) > input:not([class~="border"], [readonly]):not(:disabled):is(:hover, :focus) {
+  background-color: transparent;
+}
+
+/* Invalid fields keep their error color while focused. */
+:root body :is(input, textarea, select, .qs-select-trigger, .qs-date-trigger):is(
+  [aria-invalid="true"], [data-invalid], .qs-field-invalid, :user-invalid
+),
+:root body :is(
+  .qs-search-field,
+  .learning-search,
+  .studio-search label,
+  .admissions-search-field,
+  [class~="focus-within:ring-3"]
+):has(> input:is([aria-invalid="true"], [data-invalid], :user-invalid)) {
+  --field-focus-color: var(--destructive);
+  --field-idle-border: var(--destructive);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root body :is(
+    input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="button"], [type="submit"], [type="reset"], [type="image"]),
+    textarea,
+    select,
+    .qs-select-trigger,
+    .qs-date-trigger,
+    .qs-search-field:not(:has(> input[class~="border"])),
+    .learning-search,
+    .studio-search label,
+    .admissions-search-field,
+    [class~="focus-within:ring-3"]
+  ):not(.navbar-search-form input) {
+    transition: none;
+  }
+}

@@ -10,6 +10,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+/* Trial focus style: remove this import to restore the previous input rings. */
+@import "./input-focus-preview.css";
 
 @layer base {
   * {

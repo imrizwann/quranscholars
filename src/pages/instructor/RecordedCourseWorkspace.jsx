@@ -9,7 +9,7 @@ import CoursePublishing from "@/features/instructor-courses/CoursePublishing.jsx
 import CurriculumLesson from "@/features/instructor-courses/CurriculumLesson.jsx";
 import CurriculumActions from "@/features/instructor-courses/CurriculumActions.jsx";
 import { curriculumOrder, studioTabs } from "@/features/instructor-courses/studio-layout.js";
-import { Link, useBlocker, useNavigate, useParams } from "react-router-dom";
+import { Link, useBlocker, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   useCreateSectionMutation,
   useCreateLessonMutation,
@@ -101,6 +101,7 @@ export default function RecordedCourseWorkspace() {
 
 function Workspace({ courseId }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const base = `/${encodeURIComponent(courseId)}`;
   const course = useCourseQuery("getCourse", { courseId }, courseIsPending);
   const [createSection] = useCreateSectionMutation();
@@ -113,7 +114,7 @@ function Workspace({ courseId }) {
   const [sectionPage, setSectionPage] = useState(1);
   const [lessonPage, setLessonPage] = useState(1);
   const [selected, setSelected] = useState(null);
-  const [activeTab, setActiveTab] = useState("details");
+  const [activeTab, setActiveTab] = useState(() => location.state?.startWithCurriculum === true ? "curriculum" : "details");
   const [trailerActivity, setTrailerActivity] = useState(null);
   const studio = useRef(null);
   const editingRef = useRef(false);
