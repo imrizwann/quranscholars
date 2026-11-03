@@ -74,7 +74,8 @@ export default function ProfilePage() {
           </div>
           <div className="profile-photo-content">
             <h2 id="profile-photo-title">Profile photo</h2>
-            <p>A clear photo helps others recognize you. JPG, PNG, or WebP, up to 3 MB.</p>
+            <p>Choose a photo for your account. JPG, PNG, or WebP, up to 3 MB.</p>
+            {user?.role === "instructor" && <p className="profile-account-help">Your account name and photo also appear on your public instructor profile and course pages.</p>}
             <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={chooseImage} aria-label="Choose a profile photo" disabled={isUploading} />
             <div className="profile-actions">
               <button type="button" className="cw-button" onClick={() => fileInput.current?.click()} disabled={isUploading}><Camera size={16} aria-hidden="true" />{photo.data?.url ? "Change photo" : "Choose photo"}</button>
