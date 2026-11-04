@@ -65,6 +65,8 @@ const adaptRecordedCourse = (record = {}) => {
   return {
     id: record?._id || record?.id || null,
     learningType: "recorded",
+    enrollmentOpen: record.enrollmentOpen !== false,
+    status: record.status,
     title: record?.title || "Untitled course",
     slug: record?.slug || "",
     shortDescription: record?.shortDescription || record?.description || "",

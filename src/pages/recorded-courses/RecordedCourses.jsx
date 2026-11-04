@@ -223,7 +223,7 @@ const RecordedCourses = () => {
 
           <div ref={resultsRef} tabIndex={-1} aria-label="Course results" aria-busy={isLoading} data-scroll-pending={isLoading ? "true" : undefined} className="scroll-mt-24 outline-none">
           {isLoading && !displayedData ? (
-            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {Array.from({ length: 8 }, (_, index) => (
                 <RecordedCourseSkeleton key={index} />
               ))}
@@ -239,7 +239,7 @@ const RecordedCourses = () => {
               <button type="button" onClick={refetch} className="mt-4 font-bold text-primary">Try again</button>
             </div>
           ) : visibleCourses.length ? (
-            <div inert={isLoading ? true : undefined} className={`mt-8 grid gap-6 transition-opacity motion-reduce:transition-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${isLoading ? "opacity-50" : "opacity-100"}`}>
+            <div inert={isLoading ? true : undefined} className={`mt-8 grid gap-6 transition-opacity motion-reduce:transition-none sm:grid-cols-2 xl:grid-cols-3 ${isLoading ? "opacity-50" : "opacity-100"}`}>
               {visibleCourses.map((course) => (
                 <RecordedCourseCard key={course.id} course={course} />
               ))}

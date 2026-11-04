@@ -3,7 +3,6 @@ import { Link, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Tabs } from "@base-ui/react/tabs";
 import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, CircleHelp, Clock3, ClipboardCheck, Globe2, GraduationCap, ListVideo, LockKeyhole, NotebookPen, PanelRightClose, PanelRightOpen, Signal } from "lucide-react";
-import { useGetRecordedCourseBySlugQuery } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
 import { useGetCourseAccessQuery } from "@/services/api/user/paymentApi.js";
 import ProtectedLessonVideo from "@/features/recorded-courses/components/ProtectedLessonVideo.jsx";
 import LearningCurriculum from "@/features/recorded-courses/components/LearningCurriculum.jsx";
@@ -11,6 +10,7 @@ import LessonNotes from "@/features/recorded-courses/components/LessonNotes.jsx"
 import SectionQuizPanel from "@/features/recorded-courses/components/SectionQuizPanel.jsx";
 import useLessonWatch from "@/features/recorded-courses/useLessonWatch.js";
 import { useGetCourseProgressQuery } from "@/services/api/user/learnerApi.js";
+import learnerApi from "@/services/api/user/learnerApi.js";
 import { orderedLearningSections, readLastLesson, readLessonStudy, saveLastLesson, saveLessonStudy } from "@/features/recorded-courses/services/lessonStudyStorage.js";
 import { WorkspaceEmpty } from "@/components/lms/WorkspaceUI.jsx";
 import WorkspaceAccountMenu from "@/layouts/WorkspaceAccountMenu.jsx";
@@ -124,10 +124,10 @@ function LearningWorkspace({ course, userId, lessonId }) {
 export default function RecordedCoursePlayer() {
   const { courseSlug, lessonId } = useParams();
   const user = useSelector(state => state.user.user);
-  const query = useGetRecordedCourseBySlugQuery(courseSlug, { refetchOnMountOrArgChange: true, refetchOnFocus: true, refetchOnReconnect: true });
+  const query = learnerApi.endpoints.getLearningCourse.useQuery(courseSlug, { refetchOnMountOrArgChange: true, refetchOnFocus: true, refetchOnReconnect: true });
   const course = query.currentData;
   const access = useGetCourseAccessQuery(course?.id, { skip: !course?.id, refetchOnMountOrArgChange: true, refetchOnFocus: true, refetchOnReconnect: true, pollingInterval: 60_000, skipPollingIfUnfocused: true });
-  const owner = user?.role === "instructor" && String(course?.instructor.id) === String(user?._id);
+  const owner = course?.canManage === true;
   const allowed = !access.error && (access.currentData?.canAccessCourse === true || owner);
   const pending = (!query.error && !course) || (course && !access.currentData && !access.error);
   return <div className="learning-room">

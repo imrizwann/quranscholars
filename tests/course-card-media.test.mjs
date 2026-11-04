@@ -1,0 +1,63 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { build } from "esbuild";
+import { writeFile, unlink } from "node:fs/promises";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+import { randomUUID } from "node:crypto";
+import process from "node:process";
+import { JSDOM } from "jsdom";
+import React, { act } from "react";
+
+test("course cards remain linked image previews through thumbnail failures and preserve catalogue navigation", async () => {
+  const dom = new JSDOM("<!doctype html><html><body><div id='root'></div></body></html>", { url: "https://frontend.example.test/courses", pretendToBeVisual: true });
+  for (const key of ["window", "document", "navigator", "Node", "Element", "HTMLElement", "Event", "MouseEvent"]) Object.defineProperty(globalThis, key, { configurable: true, writable: true, value: key === "window" ? dom.window : dom.window[key] });
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  const { createRoot } = await import("react-dom/client");
+  const { MemoryRouter, useLocation } = await import("react-router-dom");
+  const output = resolve("tests", `course-card-fixture-${randomUUID()}.mjs`);
+  const previousFetch = globalThis.fetch;
+  let root, requests = 0;
+  try {
+    const compiled = await build({ stdin: { contents: `export {default as Card} from './src/features/recorded-courses/components/RecordedCourseCard.jsx';`, resolveDir: process.cwd() }, bundle: true, write: false, format: "esm", platform: "node", packages: "external", jsx: "automatic", alias: { "@": resolve("src") }, loader: { ".css": "empty" }, define: { "import.meta.env": JSON.stringify({ VITE_API_URL: "https://api.example.test" }) } });
+    await writeFile(output, compiled.outputFiles[0].text);
+    const { Card } = await import(pathToFileURL(output));
+    globalThis.fetch = async () => { requests++; throw new Error("Cards must not request video playback"); };
+    let course = { id: "course1", slug: "recitation", title: "Recitation foundations", thumbnail: "https://images.example.test/cover.webp?signature=abc%2Fdef", trailerVideo: "https://video.example.test/master.m3u8", category: "Quran", level: "Beginner", instructor: { name: "Test instructor" }, shortDescription: "Build confidence in your recitation.", price: { current: 100, original: 100, currency: "INR" }, totalLessons: 3, durationLabel: "15 min", totalReviews: 0, totalStudents: 0, rating: 0 };
+    const Capture = () => { const location = useLocation(); return React.createElement("output", { "data-location": true, "data-state": JSON.stringify(location.state) }, location.pathname + location.search); };
+    const Harness = () => React.createElement(React.Fragment, null, React.createElement(Card, { course }), React.createElement(Capture));
+    root = createRoot(document.getElementById("root"));
+    const render = () => act(async () => root.render(React.createElement(MemoryRouter, { initialEntries: ["/courses?subject=quran&page=2"] }, React.createElement(Harness))));
+    await render();
+    const cover = () => document.querySelector('a[aria-label="View course: Recitation foundations"]');
+    assert.equal(cover().getAttribute("href"), "/courses/recitation");
+    assert.equal(cover().querySelector("img").getAttribute("src"), course.thumbnail);
+    const image = cover().querySelector("img");
+    assert.equal(Number(image.getAttribute("width")) / Number(image.getAttribute("height")), 16 / 9);
+    assert.equal(image.getAttribute("loading"), "lazy");
+    assert.equal(document.querySelector("video"), null);
+    assert.equal(document.querySelector("button"), null);
+    assert.match(document.body.textContent, /Not rated yet/);
+    assert.doesNotMatch(document.body.textContent, /0 learners|Watch trailer|Loading trailer|undefined|NaN/);
+    await act(async () => cover().querySelector("img").dispatchEvent(new window.Event("error")));
+    assert.equal(cover().querySelector("img"), null);
+    assert.match(cover().textContent, /Explore this course/);
+    assert.equal(document.querySelector("video"), null);
+    course = { ...course, thumbnail: null }; await render();
+    assert.match(cover().textContent, /View lessons and course details/);
+    course = { ...course, thumbnail: "https://images.example.test/new-cover.webp", featured: true, totalReviews: 12, rating: 4.5, totalStudents: 18 }; await render();
+    assert.equal(cover().querySelector("img").getAttribute("src"), course.thumbnail);
+    assert.match(cover().textContent, /Featured/);
+    assert.match(document.body.textContent, /rating from 12 reviews/);
+    assert.match(document.body.textContent, /18 learners/);
+    await act(async () => cover().dispatchEvent(new window.MouseEvent("click", { bubbles: true, cancelable: true, button: 0 })));
+    assert.equal(document.querySelector('[data-location]').textContent, "/courses/recitation");
+    const state = JSON.parse(document.querySelector('[data-location]').getAttribute("data-state"));
+    assert.equal(state.courseCatalog.url, "/courses?subject=quran&page=2");
+    assert.equal(requests, 0);
+  } finally {
+    if (root) await act(async () => root.unmount());
+    globalThis.fetch = previousFetch;
+    await unlink(output).catch(() => {}); dom.window.close();
+  }
+});

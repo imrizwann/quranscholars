@@ -80,6 +80,7 @@ test("instructor RTK Query integration", async (t) => {
         ["getCourses", { page: 2, search: "Quran & Arabic" }, "GET", `${root}?page=2&limit=12&sort=updated&search=Quran+%26+Arabic`],
         ["getReadiness", target, "GET", `${root}/course1/readiness`],
         ["getStudents", { page: 1, limit: 20, status: "active" }, "GET", `${root}/students?page=1&limit=20&status=active`],
+        ["updateAvailability", { courseId: "course1", action: "archive", ownerId: "forged", published: false }, "PATCH", `${root}/course1/availability`, { action: "archive" }],
         ["updatePricing", { courseId: "course1", price: { original: 100, sale: 0 } }, "PATCH", `${root}/course1/pricing`, { original: 100, sale: 0 }],
         ["publishCourse", target, "POST", `${root}/course1/publish`, { confirm: true }],
         ["updateLesson", { ...target, title: "Renamed lesson", description: "Lesson overview", order: 99, isPreview: true }, "PATCH", `${root}/course1/sections/section1/lessons/lesson1`, { title: "Renamed lesson", description: "Lesson overview" }],

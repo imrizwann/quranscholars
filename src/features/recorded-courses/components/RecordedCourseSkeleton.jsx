@@ -1,6 +1,6 @@
 const RecordedCourseSkeleton = () => (
   <div
-    className="overflow-hidden rounded-2xl border border-border bg-white"
+    className="overflow-hidden rounded-xl border border-border bg-surface"
     aria-hidden="true"
   >
     <div className="aspect-video animate-pulse motion-reduce:animate-none bg-[#e8efeb]" />

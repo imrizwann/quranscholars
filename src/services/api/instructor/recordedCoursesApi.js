@@ -95,6 +95,10 @@ const instructorCoursesApi = createApi({
   // Private workspace data is retained only while a screen subscribes to it.
   keepUnusedDataFor: 0,
   endpoints: (builder) => ({
+    updateAvailability: builder.mutation({
+      query: ({ courseId, action }) => ({ url: `${courseUrl({ courseId })}/availability`, method: "PATCH", body: { action } }),
+      invalidatesTags: onSuccess(args => [courseTag(args), listTag]),
+    }),
     getAnalytics: builder.query({
       query: ({ page = 1, limit = 10 } = {}) => ({ url: `${root}/analytics`, params: { page, limit } }),
       extraOptions: { validate: data => Number.isInteger(data?.summary?.totalCourses) && Array.isArray(data.courses) && Array.isArray(data.revenue) && Number.isInteger(data.pagination?.total) },

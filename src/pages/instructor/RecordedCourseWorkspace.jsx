@@ -6,6 +6,7 @@ import SectionQuizEditor from "@/features/instructor-courses/SectionQuizEditor.j
 import { CourseDetailsPanel } from "@/features/instructor-courses/StudioInformation.jsx";
 import CoursePricingEditor from "@/features/instructor-courses/CoursePricingEditor.jsx";
 import CoursePublishing from "@/features/instructor-courses/CoursePublishing.jsx";
+import CourseAvailability from "@/features/instructor-courses/CourseAvailability.jsx";
 import CurriculumLesson from "@/features/instructor-courses/CurriculumLesson.jsx";
 import CurriculumActions from "@/features/instructor-courses/CurriculumActions.jsx";
 import { curriculumOrder, studioTabs } from "@/features/instructor-courses/studio-layout.js";
@@ -287,6 +288,7 @@ function Workspace({ courseId }) {
   }
 
   const data = course.data?.course;
+  const liveContentLocked = Boolean(data?.published && ((data.status === "Published" && data.enrollmentOpen !== false) || data.protection?.canDelete === false));
   const refreshing = course.loading || sections.loading || lessons.loading;
   const sectionPath = selected ? `${base}/sections/${selected._id}` : null;
   const unfinishedTab = [["details", metadataEditing], ["pricing", pricingEditing], ["curriculum", sectionEditing]].find(([tab, editing]) => editing && tab !== activeTab)?.[0];
@@ -356,6 +358,7 @@ function Workspace({ courseId }) {
             {unfinishedTab && <p className="cw-notice" role="status">You have unfinished edits in {studioTabs.find(([tab]) => tab === unfinishedTab)?.[1]}. <button type="button" className="cw-text-link" onClick={() => changeTab(unfinishedTab)}>Return to save or cancel</button></p>}
             <Tabs.Panel value="details" keepMounted className="cw-studio-panel"><CourseDetailsPanel course={data} disabled={busy || Boolean(course.error)} onBusy={setBusy} onEditing={changeMetadataEditing} /></Tabs.Panel>
             <Tabs.Panel value="curriculum" keepMounted className="cw-studio-panel">
+              {liveContentLocked && <p className="cw-notice">{data.protection?.canDelete === false ? "Published lessons and videos are protected to preserve learner access. You can edit titles and descriptions or add new draft lessons." : "Pause new enrollments in the Publish tab before removing or replacing published content."}</p>}
           <div className="cw-curriculum-heading">
             <div>
               <p className="cw-eyebrow">Build your curriculum</p>
@@ -433,13 +436,14 @@ function Workspace({ courseId }) {
               endActions={selected && <CurriculumActions label={`Section actions: ${selected.title}`} disabled={busy || sectionEditing || Boolean(lessons.error) || Boolean(course.error)} loading={pendingAction === `delete:${sectionPath}`} items={[
                 { label: "Edit section", icon: Pencil, onClick: () => { setSectionOpen(true); setSectionDetailsEditing(true); changeSectionEditing(true); } },
                 { label: "Manage quiz", icon: ClipboardCheck, onClick: () => { setSectionOpen(true); setQuizOpen(true); requestAnimationFrame(() => quizEditor.current?.querySelector('button')?.focus()); } },
-                { label: "Delete section", icon: Trash2, danger: true, onClick: () => remove(sectionPath, "section", { courseId, sectionId: selected._id }) },
+                { label: "Delete section", icon: Trash2, danger: true, disabled: liveContentLocked && (selected.published || lessonItems.some(lesson => lesson.published)), onClick: () => remove(sectionPath, "section", { courseId, sectionId: selected._id }) },
               ]} />}>
               {!selected ? <div className="cw-empty"><FolderOpen size={34} strokeWidth={1.5} aria-hidden="true" /><h3>A place for every lesson</h3><p>Select a section to add lessons and upload their videos.</p></div> : <>
                 <SectionDetailsEditor key={`section-editor:${selected._id}:${sectionDetailsEditing}`} section={selected} editing={sectionDetailsEditing} disabled={busy || quizEditing || Boolean(editingLessonId) || Boolean(course.error) || Boolean(sections.error)} saving={pendingAction === "update:section"} onSave={saveSection} onEditing={value => { setSectionDetailsEditing(value); changeSectionEditing(value); }} />
                 {sectionEditing && <p className="cw-field-hint">Save or cancel your edits before choosing another section.</p>}
                 <QueryMessage query={lessons} label="Loading lessons" compact />
                 {lessonItems.map((lesson, index) => <CurriculumLesson key={lesson._id} lesson={lesson} index={index}
+                  protectedPublished={liveContentLocked && lesson.published}
                   target={{ courseId, sectionId: selected._id, lessonId: lesson._id }} path={`${sectionPath}/lessons/${lesson._id}`}
                   disabled={busy || sectionDetailsEditing || quizEditing || Boolean(editingLessonId && editingLessonId !== lesson._id) || Boolean(lessons.error) || Boolean(course.error)}
                   deleting={pendingAction === `delete:${sectionPath}/lessons/${lesson._id}`} removingVideo={pendingAction === `delete:${sectionPath}/lessons/${lesson._id}/video`}
@@ -488,6 +492,7 @@ function Workspace({ courseId }) {
             </Tabs.Panel>
             <Tabs.Panel value="pricing" keepMounted className="cw-studio-panel"><CoursePricingEditor course={data} disabled={busy || Boolean(course.error)} onBusy={setBusy} onEditing={changePricingEditing} /></Tabs.Panel>
             <Tabs.Panel value="publish" keepMounted className="cw-studio-panel">
+              <CourseAvailability course={data} disabled={busy || metadataEditing || pricingEditing || sectionEditing || Boolean(course.error)} onBusy={setBusy} />
               <CoursePublishing course={data} active={activeTab === "publish"} disabled={busy || metadataEditing || pricingEditing || sectionEditing || Boolean(course.error)} onBusy={setBusy} onReview={(tab) => {
                 changeTab(tab);
                 requestAnimationFrame(() => studio.current?.querySelector('[role="tab"][aria-selected="true"]')?.focus());
@@ -496,15 +501,14 @@ function Workspace({ courseId }) {
             <div>
               <h2>Delete course</h2>
               <p className="cw-muted">
-                Permanently remove this course, its sections, lessons and
-                videos.
+                {data.protection?.canDelete === false ? "Deletion is unavailable because this course has learner or payment history. Archive it to preserve existing learners' access." : "Permanently remove this course, its sections, lessons and videos. Courses with learner history or unresolved payments cannot be deleted."}
               </p>
             </div>
             <AsyncButton
               className="cw-button cw-danger cw-button-compact"
               loading={pendingAction === `delete:${base}`}
               loadingLabel="Deleting"
-              disabled={busy || sectionEditing || metadataEditing || pricingEditing || Boolean(course.error)}
+              disabled={busy || sectionEditing || metadataEditing || pricingEditing || Boolean(course.error) || data.protection?.canDelete === false}
               onClick={() => remove(base, "course")}
             >
               <Trash2 size={16} aria-hidden="true" />

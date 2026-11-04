@@ -33,7 +33,7 @@ export default function InstructorCourseCard({ course }) {
         )}
         <span
           className="studio-course-status"
-          data-published={course.published === true}
+          data-published={course.published === true && course.status !== "Archived"}
         >
           {courseStatusLabel(course.status)}
         </span>
@@ -62,6 +62,7 @@ export default function InstructorCourseCard({ course }) {
         </div>
         <p className="studio-course-duration"><Clock3 size={14} aria-hidden="true" />{course.totalDuration > 0 ? formatDuration(course.totalDuration) : "Duration not listed"}</p>
         <div className="studio-course-footer">
+          {course.status === "Published" && course.enrollmentOpen === false && <span className="cw-status">Enrollment paused</span>}
           <span className="studio-course-trailer">
             Trailer <VideoStatus video={course.trailerVideo} />
           </span>

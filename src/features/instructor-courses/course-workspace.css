@@ -40,6 +40,10 @@
 .cw-publication-status { border: 1px solid var(--border); }
 .cw-publication-status[data-status=Draft] { color: var(--warning); background: color-mix(in srgb, var(--warning) 9%, var(--surface)); border-color: color-mix(in srgb, var(--warning) 25%, var(--border)); }
 .cw-publication-status[data-status=Published] { color: var(--success); background: color-mix(in srgb, var(--success) 7%, var(--surface)); border-color: color-mix(in srgb, var(--success) 25%, var(--border)); }
+.cw-availability-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; border-top: 1px solid var(--border); padding-block: 18px; margin-top: 16px; }
+.cw-availability-row + .cw-availability-row { margin-top: 0; }
+.cw-availability-row > div { flex: 1 1 230px; min-width: 0; }
+.cw-availability-row strong { font-size: .9rem; font-weight: 600; }
 .cw-course-meta > .cw-publication-status { padding: 5px 10px; font-size: .75rem; }
 .cw-video { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; container-type: inline-size; }
 .cw-video-layout { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); align-items: start; gap: 24px; margin-top: 0; }

@@ -6,6 +6,15 @@ const userAuthApi = createApi({
   baseQuery: apiBaseQuery,
 
   endpoints: (builder) => ({
+    getAccountDeletionStatus: builder.query({
+      query: () => ({ url: "api/auth/account-deletion", method: "GET" }),
+      keepUnusedDataFor: 0,
+      transformResponse: response => {
+        const data = response?.data;
+        if (response?.success !== true || typeof data?.canDelete !== "boolean" || !Array.isArray(data.blockers) || data.blockers.some(item => typeof item.code !== "string" || typeof item.message !== "string") || data.canDelete !== (data.blockers.length === 0)) throw new Error("Invalid account deletion response");
+        return data;
+      },
+    }),
     me: builder.query({
       query: () => ({
         url: "api/auth/me",
@@ -58,6 +67,7 @@ export const {
   useLoginMutation,
   useLogoutMutation,
   useDeleteProfileMutation,
+  useGetAccountDeletionStatusQuery,
 } = userAuthApi;
 
 export default userAuthApi;

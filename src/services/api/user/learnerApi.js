@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { apiBaseQuery } from "../base-query.js";
 import paymentApi from "./paymentApi.js";
+import { normalizeRecordedCourseDetail } from "@/features/recorded-courses/services/recordedCourseContract.js";
 
 const unwrap = (response) => {
   if (response?.success !== true || !response.data) throw new Error("Invalid learner response");
@@ -8,8 +9,22 @@ const unwrap = (response) => {
 };
 const learnerApi = createApi({
   reducerPath: "learnerApi", baseQuery: apiBaseQuery, keepUnusedDataFor: 0,
-  tagTypes: ["LearnerProfile", "Enrollment", "LearningProgress", "SectionQuiz", "LearnerAnalytics"],
+  tagTypes: ["LearnerProfile", "Enrollment", "LearningProgress", "SectionQuiz", "LearnerAnalytics", "LearningCourse"],
   endpoints: builder => ({
+    updateLearningLibrary: builder.mutation({
+      query: ({ courseId, action, confirmationTitle }) => ({ url: `/api/learner/enrollments/${encodeURIComponent(courseId)}`, method: "PATCH", body: { action, ...(action === "leave" && { confirmationTitle }) }, timeout: 20_000 }),
+      transformResponse: unwrap,
+      invalidatesTags: (result, _error, { courseId, action }) => result && action === "leave" ? [{ type: "Enrollment", id: courseId }, { type: "LearningProgress", id: courseId }, "LearningCourse", "LearnerAnalytics", "SectionQuiz"] : [],
+      async onQueryStarted({ courseId, action }, { dispatch, queryFulfilled }) {
+        try { await queryFulfilled; dispatch(paymentApi.util.invalidateTags(["LearningLibrary", ...(action === "leave" ? [{ type: "CourseAccess", id: courseId }] : [])])); }
+        catch { /* Keep current access and library state on failure. */ }
+      },
+    }),
+    getLearningCourse: builder.query({
+      query: slug => ({ url: `/api/learner/courses/by-slug/${encodeURIComponent(slug)}`, timeout: 15_000 }),
+      transformResponse: response => ({ ...normalizeRecordedCourseDetail(response), canManage: response.data.canManage === true }),
+      providesTags: ["LearningCourse"],
+    }),
     getLearnerAnalytics: builder.query({
       query: () => ({ url: "/api/learner/analytics", timeout: 15_000 }),
       transformResponse: unwrap, providesTags: ["LearnerAnalytics"],

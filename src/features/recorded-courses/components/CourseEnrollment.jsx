@@ -13,6 +13,7 @@ import { enrollmentFailureMessage } from "@/features/payments/enrollment-feedbac
 export default function CourseEnrollment({ course }) {
   const user = useSelector(state => state.user.user);
   const location = useLocation();
+  if (!user?._id && course.enrollmentOpen === false) return <p className="cd-enrollment-feedback" role="status">Enrollment is currently closed. Existing learners can continue from My learning.</p>;
   if (!user?._id) return <><Link className="cw-button cw-primary cd-enrollment-action" to="/login" state={{ from: `/courses/${encodeURIComponent(course.slug)}${location.search}` }}>Sign in to enroll<ArrowRight size={16} /></Link><p className="cd-enrollment-note">Use your account to enroll and keep your learning in one place.</p></>;
   return <EnrollmentAction key={`${user._id}/${course.id}`} course={course} user={user} />;
 }
@@ -34,6 +35,7 @@ function EnrollmentAction({ course, user }) {
   const free = course.price.current === 0;
   const mockCheckout = access.currentData?.mockCheckoutAvailable === true;
   const active = access.currentData?.canAccessCourse === true && !access.error;
+  const enrollmentOpen = access.currentData?.enrollmentOpen ?? course.enrollmentOpen;
   const busy = enrolling.isLoading || paying.isLoading;
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   useEffect(() => {
@@ -77,6 +79,7 @@ function EnrollmentAction({ course, user }) {
   if (access.isLoading || (!access.currentData && access.isFetching)) return <LoadingState variant="inline" label="Checking course access" />;
   if (access.error) return <div className="cd-enrollment-feedback" role="alert"><p>{userMessage(access.error)}</p><AsyncButton className="cw-button" loading={access.isFetching} loadingLabel="Checking access" onClick={access.refetch}>Check access again</AsyncButton></div>;
   if (user.role === "instructor" && String(course.instructor.id) === String(user._id)) return <Link className="cw-button cw-primary cd-enrollment-action" to={`/instructor/courses/${course.id}`}>Open course studio<ArrowRight size={16} /></Link>;
+  if (enrollmentOpen === false && (!intentId || ["failed", "refunded", "disputed"].includes(payment?.state))) return <p className="cd-enrollment-feedback" role="status">Enrollment is currently closed. Existing learners can continue from My learning.</p>;
   return <div>
     {mockCheckout && !free && <p className="cd-enrollment-feedback" role="status"><strong>Test purchase</strong><br />No payment will be charged. This enrollment is for testing.</p>}
     {payment?.state === "paid" ? <><p className="cd-enrollment-status" role="status">{payment.isMockPayment ? mockCheckout ? "Test purchase completed. Checking your course access." : "Test payments are disabled. This simulated purchase no longer grants course access." : "Payment confirmed. Checking your course access."}</p><AsyncButton className="cw-button" loading={access.isFetching} loadingLabel="Checking access" onClick={access.refetch}>Check course access</AsyncButton></> : payment?.state === "review_required" ? <p className="cd-enrollment-feedback" role="status">Your payment needs review. Please <Link to="/contact">contact our team</Link> before paying again.</p> : <>

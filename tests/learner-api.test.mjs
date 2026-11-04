@@ -24,6 +24,7 @@ test("learner API whitelists fields, rechecks access after enrollment, and clear
     globalThis.fetch = async request => {
       const path = new URL(request.url).pathname;
       requests.push(request);
+      if (path.includes("/courses/by-slug/")) return Response.json({ success: true, data: { course: { _id: "course-1", slug: "tajweed", title: "Archived learning", status: "Archived", sections: [] }, canManage: false } });
       if (path.endsWith("/analytics")) { analyticsReads++; return Response.json({ success: true, data: { summary: { totalEnrolledCourses: canAccess ? 1 : 0, completedCourses: 0, completedLessons: 0, coursesInProgress: 0 } } }); }
       if (path.endsWith("/access")) { accessReads++; return Response.json({ success: true, data: { canAccessCourse: canAccess } }); }
       if (path.endsWith("/library")) { libraryReads++; return Response.json({ success: true, data: { courses: canAccess ? [{ id: "course-1" }] : [] } }); }
@@ -38,6 +39,10 @@ test("learner API whitelists fields, rechecks access after enrollment, and clear
     await store.dispatch(payment.endpoints.getCourseAccess.initiate("course-1")).unwrap();
     await store.dispatch(payment.endpoints.getLearningLibrary.initiate()).unwrap();
     await store.dispatch(learner.endpoints.getLearnerProfile.initiate()).unwrap();
+    const classroom = await store.dispatch(learner.endpoints.getLearningCourse.initiate("tajweed")).unwrap();
+    assert.equal(classroom.title, "Archived learning"); assert.equal(classroom.canManage, false);
+    const privateRead = requests.find(request => request.url.endsWith("/api/learner/courses/by-slug/tajweed"));
+    assert.equal(privateRead.credentials, "include");
     await store.dispatch(learner.endpoints.getLearnerAnalytics.initiate()).unwrap();
     await store.dispatch(learner.endpoints.updateLearnerProfile.initiate({ city: "Riyadh", gender: null, name: "forged", role: "admin", studentId: "other" })).unwrap();
     const patch = requests.find(request => request.method === "PATCH");

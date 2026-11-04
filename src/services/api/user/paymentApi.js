@@ -13,7 +13,8 @@ const paymentApi = createApi({
   tagTypes: ["CourseAccess", "LearningLibrary"],
   endpoints: (builder) => ({
     getLearningLibrary: builder.query({
-      query: ({ page = 1, limit = 12 } = {}) => ({ url: "/api/purchases/library", params: { page, limit } }),
+      serializeQueryArgs: ({ queryArgs }) => ({ page: queryArgs?.page ?? 1, limit: queryArgs?.limit ?? 12, view: queryArgs?.view ?? "active" }),
+      query: ({ page = 1, limit = 12, view = "active" } = {}) => ({ url: "/api/purchases/library", params: { page, limit, view } }),
       transformResponse: unwrap,
       providesTags: ["LearningLibrary"],
     }),

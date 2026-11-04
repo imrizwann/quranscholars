@@ -105,16 +105,16 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
     const thumbnail = "https://images.example.test/cover.webp?signature=cover";
     const trailerVideo = "https://video.example.test/master.m3u8";
     const both = media({ thumbnail, trailerVideo });
-    assert.match(both, /<button[^>]+aria-label="Play trailer for Example course"/);
+    assert.match(both, /href="\/courses\/example-course"/);
     assert.match(both, /cover.webp\?signature=cover/);
-    assert.doesNotMatch(both, /<a\b|Loading trailer/);
+    assert.doesNotMatch(both, /<button|<video|Loading trailer|Watch trailer|qs-video-player/);
     const trailerOnly = media({ trailerVideo });
-    assert.match(trailerOnly, /Loading trailer|qs-video-player/);
-    assert.doesNotMatch(trailerOnly, /catalogue-cover-placeholder/);
+    assert.match(trailerOnly, /catalogue-cover-placeholder/);
+    assert.doesNotMatch(trailerOnly, /<video|qs-video-player|Loading trailer/);
     const thumbnailOnly = media({ thumbnail });
     assert.match(thumbnailOnly, /href="\/courses\/example-course"/);
     assert.doesNotMatch(thumbnailOnly, /Play trailer for|Loading trailer/);
-    assert.match(media({}), /Start a new chapter/);
+    assert.match(media({}), /Explore this course/);
     store.dispatch(api.util.resetApiState());
   } finally {
     globalThis.fetch = originalFetch;
