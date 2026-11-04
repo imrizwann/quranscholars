@@ -8,8 +8,12 @@ const unwrap = (response) => {
 };
 const learnerApi = createApi({
   reducerPath: "learnerApi", baseQuery: apiBaseQuery, keepUnusedDataFor: 0,
-  tagTypes: ["LearnerProfile", "Enrollment", "LearningProgress", "SectionQuiz"],
+  tagTypes: ["LearnerProfile", "Enrollment", "LearningProgress", "SectionQuiz", "LearnerAnalytics"],
   endpoints: builder => ({
+    getLearnerAnalytics: builder.query({
+      query: () => ({ url: "/api/learner/analytics", timeout: 15_000 }),
+      transformResponse: unwrap, providesTags: ["LearnerAnalytics"],
+    }),
     getCourseProgress: builder.query({
       query: courseId => ({ url: `/api/learner/courses/${encodeURIComponent(courseId)}/progress`, timeout: 15_000 }),
       transformResponse: unwrap, providesTags: (_result, _error, id) => [{ type: "LearningProgress", id }],
@@ -21,7 +25,7 @@ const learnerApi = createApi({
     recordLessonWatch: builder.mutation({
       query: ({ courseId, sectionId, lessonId, watchId, sequence, position, event }) => ({ url: `/api/learner/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/lessons/${encodeURIComponent(lessonId)}/watch/heartbeat`, method: "POST", body: { watchId, sequence, position, event }, timeout: 15_000 }),
       transformResponse: unwrap,
-      invalidatesTags: (result, _error, { courseId }) => result?.lesson.completed ? [{ type: "LearningProgress", id: courseId }] : [],
+      invalidatesTags: (result, _error, { courseId }) => result?.lesson.completed ? [{ type: "LearningProgress", id: courseId }, "LearnerAnalytics"] : [],
     }),
     getSectionQuiz: builder.query({
       query: ({ courseId, sectionId }) => ({ url: `/api/learner/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/quiz`, timeout: 15_000 }),
@@ -49,7 +53,7 @@ const learnerApi = createApi({
     enrollFreeCourse: builder.mutation({
       query: ({ courseId }) => ({ url: "/api/learner/enrollments/free", method: "POST", body: { courseId }, timeout: 30_000 }),
       transformResponse: unwrap,
-      invalidatesTags: (result, _error, { courseId }) => result ? [{ type: "Enrollment", id: courseId }] : [],
+      invalidatesTags: (result, _error, { courseId }) => result ? [{ type: "Enrollment", id: courseId }, "LearnerAnalytics"] : [],
       async onQueryStarted({ courseId }, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;

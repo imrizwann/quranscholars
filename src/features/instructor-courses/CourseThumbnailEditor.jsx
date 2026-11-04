@@ -63,7 +63,7 @@ export default function CourseThumbnailEditor({ course, disabled, onBusy }) {
           <h3>{file && failed === image ? "Choose a different image" : file ? "Ready to update your cover" : hasCover ? "Update your cover" : "Add a course cover"}</h3>
           <p id={hintId} className="cw-field-hint">JPG, PNG, or WebP, up to 3 MB. Use a 16:9 image for the best fit.</p>
         </div>
-        <input ref={input} type="file" hidden accept="image/jpeg,image/png,image/webp" aria-label="Choose a cover image" aria-describedby={hintId} disabled={locked} onChange={selectFile} />
+        <input id={`${hintId}-file`} ref={input} type="file" hidden accept="image/jpeg,image/png,image/webp" aria-label="Choose a cover image" aria-describedby={hintId} disabled={locked} onChange={selectFile} />
         {file && <div className="cw-thumbnail-selection" aria-live="polite"><Image size={18} aria-hidden="true" /><div><p className="cw-file">{file.name}</p><span className="cw-field-hint">{file.size < 1024 * 1024 ? `${Math.max(1, Math.round(file.size / 1024))} KB` : `${(file.size / 1024 / 1024).toFixed(1)} MB`} · Selected image</span></div></div>}
         <div className="cw-row cw-thumbnail-actions">
           <button type="button" className="cw-button" disabled={locked} onClick={() => input.current?.click()}><Image size={16} aria-hidden="true" />{file ? "Choose another" : "Choose image"}</button>

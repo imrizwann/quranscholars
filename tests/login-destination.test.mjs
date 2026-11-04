@@ -4,7 +4,7 @@ import { loginDestination } from "../src/components/guards/loginDestination.js";
 
 test("sign-in returns learners and instructors to supported shared destinations", () => {
   for (const role of ["user", "instructor"]) {
-    for (const path of ["/instructor/application", "/dashboard/learning?type=live-classes", "/get-started/instructor", "/profile", "/courses/tajweed", "/learn/tajweed/507f1f77bcf86cd799439011", "/learn/tajweed/lesson/507f1f77bcf86cd799439011#video"]) {
+    for (const path of ["/instructor/application", "/dashboard/learning?type=live-classes", "/dashboard/progress", "/get-started/instructor", "/profile", "/courses/tajweed", "/learn/tajweed/507f1f77bcf86cd799439011", "/learn/tajweed/lesson/507f1f77bcf86cd799439011#video"]) {
       assert.equal(loginDestination({ role }, path), path);
     }
   }
@@ -19,6 +19,10 @@ test("sign-in rejects external, malformed, unsupported and unauthorized private 
   assert.equal(loginDestination({ role: "user" }, "/instructor/courses/new"), "/dashboard/learning");
   assert.equal(loginDestination({ role: "instructor" }, "/instructor/courses/new"), "/instructor/courses/new");
   assert.equal(loginDestination({ role: "instructor" }, "/instructor/dashboard"), "/instructor/dashboard");
+  for (const path of ["/instructor/earnings", "/instructor/analytics"]) {
+    assert.equal(loginDestination({ role: "instructor" }, path), path);
+    assert.equal(loginDestination({ role: "user" }, path), "/dashboard/learning");
+  }
 });
 
 

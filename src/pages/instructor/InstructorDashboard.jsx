@@ -1,24 +1,16 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen, FileEdit, Plus, UserRound } from "lucide-react";
+import { ArrowRight, BookOpen, Plus, UserRound } from "lucide-react";
 import {
   WorkspacePage,
   WorkspaceEmpty,
 } from "@/components/lms/WorkspaceUI.jsx";
-import { DashboardMetrics } from "@/components/lms/DashboardParts.jsx";
+import { InstructorAnalytics } from "@/components/lms/DashboardAnalytics.jsx";
 import useCourseQuery from "@/features/instructor-courses/useCourseQuery.js";
 import { QueryMessage } from "@/features/instructor-courses/WorkspaceParts.jsx";
 import InstructorCourseCard from "@/features/instructor-courses/InstructorCourseCard.jsx";
 
 export default function InstructorDashboard() {
   const query = useCourseQuery("getCourses", { limit: 3 });
-  const drafts = useCourseQuery("getCourses", { limit: 1, status: "Draft" });
-  const published = useCourseQuery("getCourses", {
-    limit: 1,
-    status: "Published",
-  });
-  const count = (result) =>
-    result.error ? "Unavailable" : result.data?.pagination?.totalCourses;
-  const loadingCount = (result) => !result.data && !result.error;
   const showEmptyCreate = !query.error && query.data?.courses?.length === 0;
   return (
     <WorkspacePage
@@ -34,31 +26,7 @@ export default function InstructorDashboard() {
         )
       }
     >
-      <DashboardMetrics
-        items={[
-          {
-            icon: BookOpen,
-            label: "Your courses",
-            value: count(query),
-            loading: loadingCount(query),
-            note: "All recorded courses",
-          },
-          {
-            icon: FileEdit,
-            label: "In draft",
-            value: count(drafts),
-            loading: loadingCount(drafts),
-            note: "Keep shaping your next course",
-          },
-          {
-            icon: BookOpen,
-            label: "Published",
-            value: count(published),
-            loading: loadingCount(published),
-            note: "Available in the course catalog",
-          },
-        ]}
-      />
+      <InstructorAnalytics />
       <div className="studio-split">
         <section className="studio-hero">
           <div>

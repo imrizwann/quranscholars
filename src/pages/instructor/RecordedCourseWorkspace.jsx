@@ -1,5 +1,5 @@
 import { courseStatusLabel } from "@/lib/user-messages.js";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Tabs } from "@base-ui/react/tabs";
 import SectionDetailsEditor from "@/features/instructor-courses/SectionDetailsEditor.jsx";
 import SectionQuizEditor from "@/features/instructor-courses/SectionQuizEditor.jsx";
@@ -33,6 +33,7 @@ import {
 import {
   ArrowLeft,
   ChevronRight,
+  ChevronDown,
   FolderOpen,
   Pencil,
   ClipboardCheck,
@@ -52,20 +53,28 @@ import { trailerPlaybackSource } from "@/lib/trailer-playback.js";
 import "@/features/instructor-courses/course-workspace.css";
 import "@/components/lms/workspace-ui.css";
 
-function AddTitleForm({ label, disabled, loading, onCreate }) {
+function CurriculumItemForm({ label, disabled, loading, onCreate }) {
+  const id = useId();
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const descriptionPanel = useRef(null);
   return (
     <form
       className="cw-add-form"
+      aria-label={`Add ${label.toLowerCase()}`}
       onSubmit={async (event) => {
         event.preventDefault();
         if (disabled || loading) return;
-        if (await onCreate(title.trim())) setTitle("");
+        if (await onCreate({ title: title.trim(), description: description.trim() })) {
+          setTitle("");
+          setDescription("");
+          if (descriptionPanel.current) descriptionPanel.current.open = false;
+        }
       }}
     >
-      <label>
+      <label htmlFor={`${id}-title`}>
         {label} title
-        <input
+        <input id={`${id}-title`} name="title"
           required
           minLength={3}
           maxLength={150}
@@ -79,6 +88,16 @@ function AddTitleForm({ label, disabled, loading, onCreate }) {
           disabled={disabled}
         />
       </label>
+      <details ref={descriptionPanel} className="cw-add-description">
+        <summary tabIndex={disabled || loading ? -1 : 0} aria-disabled={disabled || loading || undefined} onClick={event => { if (disabled || loading) event.preventDefault(); }}>
+          Description (optional)<ChevronDown size={14} aria-hidden="true" />
+        </summary>
+        <label className="cw-add-description-field" htmlFor={`${id}-description`}>
+          <span className="sr-only">{label} description</span>
+          <textarea id={`${id}-description`} name="description" value={description} onChange={event => setDescription(event.target.value)} maxLength={300} rows={2} disabled={disabled || loading} placeholder={label === "Section" ? "Introduce what this section covers." : "Explain what learners will practise in this lesson."} aria-describedby={`${id}-description-help`} />
+          <span id={`${id}-description-help`} className="cw-field-hint">Up to 300 characters. You can edit this later.</span>
+        </label>
+      </details>
       <AsyncButton
         type="submit"
         className="cw-button cw-primary"
@@ -100,6 +119,8 @@ export default function RecordedCourseWorkspace() {
 }
 
 function Workspace({ courseId }) {
+  const confirmationId = useId();
+  const [confirmationTitle, setConfirmationTitle] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const base = `/${encodeURIComponent(courseId)}`;
@@ -184,7 +205,7 @@ function Workspace({ courseId }) {
     sections.refresh();
     lessons.refresh();
   }
-  async function create(kind, title) {
+  async function create(kind, fields) {
     const path =
       kind === "section"
         ? `${base}/sections`
@@ -197,8 +218,8 @@ function Workspace({ courseId }) {
     try {
       const request =
         kind === "section"
-          ? createSection({ courseId, title })
-          : createLesson({ courseId, sectionId: selected._id, title });
+          ? createSection({ courseId, ...fields })
+          : createLesson({ courseId, sectionId: selected._id, ...fields });
       await request.unwrap();
       return true;
     } catch (failure) {
@@ -223,11 +244,13 @@ function Workspace({ courseId }) {
   function remove(path, label, target = { courseId }) {
     if (saving.current || busyRef.current) return;
     setError("");
+    setConfirmationTitle("");
     setDeletion({ path, label, target });
   }
   async function confirmDeletion() {
     if (!deletion || saving.current || busyRef.current) return;
     const { path, label, target } = deletion;
+    if (label === "course" && (!course.data?.course?.title || confirmationTitle.trim() !== course.data.course.title.trim())) return;
     saving.current = true;
     setBusy(true);
     setPendingAction(`delete:${path}`);
@@ -239,7 +262,7 @@ function Workspace({ courseId }) {
         lesson: deleteLesson,
         video: deleteVideo,
       };
-      const result = await mutations[label](target).unwrap();
+      const result = await mutations[label]({ ...target, ...(label === "course" && { confirmationTitle: confirmationTitle.trim() }) }).unwrap();
       setDeletion(null);
       if (label === "course") {
         // Finish the local operation before navigating through the upload guard.
@@ -266,6 +289,7 @@ function Workspace({ courseId }) {
   const data = course.data?.course;
   const refreshing = course.loading || sections.loading || lessons.loading;
   const sectionPath = selected ? `${base}/sections/${selected._id}` : null;
+  const unfinishedTab = [["details", metadataEditing], ["pricing", pricingEditing], ["curriculum", sectionEditing]].find(([tab, editing]) => editing && tab !== activeTab)?.[0];
   return (
     <main ref={studio} className="course-workspace cw-studio">
       <Link className="cw-back" to="/instructor/courses">
@@ -282,7 +306,7 @@ function Workspace({ courseId }) {
         </div>
         <AsyncButton
           className="cw-button"
-          disabled={busy || sectionEditing || metadataEditing || pricingEditing}
+          disabled={busy}
           loading={refreshing}
           loadingLabel="Refreshing"
           onClick={refresh}
@@ -293,9 +317,9 @@ function Workspace({ courseId }) {
       </header>
       {data && (
         <div className="cw-course-meta">
-          <span className="cw-status">{courseStatusLabel(data.status)}</span>
+          <span className="cw-status cw-publication-status" data-status={data.status}>{data.status === "Draft" && <Pencil size={13} aria-hidden="true" />}{courseStatusLabel(data.status)}</span>
           <span>
-            Video progress updates automatically while this page is open.
+            {data.published ? "Your course is available in the catalogue." : "Your course stays private until you publish it."}
           </span>
         </div>
       )}
@@ -329,7 +353,8 @@ function Workspace({ courseId }) {
             <Tabs.List className="studio-tabs cw-studio-tabs" aria-label="Course studio">
               {studioTabs.map(([value, label]) => <Tabs.Tab key={value} value={value}>{label}</Tabs.Tab>)}
             </Tabs.List>
-            <Tabs.Panel value="details" keepMounted className="cw-studio-panel"><CourseDetailsPanel course={data} disabled={busy || sectionEditing || pricingEditing || Boolean(course.error)} onBusy={setBusy} onEditing={changeMetadataEditing} /></Tabs.Panel>
+            {unfinishedTab && <p className="cw-notice" role="status">You have unfinished edits in {studioTabs.find(([tab]) => tab === unfinishedTab)?.[1]}. <button type="button" className="cw-text-link" onClick={() => changeTab(unfinishedTab)}>Return to save or cancel</button></p>}
+            <Tabs.Panel value="details" keepMounted className="cw-studio-panel"><CourseDetailsPanel course={data} disabled={busy || Boolean(course.error)} onBusy={setBusy} onEditing={changeMetadataEditing} /></Tabs.Panel>
             <Tabs.Panel value="curriculum" keepMounted className="cw-studio-panel">
           <div className="cw-curriculum-heading">
             <div>
@@ -362,7 +387,7 @@ function Workspace({ courseId }) {
                       (selected?._id === section._id && lessons.loading) ||
                       undefined
                     }
-                    disabled={busy || sectionEditing || metadataEditing || pricingEditing}
+                    disabled={busy || sectionEditing}
                     onClick={() => {
                       setSelected(section);
                       setLessonPage(1);
@@ -387,25 +412,25 @@ function Workspace({ courseId }) {
               <Pagination
                 pagination={sections.data?.pagination}
                 page={sectionPage}
-                disabled={busy || sectionEditing || metadataEditing || pricingEditing}
+                disabled={busy || sectionEditing}
                 loading={sections.loading}
                 onPage={(page) => {
                   setSectionPage(page);
                   setSelected(null);
                 }}
               />
-              <AddTitleForm
+              <CurriculumItemForm
                 label="Section"
                 loading={pendingAction === `create:${base}/sections`}
                 disabled={
-                  busy || sectionEditing || metadataEditing || pricingEditing || Boolean(course.error) || Boolean(sections.error)
+                  busy || Boolean(course.error) || Boolean(sections.error)
                 }
-                onCreate={(title) => create("section", title)}
+                onCreate={(fields) => create("section", fields)}
               />
             </section>
             <CollapsiblePanel as="section" key={selected?._id || "no-section"} className="cw-card cw-lessons" label={selected ? 'section: ' + selected.title : 'lesson workspace'} open={sectionOpen} onOpenChange={setSectionOpen}
               heading={<div><p className="cw-eyebrow">{selected ? "Selected section" : "Lesson workspace"}</p><h2>{selected?.title || "Your lessons"}</h2></div>}
-              endActions={selected && <CurriculumActions label={`Section actions: ${selected.title}`} disabled={busy || sectionEditing || metadataEditing || pricingEditing || Boolean(lessons.error) || Boolean(course.error)} loading={pendingAction === `delete:${sectionPath}`} items={[
+              endActions={selected && <CurriculumActions label={`Section actions: ${selected.title}`} disabled={busy || sectionEditing || Boolean(lessons.error) || Boolean(course.error)} loading={pendingAction === `delete:${sectionPath}`} items={[
                 { label: "Edit section", icon: Pencil, onClick: () => { setSectionOpen(true); setSectionDetailsEditing(true); changeSectionEditing(true); } },
                 { label: "Manage quiz", icon: ClipboardCheck, onClick: () => { setSectionOpen(true); setQuizOpen(true); requestAnimationFrame(() => quizEditor.current?.querySelector('button')?.focus()); } },
                 { label: "Delete section", icon: Trash2, danger: true, onClick: () => remove(sectionPath, "section", { courseId, sectionId: selected._id }) },
@@ -416,12 +441,12 @@ function Workspace({ courseId }) {
                 <QueryMessage query={lessons} label="Loading lessons" compact />
                 {lessonItems.map((lesson, index) => <CurriculumLesson key={lesson._id} lesson={lesson} index={index}
                   target={{ courseId, sectionId: selected._id, lessonId: lesson._id }} path={`${sectionPath}/lessons/${lesson._id}`}
-                  disabled={busy || sectionDetailsEditing || quizEditing || metadataEditing || pricingEditing || Boolean(editingLessonId && editingLessonId !== lesson._id) || Boolean(lessons.error) || Boolean(course.error)}
+                  disabled={busy || sectionDetailsEditing || quizEditing || Boolean(editingLessonId && editingLessonId !== lesson._id) || Boolean(lessons.error) || Boolean(course.error)}
                   deleting={pendingAction === `delete:${sectionPath}/lessons/${lesson._id}`} removingVideo={pendingAction === `delete:${sectionPath}/lessons/${lesson._id}/video`}
                   onBusy={setBusy} onEditing={value => { setEditingLessonId(value ? lesson._id : null); changeSectionEditing(value); }} onRefresh={lessons.refresh} onRemove={remove} />)}
                 {lessons.data?.items.length === 0 && <div className="cw-empty"><Video size={28} aria-hidden="true" /><p>No lessons yet. Add a title below, then upload your video.</p></div>}
                 <Pagination pagination={lessons.data?.pagination} page={lessonPage} onPage={setLessonPage} disabled={busy || sectionEditing} loading={lessons.loading} />
-                <AddTitleForm key={`lesson-form:${selected._id}`} label="Lesson" loading={pendingAction === `create:${sectionPath}/lessons`} disabled={busy || sectionEditing || Boolean(lessons.error) || Boolean(course.error)} onCreate={title => create("lesson", title)} />
+                <CurriculumItemForm key={`lesson-form:${selected._id}`} label="Lesson" loading={pendingAction === `create:${sectionPath}/lessons`} disabled={busy || sectionEditing || Boolean(lessons.error) || Boolean(course.error)} onCreate={fields => create("lesson", fields)} />
                 <div ref={quizEditor}><SectionQuizEditor key={`quiz:${selected._id}`} open={quizOpen} onOpenChange={setQuizOpen} courseId={courseId} sectionId={selected._id} disabled={busy || (sectionEditing && !quizEditing) || Boolean(course.error) || Boolean(sections.error)} onBusy={setBusy} onEditing={changeQuizEditing} /></div>
               </>}
             </CollapsiblePanel>
@@ -453,7 +478,7 @@ function Workspace({ courseId }) {
               onActivityChange={setTrailerActivity}
               video={data.trailerVideo}
               playbackSource={trailerPlaybackSource(data, course.data?.trailerPlaybackUrl)}
-              disabled={busy || sectionEditing || metadataEditing || Boolean(course.error)}
+              disabled={busy || Boolean(course.error)}
               deleting={pendingAction === `delete:${base}/trailer`}
               onBusy={setBusy}
               onChanged={course.refresh}
@@ -461,7 +486,7 @@ function Workspace({ courseId }) {
             />
           </CollapsiblePanel>
             </Tabs.Panel>
-            <Tabs.Panel value="pricing" keepMounted className="cw-studio-panel"><CoursePricingEditor course={data} disabled={busy || metadataEditing || sectionEditing || Boolean(course.error)} onBusy={setBusy} onEditing={changePricingEditing} /></Tabs.Panel>
+            <Tabs.Panel value="pricing" keepMounted className="cw-studio-panel"><CoursePricingEditor course={data} disabled={busy || Boolean(course.error)} onBusy={setBusy} onEditing={changePricingEditing} /></Tabs.Panel>
             <Tabs.Panel value="publish" keepMounted className="cw-studio-panel">
               <CoursePublishing course={data} active={activeTab === "publish"} disabled={busy || metadataEditing || pricingEditing || sectionEditing || Boolean(course.error)} onBusy={setBusy} onReview={(tab) => {
                 changeTab(tab);
@@ -479,7 +504,7 @@ function Workspace({ courseId }) {
               className="cw-button cw-danger cw-button-compact"
               loading={pendingAction === `delete:${base}`}
               loadingLabel="Deleting"
-              disabled={busy || Boolean(course.error)}
+              disabled={busy || sectionEditing || metadataEditing || pricingEditing || Boolean(course.error)}
               onClick={() => remove(base, "course")}
             >
               <Trash2 size={16} aria-hidden="true" />
@@ -495,12 +520,19 @@ function Workspace({ courseId }) {
         title={`Delete this ${deletion?.label || "item"}?`}
         description={`${deletion?.label === "course" ? "The course, its sections, lessons and videos will be removed. " : deletion?.label === "section" ? "This section and all its lessons and videos will be removed. " : deletion?.label === "lesson" ? "This lesson and its video will be removed. " : "This video will be removed. "}This cannot be undone.`}
         confirmLabel={`Delete ${deletion?.label || "item"}`}
+        confirmDisabled={deletion?.label === "course" && (!data?.title || confirmationTitle.trim() !== data.title.trim())}
         busy={busy && pendingAction.startsWith("delete:")}
         busyLabel={`Deleting ${deletion?.label || "item"}`}
         danger
         onCancel={() => setDeletion(null)}
         onConfirm={confirmDeletion}
       >
+        {deletion?.label === "course" && <div className="qs-confirm-field">
+          <p id={`${confirmationId}-help`}>To confirm, type the course title exactly as shown:</p>
+          <p className="qs-confirm-course-title">{data?.title}</p>
+          <label htmlFor={confirmationId}>Course title</label>
+          <input id={confirmationId} name="confirmationTitle" value={confirmationTitle} onChange={event => setConfirmationTitle(event.target.value)} disabled={busy} autoComplete="off" autoCapitalize="off" spellCheck={false} maxLength={150} aria-describedby={`${confirmationId}-help`} />
+        </div>}
         {error && <p className="qs-confirm-error" role="alert">{error}</p>}
       </ConfirmationModal>
       <ConfirmationModal

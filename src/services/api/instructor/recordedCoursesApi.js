@@ -95,6 +95,11 @@ const instructorCoursesApi = createApi({
   // Private workspace data is retained only while a screen subscribes to it.
   keepUnusedDataFor: 0,
   endpoints: (builder) => ({
+    getAnalytics: builder.query({
+      query: ({ page = 1, limit = 10 } = {}) => ({ url: `${root}/analytics`, params: { page, limit } }),
+      extraOptions: { validate: data => Number.isInteger(data?.summary?.totalCourses) && Array.isArray(data.courses) && Array.isArray(data.revenue) && Number.isInteger(data.pagination?.total) },
+      providesTags: [listTag],
+    }),
     getSectionQuiz: builder.query({
       query: args => ({ url: `${sectionUrl(args)}/quiz` }),
       providesTags: (_result, _error, args) => [{ type: "InstructorQuiz", id: `${args.courseId}/${args.sectionId}` }],
@@ -122,7 +127,7 @@ const instructorCoursesApi = createApi({
       invalidatesTags: onSuccess((args) => [courseTag(args), sectionTag(args), listTag, { type: "InstructorLessons" }]),
     }),
     updateLesson: builder.mutation({
-      query: (args) => ({ url: lessonUrl(args), method: "PATCH", body: { title: args.title } }),
+      query: (args) => ({ url: lessonUrl(args), method: "PATCH", body: { title: args.title, ...(args.description !== undefined && { description: args.description }) } }),
       invalidatesTags: onSuccess((args) => [lessonTag(args), courseTag(args)]),
     }),
     getLessonPlayback: builder.query({
@@ -215,7 +220,7 @@ const instructorCoursesApi = createApi({
       query: (args) => ({
         url: sectionsUrl(args),
         method: "POST",
-        body: { title: args.title },
+        body: { title: args.title, ...(args.description !== undefined && { description: args.description }) },
       }),
       invalidatesTags: onSuccess((args) => [sectionTag(args), courseTag(args)]),
     }),
@@ -223,7 +228,7 @@ const instructorCoursesApi = createApi({
       query: (args) => ({
         url: lessonsUrl(args),
         method: "POST",
-        body: { title: args.title },
+        body: { title: args.title, ...(args.description !== undefined && { description: args.description }) },
       }),
       invalidatesTags: onSuccess((args) => [lessonTag(args), courseTag(args)]),
     }),
@@ -235,7 +240,7 @@ const instructorCoursesApi = createApi({
       invalidatesTags: onSuccess((args) => [sectionTag(args), courseTag(args)]),
     }),
     deleteCourse: builder.mutation({
-      query: (args) => ({ url: courseUrl(args), method: "DELETE" }),
+      query: (args) => ({ url: courseUrl(args), method: "DELETE", body: { confirmationTitle: args.confirmationTitle } }),
       extraOptions: deletionResult,
       // The detail screen leaves after success; do not refetch a deleted resource.
       invalidatesTags: onSuccess(() => [listTag]),

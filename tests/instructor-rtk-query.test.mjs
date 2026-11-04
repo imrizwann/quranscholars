@@ -55,6 +55,7 @@ test("instructor RTK Query integration", async (t) => {
       const url = new URL(request.url), path = url.pathname;
       if (request.method === "DELETE") return { deletionId: "deletion1", storageCleanupPending: true };
       if (path.endsWith("/students")) return { items: [], pagination: { ...pagination, total: 0 } };
+      if (path.endsWith("/analytics")) return { summary: { totalCourses: 1, totalEnrollments: 2 }, courses: [], revenue: [], pagination: { ...pagination, total: 1 } };
       if (path.endsWith("/readiness")) return { ready: true, checks: [] };
       if (path.endsWith("/upload")) return { uploadId: "upload1", uploadUrl: "https://storage.example/video" };
       if (path.endsWith("/process")) return { status: "QUEUED", uploadId: "upload1" };
@@ -81,17 +82,17 @@ test("instructor RTK Query integration", async (t) => {
         ["getStudents", { page: 1, limit: 20, status: "active" }, "GET", `${root}/students?page=1&limit=20&status=active`],
         ["updatePricing", { courseId: "course1", price: { original: 100, sale: 0 } }, "PATCH", `${root}/course1/pricing`, { original: 100, sale: 0 }],
         ["publishCourse", target, "POST", `${root}/course1/publish`, { confirm: true }],
-        ["updateLesson", { ...target, title: "Renamed lesson", order: 99, isPreview: true }, "PATCH", `${root}/course1/sections/section1/lessons/lesson1`, { title: "Renamed lesson" }],
+        ["updateLesson", { ...target, title: "Renamed lesson", description: "Lesson overview", order: 99, isPreview: true }, "PATCH", `${root}/course1/sections/section1/lessons/lesson1`, { title: "Renamed lesson", description: "Lesson overview" }],
         ["getCourse", target, "GET", `${root}/course1`],
         ["getSections", { ...target, page: 2 }, "GET", `${root}/course1/sections?page=2&limit=20`],
         ["getLessons", { ...target, page: 3 }, "GET", `${root}/course1/sections/section1/lessons?page=3&limit=10`],
         ["getDeletion", { deletionId: "deletion1" }, "GET", `${root}/deletions/deletion1`],
         ["createCourse", { title: "Course", category: "category1", outcomes: ["Read confidently"], requirements: [], audience: ["Beginners"] }, "POST", root, { title: "Course", category: "category1", outcomes: ["Read confidently"], requirements: [], audience: ["Beginners"] }],
         ["updateCourse", { courseId: "course1", changes: { title: "Updated course", tags: [] } }, "PATCH", `${root}/course1`, { title: "Updated course", tags: [] }],
-        ["createSection", { ...target, title: "Section" }, "POST", `${root}/course1/sections`, { title: "Section" }],
+        ["createSection", { ...target, title: "Section", description: "Section overview", order: 99 }, "POST", `${root}/course1/sections`, { title: "Section", description: "Section overview" }],
         ["updateSection", { ...target, title: "Updated section", description: "Introduction", order: 999 }, "PATCH", `${root}/course1/sections/section1`, { title: "Updated section", description: "Introduction" }],
-        ["createLesson", { ...target, title: "Lesson" }, "POST", `${root}/course1/sections/section1/lessons`, { title: "Lesson" }],
-        ["deleteCourse", target, "DELETE", `${root}/course1`],
+        ["createLesson", { ...target, title: "Lesson", description: "Lesson overview", isPreview: true }, "POST", `${root}/course1/sections/section1/lessons`, { title: "Lesson", description: "Lesson overview" }],
+        ["deleteCourse", { ...target, confirmationTitle: "Course title", ownerId: "forged" }, "DELETE", `${root}/course1`, { confirmationTitle: "Course title" }],
         ["deleteSection", target, "DELETE", `${root}/course1/sections/section1`],
         ["deleteLesson", target, "DELETE", `${root}/course1/sections/section1/lessons/lesson1`],
         ["deleteVideo", { courseId: "course1" }, "DELETE", `${root}/course1/trailer`],
@@ -308,6 +309,7 @@ test("instructor RTK Query integration", async (t) => {
     await t.test("account changes clear private caches and abort outstanding requests", async () => {
       const store = makeStore();
       await store.dispatch(api.endpoints.getCourse.initiate({ courseId: "private" })).unwrap();
+      await store.dispatch(api.endpoints.getAnalytics.initiate({ page: 1, limit: 5 })).unwrap();
       let started = false;
       globalThis.fetch = (request) => new Promise((_resolve, reject) => {
         started = true;

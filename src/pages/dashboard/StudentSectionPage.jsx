@@ -1,4 +1,5 @@
 import { useLocation } from "react-router-dom";
+import LearnerProgress from "./LearnerProgress.jsx";
 import { ClipboardCheck, Heart, ReceiptText } from "lucide-react";
 import { WorkspaceAccount, WorkspaceEmpty, WorkspaceGuide, WorkspacePage } from "@/components/lms/WorkspaceUI.jsx";
 
@@ -9,6 +10,7 @@ const pages = {
 };
 export default function StudentSectionPage() {
   const key = useLocation().pathname.split("/").pop();
+  if (key === "progress") return <LearnerProgress />;
   if (["profile", "settings"].includes(key)) return <WorkspaceAccount settings={key === "settings"} />;
   const [title, description, Icon, emptyTitle, emptyDescription] = pages[key] || pages.assignments;
   return <WorkspacePage eyebrow="Learner workspace" title={title} description={description}><div className="studio-split"><WorkspaceEmpty icon={Icon} badge="Coming soon" title={emptyTitle} description={emptyDescription} to="/courses" action="Explore courses" /><WorkspaceGuide title="Your learning, thoughtfully organized" items={[["Explore with confidence", "Review course details, instructor information, and the complete lesson outline."], ["Keep your account current", "Your profile brings your learning activity together under one account."], ["Return to your library", "Use My learning to find your course and classroom workspace."]]} /></div></WorkspacePage>;

@@ -7,4 +7,9 @@
 .qs-confirm-actions .qs-confirm-danger { background: var(--destructive); border-color: var(--destructive); color: var(--destructive-foreground); }
 .qs-confirm-actions .qs-confirm-danger:hover:not(:disabled) { background: color-mix(in srgb, var(--destructive) 85%, #000); border-color: var(--destructive); color: var(--destructive-foreground); }
 .qs-confirm-error { margin-top: 16px; border: 1px solid color-mix(in srgb, var(--destructive) 30%, var(--border)); border-radius: 7px; padding: 12px; color: var(--destructive); font-size: .8rem; line-height: 1.6; }
+.qs-confirm-field { display: grid; gap: 10px; margin-top: 20px; font-size: .85rem; }
+.qs-confirm-field > p:first-child { color: var(--muted-foreground); line-height: 1.6; }
+.qs-confirm-course-title { font-weight: 600; overflow-wrap: anywhere; padding: 10px 12px; border: 1px solid var(--border); border-radius: 7px; background: var(--muted); }
+.qs-confirm-field label { font-weight: 500; margin-top: 4px; }
+.qs-confirm-field input { min-width: 0; width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); color: var(--foreground); font: inherit; }
 @media (max-width: 420px) { .qs-confirm-popup { padding: 20px; } }

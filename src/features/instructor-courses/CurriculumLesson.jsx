@@ -18,7 +18,7 @@ export default function CurriculumLesson({ lesson, index, target, path, disabled
     heading={<div className="cw-lesson-title"><span className="cw-section-number">{index + 1}</span><h3>{lesson.title}</h3></div>}
     actions={<VideoStatus video={lesson.video} activity={activity} />}
     endActions={<CurriculumActions label={`Lesson actions: ${lesson.title}`} disabled={disabled || editing} loading={deleting || removingVideo} items={[
-      { label: "Edit lesson title", icon: Pencil, onClick: () => changeEditing(true) },
+      { label: "Edit lesson", icon: Pencil, onClick: () => changeEditing(true) },
       lesson.video?.status && lesson.video.status !== "NOT_UPLOADED" && { label: "Remove video", icon: VideoOff, danger: true, onClick: () => onRemove(`${path}/video`, "video", target) },
       { label: "Delete lesson", icon: Trash2, danger: true, onClick: () => onRemove(path, "lesson", target) },
     ]} />}>
