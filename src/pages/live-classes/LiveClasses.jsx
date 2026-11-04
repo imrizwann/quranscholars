@@ -113,7 +113,7 @@ export default function LiveClasses() {
           </div>
         </div>
         <div className="live-class-search-row">
-          <label className="live-class-search qs-search-field"><Search size={17} aria-hidden="true" /><span className="sr-only">Search live classes</span><input ref={searchInput} type="search" value={query} onChange={event => updateSearch(event.target.value)} placeholder="Search topics or instructors" maxLength={100} />{query && <button type="button" aria-label="Clear live class search" onClick={clearSearch}><X size={16} aria-hidden="true" /></button>}</label>
+          <label className="live-class-search qs-search-field"><Search size={17} aria-hidden="true" /><span className="sr-only">Search live classes</span><input name="search" ref={searchInput} type="search" value={query} onChange={event => updateSearch(event.target.value)} placeholder="Search topics or instructors" maxLength={100} />{query && <button type="button" aria-label="Clear live class search" onClick={clearSearch}><X size={16} aria-hidden="true" /></button>}</label>
           <p role="status" aria-live="polite">{filtered.length} {filtered.length === 1 ? "class" : "classes"} · Times shown in each class timezone</p>
         </div>
         <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">

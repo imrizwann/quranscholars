@@ -160,7 +160,7 @@ const AdminAdmissions = () => {
             >
               <div className="admissions-search-field flex min-h-11 min-w-0 flex-none items-center gap-3 rounded-lg border border-input bg-background px-3 transition focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/20 sm:flex-1">
                 <Search className="size-4 shrink-0 text-muted-foreground" />
-                <input
+                <input name="search"
                   aria-label="Search admissions"
                   value={searchInput}
                   onChange={(event) => setSearchInput(event.target.value)}

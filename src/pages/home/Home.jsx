@@ -9,6 +9,7 @@ import {
   UsersRound,
   Check,
   ChevronDown,
+  Diamond,
   Quote,
   ShieldCheck,
 } from "lucide-react";
@@ -39,7 +40,7 @@ const SectionLabel = ({ children, light = false }) => (
       (light ? "text-[#9ed6c8]" : "text-primary")
     }
   >
-    <span className={"h-px w-7 " + (light ? "bg-[#9ed6c8]" : "bg-primary")} />
+    <Diamond className="size-3 shrink-0" strokeWidth={1.5} fill="currentColor" fillOpacity={0.12} aria-hidden="true" />
     {children}
   </div>
 );

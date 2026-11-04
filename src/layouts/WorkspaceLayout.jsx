@@ -9,6 +9,7 @@ import "./workspace.css";
 const studentLinks = [
   { to: "/dashboard", label: "Overview", icon: LayoutDashboard, end: true },
   { to: "/dashboard/learning", label: "My learning", icon: BookOpen },
+  { to: "/dashboard/progress", label: "Progress", icon: BarChart3 },
   { to: "/dashboard/assignments", label: "Assignments", icon: ClipboardCheck },
   { to: "/dashboard/wishlist", label: "Wishlist", icon: Library },
   { to: "/dashboard/purchases", label: "Purchases", icon: CircleDollarSign },

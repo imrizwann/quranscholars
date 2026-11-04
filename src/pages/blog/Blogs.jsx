@@ -144,7 +144,7 @@ const Blogs = () => {
             <label className="relative block">
               <span className="sr-only">Search articles</span>
               <FiSearch className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-primary" />
-              <input className="min-h-12 w-full rounded-xl border border-[#d8e2dd] bg-[#fbfcfa] pl-11 pr-4 text-sm font-semibold outline-none transition placeholder:text-[#98a59f] focus:border-primary focus:ring-4 focus:ring-[#0f766e]/10" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search topics, tags, or keywords" />
+              <input id="resource-search" name="search" aria-label="Search articles" className="min-h-12 w-full rounded-xl border border-[#d8e2dd] bg-[#fbfcfa] pl-11 pr-4 text-sm font-semibold outline-none transition placeholder:text-[#98a59f] focus:border-primary focus:ring-4 focus:ring-[#0f766e]/10" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search topics, tags, or keywords" />
             </label>
             <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Filter articles by category">
               {categories.map((category) => (

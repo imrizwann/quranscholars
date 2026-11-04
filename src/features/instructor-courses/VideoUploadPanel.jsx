@@ -200,7 +200,7 @@ export default function VideoUploadPanel({
           {!serverBusy && !busy && (
             <div className="cw-video-file">
               <strong>{file ? "Video selected" : video?.uploadId ? "Replace your video" : "Add a video"}</strong>
-              <input
+              <input id={`video-upload-${target.courseId}-${target.lessonId || "trailer"}`} aria-label={target.lessonId ? "Choose a lesson video" : "Choose a course trailer"}
                 ref={input}
                 hidden
                 type="file"

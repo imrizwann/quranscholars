@@ -76,7 +76,7 @@ export default function ProfilePage() {
             <h2 id="profile-photo-title">Profile photo</h2>
             <p>Choose a photo for your account. JPG, PNG, or WebP, up to 3 MB.</p>
             {user?.role === "instructor" && <p className="profile-account-help">Your account name and photo also appear on your public instructor profile and course pages.</p>}
-            <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={chooseImage} aria-label="Choose a profile photo" disabled={isUploading} />
+            <input id="profile-photo-upload" ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={chooseImage} aria-label="Choose a profile photo" disabled={isUploading} />
             <div className="profile-actions">
               <button type="button" className="cw-button" onClick={() => fileInput.current?.click()} disabled={isUploading}><Camera size={16} aria-hidden="true" />{photo.data?.url ? "Change photo" : "Choose photo"}</button>
               {file && <><AsyncButton className="cw-button cw-primary" loading={isUploading} loadingLabel="Saving photo" onClick={savePhoto}><Upload size={16} aria-hidden="true" />Save photo</AsyncButton><button type="button" className="cw-button" disabled={isUploading} onClick={() => { setFile(null); setError(""); }}>Cancel</button></>}

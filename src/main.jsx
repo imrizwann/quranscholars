@@ -197,6 +197,7 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <StudentDashboard /> },
           { path: "learning", element: <MyLearning /> },
+          { path: "progress", element: <StudentSectionPage /> },
           { path: "assignments", element: <StudentSectionPage /> },
           { path: "wishlist", element: <StudentSectionPage /> },
           { path: "purchases", element: <StudentSectionPage /> },

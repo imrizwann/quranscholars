@@ -20,10 +20,11 @@ test("learner API whitelists fields, rechecks access after enrollment, and clear
     globalThis.localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
     ({ store, learner, payment } = await import(pathToFileURL(output)));
     const requests = [];
-    let canAccess = false, fail = false, accessReads = 0, libraryReads = 0;
+    let canAccess = false, fail = false, accessReads = 0, libraryReads = 0, analyticsReads = 0;
     globalThis.fetch = async request => {
       const path = new URL(request.url).pathname;
       requests.push(request);
+      if (path.endsWith("/analytics")) { analyticsReads++; return Response.json({ success: true, data: { summary: { totalEnrolledCourses: canAccess ? 1 : 0, completedCourses: 0, completedLessons: 0, coursesInProgress: 0 } } }); }
       if (path.endsWith("/access")) { accessReads++; return Response.json({ success: true, data: { canAccessCourse: canAccess } }); }
       if (path.endsWith("/library")) { libraryReads++; return Response.json({ success: true, data: { courses: canAccess ? [{ id: "course-1" }] : [] } }); }
       if (path.endsWith("/free")) {
@@ -37,6 +38,7 @@ test("learner API whitelists fields, rechecks access after enrollment, and clear
     await store.dispatch(payment.endpoints.getCourseAccess.initiate("course-1")).unwrap();
     await store.dispatch(payment.endpoints.getLearningLibrary.initiate()).unwrap();
     await store.dispatch(learner.endpoints.getLearnerProfile.initiate()).unwrap();
+    await store.dispatch(learner.endpoints.getLearnerAnalytics.initiate()).unwrap();
     await store.dispatch(learner.endpoints.updateLearnerProfile.initiate({ city: "Riyadh", gender: null, name: "forged", role: "admin", studentId: "other" })).unwrap();
     const patch = requests.find(request => request.method === "PATCH");
     assert.equal(patch.credentials, "include");
@@ -53,6 +55,9 @@ test("learner API whitelists fields, rechecks access after enrollment, and clear
     assert.equal(post.headers.get("x-csrf-protection"), "1");
     assert.deepEqual(await post.json(), { courseId: "course-1" });
     await Promise.all(store.dispatch(payment.util.getRunningQueriesThunk()));
+    await Promise.all(store.dispatch(learner.util.getRunningQueriesThunk()));
+    assert.equal(analyticsReads, 2, "confirmed free enrollment refreshes subscribed analytics");
+    assert.equal(learner.endpoints.getLearnerAnalytics.select()(store.getState()).data.summary.totalEnrolledCourses, 1);
     assert.equal(accessReads, 2);
     assert.equal(libraryReads, 2);
     assert.equal(payment.endpoints.getCourseAccess.select("course-1")(store.getState()).data.canAccessCourse, true);
