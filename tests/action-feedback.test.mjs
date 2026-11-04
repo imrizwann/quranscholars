@@ -51,8 +51,8 @@ test("application resubmission and checkout feedback reflect confirmed server ou
   assert.equal(calls.at(-1).type, "info");
   assert.doesNotMatch(calls.at(-1).args[0], /enrolled|confirmed|completed/i);
   action("pending", "createCourseCheckout", undefined, { api: "paymentApi" });
-  action("fulfilled", "createCourseCheckout", { state: "paid", isMockPayment: true }, { api: "paymentApi" });
-  assert.equal(calls.at(-1).args[0], "Test purchase completed");
+  action("fulfilled", "createCourseCheckout", { state: "paid" }, { api: "paymentApi" });
+  assert.equal(calls.at(-1).args[0], "Payment confirmed");
 });
 test("notification links are kind-specific local routes and never accept external URLs or malformed dates", () => {
   for (const kind of ["instructor.approved", "instructor.rejected"]) assert.equal(notificationPresentation({ kind }).to, "/instructor/application");

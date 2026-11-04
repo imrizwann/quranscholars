@@ -15,7 +15,7 @@ function LibraryCard({ course, disabled }) {
   return <article className="studio-course-card">
     <Link to={`/learn/${course.slug}`} className="studio-course-cover" aria-label={`Open ${course.title}`}>
       {image && failed !== image ? <img src={image} alt="" loading="lazy" onError={() => setFailed(image)} /> : <div className="studio-course-placeholder"><BookOpen size={42} strokeWidth={1.25} aria-hidden="true" /><span>QURANSCHOLAR</span></div>}
-      <span className="studio-course-status">{course.isMockPurchase ? "Test enrollment" : course.hidden ? "Hidden course" : course.status === "Archived" ? "Archived course" : "In your library"}</span>
+      <span className="studio-course-status">{course.hidden ? "Hidden course" : course.status === "Archived" ? "Archived course" : "In your library"}</span>
     </Link>
     <div className="studio-course-body">
       <div className="cw-row cw-between"><p className="studio-label">{course.level || "Recorded course"}</p><LibraryCourseActions course={course} disabled={disabled} /></div>

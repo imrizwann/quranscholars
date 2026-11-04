@@ -70,7 +70,7 @@ export function InstructorAnalytics({ view = "overview" }) {
           <Pagination pagination={data.pagination} page={page} onPage={setPage} loading={query.isFetching} />
         </> : <p className="analytics-empty">{page > 1 ? "No courses on this page." : "Create a course to start tracking your enrollments."}{page > 1 && <button className="cw-button" onClick={() => setPage(1)}>Back to first page</button>}</p>}
       </section>}
-      {view !== "analytics" && <section className="studio-panel analytics-revenue"><h2>Verified revenue</h2><p>Recorded payments after refunds and disputes. Test purchases and free enrollments are excluded.</p>
+      {view !== "analytics" && <section className="studio-panel analytics-revenue"><h2>Verified revenue</h2><p>Verified sales after refunds and disputes. Free enrollments are excluded.</p>
         {!data ? <AnalyticsSkeleton label="Loading verified revenue" /> : data.revenue.length ? <dl>{data.revenue.map(item => <div key={`${item.currency}-${item.currencyExponent}`}><dt>{item.currency}</dt><dd>{new Intl.NumberFormat(undefined, { style: "currency", currency: item.currency }).format(item.amountMinor / 10 ** item.currencyExponent)}</dd><p>{count(item.sales)} verified {item.sales === 1 ? "sale" : "sales"}</p></div>)}</dl> : <div className="analytics-empty"><Receipt size={22} aria-hidden="true" /><strong>No verified revenue yet</strong><p>Verified payments will appear here when learners purchase your courses.</p></div>}
         <p className="analytics-footnote">Sales totals before provider fees and payouts. Currencies are shown separately.</p>
       </section>}

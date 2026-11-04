@@ -32,6 +32,14 @@ const paymentApi = createApi({
       query: (intentId) => ({ url: `/api/payments/${encodeURIComponent(intentId)}`, timeout: 15_000 }),
       transformResponse: unwrap,
     }),
+    verifyCourseCheckout: builder.mutation({
+      query: ({ intentId, paymentId, signature }) => ({
+        url: `/api/payments/${encodeURIComponent(intentId)}/verify`, method: "POST",
+        body: { paymentId, signature }, timeout: 20_000,
+      }),
+      transformResponse: unwrap,
+      invalidatesTags: result => result?.state === "paid" ? ["CourseAccess", "LearningLibrary"] : [],
+    }),
     getCourseAccess: builder.query({
       query: (courseId) => ({ url: `/api/purchases/${encodeURIComponent(courseId)}/access`, timeout: 15_000 }),
       transformResponse: unwrap,
@@ -40,7 +48,7 @@ const paymentApi = createApi({
   }),
 });
 
-export const { useGetLearningLibraryQuery, useCreateCourseCheckoutMutation, useGetCoursePaymentStatusQuery, useLazyGetCoursePaymentStatusQuery, useGetCourseAccessQuery } = paymentApi;
+export const { useGetLearningLibraryQuery, useCreateCourseCheckoutMutation, useVerifyCourseCheckoutMutation, useGetCoursePaymentStatusQuery, useLazyGetCoursePaymentStatusQuery, useGetCourseAccessQuery } = paymentApi;
 // Compatibility for the old unused import; arguments now follow the strict contract.
 export const useCoursePaymentMutation = useCreateCourseCheckoutMutation;
 export default paymentApi;

@@ -5,6 +5,7 @@ import { writeFile, unlink } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { randomUUID } from "node:crypto";
+import process from "node:process";
 import { configureStore } from "@reduxjs/toolkit";
 
 test("payment hooks use authenticated backend contracts and clear data across accounts", async () => {
@@ -23,27 +24,32 @@ test("payment hooks use authenticated backend contracts and clear data across ac
     const requests = [];
     globalThis.fetch = async (request) => {
       requests.push(request);
-      return Response.json({ success: true, data: request.method === "POST" ? { intentId: "intent-1", state: "pending", isMockPayment: false } : { canAccessCourse: false, mockCheckoutAvailable: true } });
+      return Response.json({ success: true, data: request.method === "POST" ? { intentId: "intent-1", state: "pending" } : { canAccessCourse: false, checkoutAvailable: true } });
     };
     store = configureStore({
       reducer: { [api.reducerPath]: api.reducer, user: (state = { user: { _id: "buyer-1", role: "user" } }, action) => action.type === "user/setUser" ? { user: action.payload } : state },
       middleware: (defaults) => defaults().concat(paymentSessionMiddleware, api.middleware),
     });
     const idempotencyKey = randomUUID();
-    const checkout = await store.dispatch(api.endpoints.createCourseCheckout.initiate({ courseId: "course-1", idempotencyKey, amountMinor: 1, userId: "attacker", paymentStatus: "completed", isMockPayment: true, mockCheckoutAvailable: true })).unwrap();
+    const checkout = await store.dispatch(api.endpoints.createCourseCheckout.initiate({ courseId: "course-1", idempotencyKey, amountMinor: 1, userId: "attacker", paymentStatus: "completed", provider: "untrusted", checkoutAvailable: true })).unwrap();
     assert.equal(checkout.state, "pending");
     assert.equal(checkout.canAccessCourse, undefined);
-    assert.equal(checkout.isMockPayment, false, "payment mode comes from the server response");
+    assert.equal(checkout.provider, undefined, "the client cannot select a provider");
     assert.equal(requests[0].url, "https://api.example/api/payments/checkout");
     assert.equal(requests[0].credentials, "include");
     assert.equal(requests[0].headers.get("x-csrf-protection"), "1");
     assert.deepEqual(await requests[0].json(), { courseId: "course-1", idempotencyKey });
     await store.dispatch(api.endpoints.getCoursePaymentStatus.initiate("intent-1")).unwrap();
     const access = await store.dispatch(api.endpoints.getCourseAccess.initiate("course-1")).unwrap();
-    assert.equal(access.mockCheckoutAvailable, true);
+    assert.equal(access.checkoutAvailable, true);
     assert.equal(requests[1].url, "https://api.example/api/payments/intent-1");
     assert.equal(requests[2].url, "https://api.example/api/purchases/course-1/access");
     assert.equal(Object.keys(store.getState()[api.reducerPath].queries).length, 2);
+    await store.dispatch(api.endpoints.verifyCourseCheckout.initiate({ intentId: "intent-1", paymentId: "pay_one", signature: "a".repeat(64), orderId: "forged", state: "paid", amountMinor: 1 })).unwrap();
+    assert.equal(requests[3].url, "https://api.example/api/payments/intent-1/verify");
+    assert.equal(requests[3].credentials, "include");
+    assert.equal(requests[3].headers.get("x-csrf-protection"), "1");
+    assert.deepEqual(await requests[3].json(), { paymentId: "pay_one", signature: "a".repeat(64) });
     store.dispatch({ type: "user/setUser", payload: { _id: "buyer-2", role: "user" } });
     assert.equal(Object.keys(store.getState()[api.reducerPath].queries).length, 0);
     assert.equal(Object.keys(store.getState()[api.reducerPath].mutations).length, 0);

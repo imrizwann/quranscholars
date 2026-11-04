@@ -141,3 +141,8 @@
 .cd-enrollment-feedback a { text-decoration: underline; }
 .cd-payment-check { margin-top: 10px; }
 .cd-checkout-reference { margin-top: 12px; color: var(--muted-foreground); font-size: .7rem; overflow-wrap: anywhere; }
+.cd-checkout-summary { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--muted); font-size: .8rem; line-height: 1.6; overflow-wrap: anywhere; }
+.cd-checkout-summary > div { display: flex; align-items: center; gap: 8px; color: var(--primary); }
+.cd-checkout-summary > p { margin-top: 8px; color: var(--muted-foreground); }
+.cd-checkout-summary dl { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+.cd-checkout-summary dd { font-weight: 650; color: var(--foreground); }
