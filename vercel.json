@@ -5,7 +5,7 @@
       "source": "/api/:path*",
       "destination": "https://quranscholars-apis.vercel.app/api/:path*"
     },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!api(?:/|$)|assets(?:/|$)).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
@@ -15,6 +15,14 @@
         { "key": "CDN-Cache-Control", "value": "no-store" },
         { "key": "Vercel-CDN-Cache-Control", "value": "no-store" },
         { "key": "x-vercel-enable-rewrite-caching", "value": "0" }
+      ]
+    },
+    {
+      "source": "/((?!api(?:/|$)|assets(?:/|$)).*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" },
+        { "key": "CDN-Cache-Control", "value": "no-store" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store" }
       ]
     }
   ]

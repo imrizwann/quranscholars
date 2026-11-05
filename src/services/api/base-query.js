@@ -65,7 +65,7 @@ export function renewSession(api, extraOptions) {
 
 export async function apiBaseQuery(args, api, extraOptions) {
   const path = (typeof args === "string" ? args : args.url).replace(/^\//, "").split("?")[0];
-  if (["api/auth/login", "api/auth/logout", "api/auth/delete_profile"].includes(path)) {
+  if (["api/auth/login", "api/auth/logout", "api/auth/delete_profile", "api/auth/reset-password"].includes(path)) {
     authChange++; authChanging = true;
     try { return await authLock(() => rawBaseQuery(args, api, extraOptions)); }
     finally { authChanging = false; }

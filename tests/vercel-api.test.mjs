@@ -45,5 +45,13 @@ test("same-origin Vercel API requests preserve cookies, CSRF, paths, and playbac
     assert.equal(headers["x-vercel-enable-rewrite-caching"], "0");
     assert.match(headers["Cache-Control"], /no-store/);
     assert.equal(headers["Vercel-CDN-Cache-Control"], "no-store");
+    const fallback = config.rewrites.at(-1);
+    const spaPath = new RegExp(`^${fallback.source}$`);
+    for (const path of ["/", "/profile", "/instructor/courses/course-id", "/learn/course/lesson", "/api-help"]) assert(spaPath.test(path), path);
+    for (const path of ["/assets", "/assets/Profile-old.js", "/assets/missing.css", "/api", "/api/auth/me", "/api/learning/course/playback"]) assert.equal(spaPath.test(path), false, `Do not return HTML for ${path}`);
+    const documentHeaders = Object.fromEntries(config.headers.find(rule => rule.source === fallback.source).headers.map(({ key, value }) => [key, value]));
+    assert.equal(documentHeaders["Cache-Control"], "no-cache");
+    assert.equal(documentHeaders["CDN-Cache-Control"], "no-store");
+    assert.equal(documentHeaders["Vercel-CDN-Cache-Control"], "no-store");
   } finally { globalThis.fetch = originalFetch; globalThis.Request = OriginalRequest; await unlink(output); }
 });

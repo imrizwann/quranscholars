@@ -6,6 +6,18 @@ const userAuthApi = createApi({
   baseQuery: apiBaseQuery,
 
   endpoints: (builder) => ({
+    forgotPassword: builder.mutation({
+      query: email => ({ url: "api/auth/forgot-password", method: "POST", body: { email }, timeout: 15_000 }),
+    }),
+    resetPassword: builder.mutation({
+      query: ({ token, password }) => ({ url: "api/auth/reset-password", method: "POST", body: { token, password }, timeout: 15_000 }),
+    }),
+    requestEmailVerification: builder.mutation({
+      query: () => ({ url: "api/auth/email-verification/request", method: "POST", body: {}, timeout: 15_000 }),
+    }),
+    verifyEmail: builder.mutation({
+      query: token => ({ url: "api/auth/email-verification/confirm", method: "POST", body: { token }, timeout: 15_000 }),
+    }),
     getAccountDeletionStatus: builder.query({
       query: () => ({ url: "api/auth/account-deletion", method: "GET" }),
       keepUnusedDataFor: 0,
@@ -68,6 +80,7 @@ export const {
   useLogoutMutation,
   useDeleteProfileMutation,
   useGetAccountDeletionStatusQuery,
+  useForgotPasswordMutation, useResetPasswordMutation, useRequestEmailVerificationMutation, useVerifyEmailMutation,
 } = userAuthApi;
 
 export default userAuthApi;

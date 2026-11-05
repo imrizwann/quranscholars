@@ -92,11 +92,12 @@ export default function ProfilePage() {
           <p className="profile-section-description">Your registered account information.</p>
           <dl className="profile-details"><div><dt>Full name</dt><dd>{name}</dd></div><div><dt>Email address</dt><dd>{user?.email || "Not provided"}</dd></div><div><dt>Account type</dt><dd>{role}</dd></div></dl>
           <p className="profile-account-help">Need to correct your name or email? <Link to="/contact">Contact our team</Link>.</p>
+          <div className="profile-actions"><span className="text-sm text-muted-foreground">{user?.emailVerified ? "Email verified" : "Email not yet verified"}</span>{!user?.emailVerified && <Link className="cw-button" to="/verify-email">Verify email</Link>}</div>
         </section>
         {user?._id && <LearnerProfileForm key={user._id} />}
       </div>
       <aside className="profile-sidebar">
-        <section className="public-panel" aria-labelledby="profile-access-title"><span className="public-icon"><ShieldCheck size={20} aria-hidden="true" /></span><h2 id="profile-access-title" className="profile-card-title">Account access</h2><p>Use your registered email and password to sign in. Keep your password private.</p><div className="profile-actions"><Link to={dashboard} className="cw-button">Open dashboard</Link></div></section>
+        <section className="public-panel" aria-labelledby="profile-access-title"><span className="public-icon"><ShieldCheck size={20} aria-hidden="true" /></span><h2 id="profile-access-title" className="profile-card-title">Account access</h2><p>Use your registered email and password to sign in. Keep your password private.</p><div className="profile-actions"><Link to="/forgot-password" className="cw-button">Reset password</Link><Link to={dashboard} className="cw-button">Open dashboard</Link></div></section>
         <section className="public-panel profile-danger" aria-labelledby="profile-delete-title"><Trash2 size={20} aria-hidden="true" /><h2 id="profile-delete-title" className="profile-card-title">Delete account</h2><p>Deleting your account permanently ends your access. You will need your current password to confirm.</p>{user?.role === "instructor" && <p className="profile-account-help">Courses, including archived courses, need an instructor. Resolve course ownership with our team before deleting your account.</p>}<div className="profile-actions"><button ref={deleteButton} type="button" className="cw-button cw-danger" disabled={isUploading} onClick={() => setModalVisible(true)}>Delete account</button></div></section>
       </aside>
     </div>

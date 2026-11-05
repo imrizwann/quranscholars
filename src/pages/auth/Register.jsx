@@ -24,8 +24,8 @@ export default function Register() {
     if (!name.trim() || !email.trim() || !password) { setError("Enter your name, email and password to create an account."); return; }
     pending.current = true; setIsLoading(true); setError("");
     try {
-      await register({ name: name.trim(), email: email.trim().toLowerCase(), password }).unwrap();
-      navigate("/login", { replace: true, state: { registrationComplete: true, ...(returnTo && { from: returnTo }) } });
+      const result = await register({ name: name.trim(), email: email.trim().toLowerCase(), password }).unwrap();
+      navigate("/login", { replace: true, state: { registrationComplete: true, verificationEmailSent: result.verificationEmailSent === true, ...(returnTo && { from: returnTo }) } });
     } catch (failure) { setError(userMessage(failure, "We could not create your account. Please try again.")); }
     finally { pending.current = false; setIsLoading(false); }
   }

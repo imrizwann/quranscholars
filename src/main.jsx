@@ -10,6 +10,7 @@ import AdminRoute from "@/components/guards/AdminRoute.jsx";
 import InstructorCourseAccess from "@/features/instructor-courses/InstructorCourseAccess.jsx";
 import NotLoggedIn from "@/components/guards/NotLoggedIn.jsx";
 import CourseRouteRedirect from "@/components/navigation/CourseRouteRedirect.jsx";
+import RouteErrorPage from "@/components/feedback/RouteErrorPage.jsx";
 import BerrySandLmsDemo from "./assets/example themes/berry-sand-lms";
 const Home = lazy(() => import("@/pages/home/Home.jsx"));
 const Services = lazy(() => import("@/pages/services/Services.jsx"));
@@ -20,6 +21,9 @@ const Donate = lazy(() => import("@/pages/donate/Donate.jsx"));
 const Mission = lazy(() => import("@/pages/about/Mission.jsx"));
 const Login = lazy(() => import("@/pages/auth/Login.jsx"));
 const Register = lazy(() => import("@/pages/auth/Register.jsx"));
+const ForgotPassword = lazy(() => import("@/pages/auth/ForgotPassword.jsx"));
+const ResetPassword = lazy(() => import("@/pages/auth/ResetPassword.jsx"));
+const VerifyEmail = lazy(() => import("@/pages/auth/VerifyEmail.jsx"));
 
 const RecordedCourses = lazy(
   () => import("@/pages/recorded-courses/RecordedCourses.jsx"),
@@ -124,6 +128,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         path: "/",
@@ -320,6 +325,9 @@ const router = createBrowserRouter([
       },
 
       { path: "/privacy", element: <PrivacyPolicy /> },
+      { path: "/forgot-password", element: <ForgotPassword /> },
+      { path: "/reset-password", element: <ResetPassword /> },
+      { path: "/verify-email", element: <VerifyEmail /> },
       {
         path: "/profile",
         element: <ProtectedRoute>{<Profile />}</ProtectedRoute>,
