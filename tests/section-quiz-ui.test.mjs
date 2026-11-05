@@ -147,6 +147,63 @@ test("one-question quiz navigation preserves answers, reviews skipped questions 
   assert.deepEqual(writes[0].answers, [{ questionId: "q1", optionIndex: 0 }, { questionId: "q2", optionIndex: 1 }, { questionId: "q3", optionIndex: 0 }]);
 }));
 
+test("submitted answers and scores restore on reopen, remain read-only and restart only through an explicit retake", async () => fixture(async ({ mod, render, settle }) => {
+  const questions = [1, 2].map(number => ({ id: `q${number}`, prompt: `Saved question ${number}`, options: ["First answer", "Second answer"] }));
+  let latestAttempt = { scorePercent: 50, correctCount: 1, passed: false, submittedAt: "2026-11-05T09:30:00.000Z", attemptsRemaining: 4, answers: [{ questionId: "q1", optionIndex: 1 }, { questionId: "q2", optionIndex: 0 }] };
+  const writes = [];
+  globalThis.fetch = async request => {
+    if (request.method === "POST") {
+      const body = await request.json(); writes.push(body);
+      latestAttempt = { scorePercent: 100, correctCount: 2, passed: true, submittedAt: "2026-11-05T10:00:00.000Z", attemptsRemaining: 3, answers: body.answers };
+      return response(latestAttempt);
+    }
+    return response({ title: "Saved practice", version: "v1", passingPercent: 70, attemptsRemaining: latestAttempt.attemptsRemaining, passed: latestAttempt.passed, latestAttempt, questions });
+  };
+  function Harness() {
+    const [open, setOpen] = React.useState(true);
+    return React.createElement(React.Fragment, null, React.createElement("button", { onClick: () => setOpen(true) }, "Open saved quiz"), open && React.createElement(mod.Quiz, { courseId: "course1", sectionId: "section1", onDone: () => setOpen(false) }));
+  }
+  await render(React.createElement(Harness));
+  const submitted = () => document.querySelector('section[aria-label="Submitted answers"]');
+  await settle(() => submitted() && button("Retake quiz") && !button("Retake quiz").disabled);
+  assert.match(document.body.textContent, /50%/); assert.match(document.body.textContent, /1 of 2 correct/);
+  assert.equal(document.querySelector('input[value="1"]').checked, true);
+  assert.equal(document.querySelector("fieldset").disabled, true); assert.equal(button("Submit answers"), undefined);
+  await click(document.querySelector('input[value="0"]'));
+  assert.equal(document.querySelector('input[value="1"]').checked, true);
+  await click(button("Next")); assert.equal(document.querySelector('input[value="0"]').checked, true);
+  assert.match(document.body.textContent, /Saved question 2/);
+  await click(button("Previous")); assert.equal(document.activeElement, document.querySelector("legend"));
+  await click(button("Back to lessons")); await click(button("Open saved quiz"));
+  await settle(() => submitted() && !button("Retake quiz").disabled);
+  assert.match(document.body.textContent, /50%/); assert.equal(writes.length, 0, "viewing a submission never spends an attempt");
+  await click(button("Retake quiz"));
+  assert.equal(submitted(), null); assert.equal(document.querySelector("fieldset").disabled, false);
+  assert.equal(document.querySelector('input:checked'), null); assert.match(document.body.textContent, /Question 1 of 2/);
+  assert.equal(writes.length, 0, "retake starts an empty form but spends no attempt until submission");
+  await click(document.querySelector('input[value="0"]')); await click(document.querySelector('button[aria-label="Next question"]'));
+  await click(document.querySelector('input[value="1"]')); await click(button("Review")); await click(button("Submit answers"));
+  await settle(() => submitted() && document.body.textContent.includes("100%") && !button("Retake quiz").disabled);
+  assert.equal(writes.length, 1); assert.deepEqual(writes[0].answers, [{ questionId: "q1", optionIndex: 0 }, { questionId: "q2", optionIndex: 1 }]);
+  await click(button("Back to lessons")); await click(button("Open saved quiz"));
+  await settle(() => submitted() && document.body.textContent.includes("100%") && !button("Retake quiz").disabled);
+  assert.equal(document.querySelector('input[value="0"]').checked, true); assert.equal(writes.length, 1);
+  await click(button("Retake quiz")); assert.equal(document.querySelector("fieldset").disabled, false, "a passed quiz may be retaken while attempts remain");
+}));
+
+test("older submissions and exhausted attempts show the saved result without inventing answers or offering another attempt", async () => fixture(async ({ mod, render, settle }) => {
+  globalThis.fetch = async request => {
+    assert.equal(request.method, "GET");
+    return response({ title: "Earlier practice", version: "v1", passingPercent: 70, attemptsRemaining: 0, passed: true, latestAttempt: { scorePercent: 0, correctCount: 0, passed: false, answers: null, attemptsRemaining: 0 }, questions: [{ id: "q1", prompt: "Earlier question", options: ["First", "Second"] }] });
+  };
+  await render(React.createElement(mod.Quiz, { courseId: "course1", sectionId: "section1", onDone() {} }));
+  await settle(() => document.body.textContent.includes("earlier submission"));
+  assert.match(document.body.textContent, /0%/); assert.match(document.body.textContent, /Your passed status is kept/);
+  assert.match(document.body.textContent, /All five attempts have been used/);
+  assert.equal(document.querySelector('input[type="radio"]'), null); assert.equal(button("Retake quiz"), undefined);
+  assert.equal(button("Submit answers"), undefined);
+}));
+
 test("publishing review exposes hidden draft quizzes and saving a published quiz refreshes readiness", async () => fixture(async ({ mod, render, settle }) => {
   let published = false, readinessReads = 0;
   const writes = [];

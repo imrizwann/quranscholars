@@ -8,12 +8,13 @@ import { userMessage } from "@/lib/user-messages.js";
 export default function SectionQuizPanel({ courseId, sectionId, onDone }) {
   const query = useGetSectionQuizQuery({ courseId, sectionId }, { refetchOnMountOrArgChange: true, refetchOnFocus: true });
   if (query.error || !query.currentData) return <div className="learning-quiz"><QueryMessage query={{ error: query.error, data: query.currentData, loading: query.isFetching, refresh: query.refetch }} label="Checking section quiz access" /></div>;
-  return <QuizForm key={query.currentData.version} quiz={query.currentData} courseId={courseId} sectionId={sectionId} onDone={onDone} refreshing={query.isFetching} />;
+  return <QuizForm key={`${courseId}/${sectionId}/${query.currentData.version}`} quiz={query.currentData} courseId={courseId} sectionId={sectionId} onDone={onDone} refreshing={query.isFetching} />;
 }
 function QuizForm({ quiz, courseId, sectionId, onDone, refreshing }) {
   const [submit, sending] = useSubmitSectionQuizMutation();
   const [answers, setAnswers] = useState({});
-  const [result, setResult] = useState(null);
+  const [submitted, setSubmitted] = useState(null);
+  const [retaking, setRetaking] = useState(false);
   const [error, setError] = useState("");
   const [locked, setLocked] = useState(false);
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -26,6 +27,7 @@ function QuizForm({ quiz, courseId, sectionId, onDone, refreshing }) {
   const allAnswered = quiz.questions.length > 0 && answeredCount === quiz.questions.length;
   const blocked = locked || sending.isLoading || refreshing;
   const question = quiz.questions[questionIndex];
+  const result = submitted || (!retaking ? quiz.latestAttempt || (quiz.passed ? { passed: true, attemptsRemaining: quiz.attemptsRemaining } : null) : null);
   useEffect(() => {
     if (focusQuestion.current) { heading.current?.focus({ preventScroll: true }); focusQuestion.current = false; }
   }, [questionIndex, review]);
@@ -40,14 +42,16 @@ function QuizForm({ quiz, courseId, sectionId, onDone, refreshing }) {
   }
   async function finish(event) {
     event.preventDefault();
-    if (pending.current || !review || !allAnswered || quiz.attemptsRemaining === 0 || refreshing) return;
+    if (pending.current || result || !review || !allAnswered || quiz.attemptsRemaining === 0 || refreshing) return;
     pending.current = true; setError(""); setLocked(true);
     attempt.current ||= { idempotencyKey: crypto.randomUUID(), answers: quiz.questions.map(question => ({ questionId: question.id, optionIndex: Number(answers[question.id]) })) };
-    try { setResult(await submit({ courseId, sectionId, version: quiz.version, ...attempt.current }).unwrap()); }
+    try { setSubmitted(await submit({ courseId, sectionId, version: quiz.version, ...attempt.current }).unwrap()); setRetaking(false); }
     catch (failure) { setError(userMessage(failure)); }
     finally { pending.current = false; }
   }
-  if (result || quiz.passed) return <div className="learning-quiz learning-quiz-result" role="status">{(result?.passed ?? quiz.passed) ? <CheckCircle2 size={30} aria-hidden="true" /> : <RotateCcw size={30} aria-hidden="true" />}<h2>{(result?.passed ?? quiz.passed) ? "Section quiz passed" : "Keep practicing"}</h2>{result && <p><strong>{result.scorePercent}%</strong> · {result.correctCount} of {quiz.questions.length} correct</p>}<p>{(result?.passed ?? quiz.passed) ? "You’ve completed this section’s knowledge check." : `The pass mark is ${quiz.passingPercent}%. Revisit the lessons before trying again.`} Your section and course completion are unchanged.</p><div className="cw-row"><button type="button" className="cw-button cw-primary" onClick={onDone}>Back to lessons</button>{result && !result.passed && result.attemptsRemaining > 0 && <button type="button" className="cw-button" onClick={() => { focusQuestion.current = true; setResult(null); setAnswers({}); setLocked(false); setQuestionIndex(0); setReview(false); attempt.current = null; }}><RotateCcw size={15} aria-hidden="true" />Try again ({result.attemptsRemaining} left)</button>}</div>{result?.attemptsRemaining === 0 && !result.passed && <p>All five attempts have been used. You can continue learning or ask your instructor for guidance.</p>}</div>;
+  if (result) return <SubmittedQuiz quiz={quiz} result={result} refreshing={refreshing} onDone={onDone} onRetake={() => {
+    focusQuestion.current = true; setSubmitted(null); setRetaking(true); setAnswers({}); setError(""); setLocked(false); setQuestionIndex(0); setReview(false); attempt.current = null;
+  }} />;
   return <form className="learning-quiz" onSubmit={finish}>
     <div className="learning-quiz-heading"><ClipboardCheck size={22} aria-hidden="true" /><div><h2>{quiz.title}</h2><p>{quiz.questions.length} questions · {quiz.passingPercent}% to pass · {quiz.attemptsRemaining} attempts remaining</p></div><button type="button" className="cw-text-link learning-quiz-exit" disabled={sending.isLoading} onClick={onDone}>{attempt.current || quiz.attemptsRemaining === 0 ? "Back to lessons" : "Skip quiz"}</button></div>
     <p className="learning-quiz-note">Optional knowledge check. You can continue learning without taking or passing this quiz.</p>
@@ -58,4 +62,31 @@ function QuizForm({ quiz, courseId, sectionId, onDone, refreshing }) {
     </>}
     {error && <p className="cw-error" role="alert">{error} Retry here to check the same submission.</p>}
   </form>;
+}
+
+function SubmittedQuiz({ quiz, result, refreshing, onDone, onRetake }) {
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const heading = useRef(null);
+  const focusQuestion = useRef(false);
+  const answers = new Map(result.answers?.map(answer => [answer.questionId, answer.optionIndex]) || []);
+  const question = quiz.questions[questionIndex];
+  const remaining = Math.min(result.attemptsRemaining, quiz.attemptsRemaining);
+  function goTo(index) { focusQuestion.current = true; setQuestionIndex(index); }
+  useEffect(() => { if (focusQuestion.current) { heading.current?.focus({ preventScroll: true }); focusQuestion.current = false; } }, [questionIndex]);
+  return <div className="learning-quiz learning-quiz-result">
+    <div role="status">{result.passed ? <CheckCircle2 size={30} aria-hidden="true" /> : <RotateCcw size={30} aria-hidden="true" />}
+      <h2>{result.passed ? "Section quiz passed" : "Keep practicing"}</h2>
+      {Number.isFinite(result.scorePercent) && <p><strong>{result.scorePercent}%</strong> · {result.correctCount} of {quiz.questions.length} correct</p>}
+      <p>{result.passed ? "You’ve completed this section’s knowledge check." : `The pass mark is ${quiz.passingPercent}%. Revisit the lessons before trying again.`} Your section and course completion are unchanged.</p>
+      {!result.passed && quiz.passed && <p>A previous attempt passed. Your passed status is kept.</p>}
+      {result.submittedAt && <p>Submitted on <time dateTime={result.submittedAt}>{new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(result.submittedAt))}</time></p>}
+    </div>
+    {question && result.answers?.length > 0 ? <section aria-label="Submitted answers" className="learning-quiz-submitted">
+      <div className="learning-quiz-progress"><span>Submitted answer · Question {questionIndex + 1} of {quiz.questions.length}</span></div>
+      <fieldset className="learning-quiz-question" key={question.id} disabled><legend tabIndex={-1} ref={heading}>{question.prompt}</legend><div className="learning-quiz-options">{question.options.map((option, optionIndex) => <label key={optionIndex}><input type="radio" name={`submitted-${question.id}`} value={optionIndex} checked={answers.get(question.id) === optionIndex} readOnly /><span>{option}</span></label>)}</div></fieldset>
+      <nav className="learning-quiz-navigation" aria-label="Submitted question navigation"><button type="button" className="cw-button" disabled={questionIndex === 0} onClick={() => goTo(questionIndex - 1)}><ArrowLeft size={16} aria-hidden="true" />Previous</button><button type="button" className="cw-button" disabled={questionIndex === quiz.questions.length - 1} onClick={() => goTo(questionIndex + 1)}>Next<ArrowRight size={16} aria-hidden="true" /></button></nav>
+    </section> : <p>Answer choices aren’t available for this earlier submission. Your saved result is shown above.</p>}
+    <div className="cw-row learning-quiz-result-actions"><button type="button" className="cw-button cw-primary" onClick={onDone}>Back to lessons</button>{remaining > 0 && <button type="button" className="cw-button" disabled={refreshing} onClick={onRetake}><RotateCcw size={15} aria-hidden="true" />Retake quiz ({remaining} left)</button>}</div>
+    {remaining === 0 && <p>All five attempts have been used. You can continue learning or ask your instructor for guidance.</p>}
+  </div>;
 }
