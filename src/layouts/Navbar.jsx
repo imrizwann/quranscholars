@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { Dialog } from "@base-ui/react/dialog";
 import { Menu } from "@base-ui/react/menu";
 import { ArrowRight, BookOpen, ChevronDown, Compass, Headphones, Info, LayoutDashboard, LogOut, Mail, Menu as MenuIcon, NotebookPen, Presentation, Search, ShieldCheck, UserRound, Video, X } from "lucide-react";
-import Logo from "/images/Logo-4.svg";
+import Brand from "@/components/branding/Brand.jsx";
 import useSignOut from "@/features/auth/useSignOut.js";
 import useProfilePhoto from "@/features/profile/useProfilePhoto.js";
 import ProfileAvatar from "@/features/profile/components/ProfileAvatar.jsx";
@@ -113,7 +113,7 @@ export default function Navbar() {
   return <Dialog.Root open={mobileOpen} onOpenChange={changeMobile}>
     <header className="navbar-shell">
       <nav className="navbar-inner" aria-label="Main navigation" data-search-open={searchOpen || undefined}>
-        <Link className="navbar-logo" to="/" aria-label="QuranScholar home"><img src={Logo} alt="" width="160" height="40" /></Link>
+        <Link className="navbar-logo" to="/" aria-label="QuranScholar home"><Brand /></Link>
         <div className="navbar-primary">
           {primaryLinks.map(({ to, label }) => <NavLink key={to} to={to} className="navbar-link">{label}</NavLink>)}
           <Menu.Root open={openPopup === "more"} onOpenChange={changePopup("more")} modal={false}>

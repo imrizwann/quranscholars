@@ -1,4 +1,4 @@
-import Logo from "/images/Logo-4.svg";
+import Brand from "@/components/branding/Brand.jsx";
 import { Link } from "react-router-dom";
 import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import { contactDetails } from "@/data/contactDetails.js";
@@ -45,7 +45,7 @@ const Footer = () => {
             aria-label="QuranScholar home"
             className="flex min-w-0 flex-col items-start gap-4 no-underline sm:flex-row sm:items-center"
           >
-            <img className="h-auto w-36 shrink-0 object-contain" src={Logo} alt="" />
+            <span className="inline-flex shrink-0 items-center gap-2.5 text-lg text-foreground"><Brand /></span>
             <span className="hidden h-8 w-px bg-border sm:block" />
             <span className="max-w-sm text-sm font-medium leading-6 text-muted-foreground">
               Online Quran and Islamic learning with structured courses,

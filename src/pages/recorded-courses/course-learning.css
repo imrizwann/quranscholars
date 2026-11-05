@@ -195,6 +195,7 @@
 @media (max-width: 640px) {
   .learning-topbar { gap: 8px; }
   .learning-brand { font-size: .85rem; gap: 7px; }
+  .learning-brand .brand-icon { width: 28px; height: 28px; }
   .learning-back { font-size: .8125rem; gap: 7px; }
   .learning-topbar .workspace-account { min-width: 36px; padding: 2px; }
   .learning-main { padding-top: 20px; }

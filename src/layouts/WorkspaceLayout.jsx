@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import CollapsibleSidebar, { HamburgerIcon, SidebarToggle } from "@/components/navigation/CollapsibleSidebar.jsx";
 import WorkspaceAccountMenu from "./WorkspaceAccountMenu.jsx";
+import Brand from "@/components/branding/Brand.jsx";
 import { ArrowUpRight, BarChart3, BookOpen, ChevronRight, CircleDollarSign, ClipboardCheck, GraduationCap, LayoutDashboard, Library, MessageSquareText, Radio, Settings, UserRound, Users, X } from "lucide-react";
 import "./workspace.css";
 
@@ -45,8 +46,7 @@ function WorkspaceSidebar({ instructor, admin, onNavigate, mobile = false, colla
     <div className="workspace-sidebar">
       <div className="workspace-brand-row">
         <NavLink to="/" className="workspace-brand" onClick={onNavigate} aria-label="QuranScholar home" title={collapsed ? "QuranScholar home" : undefined}>
-          <span className="workspace-brand-icon"><BookOpen size={21} aria-hidden="true" /></span>
-          <span className="workspace-brand-copy">QuranScholar<span className="workspace-brand-caption">A journey of knowledge</span></span>
+          <Brand caption />
         </NavLink>
         {mobile && <Dialog.Close className="workspace-icon-button" aria-label="Close navigation"><X size={20} /></Dialog.Close>}
       </div>

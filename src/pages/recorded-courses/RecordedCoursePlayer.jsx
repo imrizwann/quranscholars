@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Tabs } from "@base-ui/react/tabs";
 import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, CircleHelp, Clock3, ClipboardCheck, Globe2, GraduationCap, ListVideo, LockKeyhole, NotebookPen, PanelRightClose, PanelRightOpen, Signal } from "lucide-react";
+import Brand from "@/components/branding/Brand.jsx";
 import { useGetCourseAccessQuery } from "@/services/api/user/paymentApi.js";
 import ProtectedLessonVideo from "@/features/recorded-courses/components/ProtectedLessonVideo.jsx";
 import LearningCurriculum from "@/features/recorded-courses/components/LearningCurriculum.jsx";
@@ -147,7 +148,7 @@ export default function RecordedCoursePlayer() {
   const pending = (!query.error && !course) || (course && !access.currentData && !access.error);
   return <div className="learning-room">
     <a href="#learning-main" className="workspace-skip-link">Skip to lesson</a>
-    <header className="learning-topbar"><Link to="/dashboard/learning" className="learning-back"><ArrowLeft size={17} aria-hidden="true" /><span>My learning</span></Link><Link className="learning-brand" to="/" aria-label="QuranScholar home"><BookOpen size={20} aria-hidden="true" /><span>QuranScholar</span></Link><WorkspaceAccountMenu type={user?.role === "instructor" ? "instructor" : user?.role === "admin" ? "admin" : "student"} /></header>
+    <header className="learning-topbar"><Link to="/dashboard/learning" className="learning-back"><ArrowLeft size={17} aria-hidden="true" /><span>My learning</span></Link><Link className="learning-brand" to="/" aria-label="QuranScholar home"><Brand /></Link><WorkspaceAccountMenu type={user?.role === "instructor" ? "instructor" : user?.role === "admin" ? "admin" : "student"} /></header>
     <main id="learning-main" className="learning-main" tabIndex={-1}>
       {pending ? <ClassroomSkeleton label={course ? "Checking course access" : "Loading your classroom"} /> : query.error ? <div className="learning-page-state"><QueryMessage query={{ error: query.error, refresh: query.refetch }} /><Link className="cw-button" to="/dashboard/learning">Return to My learning</Link></div> : access.error ? <div className="learning-page-state"><QueryMessage query={{ error: access.error, refresh: access.refetch }} /><Link className="cw-button" to="/dashboard/learning">Return to My learning</Link></div> : course && !allowed ? <WorkspaceEmpty icon={LockKeyhole} title="Course access required" description="Enroll in this course to watch its lessons. You can review the course outline and watch the trailer before joining." to={`/courses/${encodeURIComponent(course.slug)}`} action="View course details" /> : course && allowed ? <LearningWorkspace key={`${user?._id}/${course.id}`} course={course} userId={user?._id} lessonId={lessonId} /> : <WorkspaceEmpty title="Course not found" description="This course may have moved or is no longer available." to="/dashboard/learning" action="My learning" />}
     </main>
