@@ -38,9 +38,17 @@ const learnerApi = createApi({
       transformResponse: unwrap,
     }),
     recordLessonWatch: builder.mutation({
-      query: ({ courseId, sectionId, lessonId, watchId, sequence, position, event }) => ({ url: `/api/learner/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/lessons/${encodeURIComponent(lessonId)}/watch/heartbeat`, method: "POST", body: { watchId, sequence, position, event }, timeout: 15_000 }),
+      query: ({ courseId, sectionId, lessonId, watchId, sequence, position, event }) => ({ url: `/api/learner/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/lessons/${encodeURIComponent(lessonId)}/watch/heartbeat`, method: "POST", body: { watchId, sequence, position, event }, keepalive: true, timeout: 15_000 }),
       transformResponse: unwrap,
-      invalidatesTags: (result, _error, { courseId }) => result?.lesson.completed ? [{ type: "LearningProgress", id: courseId }, "LearnerAnalytics"] : [],
+      async onQueryStarted({ courseId, lessonId }, { dispatch, getState, queryFulfilled }) {
+        const wasComplete = learnerApi.endpoints.getCourseProgress.select(courseId)(getState()).data?.lessons.find(lesson => lesson.lessonId === lessonId)?.completed;
+        try {
+          const { data } = await queryFulfilled;
+          // Resume saves continue after completion; refresh course/analytics only
+          // when a lesson first becomes complete, rather than on every heartbeat.
+          if (data.lesson.completed && !wasComplete) dispatch(learnerApi.util.invalidateTags([{ type: "LearningProgress", id: courseId }, "LearnerAnalytics"]));
+        } catch { /* An unconfirmed save cannot change completion or analytics. */ }
+      },
     }),
     getSectionQuiz: builder.query({
       query: ({ courseId, sectionId }) => ({ url: `/api/learner/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/quiz`, timeout: 15_000 }),

@@ -4,14 +4,14 @@ import { createLearningWatch } from "../src/lib/learning-watch.js";
 const settle = () => new Promise(resolve => setTimeout(resolve, 0));
 const lesson = completed => ({ lessonId: "lesson", completed });
 
-test("watch reporting starts on play, serializes heartbeat sequences, and stops after server completion", async () => {
+test("watch reporting starts on play, serializes heartbeat sequences, and keeps resume positions active after completion", async () => {
   const starts = [], beats = [], states = [], received = [];
-  const watch = createLearningWatch({ start: async body => { starts.push(body); return { watchId: "watch", sequence: 0, lesson: lesson(false) }; }, heartbeat: async body => { beats.push(body); return { sequence: body.sequence, lesson: lesson(body.sequence === 2) }; }, onStatus: state => states.push(state), onLesson: value => received.push(value) });
+  const watch = createLearningWatch({ start: async body => { starts.push(body); return { watchId: "watch", sequence: 0, lesson: lesson(false) }; }, heartbeat: async body => { beats.push(body); return { sequence: body.sequence, lesson: lesson(body.sequence >= 2) }; }, onStatus: state => states.push(state), onLesson: value => received.push(value) });
   watch.update(5); watch.tick(); await settle(); assert.equal(starts.length, 0);
   watch.play(5); await settle(); watch.play(5); assert.equal(starts.length, 1);
   watch.update(15); watch.tick(); await settle(); watch.update(25); watch.tick(); await settle();
   watch.update(35); watch.tick(); await settle();
-  assert.deepEqual(beats.map(body => [body.sequence, body.position]), [[1, 15], [2, 25]]);
+  assert.deepEqual(beats.map(body => [body.sequence, body.position]), [[1, 15], [2, 25], [3, 35]]);
   assert.equal(received.at(-1).completed, true); assert.equal(states.at(-1), "complete"); watch.dispose();
 });
 test("seeks are sent as baseline resets after an in-flight heartbeat, without overlapping requests", async () => {
@@ -58,8 +58,19 @@ test("media updates keep reporting when background timers are throttled", async 
   const watch = createLearningWatch({ now: () => now, start: async () => ({ watchId: "watch", sequence: 0, lesson: lesson(false) }), heartbeat: async body => { beats.push(body); return { sequence: body.sequence, lesson: lesson(body.position >= 90) }; }, onStatus() {}, onLesson() {} });
   watch.play(0); await settle();
   for (let position = 1; position <= 100; position++) { now = position * 1000; watch.update(position); await settle(); }
-  assert.deepEqual(beats.map(body => body.position), [10, 20, 30, 40, 50, 60, 70, 80, 90]);
+  assert.deepEqual(beats.map(body => body.position), [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
   watch.dispose();
+});
+
+test("resuming an already-completed lesson still saves its position on pause and page exit", async () => {
+  const beats = [];
+  const watch = createLearningWatch({ start: async () => ({ watchId: "replay", sequence: 0, lesson: lesson(true) }), heartbeat: async body => { beats.push(body); return { sequence: body.sequence, lesson: lesson(true) }; }, onStatus() {}, onLesson() {} });
+  watch.play(120); await settle();
+  watch.update(130); watch.flush(); await settle();
+  watch.pause(135); await settle();
+  assert.deepEqual(beats.map(body => body.position), [130, 135]);
+  watch.tick(); await settle(); assert.equal(beats.length, 2, "a paused video does not keep polling");
+  watch.dispose(); await settle(); assert.equal(beats.at(-1).position, 135);
 });
 
 test("the final position is saved even if playback resets while a heartbeat is pending", async () => {

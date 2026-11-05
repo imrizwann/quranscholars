@@ -68,9 +68,20 @@ function LessonVideo({ target, title = "Lesson preview", poster, startTime = 0, 
   if (!source.current || denied) return <div className="cw-preview-placeholder" role={query.error ? "alert" : "status"}><LockKeyhole size={28} aria-hidden="true" /><strong>{denied ? "Lesson access required" : "Playback unavailable"}</strong><p>{query.error ? userMessage(query.error) : "Refresh to check your access to this lesson."}</p><button type="button" className="cw-button" disabled={query.isFetching} onClick={query.refetch}>{query.isFetching ? "Checking access…" : "Refresh playback"}</button></div>;
   return <div className="protected-lesson-video"><Suspense fallback={<div className="cw-preview-placeholder"><LoadingState label="Opening lesson" /></div>}><VideoPlayer src={source.current} crossOrigin="anonymous" title={title} poster={poster} className="cw-preview-player" playerRef={player} onProviderSetup={configure}
     onTimeUpdate={() => { if (player.current && !restorePending.current) { position.current.time = player.current.currentTime; onPlaybackProgress?.({ currentTime: player.current.currentTime, duration: player.current.duration }); } }}
-    onPlay={() => { position.current.playing = true; onPlaybackPlay?.({ currentTime: player.current?.currentTime || 0 }); }} onPause={() => { if (player.current?.canPlay) position.current.playing = false; onPlaybackPause?.({ currentTime: player.current?.currentTime || 0 }); }}
-    onSeeked={() => { onPlaybackSeek?.({ currentTime: player.current?.currentTime || 0 }); }}
-    onCanPlay={() => { if (player.current && restorePending.current) { restorePending.current = false; const duration = player.current.duration; const time = Number.isFinite(duration) && duration > 0 && position.current.time >= duration - 2 ? 0 : position.current.time; if (time > 0) player.current.currentTime = time; if (position.current.playing) player.current.play().catch(() => {}); } }}
+    onPlay={() => { position.current.playing = true; if (!restorePending.current) onPlaybackPlay?.({ currentTime: player.current?.currentTime || 0 }); }}
+    onPause={() => { if (player.current?.canPlay) position.current.playing = false; if (!restorePending.current) onPlaybackPause?.({ currentTime: player.current?.currentTime || 0 }); }}
+    onSeeked={() => { if (!restorePending.current) onPlaybackSeek?.({ currentTime: player.current?.currentTime || 0 }); }}
+    onCanPlay={() => {
+      if (!player.current || !restorePending.current) return;
+      const duration = player.current.duration;
+      const time = Number.isFinite(duration) && duration > 0 && position.current.time >= duration - 2 ? 0 : position.current.time;
+      position.current.time = time;
+      if (time > 0) player.current.currentTime = time;
+      restorePending.current = false;
+      // An early play request may precede media readiness. Start tracking only
+      // after restoring the account position, never from a temporary zero.
+      if (position.current.playing) { onPlaybackPlay?.({ currentTime: time }); player.current.play().catch(() => {}); }
+    }}
     onEnded={() => { position.current.time = 0; position.current.playing = false; onEnded?.({ currentTime: player.current?.duration || 0 }); }}
     onRetry={query.refetch} errorMessage="Your video could not load. Try again to refresh your playback access." /></Suspense></div>;
 }

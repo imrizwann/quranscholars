@@ -35,6 +35,16 @@ export function saveLessonStudy(userId, courseId, lessonId, patch) {
   return write(keyFor(userId, courseId, lessonId), data);
 }
 
+// Server positions are scoped to the signed-in learner and current video. Keep
+// the browser copy as a fallback when progress cannot be loaded, never as proof
+// that any part of a lesson has been watched.
+export function lessonResumePosition(userId, courseId, lessonId, learningState) {
+  const progress = learningState?.lessons?.find(lesson => lesson.lessonId === lessonId);
+  if (!progress) return readLessonStudy(userId, courseId, lessonId).position;
+  return Number.isFinite(progress.lastPosition) && progress.lastPosition >= 0
+    ? Math.min(progress.lastPosition, Number.isFinite(progress.duration) && progress.duration > 0 ? progress.duration : 86400) : 0;
+}
+
 export function orderedLearningSections(sections) {
   const ordered = items => [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   return ordered(sections).map(section => ({ ...section, lessons: ordered(section.lessons) }));

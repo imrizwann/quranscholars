@@ -23,7 +23,10 @@ function Metrics({ query, items }) {
 export function LearnerAnalytics({ detailed = false }) {
   const query = learnerApi.endpoints.getLearnerAnalytics.useQuery(undefined, options);
   const summary = query.isError ? undefined : query.currentData?.summary;
-  const completion = summary?.totalEnrolledCourses ? Math.round(summary.completedCourses / summary.totalEnrolledCourses * 100) : 0;
+  const hasLessonTotals = Number.isSafeInteger(summary?.totalLessons) && summary.totalLessons >= 0;
+  const totalLessons = hasLessonTotals ? summary.totalLessons : 0;
+  const completedLessons = Math.max(0, Math.min(summary?.completedLessons || 0, totalLessons));
+  const completion = totalLessons > 0 ? Math.round(completedLessons / totalLessons * 100) : 0;
   return <section aria-label="Your learning overview">
     {detailed && <ReportToolbar query={query} label="Your current learning activity" />}
     <Metrics query={query} items={[
@@ -33,7 +36,7 @@ export function LearnerAnalytics({ detailed = false }) {
       { key: "coursesInProgress", label: "In progress", icon: Play, note: "Started and still learning" },
     ]} />
     <QueryMessage query={queryState(query)} />
-    {detailed && summary?.totalEnrolledCourses > 0 && <section className="studio-panel analytics-learning-progress"><div><h2>Your course milestones</h2><p>{count(summary.completedCourses)} of {count(summary.totalEnrolledCourses)} enrolled courses completed. A course is complete when all its current lessons are completed.</p></div><span className="analytics-progress-value">{completion}%</span><progress max="100" value={completion} aria-label="Enrolled courses completed" /></section>}
+    {detailed && summary?.totalEnrolledCourses > 0 && (hasLessonTotals ? <section className="studio-panel analytics-learning-progress"><div><h2>Your lesson progress</h2><p>{count(completedLessons)} of {count(totalLessons)} lessons completed across your enrolled courses.{totalLessons === 0 && " Your published lessons will appear here when available."}</p></div><span className="analytics-progress-value">{completion}%</span><progress max={Math.max(1, totalLessons)} value={completedLessons} aria-label="Completed lessons across enrolled courses" aria-valuetext={`${completedLessons} of ${totalLessons} lessons completed (${completion}%)`} /></section> : <AnalyticsSkeleton label="Updating lesson progress" />)}
     {!query.isError && query.currentData?.summary.totalEnrolledCourses === 0 && <p className="analytics-empty">Your learning journey starts with your first course. <Link to="/courses" className="cw-text-link">Explore courses</Link></p>}
     {!detailed && <div className="analytics-report-links"><Link className="cw-text-link" to="/dashboard/progress">View your progress</Link></div>}
   </section>;

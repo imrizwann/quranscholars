@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { NOTE_LIMIT, lessonTime, orderedLearningSections, readLastLesson, readLessonStudy, saveLastLesson, saveLessonStudy } from "../src/features/recorded-courses/services/lessonStudyStorage.js";
+import { NOTE_LIMIT, lessonResumePosition, lessonTime, orderedLearningSections, readLastLesson, readLessonStudy, saveLastLesson, saveLessonStudy } from "../src/features/recorded-courses/services/lessonStudyStorage.js";
 
 test("lesson notes and resume positions stay scoped to account, course and lesson without persisting grants", t => {
   const previous = globalThis.localStorage;
@@ -41,6 +41,22 @@ test("corrupt and unavailable browser storage never prevents learning or claims 
   assert.deepEqual(readLessonStudy("u", "c", "l"), { notes: "", position: 0 });
   assert.equal(saveLessonStudy("u", "c", "l", { notes: "keep this draft" }), false);
   assert.equal(saveLessonStudy(null, "c", "l", { notes: "no account" }), false);
+});
+
+test("resume uses account progress on a fresh device and respects server resets instead of stale local positions", t => {
+  const previous = globalThis.localStorage;
+  const data = new Map();
+  globalThis.localStorage = { getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value) };
+  t.after(() => { globalThis.localStorage = previous; });
+  const state = position => ({ lessons: [{ lessonId: "lesson", duration: 300, lastPosition: position }] });
+  assert.equal(lessonResumePosition("learner", "course", "lesson", state(120)), 120, "resume works without any browser history");
+  saveLessonStudy("learner", "course", "lesson", { position: 180 });
+  assert.equal(lessonResumePosition("learner", "course", "lesson", state(120)), 120);
+  assert.equal(lessonResumePosition("learner", "course", "lesson", state(0)), 0, "replaced videos reset resume to zero");
+  assert.equal(lessonResumePosition("learner", "course", "lesson", state(999)), 300);
+  assert.equal(lessonResumePosition("learner", "course", "lesson", state(-10)), 0);
+  assert.equal(lessonResumePosition("learner", "course", "lesson"), 180, "local resume remains a fallback when progress cannot load");
+  assert.equal(lessonResumePosition("other", "course", "lesson"), 0);
 });
 
 test("learning order follows database order without mutating metadata; timestamps include hours", () => {

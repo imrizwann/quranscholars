@@ -29,13 +29,17 @@ test("dashboard analytics render loading, zero, verified currency totals, pagina
     store = configureStore({ reducer: Object.fromEntries(apis.map(api => [api.reducerPath, api.reducer])), middleware: defaults => defaults().concat(...apis.map(api => api.middleware)) });
     let release, fail = false, pages = [], requests = [];
     const gate = new Promise(resolve => { release = resolve; });
-    let learnerSummary = { totalEnrolledCourses: 0, completedCourses: 0, completedLessons: 0, coursesInProgress: 0 };
+    let learnerSummary = { totalEnrolledCourses: 0, completedCourses: 0, completedLessons: 0, totalLessons: 0, coursesInProgress: 0 };
     const instructor = { summary: { totalCourses: 6, publishedCourses: 4, draftCourses: 2, totalEnrollments: 12, verifiedSales: 2 }, revenue: [{ currency: "INR", currencyExponent: 2, amountMinor: 12345, sales: 1 }, { currency: "USD", currencyExponent: 2, amountMinor: 999, sales: 1 }] };
     globalThis.fetch = async request => {
       const url = new URL(request.url);
       requests.push(request);
       await gate;
       if (fail) return Response.json({ success: false, message: "Statistics are temporarily unavailable." }, { status: 503 });
+      if (url.pathname.endsWith("/watch/heartbeat")) {
+        learnerSummary = { ...learnerSummary, completedLessons: 3 };
+        return Response.json({ success: true, data: { sequence: 1, lesson: { lessonId: "lesson-1", completed: true } } });
+      }
       if (url.pathname.includes("/learner/")) return Response.json({ success: true, data: { summary: learnerSummary } });
       const page = Number(url.searchParams.get("page")); pages.push(page);
       return Response.json({ success: true, data: { ...instructor, courses: [{ _id: `course-${page}`, title: page === 1 ? "Recitation foundations" : "Advanced recitation", published: page === 1, status: page === 1 ? "Published" : "Draft", enrollments: page === 1 ? 12 : 0 }], pagination: { page, total: 6, hasNextPage: page === 1, hasPreviousPage: page > 1 } } });
@@ -60,13 +64,34 @@ test("dashboard analytics render loading, zero, verified currency totals, pagina
     await settle(() => document.body.textContent.includes("Your learning journey"));
     assert.deepEqual([...document.querySelectorAll("dd")].map(node => node.textContent), ["0", "0", "0", "0"]);
     assert.equal(requests[0].credentials, "include");
-    learnerSummary = { totalEnrolledCourses: 4, completedCourses: 1, completedLessons: 5, coursesInProgress: 2 };
+    learnerSummary = { totalEnrolledCourses: 2, completedCourses: 0, completedLessons: 2, totalLessons: 5, coursesInProgress: 2 };
     await mount(mod.LearnerAnalytics, { detailed: true });
     await act(async () => { store.dispatch(mod.learner.util.invalidateTags(["LearnerAnalytics"])); });
     await settle(() => document.querySelector("progress"));
-    assert.equal(document.querySelector("progress").value, 25);
-    assert.match(document.body.textContent, /1 of 4 enrolled courses completed/);
+    assert.equal(document.querySelector("progress").value, 2);
+    assert.equal(document.querySelector("progress").max, 5);
+    assert.match(document.body.textContent, /40%/);
+    assert.match(document.body.textContent, /2 of 5 lessons completed/);
     assert.match(document.body.textContent, /Your current learning activity/);
+    await act(async () => { await store.dispatch(mod.learner.endpoints.recordLessonWatch.initiate({ courseId: "course-1", sectionId: "section-1", lessonId: "lesson-1", watchId: randomUUID(), sequence: 1, position: 90, event: "tick" })).unwrap(); });
+    await settle(() => document.querySelector("progress")?.value === 3);
+    assert.match(document.body.textContent, /60%/);
+    await click("Refresh");
+    await settle(() => !document.querySelector("button[disabled]"));
+    assert.equal(document.querySelector("progress").value, 3);
+    learnerSummary = { ...learnerSummary, completedLessons: 5, completedCourses: 2, coursesInProgress: 0 };
+    await click("Refresh");
+    await settle(() => document.querySelector("progress")?.value === 5);
+    assert.match(document.body.textContent, /100%/);
+    learnerSummary = { ...learnerSummary, totalLessons: 0, completedLessons: 0, completedCourses: 0 };
+    await click("Refresh");
+    await settle(() => document.querySelector("progress")?.max === 1);
+    assert.equal(document.querySelector("progress").value, 0);
+    assert.doesNotMatch(document.body.textContent, /NaN|Infinity/);
+    learnerSummary = { ...learnerSummary, totalLessons: undefined };
+    await click("Refresh");
+    await settle(() => document.body.textContent.includes("Updating lesson progress"));
+    assert.equal(document.querySelector("progress"), null, "missing totals cannot fabricate zero progress during a rolling deployment");
 
     await mount(mod.InstructorAnalytics);
     await settle(() => document.body.textContent.includes("Recitation foundations"));

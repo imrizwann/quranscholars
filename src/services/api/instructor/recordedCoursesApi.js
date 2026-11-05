@@ -110,7 +110,7 @@ const instructorCoursesApi = createApi({
     }),
     saveSectionQuiz: builder.mutation({
       query: ({ courseId, sectionId, quiz }) => ({ url: `${sectionUrl({ courseId, sectionId })}/quiz`, method: "PUT", body: quiz }),
-      invalidatesTags: onSuccess(args => [{ type: "InstructorQuiz", id: `${args.courseId}/${args.sectionId}` }]),
+      invalidatesTags: onSuccess(args => [{ type: "InstructorQuiz", id: `${args.courseId}/${args.sectionId}` }, courseTag(args)]),
     }),
     getStudents: builder.query({
       query: (params) => ({ url: `${root}/students`, params }),

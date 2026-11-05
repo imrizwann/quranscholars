@@ -11,7 +11,7 @@ import SectionQuizPanel from "@/features/recorded-courses/components/SectionQuiz
 import useLessonWatch from "@/features/recorded-courses/useLessonWatch.js";
 import { useGetCourseProgressQuery } from "@/services/api/user/learnerApi.js";
 import learnerApi from "@/services/api/user/learnerApi.js";
-import { orderedLearningSections, readLastLesson, readLessonStudy, saveLastLesson, saveLessonStudy } from "@/features/recorded-courses/services/lessonStudyStorage.js";
+import { lessonResumePosition, orderedLearningSections, readLastLesson, saveLastLesson, saveLessonStudy } from "@/features/recorded-courses/services/lessonStudyStorage.js";
 import { WorkspaceEmpty } from "@/components/lms/WorkspaceUI.jsx";
 import WorkspaceAccountMenu from "@/layouts/WorkspaceAccountMenu.jsx";
 import { QueryMessage } from "@/features/instructor-courses/WorkspaceParts.jsx";
@@ -35,9 +35,18 @@ function CourseOverview({ course, lesson, section }) {
 }
 
 function LearningWorkspace({ course, userId, lessonId }) {
+  const progress = useGetCourseProgressQuery(course.id, { refetchOnMountOrArgChange: true, refetchOnFocus: true, refetchOnReconnect: true });
+  // The protected player reads its starting position when mounted. Wait for the
+  // account's progress before mounting it, so a late response cannot reset a
+  // learner who has already started watching.
+  if (!progress.currentData && !progress.error) return <ClassroomSkeleton label="Restoring your lesson and progress" />;
+  return <LearningWorkspaceBody course={course} userId={userId} lessonId={lessonId} progress={progress} />;
+}
+
+function LearningWorkspaceBody({ course, userId, lessonId, progress }) {
   const sections = useMemo(() => orderedLearningSections(course.sections), [course.sections]);
   const lessons = useMemo(() => sections.flatMap(section => section.lessons), [sections]);
-  const [lastLesson] = useState(() => readLastLesson(userId, course.id, lessons));
+  const [lastLesson] = useState(() => progress.currentData?.lastLessonId || readLastLesson(userId, course.id, lessons));
   const lesson = lessonId ? lessons.find(item => item.id === lessonId) : lessons.find(item => item.id === lastLesson) || lessons[0];
   const [contentOpen, setContentOpen] = useState(true);
   const [finished, setFinished] = useState(false);
@@ -50,10 +59,15 @@ function LearningWorkspace({ course, userId, lessonId }) {
   const section = sections.find(item => item.id === lesson?.sectionId);
   const index = lessons.findIndex(item => item.id === lesson?.id);
   const previous = lessons[index - 1], next = lessons[index + 1];
-  const startTime = readLessonStudy(userId, course.id, lesson?.id).position;
+  const startTime = lessonResumePosition(userId, course.id, lesson?.id, progress.error ? undefined : progress.currentData);
+  const resume = useRef(startTime);
+  resume.current = startTime;
   const activeLessonId = lesson?.id;
   const activeLessonTitle = lesson?.title;
-  const progress = useGetCourseProgressQuery(course.id, { refetchOnMountOrArgChange: true, refetchOnFocus: true, refetchOnReconnect: true });
+  const learningState = !progress.error ? progress.currentData : undefined;
+  const sectionProgress = learningState?.sections.find(item => item.sectionId === section?.id);
+  const quizTarget = learningState?.sections.find(item => item.sectionId === (quizSectionId || section?.id));
+  useEffect(() => { if (tab === "quiz" && !quizTarget?.quiz?.unlocked) setTab("overview"); }, [tab, quizTarget?.quiz?.unlocked]);
   const watch = useLessonWatch({ courseId: course.id, sectionId: lesson?.sectionId, lessonId: lesson?.id });
   const { update: updateWatch, pause: pauseWatch } = watch;
   useEffect(() => {
@@ -61,7 +75,7 @@ function LearningWorkspace({ course, userId, lessonId }) {
     saveLastLesson(userId, course.id, activeLessonId);
     setFinished(false);
     setTab("overview"); setQuizSectionId(null);
-    const time = readLessonStudy(userId, course.id, activeLessonId).position;
+    const time = resume.current;
     playback.current = { lessonId: activeLessonId, time, saved: time };
     if (lastViewed.current !== activeLessonId) heading.current?.focus({ preventScroll: true });
     lastViewed.current = activeLessonId;
@@ -111,13 +125,14 @@ function LearningWorkspace({ course, userId, lessonId }) {
           {next ? <Link className="cw-button cw-primary" aria-label={`Next lesson: ${next.title}`} to={`/learn/${encodeURIComponent(course.slug)}/${encodeURIComponent(next.id)}`}><span>Next<span className="learning-navigation-detail"> lesson</span></span><ArrowRight size={16} aria-hidden="true" /></Link> : <Link className="cw-button cw-primary" to="/dashboard/learning"><span><span className="learning-navigation-detail">Back to </span>My learning</span><ArrowRight size={16} aria-hidden="true" /></Link>}
         </nav>
         {finished && <div className="learning-finished" role="status"><Check size={18} aria-hidden="true" /><p>{next ? "You’ve reached the end of this lesson. Continue when you’re ready." : "You’ve reached the end of the final lesson. You can revisit any lesson to keep practicing."}</p></div>}
+        {sectionProgress?.quiz?.unlocked && <div className="learning-section-checkpoint"><ClipboardCheck size={20} aria-hidden="true" /><div><strong>Section complete</strong><p>{sectionProgress.quiz.passed ? "You’ve also passed this section’s optional quiz." : "Check your understanding with an optional quiz. Your lesson progress is complete."}</p></div><button type="button" className="cw-button" onClick={() => openQuiz(section.id)}>{sectionProgress.quiz.passed ? "Review quiz" : "Take optional quiz"}</button></div>}
         {(watch.status === "error" || progress.error) && <div className="learning-progress-error" role="alert"><p>{watch.error || "We could not load your saved progress. You can still watch this lesson."}</p><button type="button" className="cw-button" onClick={() => { watch.retry(); progress.refetch(); }}>Retry progress</button></div>}
         {watch.status === "saving" && <p className="learning-save-status" role="status">Saving lesson progress…</p>}
       </section>
-      <aside id="learning-course-content" className="learning-curriculum" aria-labelledby="learning-content-title" hidden={!contentOpen}><LearningCurriculum course={course} sections={sections} lesson={lesson} lessons={lessons} learningState={!progress.error ? progress.currentData : undefined} progressLoading={progress.isLoading} onQuiz={openQuiz} /></aside>
-      <section className="learning-details" aria-label="Lesson information and notes" ref={details} tabIndex={-1}><Tabs.Root value={tab} onValueChange={setTab}><Tabs.List className="learning-tabs" aria-label="Lesson tools"><Tabs.Tab value="overview"><BookOpen size={16} aria-hidden="true" />Overview</Tabs.Tab><Tabs.Tab value="notes"><NotebookPen size={16} aria-hidden="true" />My notes</Tabs.Tab>{quizSectionId && <Tabs.Tab value="quiz"><ClipboardCheck size={16} aria-hidden="true" />Section quiz</Tabs.Tab>}</Tabs.List><Tabs.Panel value="overview"><CourseOverview course={course} lesson={lesson} section={section} /></Tabs.Panel><Tabs.Panel value="notes" keepMounted><LessonNotes key={`${userId}/${course.id}/${lesson.id}`} userId={userId} courseId={course.id} lesson={lesson} getTime={() => playback.current.time} /></Tabs.Panel>{quizSectionId && <Tabs.Panel value="quiz"><SectionQuizPanel key={quizSectionId} courseId={course.id} sectionId={quizSectionId} onDone={() => setTab("overview")} /></Tabs.Panel>}</Tabs.Root></section>
+      <aside id="learning-course-content" className="learning-curriculum" aria-labelledby="learning-content-title" hidden={!contentOpen}><LearningCurriculum course={course} sections={sections} lesson={lesson} lessons={lessons} learningState={learningState} progressLoading={progress.isLoading} onQuiz={openQuiz} /></aside>
+      <section className="learning-details" aria-label="Lesson information and notes" ref={details} tabIndex={-1}><Tabs.Root value={tab} onValueChange={setTab}><Tabs.List className="learning-tabs" aria-label="Lesson tools"><Tabs.Tab value="overview"><BookOpen size={16} aria-hidden="true" />Overview</Tabs.Tab><Tabs.Tab value="notes"><NotebookPen size={16} aria-hidden="true" />My notes</Tabs.Tab>{quizTarget?.quiz && <Tabs.Tab value="quiz" disabled={!quizTarget.quiz.unlocked} title={quizTarget.quiz.unlocked ? "Optional knowledge check" : "Complete this section’s lessons to unlock"}><ClipboardCheck size={16} aria-hidden="true" />Quiz (optional)</Tabs.Tab>}</Tabs.List><Tabs.Panel value="overview"><CourseOverview course={course} lesson={lesson} section={section} /></Tabs.Panel><Tabs.Panel value="notes" keepMounted><LessonNotes key={`${userId}/${course.id}/${lesson.id}`} userId={userId} courseId={course.id} lesson={lesson} getTime={() => playback.current.time} /></Tabs.Panel>{quizTarget?.quiz?.unlocked && <Tabs.Panel value="quiz"><SectionQuizPanel key={quizTarget.sectionId} courseId={course.id} sectionId={quizTarget.sectionId} onDone={() => setTab("overview")} /></Tabs.Panel>}</Tabs.Root></section>
     </div>
-    <footer className="learning-footer"><p>Playback position is saved in this browser.</p><Link to="/contact"><CircleHelp size={16} aria-hidden="true" />Get help with this course</Link></footer>
+    <footer className="learning-footer"><p>Your playback position syncs with your account. Notes stay in this browser.</p><Link to="/contact"><CircleHelp size={16} aria-hidden="true" />Get help with this course</Link></footer>
   </>;
 }
 

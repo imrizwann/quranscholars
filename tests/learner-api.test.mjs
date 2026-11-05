@@ -20,12 +20,14 @@ test("learner API whitelists fields, rechecks access after enrollment, and clear
     globalThis.localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
     ({ store, learner, payment } = await import(pathToFileURL(output)));
     const requests = [];
-    let canAccess = false, fail = false, accessReads = 0, libraryReads = 0, analyticsReads = 0;
+    let canAccess = false, fail = false, accessReads = 0, libraryReads = 0, analyticsReads = 0, progressReads = 0, completed = false;
     globalThis.fetch = async request => {
       const path = new URL(request.url).pathname;
       requests.push(request);
       if (path.includes("/courses/by-slug/")) return Response.json({ success: true, data: { course: { _id: "course-1", slug: "tajweed", title: "Archived learning", status: "Archived", sections: [] }, canManage: false } });
       if (path.endsWith("/analytics")) { analyticsReads++; return Response.json({ success: true, data: { summary: { totalEnrolledCourses: canAccess ? 1 : 0, completedCourses: 0, completedLessons: 0, coursesInProgress: 0 } } }); }
+      if (path.endsWith("/progress")) { progressReads++; return Response.json({ success: true, data: { lessons: [{ lessonId: "lesson-1", completed }] } }); }
+      if (path.endsWith("/watch/heartbeat")) { completed = true; return Response.json({ success: true, data: { sequence: 1, lesson: { lessonId: "lesson-1", completed: true } } }); }
       if (path.endsWith("/access")) { accessReads++; return Response.json({ success: true, data: { canAccessCourse: canAccess } }); }
       if (path.endsWith("/library")) { libraryReads++; return Response.json({ success: true, data: { courses: canAccess ? [{ id: "course-1" }] : [] } }); }
       if (path.endsWith("/free")) {
@@ -66,6 +68,19 @@ test("learner API whitelists fields, rechecks access after enrollment, and clear
     assert.equal(accessReads, 2);
     assert.equal(libraryReads, 2);
     assert.equal(payment.endpoints.getCourseAccess.select("course-1")(store.getState()).data.canAccessCourse, true);
+    await store.dispatch(learner.endpoints.getCourseProgress.initiate("course-1")).unwrap();
+    const heartbeat = { courseId: "course-1", sectionId: "section-1", lessonId: "lesson-1", watchId: randomUUID(), sequence: 1, position: 90, event: "tick" };
+    await store.dispatch(learner.endpoints.recordLessonWatch.initiate(heartbeat)).unwrap();
+    await Promise.all(store.dispatch(learner.util.getRunningQueriesThunk()));
+    assert.equal(progressReads, 2); assert.equal(analyticsReads, 3);
+    await store.dispatch(learner.endpoints.recordLessonWatch.initiate({ ...heartbeat, sequence: 2, position: 95 })).unwrap();
+    await Promise.all(store.dispatch(learner.util.getRunningQueriesThunk()));
+    assert.equal(progressReads, 2, "post-completion resume saves must not reload the course every ten seconds");
+    assert.equal(analyticsReads, 3);
+    const resumeWrite = requests.filter(request => request.url.endsWith("/watch/heartbeat")).at(-1);
+    assert.equal(resumeWrite.keepalive, true);
+    assert.equal(resumeWrite.credentials, "include");
+    assert.equal(resumeWrite.headers.get("x-csrf-protection"), "1");
     store.dispatch({ type: "user/setUser", payload: { _id: "buyer-2", role: "user" } });
     for (const api of [learner, payment]) {
       assert.deepEqual(store.getState()[api.reducerPath].queries, {});
