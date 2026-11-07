@@ -68,7 +68,7 @@ export default function CourseThumbnailEditor({ course, disabled, onBusy }) {
         <div className="cw-row cw-thumbnail-actions">
           <button type="button" className="cw-button" disabled={locked} onClick={() => input.current?.click()}><Image size={16} aria-hidden="true" />{file ? "Choose another" : "Choose image"}</button>
           {file && <>
-            <AsyncButton className="cw-button cw-primary" loading={result.isLoading} loadingLabel="Uploading cover" disabled={disabled || failed === image} onClick={save}><Upload size={16} aria-hidden="true" />{hasCover ? "Replace cover" : "Upload cover"}</AsyncButton>
+            <AsyncButton className="cw-button cw-secondary" loading={result.isLoading} loadingLabel="Uploading cover" disabled={disabled || failed === image} onClick={save}><Upload size={16} aria-hidden="true" />{hasCover ? "Replace cover" : "Upload cover"}</AsyncButton>
             <button type="button" className="cw-button" disabled={locked} onClick={clearSelection}><X size={16} aria-hidden="true" />Cancel</button>
           </>}
         </div>

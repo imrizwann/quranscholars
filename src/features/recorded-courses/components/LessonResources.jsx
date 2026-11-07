@@ -59,7 +59,7 @@ export default function LessonResources({ target, manage = false, active = true,
         setFile(selected);
       }} /></label><p id={`${id}-help`} className="cw-field-hint">PDF files up to 3 MB. Up to five resources per lesson. Downloads require course access.</p>
       {file && <label htmlFor={`${id}-name`}>Resource title (optional)<input id={`${id}-name`} name="title" value={title} onChange={event => setTitle(event.target.value)} maxLength={150} placeholder={file.name.replace(/\.pdf$/i, "")} disabled={blocked} /></label>}
-      <AsyncButton type="submit" className="cw-button" loading={uploading.isLoading} loadingLabel="Uploading PDF" disabled={blocked || !file}><Upload size={16} aria-hidden="true" />Upload PDF</AsyncButton>
+      <AsyncButton type="submit" className="cw-button cw-secondary" loading={uploading.isLoading} loadingLabel="Uploading PDF" disabled={blocked || !file}><Upload size={16} aria-hidden="true" />Upload PDF</AsyncButton>
     </form>)}
     <ConfirmationModal open={Boolean(confirmation)} title="Remove lesson resource?" description={`Remove “${confirmation?.title || "this PDF"}” from the lesson? Enrolled learners will lose access to this resource.`} danger confirmLabel="Remove resource" busy={removing.isLoading} busyLabel="Removing resource" onCancel={() => setConfirmation(null)} onConfirm={async () => {
       if (pending.current || !confirmation || blocked) return;

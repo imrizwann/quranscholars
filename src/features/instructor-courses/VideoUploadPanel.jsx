@@ -238,7 +238,7 @@ export default function VideoUploadPanel({
           <div className="cw-row">
             {((!serverBusy && file) || action === "upload") && (
               <AsyncButton
-                className="cw-button cw-primary"
+                className="cw-button cw-secondary"
                 loading={action === "upload"}
                 loadingLabel={phase}
                 disabled={locked || !file}

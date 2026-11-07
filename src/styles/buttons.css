@@ -35,6 +35,16 @@
   background: color-mix(in srgb, var(--primary) 88%, var(--foreground));
   color: var(--primary-foreground);
 }
+.cw-secondary {
+  background: var(--secondary);
+  border-color: var(--secondary);
+  color: var(--secondary-foreground);
+}
+.cw-secondary:hover:not(:disabled) {
+  background: var(--secondary-hover);
+  border-color: var(--secondary-hover);
+  color: var(--secondary-foreground);
+}
 .cw-danger {
   color: var(--destructive);
   border-color: color-mix(in srgb, var(--destructive) 25%, var(--border));

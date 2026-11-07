@@ -15,8 +15,10 @@
   --primary: #0f766e;
   --primary-hover: #115e59;
   --primary-foreground: #ffffff;
-  --secondary: #f1f4f2;
-  --secondary-foreground: #25312c;
+  --secondary: #f4c95d;
+  --secondary-hover: #ffd978;
+  --secondary-foreground: #102f2a;
+  --secondary-tint: #fff7e1;
   --muted: #f5f7f6;
   --muted-foreground: #68726d;
   --accent: #ecf8f5;
@@ -64,9 +66,10 @@
   --primary-foreground: #2b1013;
   --primary-tint: #3a2027;
 
-  --secondary: #d89aa3;
-  --secondary-foreground: #2b1013;
-  --secondary-tint: #2e1e22;
+  --secondary: #f4c95d;
+  --secondary-hover: #ffd978;
+  --secondary-foreground: #102f2a;
+  --secondary-tint: #362d16;
 
   --accent: #e8bc64;
   --accent-hover: rgb(239, 201, 125);
@@ -124,6 +127,7 @@
   /* Secondary */
 
   --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary-tint: var(--secondary-tint);
 

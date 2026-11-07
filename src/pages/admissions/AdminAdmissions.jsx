@@ -202,7 +202,7 @@ const AdminAdmissions = () => {
         <section className="relative mt-5 overflow-hidden rounded-lg border border-border bg-surface">
           <div className="admissions-results">
             <table className="admissions-table w-full border-collapse text-left text-sm" role="table" aria-label="Student admissions">
-              <thead className="border-b border-border bg-secondary">
+              <thead className="border-b border-border bg-muted">
                 <tr>
                   <th className="px-5 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">
                     Student
@@ -338,7 +338,7 @@ const AdminAdmissions = () => {
               <ChevronLeft className="size-4" />
               Prev
             </button>
-            <span className="grid h-10 min-w-28 place-items-center rounded-lg bg-secondary px-3 text-sm font-bold text-foreground">
+            <span className="grid h-10 min-w-28 place-items-center rounded-lg bg-muted px-3 text-sm font-bold text-foreground">
               {pagination.page || 1} / {pagination.totalPages || 1}
             </span>
             <button

@@ -141,7 +141,7 @@ const Home = () => {
             >
               <Link
                 to="/courses"
-                className="group inline-flex min-h-12 items-center justify-center gap-2.5 rounded-lg bg-[#f4c95d] px-6 text-sm font-black text-[#102f2a] no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-[#ffd978] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f4c95d]"
+                className="group inline-flex min-h-12 items-center justify-center gap-2.5 rounded-lg bg-secondary px-6 text-sm font-black text-secondary-foreground no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-secondary-hover focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-secondary"
               >
                 Explore courses
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
