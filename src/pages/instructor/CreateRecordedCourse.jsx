@@ -20,6 +20,8 @@ export default function CreateRecordedCourse() {
   const [error, setError] = useState("");
   const [learningDetails, setLearningDetails] = useState({ outcomes: "", requirements: "", audience: "" });
   const [fieldErrors, setFieldErrors] = useState({});
+  const [subtitle, setSubtitle] = useState("");
+  const [description, setDescription] = useState("");
   const [createCourse, { isLoading: busy }] = useCreateCourseMutation();
   const saving = useRef(false);
   const categoryOptions = (categories.data?.items || []).map((item) => ({ value: item._id, label: item.name }));
@@ -39,7 +41,7 @@ export default function CreateRecordedCourse() {
     saving.current = true; setError("");
     try {
       const data = await createCourse({
-        title: form.get("title").trim(), description: form.get("description").trim(), category: category._id,
+        title: form.get("title").trim(), shortDescription: subtitle.trim(), description: description.trim(), category: category._id,
         language: form.get("language").trim(), level: form.get("level"), price: coursePrice(form.get("price"), form.get("salePrice")), tags: [], ...lists,
       }).unwrap();
       navigate(`/instructor/courses/${data.courseId}`, { replace: true, state: { startWithCurriculum: true } });
@@ -54,7 +56,8 @@ export default function CreateRecordedCourse() {
         <div className="cw-card-heading"><span className="cw-heading-icon"><FileText size={21} aria-hidden="true" /></span><div><h2>Course details</h2><p className="cw-muted">Help learners understand what your course offers.</p></div></div>
         <div className="cw-stack">
           <label>Course title<input name="title" placeholder="e.g. Tajweed Foundations" required minLength={3} maxLength={150} disabled={busy} /></label>
-          <label>Description<textarea name="description" placeholder="What will learners study, and who is this course for?" required minLength={30} maxLength={300} rows={4} disabled={busy} /><span className="cw-field-hint">30 to 300 characters. Keep it clear and focused.</span></label>
+          <label>Subtitle (optional)<input name="shortDescription" value={subtitle} onChange={event => setSubtitle(event.target.value)} placeholder="e.g. Build confidence in recitation with guided Tajweed practice" maxLength={200} aria-describedby="create-course-subtitle-help" disabled={busy} /><span id="create-course-subtitle-help" className="cw-field-hint">Summarize what learners will gain. {subtitle.length}/200 characters.</span></label>
+          <label>Description<textarea name="description" value={description} onChange={event => setDescription(event.target.value)} placeholder="Introduce your course, explain your approach, and describe what learners can expect." required minLength={30} maxLength={10000} rows={6} aria-describedby="create-course-description-help" disabled={busy} /><span id="create-course-description-help" className="cw-field-hint">Use paragraphs for a clear course introduction. At least 30 characters. {description.length.toLocaleString("en")}/10,000 characters.</span></label>
           <div className="cw-form-grid">
             <div><SelectField label="Category" name="category" value={category?._id || null} options={categoryOptions} placeholder="Choose a category" loading={categories.loading} disabled={busy || Boolean(categories.error)} onChange={(value) => setCategory(categories.data?.items.find((item) => item._id === value) || (category?._id === value ? category : null))} required />
               {categories.error && <QueryMessage query={categories} compact />}

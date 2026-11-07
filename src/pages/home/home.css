@@ -3,15 +3,15 @@
 .home-start-panel { align-self: center; min-width: 0; padding: 24px; border: 1px solid #ffffff2e; border-radius: 12px; background: #082f2be8; }
 .home-start-panel .public-eyebrow { color: #9ed6c8; }
 .home-start-panel h2 { margin-top: 10px; font-size: 1.1rem; font-weight: 650; line-height: 1.5; }
-.home-start-panel > p:not(.public-eyebrow) { margin-top: 8px; font-size: .85rem; line-height: 1.75; color: #ffffffbf; }
+.home-start-panel > p:not(.public-eyebrow) { margin-top: 8px; font-size: var(--font-size-body); line-height: 1.75; color: #ffffffbf; }
 .home-start-links { display: grid; gap: 10px; margin-top: 20px; }
 .home-start-links a { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 14px 12px; border: 1px solid #ffffff26; border-radius: 7px; text-decoration: none; transition: background 200ms var(--ease-out-ui), border-color 200ms var(--ease-out-ui); }
 .home-start-links a:hover { background: #ffffff0d; border-color: #ffffff66; }
 .home-start-links a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 .home-start-icon { display: grid; place-items: center; width: 36px; height: 40px; flex-shrink: 0; color: #f4c95d; }
 .home-start-links a > span:nth-child(2) { flex: 1; min-width: 0; }
-.home-start-links strong { display: block; font-size: .85rem; font-weight: 600; }
-.home-start-links small { display: block; margin-top: 3px; font-size: .75rem; line-height: 1.6; color: #ffffffbf; }
+.home-start-links strong { display: block; font-size: var(--font-size-body); font-weight: 600; }
+.home-start-links small { display: block; margin-top: 3px; font-size: var(--font-size-label); line-height: 1.6; color: #ffffffbf; }
 .home-start-links a > svg { flex-shrink: 0; color: #9ed6c8; }
 .home-hero-actions a { min-height: 44px; padding: 10px 18px; border-radius: 7px; }
 .home-mobile-instructor-link { display: none; }
@@ -22,24 +22,24 @@
 .home-course-state { grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: 16px; padding: 24px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--foreground); }
 .home-course-state > svg { flex-shrink: 0; color: var(--primary); }
 .home-course-state > div { flex: 1 1 240px; min-width: 0; }
-.home-course-state h3 { font-size: .9rem; font-weight: 600; }
-.home-course-state p { margin-top: 4px; color: var(--muted-foreground); font-size: .85rem; line-height: 1.75; }
+.home-course-state h3 { font-size: var(--font-size-body); font-weight: 600; }
+.home-course-state p { margin-top: 4px; color: var(--muted-foreground); font-size: var(--font-size-body); line-height: 1.75; }
 .home-course-state .cw-button { min-height: 44px; }
 .home-course-spotlight { min-width: 0; overflow: hidden; border: 1px solid #ffffff33; border-radius: 12px; background: var(--surface); color: var(--foreground); }
 .home-spotlight-copy { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; padding: 20px; }
 .home-spotlight-copy > div { flex: 1 1 200px; min-width: 0; }
-.home-spotlight-copy p { font-size: .65rem; font-weight: 600; letter-spacing: 1.3px; text-transform: uppercase; color: var(--primary); }
+.home-spotlight-copy p { font-size: var(--font-size-caption); font-weight: 600; letter-spacing: 1.3px; text-transform: uppercase; color: var(--primary); }
 .home-spotlight-copy h3 { margin-top: 8px; font-size: 1.1rem; font-weight: 650; line-height: 1.4; overflow-wrap: anywhere; }
-.home-spotlight-copy span { display: block; margin-top: 6px; font-size: .8rem; color: var(--muted-foreground); }
+.home-spotlight-copy span { display: block; margin-top: 6px; font-size: var(--font-size-label); color: var(--muted-foreground); }
 .home-spotlight-copy .cw-button, .home-spotlight-empty .cw-button { min-height: 44px; }
 .home-spotlight-empty { display: flex; flex-direction: column; align-items: start; gap: 16px; padding: 28px; }
 .home-spotlight-empty > svg { color: var(--primary); }
 .home-spotlight-empty h3 { font-size: 1.1rem; font-weight: 650; }
-.home-spotlight-empty p { font-size: .85rem; line-height: 1.75; color: var(--muted-foreground); }
+.home-spotlight-empty p { font-size: var(--font-size-body); line-height: 1.75; color: var(--muted-foreground); }
 .home-testimonials figure { min-height: 0; }
 .home-testimonials blockquote { margin-top: 20px; }
 .home-faq-trigger:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; border-radius: 7px; }
 .home-faq-panel { transition-timing-function: var(--ease-out-ui); }
-@media (max-width: 1023px) { .home-start-panel { display: none; } .home-hero-layout { padding-bottom: 40px; } .home-hero-actions .home-mobile-instructor-link { display: inline-flex; align-items: center; gap: 8px; padding-inline: 0; color: #d6efe8; font-size: .8rem; font-weight: 600; text-decoration: none; } .home-mobile-instructor-link:focus-visible { outline: 2px solid #fff; outline-offset: 3px; } .home-mobile-instructor-link:hover { text-decoration: underline; text-underline-offset: 4px; } }
-@media (max-width: 600px) { .home-hero-highlights > div { padding: 14px 10px; } .home-hero-highlights > div > p:first-child { font-size: 1.1rem; } .home-hero-highlights > div > p + p { font-size: .65rem; line-height: 1.6; letter-spacing: .5px; } }
+@media (max-width: 1023px) { .home-start-panel { display: none; } .home-hero-layout { padding-bottom: 40px; } .home-hero-actions .home-mobile-instructor-link { display: inline-flex; align-items: center; gap: 8px; padding-inline: 0; color: #d6efe8; font-size: var(--font-size-label); font-weight: 600; text-decoration: none; } .home-mobile-instructor-link:focus-visible { outline: 2px solid #fff; outline-offset: 3px; } .home-mobile-instructor-link:hover { text-decoration: underline; text-underline-offset: 4px; } }
+@media (max-width: 600px) { .home-hero-highlights > div { padding: 14px 10px; } .home-hero-highlights > div > p:first-child { font-size: 1.1rem; } .home-hero-highlights > div > p + p { font-size: var(--font-size-caption); line-height: 1.6; letter-spacing: .5px; } }
 @media (prefers-reduced-motion: reduce) { .home-start-links a, .home-faq-panel, .home-faq-trigger svg, .home-page img { transition: none; } .home-page a:hover, .home-page img:hover { transform: none; } }

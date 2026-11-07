@@ -79,7 +79,13 @@ test("dashboard analytics render loading, zero, verified currency totals, pagina
     await click("Refresh");
     await settle(() => !document.querySelector("button[disabled]"));
     assert.equal(document.querySelector("progress").value, 3);
-    learnerSummary = { ...learnerSummary, completedLessons: 5, completedCourses: 2, coursesInProgress: 0 };
+    learnerSummary = { ...learnerSummary, totalLessons: 200, completedLessons: 199 };
+    await click("Refresh");
+    await settle(() => document.querySelector("progress")?.value === 199);
+    assert.match(document.body.textContent, /99%/);
+    assert.doesNotMatch(document.querySelector(".analytics-learning-progress").textContent, /100%/);
+    assert.match(document.body.textContent, /Quizzes are optional/);
+    learnerSummary = { ...learnerSummary, totalLessons: 5, completedLessons: 5, completedCourses: 2, coursesInProgress: 0 };
     await click("Refresh");
     await settle(() => document.querySelector("progress")?.value === 5);
     assert.match(document.body.textContent, /100%/);

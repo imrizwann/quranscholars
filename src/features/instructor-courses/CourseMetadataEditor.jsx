@@ -44,7 +44,8 @@ export default function CourseMetadataEditor({ course, disabled, onBusy, onCance
     const { lists, errors } = parseCourseMetadataLists(values);
     Object.assign(next, lists);
     if (next.title.length < 3) errors.title = "Enter a title with at least 3 characters.";
-    if (next.description.length < 30) errors.description = "Enter a description with at least 30 characters.";
+    if (next.shortDescription.length > 200 && next.shortDescription !== initial.shortDescription) errors.shortDescription = "Keep your course subtitle within 200 characters.";
+    if (next.description.length < 30 || next.description.length > 10000) errors.description = "Enter a description between 30 and 10,000 characters.";
     if (next.language.length < 2) errors.language = "Enter a language with at least 2 characters.";
     if (!next.category) errors.category = "Choose a category.";
     setFieldErrors(errors); setError("");
@@ -62,8 +63,8 @@ export default function CourseMetadataEditor({ course, disabled, onBusy, onCance
   }
   return <form className="cw-stack" onSubmit={submit} aria-label="Edit course details">
     <label>Course title<input {...inputProps("title")} required minLength={3} maxLength={150} autoFocus />{feedback("title")}</label>
-    <label>Short description<textarea {...inputProps("shortDescription")} maxLength={300} rows={2} /><span className="cw-field-hint">Optional, up to 300 characters.</span>{feedback("shortDescription")}</label>
-    <label>Description<textarea {...inputProps("description")} required minLength={30} maxLength={300} rows={4} /><span className="cw-field-hint">30 to 300 characters.</span>{feedback("description")}</label>
+    <label>Subtitle (optional)<input {...inputProps("shortDescription")} maxLength={200} placeholder="Summarize what learners will gain" aria-describedby={["metadata-subtitle-help", fieldErrors.shortDescription && "metadata-shortDescription-error"].filter(Boolean).join(" ")} /><span id="metadata-subtitle-help" className="cw-field-hint">Shown below the course title and on course cards. {values.shortDescription.length}/200 characters.</span>{feedback("shortDescription")}</label>
+    <label>Description<textarea {...inputProps("description")} required minLength={30} maxLength={10000} rows={6} aria-describedby={["metadata-description-help", fieldErrors.description && "metadata-description-error"].filter(Boolean).join(" ")} /><span id="metadata-description-help" className="cw-field-hint">Use paragraphs for a clear course introduction. At least 30 characters. {values.description.length.toLocaleString("en")}/10,000 characters.</span>{feedback("description")}</label>
     <div className="cw-form-grid">
       <div><SelectField label="Category" name="category" value={values.category || null} options={options} required disabled={busy || Boolean(categories.error)} loading={categories.loading} error={fieldErrors.category} onChange={(value) => { change("category", value); setCategory(categories.data?.items.find((item) => item._id === value) || category); }} />
         {categories.error && <QueryMessage query={categories} compact />}

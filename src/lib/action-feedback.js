@@ -3,6 +3,8 @@ import { enrollmentFailureMessage } from "../features/payments/enrollment-feedba
 
 const feedback = (pending, title, description) => ({ pending, success: () => ({ title, description, type: "success" }) });
 const studio = {
+  uploadLessonResource: feedback("Uploading lesson resource…", "Lesson resource added"),
+  removeLessonResource: feedback("Removing lesson resource…", "Lesson resource removed"),
   updateAvailability: feedback("Updating course availability…", "Course availability updated", "Existing learners keep their access and progress."),
   createCourse: feedback("Creating course…", "Course created", "Your draft is ready. Add sections, lessons, and videos in Course Studio."),
   createSection: feedback("Adding section…", "Section added", "You can now add lessons to this section."),

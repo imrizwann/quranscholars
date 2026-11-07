@@ -5,7 +5,6 @@ import {
     Layers3,
     MessageCircleMore,
     MonitorPlay,
-    Radio,
     Video,
 } from "lucide-react";
 import MuslimMan from "@/assets/images/muslim.png";
@@ -47,17 +46,17 @@ const learningFormats = [
     {
         icon: MonitorPlay,
         title: "On-demand courses",
-        text: "Professionally produced lessons with chapters, resources, and saved progress.",
+        text: "Study structured video lessons and return to your saved playback position.",
     },
     {
-        icon: Radio,
-        title: "Live scholar-led classes",
-        text: "Learn in real time, ask questions, and receive personal guidance.",
+        icon: BookOpen,
+        title: "A clear learning path",
+        text: "Follow course sections and lessons, with optional quizzes to check your understanding.",
     },
     {
         icon: Layers3,
-        title: "Blended learning paths",
-        text: "Combine self-paced study with live feedback for deeper understanding.",
+        title: "Progress across devices",
+        text: "Continue your lessons from your phone, tablet, or computer with the same account.",
     },
 ];
 
@@ -110,7 +109,7 @@ const platformFeatures = [
     {
         icon: MessageCircleMore,
         title: "Guidance when self-study is not enough",
-        text: "Move from self-paced learning into live classes and scholar support when you need it.",
+        text: "Contact our team for help choosing a course or accessing your lessons.",
     },
 ];
 
@@ -158,9 +157,9 @@ const testimonials = [
 
 const faqs = [
     {
-        question: "Are courses live, self-paced, or both?",
+        question: "How do the courses work?",
         answer:
-            "Both. You can study professionally produced self-paced courses and join live scholar-led classes. Blended pathways bring the two formats together.",
+            "Courses contain recorded video lessons organised into sections. Enroll in a course, learn at your own pace, and return to your saved progress whenever you need.",
     },
     {
         question: "Do I need an Arabic or Islamic studies background?",
@@ -178,9 +177,9 @@ const faqs = [
             "Self-paced courses are organised by sections and lessons, allowing you to resume learning and keep track of completed material.",
     },
     {
-        question: "Can I choose a male or female instructor?",
+        question: "Can I see who teaches a course?",
         answer:
-            "Live learning options include qualified male and female instructors, subject to the chosen programme and teacher availability.",
+            "Yes. Each course identifies its instructor. Read the course outline and instructor profile, and watch the trailer when available before enrolling.",
     },
 ];
 

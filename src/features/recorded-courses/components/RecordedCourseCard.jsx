@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, BookOpen, Clock3, Users } from "lucide-react";
 import CourseCardMedia from "./CourseCardMedia.jsx";
 import CoursePrice from "@/features/recorded-courses/components/CoursePrice.jsx";
-import CourseRating from "@/features/recorded-courses/components/CourseRating.jsx";
+// import CourseRating from "@/features/recorded-courses/components/CourseRating.jsx";
 import InstructorByline from "@/features/profile/components/InstructorByline.jsx";
 
 const compactNumber = new Intl.NumberFormat("en-IN", {
@@ -22,7 +22,7 @@ const RecordedCourseCard = ({ course }) => {
 
     <div className="flex flex-1 flex-col p-5">
       <div className="flex items-start justify-between gap-3">
-        <p className="min-w-0 break-words text-[0.68rem] font-black uppercase tracking-[0.12em] text-primary">
+        <p className="min-w-0 break-words text-xs font-black uppercase tracking-[0.12em] text-primary">
           {course.category}
         </p>
         <span className="shrink-0 rounded-md bg-muted px-2 py-1 text-xs font-semibold text-muted-foreground">{course.level}</span>
@@ -39,13 +39,13 @@ const RecordedCourseCard = ({ course }) => {
         {course.shortDescription}
       </p>}
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-        {course.totalReviews > 0 && Number.isFinite(course.rating) ? <CourseRating rating={course.rating} reviews={course.totalReviews} /> : <span className="text-xs text-muted-foreground">Not rated yet</span>}
+      {course.totalStudents > 0 && <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+        {/* Ratings stay hidden until the review workflow is released. */}
         {course.totalStudents > 0 && <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
           <Users className="size-3.5 text-primary" aria-hidden="true" />
           {compactNumber.format(course.totalStudents)} learners
         </span>}
-      </div>
+      </div>}
 
       <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border pt-4 text-xs font-semibold text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">

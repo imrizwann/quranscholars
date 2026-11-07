@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Dialog } from "@base-ui/react/dialog";
 import { Menu } from "@base-ui/react/menu";
-import { ArrowRight, BookOpen, ChevronDown, Compass, Headphones, Info, LayoutDashboard, LogOut, Mail, Menu as MenuIcon, NotebookPen, Presentation, Search, ShieldCheck, UserRound, Video, X } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronDown, Compass, Info, LayoutDashboard, LogOut, Mail, Menu as MenuIcon, Presentation, Search, ShieldCheck, UserRound, X } from "lucide-react";
 import Brand from "@/components/branding/Brand.jsx";
 import useSignOut from "@/features/auth/useSignOut.js";
 import useProfilePhoto from "@/features/profile/useProfilePhoto.js";
@@ -13,11 +13,12 @@ import "./navbar.css";
 
 const primaryLinks = [
   { to: "/courses", label: "Courses", icon: BookOpen },
-  { to: "/live-classes", label: "Live classes", icon: Video },
+  // MVP: restore live classes only when scheduling and classroom access are ready.
+  // { to: "/live-classes", label: "Live classes", icon: Video },
 ];
 const moreLinks = [
-  { to: "/blogs", label: "Resources", icon: NotebookPen },
-  { to: "/services", label: "Learner services", icon: Headphones },
+  // { to: "/blogs", label: "Resources", icon: NotebookPen },
+  // { to: "/services", label: "Learner services", icon: Headphones },
   { to: "/about", label: "About QuranScholar", icon: Info },
   { to: "/mission", label: "Our mission", icon: Compass },
   { to: "/contact", label: "Contact", icon: Mail },

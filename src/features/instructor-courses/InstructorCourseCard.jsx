@@ -39,28 +39,30 @@ export default function InstructorCourseCard({ course }) {
         </span>
       </Link>
       <div className="studio-course-body">
-        <p className="studio-label">
-          {course.category?.name || "Recorded course"}
-          {course.level ? ` · ${course.level}` : ""}
-        </p>
-        <h2>
-          <Link to={to}>{course.title}</Link>
-        </h2>
-        <p className="studio-course-description">
-          {course.shortDescription ||
-            "Build your curriculum and prepare your lessons for learners."}
-        </p>
-        <div className="studio-course-meta">
-          <span>
-            <Layers size={15} aria-hidden="true" />
-            {course.stats?.totalSections ?? 0} sections
-          </span>
-          <span>
-            <PlayCircle size={15} aria-hidden="true" />
-            {course.stats?.totalLessons ?? 0} lessons
-          </span>
+        <div className="studio-course-content">
+          <p className="studio-label">
+            {course.category?.name || "Recorded course"}
+            {course.level ? ` · ${course.level}` : ""}
+          </p>
+          <h2>
+            <Link to={to}>{course.title}</Link>
+          </h2>
+          <p className="studio-course-description">
+            {course.shortDescription ||
+              "Build your curriculum and prepare your lessons for learners."}
+          </p>
+          <div className="studio-course-meta">
+            <span>
+              <Layers size={15} aria-hidden="true" />
+              {course.stats?.totalSections ?? 0} sections
+            </span>
+            <span>
+              <PlayCircle size={15} aria-hidden="true" />
+              {course.stats?.totalLessons ?? 0} lessons
+            </span>
+          </div>
+          <p className="studio-course-duration"><Clock3 size={14} aria-hidden="true" />{course.totalDuration > 0 ? formatDuration(course.totalDuration) : "Duration not listed"}</p>
         </div>
-        <p className="studio-course-duration"><Clock3 size={14} aria-hidden="true" />{course.totalDuration > 0 ? formatDuration(course.totalDuration) : "Duration not listed"}</p>
         <div className="studio-course-footer">
           {course.status === "Published" && course.enrollmentOpen === false && <span className="cw-status">Enrollment paused</span>}
           <span className="studio-course-trailer">

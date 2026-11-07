@@ -1,4 +1,8 @@
 :root {
+  /* Shared readable sizes for captions, labels, and everyday UI text. */
+  --font-size-caption: .8125rem;
+  --font-size-label: .875rem;
+  --font-size-body: .9375rem;
   --background: #fcfcfa;
   --surface: #ffffff;
   --surface-alt: var(--muted);
@@ -89,6 +93,10 @@
 }
 
 @theme inline {
+  --text-xs: var(--font-size-caption);
+  --text-xs--line-height: 1.5;
+  --text-sm: var(--font-size-body);
+  --text-sm--line-height: 1.6;
   /* Core */
   --color-background: var(--background);
   --color-foreground: var(--foreground);

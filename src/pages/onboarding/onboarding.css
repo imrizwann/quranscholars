@@ -3,7 +3,7 @@
 .onboarding-path { display: flex; flex-direction: column; align-items: start; }
 .onboarding-path h2 { margin-top: 18px; }
 .onboarding-path > p { margin-top: 10px; }
-.onboarding-points { display: grid; gap: 10px; margin-block: 20px; list-style: none; color: var(--muted-foreground); font-size: .85rem; line-height: 1.7; }
+.onboarding-points { display: grid; gap: 10px; margin-block: 20px; list-style: none; color: var(--muted-foreground); font-size: var(--font-size-body); line-height: 1.7; }
 .onboarding-points li { display: flex; align-items: start; gap: 10px; }
 .onboarding-points svg { flex-shrink: 0; margin-top: 4px; color: var(--primary); }
 .onboarding-card-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: auto; }
@@ -12,10 +12,10 @@
 .onboarding-entry > div > p { margin-top: 8px; }
 .onboarding-entry .onboarding-card-actions { margin-top: 0; }
 .onboarding-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 24px; list-style: none; }
-.onboarding-step-label { display: flex; align-items: center; gap: 8px; font-size: .75rem; font-weight: 600; color: var(--primary); }
+.onboarding-step-label { display: flex; align-items: center; gap: 8px; font-size: var(--font-size-label); font-weight: 600; color: var(--primary); }
 .onboarding-steps h2 { margin-top: 16px; font-size: .95rem; }
 .onboarding-steps p { margin-top: 10px; }
-.onboarding-help { display: flex; align-items: start; flex-wrap: wrap; gap: 6px; margin-top: 24px; font-size: .8rem; line-height: 1.75; color: var(--muted-foreground); }
+.onboarding-help { display: flex; align-items: start; flex-wrap: wrap; gap: 6px; margin-top: 24px; font-size: var(--font-size-label); line-height: 1.75; color: var(--muted-foreground); }
 .onboarding-help svg { flex-shrink: 0; margin-top: 3px; }
 .onboarding-help a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
 .onboarding-error { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; flex-basis: 100%; padding-top: 16px; border-top: 1px solid var(--border); }

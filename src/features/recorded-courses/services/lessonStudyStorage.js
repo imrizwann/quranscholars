@@ -40,7 +40,7 @@ export function saveLessonStudy(userId, courseId, lessonId, patch) {
 // that any part of a lesson has been watched.
 export function lessonResumePosition(userId, courseId, lessonId, learningState) {
   const progress = learningState?.lessons?.find(lesson => lesson.lessonId === lessonId);
-  if (!progress) return readLessonStudy(userId, courseId, lessonId).position;
+  if (!progress) return learningState ? 0 : readLessonStudy(userId, courseId, lessonId).position;
   return Number.isFinite(progress.lastPosition) && progress.lastPosition >= 0
     ? Math.min(progress.lastPosition, Number.isFinite(progress.duration) && progress.duration > 0 ? progress.duration : 86400) : 0;
 }

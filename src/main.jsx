@@ -11,7 +11,6 @@ import InstructorCourseAccess from "@/features/instructor-courses/InstructorCour
 import NotLoggedIn from "@/components/guards/NotLoggedIn.jsx";
 import CourseRouteRedirect from "@/components/navigation/CourseRouteRedirect.jsx";
 import RouteErrorPage from "@/components/feedback/RouteErrorPage.jsx";
-import BerrySandLmsDemo from "./assets/example themes/berry-sand-lms";
 const Home = lazy(() => import("@/pages/home/Home.jsx"));
 const Services = lazy(() => import("@/pages/services/Services.jsx"));
 const ServicesList = lazy(() => import("@/pages/services/ServicesList.jsx"));
@@ -35,11 +34,10 @@ const RecordedCoursePlayer = lazy(
   () => import("@/pages/recorded-courses/RecordedCoursePlayer.jsx"),
 );
 const MyLearning = lazy(() => import("@/pages/account/MyLearning.jsx"));
-const LiveClasses = lazy(() => import("@/pages/live-classes/LiveClasses.jsx"));
-const LiveClassDetails = lazy(
-  () => import("@/pages/live-classes/LiveClassDetails.jsx"),
-);
-const Classroom = lazy(() => import("@/pages/live-classes/Classroom.jsx"));
+// Post-MVP: live classes have no API-backed scheduling or classroom access yet.
+// const LiveClasses = lazy(() => import("@/pages/live-classes/LiveClasses.jsx"));
+// const LiveClassDetails = lazy(() => import("@/pages/live-classes/LiveClassDetails.jsx"));
+// const Classroom = lazy(() => import("@/pages/live-classes/Classroom.jsx"));
 const Instructors = lazy(() => import("@/pages/instructors/Instructors.jsx"));
 const InstructorProfile = lazy(
   () => import("@/pages/instructors/InstructorProfile.jsx"),
@@ -72,11 +70,7 @@ const InstructorSectionPage = lazy(() =>
     default: m.InstructorSectionPage,
   })),
 );
-const CreationWizard = lazy(() =>
-  import("@/pages/instructor/InstructorPages.jsx").then((m) => ({
-    default: m.CreationWizard,
-  })),
-);
+// The live-class CreationWizard remains in InstructorPages.jsx for later.
 const InstructorApplication = lazy(
   () => import("@/pages/instructor/InstructorApplication.jsx"),
 );
@@ -94,7 +88,6 @@ const VideoDeletionStatus = lazy(
 );
 const PrivacyPolicy = lazy(() => import("@/pages/legal/PrivacyPolicy.jsx"));
 const Profile = lazy(() => import("@/pages/account/Profile.jsx"));
-const TestPage = lazy(() => import("@/pages/dev/TestPage.jsx"));
 const NotFound = lazy(() => import("@/pages/errors/NotFound.jsx"));
 
 const InteractiveLesson = lazy(
@@ -119,7 +112,7 @@ const FamilyFocused = lazy(() => import("@/pages/services/FamilyFocused.jsx"));
 const IslamicEvents = lazy(() => import("@/pages/services/IslamicEvents.jsx"));
 const YouthPrograms = lazy(() => import("@/pages/services/YouthPrograms.jsx"));
 const AccountDeleted = lazy(() => import("@/pages/account/AccountDeleted.jsx"));
-const Blogs = lazy(() => import("@/pages/blog/Blogs.jsx"));
+// const Blogs = lazy(() => import("@/pages/blog/Blogs.jsx"));
 
 const AdminInstructorApplications = lazy(() => import("@/pages/instructor/AdminInstructorApplications.jsx"));
 const AdminInstructorApplication = lazy(() => import("@/pages/instructor/AdminInstructorApplication.jsx"));
@@ -135,10 +128,11 @@ const router = createBrowserRouter([
         index: true,
         element: <Home />,
       },
-      {
-        path: "example-theme",
-        element: <BerrySandLmsDemo />,
-      },
+      // Demo pages are for local development, never the released application.
+      ...(import.meta.env.DEV ? [
+        { path: "example-theme", element: React.createElement(lazy(() => import("./assets/example themes/berry-sand-lms"))) },
+        { path: "test", element: React.createElement(lazy(() => import("@/pages/dev/TestPage.jsx"))) },
+      ] : []),
       {
         path: "courses",
         element: <RecordedCourses />,
@@ -153,11 +147,11 @@ const router = createBrowserRouter([
       },
       {
         path: "courses/live",
-        element: <CourseRouteRedirect basePath="/live-classes" />,
+        element: <Navigate to="/courses" replace />,
       },
       {
         path: "courses/live/:slug",
-        element: <CourseRouteRedirect basePath="/live-classes" includeSlug />,
+        element: <Navigate to="/courses" replace />,
       },
       {
         path: "recorded-courses",
@@ -168,8 +162,9 @@ const router = createBrowserRouter([
         element: <CourseRouteRedirect basePath="/courses" includeSlug />,
       },
       { path: "courses/:slug", element: <RecordedCourseDetails /> },
-      { path: "live-classes", element: <LiveClasses /> },
-      { path: "live-classes/:slug", element: <LiveClassDetails /> },
+      // { path: "live-classes", element: <LiveClasses /> },
+      // { path: "live-classes/:slug", element: <LiveClassDetails /> },
+      { path: "live-classes/*", element: <Navigate to="/courses" replace /> },
       { path: "instructors", element: <Instructors /> },
       { path: "instructors/:slug", element: <InstructorProfile /> },
       { path: "get-started", element: <GetStarted /> },
@@ -195,7 +190,8 @@ const router = createBrowserRouter([
         path: "learn/:courseSlug/lesson/:lessonId",
         element: <ProtectedRoute>{<RecordedCoursePlayer />}</ProtectedRoute>,
       },
-      { path: "classroom/:liveClassSlug", element: <Classroom /> },
+      // { path: "classroom/:liveClassSlug", element: <Classroom /> },
+      { path: "classroom/*", element: <Navigate to="/dashboard/learning" replace /> },
       {
         path: "dashboard",
         element: <ProtectedRoute><WorkspaceLayout type="student" /></ProtectedRoute>,
@@ -203,9 +199,8 @@ const router = createBrowserRouter([
           { index: true, element: <StudentDashboard /> },
           { path: "learning", element: <MyLearning /> },
           { path: "progress", element: <StudentSectionPage /> },
-          { path: "assignments", element: <StudentSectionPage /> },
-          { path: "wishlist", element: <StudentSectionPage /> },
-          { path: "purchases", element: <StudentSectionPage /> },
+          // Placeholder implementations remain in StudentSectionPage.jsx.
+          ...["assignments", "wishlist", "purchases"].map(path => ({ path, element: <Navigate to="/dashboard/learning" replace /> })),
           { path: "profile", element: <StudentSectionPage /> },
           { path: "settings", element: <StudentSectionPage /> },
         ],
@@ -233,14 +228,13 @@ const router = createBrowserRouter([
             path: "courses/:courseId",
             element: <RecordedCourseWorkspace />,
           },
-          { path: "live-classes", element: <InstructorSectionPage /> },
-          { path: "live-classes/new", element: <CreationWizard type="live" /> },
+          // { path: "live-classes", element: <InstructorSectionPage /> },
+          // { path: "live-classes/new", element: <CreationWizard type="live" /> },
+          { path: "live-classes/*", element: <Navigate to="/instructor/courses" replace /> },
           { path: "students", element: <InstructorSectionPage /> },
-          { path: "assignments", element: <InstructorSectionPage /> },
-          { path: "resources", element: <InstructorSectionPage /> },
+          ...["assignments", "resources", "reviews"].map(path => ({ path, element: <Navigate to="/instructor/courses" replace /> })),
           { path: "earnings", element: <InstructorSectionPage /> },
           { path: "analytics", element: <InstructorSectionPage /> },
-          { path: "reviews", element: <InstructorSectionPage /> },
           { path: "profile", element: <InstructorSectionPage /> },
           { path: "settings", element: <InstructorSectionPage /> },
         ],
@@ -252,12 +246,12 @@ const router = createBrowserRouter([
           { index: true, element: <ServicesList /> },
           {
             path: "courses",
-            element: <CourseRouteRedirect basePath="/live-classes" />,
+            element: <Navigate to="/courses" replace />,
           },
           {
             path: "courses/:slug",
             element: (
-              <CourseRouteRedirect basePath="/live-classes" includeSlug />
+              <Navigate to="/courses" replace />
             ),
           },
           {
@@ -300,7 +294,7 @@ const router = createBrowserRouter([
       },
       {
         path: "blogs",
-        element: <Blogs />,
+        element: <Navigate to="/courses" replace />,
       },
       { path: "about", element: <About /> },
       { path: "mission", element: <Mission /> },
@@ -336,7 +330,6 @@ const router = createBrowserRouter([
         path: "/admin/admissions",
         element: <AdminRoute><Navigate to="/admin/instructor-applications" replace /></AdminRoute>,
       },
-      { path: "/test", element: <TestPage /> },
       {
         path: "/admin/instructor-applications",
         element: <AdminRoute><WorkspaceLayout type="admin" /></AdminRoute>,

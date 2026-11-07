@@ -1,8 +1,7 @@
 import LoadingState from "@/components/feedback/LoadingState.jsx";
 import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
-  ArrowRight,
   BookOpen,
   Grid3X3,
   Search,
@@ -109,7 +108,9 @@ const RecordedCourses = () => {
   return (
     <main className="catalogue-page bg-[#fbfcfa] text-[#172b24]">
       <CatalogueHero id="course-catalogue-title" eyebrow="Self-paced courses" title="Learn at your own pace." description="Explore Quran, Tajweed, Arabic, and Islamic studies. Review course outlines, instructors, and pricing before you enroll." icon={Sparkles} highlights={["Video lessons", "Course previews", "Saved progress"]}>
+        {/* Live-class discovery is deferred until after the recorded-course MVP.
         <Link to="/live-classes" className="cw-button">Live classes<ArrowRight size={15} aria-hidden="true" /></Link>
+        */}
         <a href="#how-courses-work">How courses work</a>
       </CatalogueHero>
 

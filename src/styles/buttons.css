@@ -9,7 +9,7 @@
   border-radius: 7px;
   background: var(--surface);
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: var(--font-size-label);
   line-height: 1.5;
   text-decoration: none;
   color: var(--foreground);

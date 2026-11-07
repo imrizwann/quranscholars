@@ -2,8 +2,8 @@
 .qs-toaster [data-sonner-toast].qs-toast { background: var(--surface, #fff); color: var(--foreground); border: 1px solid var(--border); border-radius: var(--radius, 8px); padding: 16px 36px 16px 16px; gap: 12px; box-shadow: 0 4px 16px rgb(0 0 0 / .06); font-family: inherit; }
 .qs-toast [data-icon] { color: var(--primary); flex-shrink: 0; }
 .qs-toast[data-type=error] [data-icon] { color: var(--destructive); }
-.qs-toaster .qs-toast-title { font-size: .85rem; font-weight: 600; line-height: 1.5; }
-.qs-toaster .qs-toast-description { font-size: .8rem; line-height: 1.65; color: var(--muted-foreground); overflow-wrap: anywhere; }
+.qs-toaster .qs-toast-title { font-size: var(--font-size-body); font-weight: 600; line-height: 1.5; }
+.qs-toaster .qs-toast-description { font-size: var(--font-size-label); line-height: 1.65; color: var(--muted-foreground); overflow-wrap: anywhere; }
 .qs-toaster [data-sonner-toast] .qs-toast-close { left: auto; right: 8px; top: 8px; transform: none; width: 24px; height: 24px; border: 0; border-radius: 4px; background: transparent; color: var(--muted-foreground); }
 .qs-toaster [data-sonner-toast] .qs-toast-close:hover { background: var(--muted); color: var(--foreground); }
 .qs-toast-close:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }

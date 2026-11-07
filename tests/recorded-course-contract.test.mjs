@@ -4,6 +4,15 @@ import { adaptRecordedCourse, formatDuration, resolveCourseImage } from "../src/
 import { buildRecordedCourseQuery, normalizeRecordedCourseList, normalizeRecordedCourseDetail } from "../src/features/recorded-courses/services/recordedCourseContract.js";
 import { trailerPlaybackSource } from "../src/lib/trailer-playback.js";
 
+test("subtitle is optional and a full description never expands into card or hero copy", () => {
+  const description = "A".repeat(10000);
+  const course = adaptRecordedCourse({ shortDescription: "A concise subtitle", description });
+  assert.equal(course.shortDescription, "A concise subtitle");
+  assert.equal(course.description, description);
+  assert.equal(adaptRecordedCourse({ description }).shortDescription, "");
+  assert.equal(adaptRecordedCourse({ shortDescription: "Existing summary" }).shortDescription, "Existing summary");
+});
+
 test("short processed videos show seconds and missing duration never appears as a zero-minute course", () => {
   assert.equal(formatDuration(12), "12 sec"); assert.equal(formatDuration(24), "24 sec");
   assert.equal(adaptRecordedCourse({ totalDuration: 0 }).durationLabel, "Duration not listed");

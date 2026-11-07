@@ -1,9 +1,10 @@
 .qs-search-field { border-radius: 8px; }
+.course-description { min-width: 0; overflow-wrap: anywhere; }
 .qs-search-field:focus-within { outline: 2px solid var(--ring); outline-offset: 2px; }
 .qs-search-field input:focus-visible { outline: none; box-shadow: none; }
 .brand-icon { display: block; flex: 0 0 auto; width: 32px; height: 32px; object-fit: contain; border-radius: 6px; }
 .brand-name { display: block; font-family: var(--font-display); font-weight: 600; line-height: 1.2; letter-spacing: -.4px; white-space: nowrap; }
-.brand-caption { display: block; margin-top: 3px; font-family: var(--font-body, sans-serif); font-size: 9px; font-weight: 500; letter-spacing: .5px; color: var(--muted-foreground); }
+.brand-caption { display: block; margin-top: 3px; font-family: var(--font-body, sans-serif); font-size: var(--font-size-caption); font-weight: 500; letter-spacing: .5px; color: var(--muted-foreground); }
 
 @layer components {
   .profile-dropdown.dropdown-active {

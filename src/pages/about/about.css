@@ -7,9 +7,9 @@
 .about-illustration img { width: 100%; height: auto; max-height: 340px; object-fit: contain; }
 .about-formats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
 .about-formats .public-panel { display: flex; flex-direction: column; align-items: start; padding: 20px; }
-.about-page h3 { margin-top: 16px; font-size: .9rem; font-weight: 600; line-height: 1.5; }
+.about-page h3 { margin-top: 16px; font-size: var(--font-size-body); font-weight: 600; line-height: 1.5; }
 .about-page .public-panel > p { margin-top: 8px; }
-.about-text-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-top: auto; padding-top: 12px; font-size: .8rem; font-weight: 600; color: var(--primary); text-decoration: none; }
+.about-text-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-top: auto; padding-top: 12px; font-size: var(--font-size-label); font-weight: 600; color: var(--primary); text-decoration: none; }
 .about-text-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 .about-text-link:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; border-radius: 3px; }
 .about-values { border-block: 1px solid var(--border); background: var(--surface); }
@@ -17,7 +17,7 @@
 .about-principles .public-panel { padding: 20px; background: var(--background); }
 .about-journey { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 24px; list-style: none; }
 .about-journey .public-panel { padding: 20px; }
-.about-step { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid var(--border); border-radius: 7px; color: var(--primary); background: var(--muted); font-size: .8rem; font-weight: 600; }
+.about-step { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid var(--border); border-radius: 7px; color: var(--primary); background: var(--muted); font-size: var(--font-size-label); font-weight: 600; }
 .about-next-step { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 32px; background: var(--muted); }
 .about-next-step > div { min-width: 0; }
 .about-next-step h2 { margin-top: 10px; }

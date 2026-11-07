@@ -1,14 +1,15 @@
 import { useMemo } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowUpRight, BookOpen, Check, ChevronRight, Clock3, Globe2, GraduationCap, Layers3, MessageCircle, MonitorPlay, PlayCircle, Signal, Star, Users, VideoOff } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, BookOpen, Check, ChevronRight, Clock3, Globe2, GraduationCap, Layers3, MessageCircle, MonitorPlay, PlayCircle, Signal, Users, VideoOff } from "lucide-react";
 import AppLoader from "@/components/feedback/AppLoader.jsx";
 import LoadingState from "@/components/feedback/LoadingState.jsx";
 import CoursePrice from "@/features/recorded-courses/components/CoursePrice.jsx";
 import CourseEnrollment from "@/features/recorded-courses/components/CourseEnrollment.jsx";
-import CourseRating from "@/features/recorded-courses/components/CourseRating.jsx";
+// import CourseRating from "@/features/recorded-courses/components/CourseRating.jsx";
 import CourseVideo from "@/features/recorded-courses/components/CourseVideo.jsx";
 import PublicCourseCurriculum from "@/features/recorded-courses/components/PublicCourseCurriculum.jsx";
 import RecordedCourseCard from "@/features/recorded-courses/components/RecordedCourseCard.jsx";
+import CourseDescription from "@/features/recorded-courses/components/CourseDescription.jsx";
 import { useGetRecordedCourseBySlugQuery, useGetRecordedCoursesQuery } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
 import "./course-detail.css";
 import ProfileAvatar from "@/features/profile/components/ProfileAvatar.jsx";
@@ -34,7 +35,7 @@ function CourseDetailsContent({ course, catalogUrl, catalogState, relatedCourses
         <div className="cd-hero-meta">
           <a href="#course-instructor" className="cd-instructor-link"><GraduationCap aria-hidden="true" /><span>With <strong>{course.instructor.name}</strong></span></a>
           <span><Globe2 aria-hidden="true" />{course.language}</span>
-          {course.totalReviews > 0 ? <a href="#course-reviews"><CourseRating rating={course.rating} reviews={course.totalReviews} /></a> : <span><Star aria-hidden="true" />No ratings yet</span>}
+          {/* Learner ratings are deferred until the review workflow is available. */}
           {course.totalStudents > 0 && <span><Users aria-hidden="true" />{number.format(course.totalStudents)} learners</span>}
           {updated && <span className="cd-updated">Updated {updated}</span>}
         </div>
@@ -51,10 +52,10 @@ function CourseDetailsContent({ course, catalogUrl, catalogState, relatedCourses
               <div className="cd-no-trailer-content"><span className="cd-preview-icon"><VideoOff aria-hidden="true" /></span><p className="cd-eyebrow">Explore the course</p><h2 id="preview-heading">No trailer available</h2><p>Get to know the course through its overview, learning outcomes, and lesson outline.</p><a href="#course-curriculum">Explore the curriculum<ChevronRight aria-hidden="true" /></a></div>
             </div>}
           </section>
-          <nav className="cd-section-nav" aria-label="Course sections"><a href="#course-overview">Overview</a><a href="#course-curriculum">Curriculum</a><a href="#course-instructor">Instructor</a><a href="#course-reviews">Reviews</a></nav>
+          <nav className="cd-section-nav" aria-label="Course sections"><a href="#course-overview">Overview</a><a href="#course-curriculum">Curriculum</a><a href="#course-instructor">Instructor</a></nav>
           <section id="course-overview" className="cd-content-section" aria-labelledby="overview-heading">
             <p className="cd-eyebrow">Build your understanding</p><h2 id="overview-heading">About this course</h2>
-            <p className="cd-description">{course.description || "A detailed course description has not been added yet."}</p>
+            <CourseDescription key={course.id || course.slug} text={course.description} />
             {course.outcomes.length > 0 && <div className="cd-outcomes"><h3>What you will learn</h3><ul>{course.outcomes.map((outcome, index) => <li key={index}><span><Check aria-hidden="true" /></span>{outcome}</li>)}</ul></div>}
             {course.tags.length > 0 && <ul className="cd-tags" aria-label="Course topics">{course.tags.map((tag, index) => <li key={index}>{tag}</li>)}</ul>}
           </section>
@@ -67,10 +68,12 @@ function CourseDetailsContent({ course, catalogUrl, catalogState, relatedCourses
             <p className="cd-eyebrow">Learn with guidance</p><h2 id="instructor-heading">Meet your instructor</h2>
             <div className="cd-instructor-card"><ProfileAvatar name={course.instructor.name} src={course.instructor.avatar} size={56} /><div><h3>{course.instructor.name}</h3><p className="cd-instructor-role">{course.instructor.title}</p>{course.instructor.bio && <p className="cd-description">{course.instructor.bio}</p>}{instructorProfileUrl(course.instructor) && <Link className="cw-button mt-4" to={instructorProfileUrl(course.instructor)}>View instructor profile<ArrowUpRight size={16} aria-hidden="true" /></Link>}</div></div>
           </section>
+          {/* Post-MVP: publish this section when learners can submit real reviews.
           <section id="course-reviews" className="cd-content-section" aria-labelledby="reviews-heading">
             <div className="cd-section-heading"><div><p className="cd-eyebrow">The learner perspective</p><h2 id="reviews-heading">Learner feedback</h2></div>{course.totalReviews > 0 && <CourseRating rating={course.rating} reviews={course.totalReviews} />}</div>
             <div className="cd-reviews-empty"><MessageCircle aria-hidden="true" /><div><h3>{course.totalReviews > 0 ? `${number.format(course.totalReviews)} learner ratings` : "No reviews yet"}</h3><p>{course.totalReviews > 0 ? "Written reviews are not available yet." : "Learner reviews will help you discover more about this course as they become available."}</p></div></div>
           </section>
+          */}
         </div>
         <aside className="cd-sidebar" aria-label="Course enrollment and details">
           <div className="cd-enrollment">

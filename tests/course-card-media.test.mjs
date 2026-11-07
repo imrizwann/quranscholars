@@ -37,7 +37,7 @@ test("course cards remain linked image previews through thumbnail failures and p
     assert.equal(image.getAttribute("loading"), "lazy");
     assert.equal(document.querySelector("video"), null);
     assert.equal(document.querySelector("button"), null);
-    assert.match(document.body.textContent, /Not rated yet/);
+    assert.doesNotMatch(document.body.textContent, /Not rated yet|reviews/);
     assert.doesNotMatch(document.body.textContent, /0 learners|Watch trailer|Loading trailer|undefined|NaN/);
     await act(async () => cover().querySelector("img").dispatchEvent(new window.Event("error")));
     assert.equal(cover().querySelector("img"), null);
@@ -48,7 +48,7 @@ test("course cards remain linked image previews through thumbnail failures and p
     course = { ...course, thumbnail: "https://images.example.test/new-cover.webp", featured: true, totalReviews: 12, rating: 4.5, totalStudents: 18 }; await render();
     assert.equal(cover().querySelector("img").getAttribute("src"), course.thumbnail);
     assert.match(cover().textContent, /Featured/);
-    assert.match(document.body.textContent, /rating from 12 reviews/);
+    assert.doesNotMatch(document.body.textContent, /rating from 12 reviews/);
     assert.match(document.body.textContent, /18 learners/);
     await act(async () => cover().dispatchEvent(new window.MouseEvent("click", { bubbles: true, cancelable: true, button: 0 })));
     assert.equal(document.querySelector('[data-location]').textContent, "/courses/recitation");

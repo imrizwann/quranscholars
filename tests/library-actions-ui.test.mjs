@@ -29,8 +29,10 @@ test("learner library menus confirm hiding, restore from the hidden view and req
     const compiled = await build({ stdin: { contents: `export {default as Library} from './src/features/recorded-courses/components/LearnerLibrary.jsx'; export {default as learnerApi} from './src/services/api/user/learnerApi.js'; export {default as paymentApi} from './src/services/api/user/paymentApi.js';`, resolveDir: process.cwd() }, bundle: true, write: false, format: "esm", platform: "node", packages: "external", jsx: "automatic", alias: { "@": resolve("src") }, loader: { ".css": "empty" }, define: { "import.meta.env": JSON.stringify({ VITE_API_URL: "https://api.example.test" }) } });
     await writeFile(output, compiled.outputFiles[0].text);
     const mod = await import(pathToFileURL(output)); apis = [mod.learnerApi, mod.paymentApi];
-    const free = { _id: "free1", title: "Recitation foundations", slug: "recitation", canLeave: true, hidden: false, totalLessons: 1, totalDuration: 100 };
-    const paid = { _id: "paid1", title: "Advanced recitation", slug: "advanced", canLeave: false, hidden: false };
+    const free = { _id: "free1", title: "Recitation foundations", slug: "recitation", canLeave: true, hidden: false, totalLessons: 1, totalDuration: 100,
+      progress: { completedLessons: 0, totalLessons: 1, progressPercent: 0, started: false, completed: false, continueLessonTitle: "Welcome" } };
+    const paid = { _id: "paid1", title: "Advanced recitation", slug: "advanced", canLeave: false, hidden: false,
+      progress: { completedLessons: 1, totalLessons: 2, progressPercent: 50, started: true, completed: false, continueLessonTitle: "Practice together" } };
     const writes = []; let left = false, failLeave = true;
     globalThis.fetch = async request => {
       assert.equal(request.credentials, "include");
@@ -64,6 +66,16 @@ test("learner library menus confirm hiding, restore from the hidden view and req
       await click([...document.querySelectorAll('[role="option"]')].find(node => node.textContent.trim() === label));
     };
     await settle(() => options(free.title));
+    assert.equal(document.querySelector('progress[aria-label="Advanced recitation progress"]').value, 50);
+    assert.match(document.body.textContent, /1 of 2 lessons complete/);
+    assert.match(document.body.textContent, /Continue with Practice together/);
+    assert.equal(document.querySelector('a[aria-label="Continue learning: Advanced recitation"]').getAttribute("href"), "/learn/advanced", "the classroom resolves the latest server destination on entry");
+    assert(document.querySelector('a[aria-label="Start course: Recitation foundations"]'));
+    paid.progress = { ...paid.progress, completedLessons: 2, progressPercent: 100, completed: true };
+    await act(async () => store.dispatch(mod.paymentApi.util.invalidateTags(["LearningLibrary"])));
+    await settle(() => document.querySelector('a[aria-label="Review course: Advanced recitation"]'));
+    assert.equal(document.querySelector('progress[aria-label="Advanced recitation progress"]').value, 100);
+    assert.match(document.body.textContent, /Course complete/);
     await click(options(free.title)); await settle(() => menu("Hide from My learning"));
     await click(menu("Hide from My learning"));
     assert.equal(writes.length, 0, "Opening a dialog cannot change enrollment");

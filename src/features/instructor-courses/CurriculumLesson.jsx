@@ -5,6 +5,7 @@ import CurriculumActions from "./CurriculumActions.jsx";
 import LessonTitleEditor from "./LessonTitleEditor.jsx";
 import VideoUploadPanel from "./VideoUploadPanel.jsx";
 import { VideoStatus } from "./WorkspaceParts.jsx";
+import LessonResources from "@/features/recorded-courses/components/LessonResources.jsx";
 
 export default function CurriculumLesson({ lesson, index, target, path, disabled, protectedPublished = false, deleting, removingVideo, onBusy, onEditing, onRefresh, onRemove }) {
   const [open, setOpen] = useState(index === 0);
@@ -24,5 +25,6 @@ export default function CurriculumLesson({ lesson, index, target, path, disabled
     ]} />}>
     <LessonTitleEditor key={editing ? "editing" : "view"} lesson={lesson} editing={editing} target={target} disabled={disabled} onBusy={onBusy} onEditing={changeEditing} />
     <VideoUploadPanel path={`${path}/video`} target={target} video={lesson.video} deleting={removingVideo} disabled={disabled || editing || protectedPublished} onBusy={onBusy} onChanged={onRefresh} onDelete={onRemove} showRemoveAction={false} onActivityChange={setActivity} />
+    <LessonResources key={lesson._id} target={target} manage active={open} disabled={disabled || editing} onBusy={onBusy} />
   </CollapsiblePanel>;
 }

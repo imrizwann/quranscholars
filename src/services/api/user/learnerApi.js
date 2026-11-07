@@ -46,7 +46,10 @@ const learnerApi = createApi({
           const { data } = await queryFulfilled;
           // Resume saves continue after completion; refresh course/analytics only
           // when a lesson first becomes complete, rather than on every heartbeat.
-          if (data.lesson.completed && !wasComplete) dispatch(learnerApi.util.invalidateTags([{ type: "LearningProgress", id: courseId }, "LearnerAnalytics"]));
+          if (data.lesson.completed && !wasComplete) {
+            dispatch(learnerApi.util.invalidateTags([{ type: "LearningProgress", id: courseId }, "LearnerAnalytics"]));
+            dispatch(paymentApi.util.invalidateTags(["LearningLibrary"]));
+          }
         } catch { /* An unconfirmed save cannot change completion or analytics. */ }
       },
     }),

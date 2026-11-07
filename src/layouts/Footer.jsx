@@ -8,11 +8,11 @@ const footerColumns = [
     title: "Platform",
     links: [
       { to: "/courses", label: "All courses" },
-      { to: "/live-classes", label: "Live Classes" },
+      // { to: "/live-classes", label: "Live Classes" },
       { to: "/instructors", label: "Instructors" },
-      { to: "/services", label: "Services" },
+      // { to: "/services", label: "Services" },
       { to: "/get-started/instructor", label: "Teach on QuranScholar" },
-      { to: "/blogs", label: "Blogs" },
+      // { to: "/blogs", label: "Blogs" },
     ],
   },
   {

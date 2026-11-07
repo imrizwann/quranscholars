@@ -15,6 +15,8 @@ const lessonsUrl = (args) => `${sectionUrl(args)}/lessons`;
 
 const lessonUrl = (args) =>
   `${lessonsUrl(args)}/${encodeURIComponent(args.lessonId)}`;
+const resourcesUrl = ({ courseId, sectionId, lessonId }) => `/api/learning/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/lessons/${encodeURIComponent(lessonId)}/resources`;
+const resourceTag = args => ({ type: "LessonResources", id: `${args.courseId}/${args.sectionId}/${args.lessonId}` });
 
 const videoUrl = (args) =>
   args.lessonId ? `${lessonUrl(args)}/video` : `${courseUrl(args)}/trailer`;
@@ -91,10 +93,37 @@ const instructorCoursesApi = createApi({
     }
     return { data, meta: result.meta };
   },
-  tagTypes: ["InstructorCourse", "InstructorSections", "InstructorLessons", "InstructorQuiz"],
+  tagTypes: ["InstructorCourse", "InstructorSections", "InstructorLessons", "InstructorQuiz", "LessonResources"],
   // Private workspace data is retained only while a screen subscribes to it.
   keepUnusedDataFor: 0,
   endpoints: (builder) => ({
+    getLessonResources: builder.query({
+      query: args => ({ url: resourcesUrl(args) }),
+      extraOptions: { validate: data => Array.isArray(data.items) && typeof data.canManage === "boolean" && typeof data.available === "boolean" },
+      providesTags: (_result, _error, args) => [resourceTag(args)],
+    }),
+    uploadLessonResource: builder.mutation({
+      query: ({ file, title, ...target }) => {
+        const body = new FormData(); body.append("file", file); if (title?.trim()) body.append("title", title.trim());
+        return { url: resourcesUrl(target), method: "POST", body };
+      },
+      invalidatesTags: onSuccess(args => [resourceTag(args)]),
+    }),
+    removeLessonResource: builder.mutation({
+      query: ({ resourceId, ...target }) => ({ url: `${resourcesUrl(target)}/${encodeURIComponent(resourceId)}`, method: "DELETE", body: {} }),
+      invalidatesTags: onSuccess(args => [resourceTag(args)]),
+    }),
+    downloadLessonResource: builder.mutation({
+      async queryFn({ resourceId, ...target }, api, extraOptions) {
+        const result = await apiBaseQuery({ url: `${resourcesUrl(target)}/${encodeURIComponent(resourceId)}/download`, timeout: 20_000,
+          responseHandler: response => response.ok ? response.blob() : response.json() }, api, extraOptions);
+        if (result.error) return result;
+        if (result.data?.type !== "application/pdf" || !result.data.size || result.data.size > 3 * 1024 * 1024) return { error: { status: "CUSTOM_ERROR", error: "The lesson file could not be downloaded. Please try again." } };
+        const url = URL.createObjectURL(result.data);
+        const timer = setTimeout(() => URL.revokeObjectURL(url), 60_000); timer.unref?.();
+        return { data: { url } };
+      },
+    }),
     updateAvailability: builder.mutation({
       query: ({ courseId, action }) => ({ url: `${courseUrl({ courseId })}/availability`, method: "PATCH", body: { action } }),
       invalidatesTags: onSuccess(args => [courseTag(args), listTag]),

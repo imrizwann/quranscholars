@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import learnerApi, { useStartLessonWatchMutation, useRecordLessonWatchMutation } from "@/services/api/user/learnerApi.js";
 import { createLearningWatch } from "@/lib/learning-watch.js";
 import { userMessage } from "@/lib/user-messages.js";
+import { lessonCompletionSummary } from "./model/courseProgress.js";
 
 export default function useLessonWatch({ courseId, sectionId, lessonId }) {
   const [start] = useStartLessonWatchMutation();
@@ -24,12 +25,10 @@ export default function useLessonWatch({ courseId, sectionId, lessonId }) {
       onLesson: lesson => dispatch(learnerApi.util.updateQueryData("getCourseProgress", courseId, data => {
         const old = data.lessons.find(item => item.lessonId === lesson.lessonId);
         if (old) Object.assign(old, lesson);
-        data.completedLessons = data.lessons.filter(item => item.completed).length;
-        data.completed = data.lessons.length > 0 && data.lessons.every(item => item.completed);
+        Object.assign(data, lessonCompletionSummary(data.lessons));
         for (const section of data.sections) {
           const members = data.lessons.filter(item => item.sectionId === section.sectionId);
-          section.completedLessons = members.filter(item => item.completed).length;
-          section.completed = members.length > 0 && members.every(item => item.completed);
+          Object.assign(section, lessonCompletionSummary(members));
           if (section.quiz) section.quiz.unlocked = section.completed;
         }
       })),

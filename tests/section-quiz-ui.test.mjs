@@ -81,6 +81,8 @@ test("server-confirmed lesson completion immediately unlocks an optional quiz; s
   await click(button("Save lesson progress"));
   await settle(() => document.querySelector(".learning-quiz-link").disabled === false);
   assert.match(document.body.textContent, /Section complete/);
+  assert.equal(mod.learnerApi.endpoints.getCourseProgress.select("course1")(store.getState()).data.progressPercent, 100);
+  assert.equal(mod.learnerApi.endpoints.getCourseProgress.select("course1")(store.getState()).data.sections[0].progressPercent, 100);
   await click(document.querySelector(".learning-quiz-link")); await settle(() => document.querySelector(".learning-quiz-note"));
   assert.match(document.querySelector(".learning-quiz-note").textContent, /without taking or passing/);
   await click(button("Skip quiz"));
@@ -92,6 +94,26 @@ test("server-confirmed lesson completion immediately unlocks an optional quiz; s
   await click(button("Submit answers")); await settle(() => document.body.textContent.includes("Keep practicing"));
   assert.match(document.body.textContent, /section and course completion are unchanged/);
   assert.equal(mod.learnerApi.endpoints.getCourseProgress.select("course1")(store.getState()).data.completed, true);
+}));
+
+test("curriculum reserves 100% for all lessons and labels instructor drafts as previews", async () => fixture(async ({ mod, render }) => {
+  const lessons = Array.from({ length: 200 }, (_, i) => ({ id: `lesson${i}`, sectionId: "section1", title: `Lesson ${i + 1}`, durationLabel: "2 min" }));
+  const section = { id: "section1", title: "Foundations", lessons };
+  const learning = { completed: false, completedLessons: 199, totalLessons: 200,
+    lessons: lessons.map((lesson, i) => ({ lessonId: lesson.id, sectionId: section.id, completed: i < 199 })), sections: [{ sectionId: section.id, completed: false, quiz: null }] };
+  const show = (course, state) => render(React.createElement(mod.Curriculum, { course, sections: [section], lesson: lessons[199], lessons, learningState: state, onQuiz() {} }));
+  await show({ slug: "foundations" }, learning);
+  assert.match(document.querySelector(".learning-course-progress").textContent, /99%/);
+  assert.doesNotMatch(document.querySelector(".learning-course-progress").textContent, /100%|Course complete/);
+  assert.match(document.querySelector(".learning-course-progress").textContent, /Quizzes are optional/);
+  await show({ slug: "foundations" }, { ...learning, completed: true, completedLessons: 200 });
+  assert.match(document.querySelector(".learning-course-progress").textContent, /100%/);
+  assert.match(document.querySelector(".learning-course-progress").textContent, /Course complete/);
+  await show({ slug: "foundations", canManage: true }, { ...learning, completed: true, totalLessons: 199,
+    lessons: learning.lessons.slice(0, 199) });
+  const preview = [...document.querySelectorAll(".learning-section li")].find(row => row.textContent.includes("Lesson 200"));
+  assert.match(preview.textContent, /Preview/);
+  assert.equal(preview.querySelector('[role="checkbox"]'), null, "an ungraded draft cannot appear incomplete or affect course completion");
 }));
 
 test("one-question quiz navigation preserves answers, reviews skipped questions and safely retries the same submission", async () => fixture(async ({ mod, render, settle }) => {

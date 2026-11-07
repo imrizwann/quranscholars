@@ -34,9 +34,10 @@ test("the classroom waits for account resume, chooses the last watched lesson, a
     const course = { _id: "course1", slug: "resume-course", title: "Resume course", language: "English", level: "Beginner", instructor: { _id: "teacher1", name: "Your instructor" }, sections: [{ _id: "section1", title: "First section", order: 1, lessons: [1, 2].map(number => ({ _id: `lesson${number}`, sectionId: "section1", title: `Lesson ${number}`, order: number, durationSeconds: 300 })) }] };
     let release;
     const gate = new Promise(resolve => { release = resolve; });
-    let state = { lastLessonId: "lesson2", completedLessons: 0, totalLessons: 2, lessons: [{ lessonId: "lesson1", sectionId: "section1", duration: 300, lastPosition: 60, completed: false }, { lessonId: "lesson2", sectionId: "section1", duration: 300, lastPosition: 120, completed: false }], sections: [{ sectionId: "section1", completedLessons: 0, totalLessons: 2, quiz: null }] };
+    let state = { lastLessonId: "lesson1", continueLessonId: "lesson2", completedLessons: 1, totalLessons: 2, lessons: [{ lessonId: "lesson1", sectionId: "section1", duration: 300, lastPosition: 60, completed: true }, { lessonId: "lesson2", sectionId: "section1", duration: 300, lastPosition: 120, completed: false }], sections: [{ sectionId: "section1", completedLessons: 1, totalLessons: 2, quiz: null }] };
     globalThis.fetch = async request => {
       const path = new URL(request.url).pathname;
+      if (path.endsWith("/resources")) return Response.json({ success: true, data: { available: true, canManage: false, items: [] } });
       if (path.includes("/courses/by-slug/")) return Response.json({ success: true, data: { course, canManage: false } });
       if (path.endsWith("/access")) return Response.json({ success: true, data: { canAccessCourse: true } });
       if (path.endsWith("/playback")) return Response.json({ success: true, data: { playbackUrl: "https://video.example.test/lesson/run/master.m3u8", playbackToken: "header.payload.signature", expiresAt: new Date(Date.now() + 600000).toISOString() } });
@@ -62,7 +63,7 @@ test("the classroom waits for account resume, chooses the last watched lesson, a
     await act(async () => mediaReady().click());
     assert.equal(document.querySelector(".resume-player").dataset.title, "Lesson 2");
     assert.equal(document.querySelector(".resume-player").dataset.time, "120");
-    state = { ...state, lastLessonId: "lesson1", lessons: state.lessons.map(lesson => lesson.lessonId === "lesson2" ? { ...lesson, lastPosition: 180 } : lesson) };
+    state = { ...state, lastLessonId: "lesson1", continueLessonId: "lesson1", lessons: state.lessons.map(lesson => lesson.lessonId === "lesson2" ? { ...lesson, lastPosition: 180 } : lesson) };
     await act(async () => store.dispatch(mod.learnerApi.util.invalidateTags([{ type: "LearningProgress", id: "course1" }])));
     await settle(() => mod.learnerApi.endpoints.getCourseProgress.select("course1")(store.getState()).data.lessons[1].lastPosition === 180);
     assert.equal(document.querySelector(".resume-player").dataset.time, "120");
@@ -72,6 +73,14 @@ test("the classroom waits for account resume, chooses the last watched lesson, a
     await settle(() => document.querySelector(".resume-player")?.dataset.title === "Lesson 1");
     await act(async () => mediaReady().click());
     assert.equal(document.querySelector(".resume-player").dataset.time, "60", "a direct lesson URL restores account progress without browser history");
+    state = { ...state, lastLessonId: null, continueLessonId: null, completedLessons: 0, lessons: state.lessons.map(lesson => ({ ...lesson, lastPosition: 0, completed: false })) };
+    mod.saveLastLesson("account1", "course1", "lesson2");
+    mod.saveLessonStudy("account1", "course1", "lesson1", { position: 88 });
+    await render("/learn/resume-course", "server-reset");
+    await settle(() => mod.learnerApi.endpoints.getCourseProgress.select("course1")(store.getState()).data?.lessons[0].lastPosition === 0);
+    await settle(() => document.querySelector(".resume-player")?.dataset.title === "Lesson 1");
+    await act(async () => mediaReady().click());
+    assert.equal(document.querySelector(".resume-player").dataset.time, "0", "a server reset overrides stale local lesson and position");
     const plays = [];
     const target = { courseId: "course1", sectionId: "section1", lessonId: "lesson2" };
     await act(async () => root.render(React.createElement(Provider, { store }, React.createElement(mod.ProtectedVideo, { key: "early-play", target, title: "Early play", startTime: 120, onPlaybackPlay: value => plays.push(value.currentTime) }))));

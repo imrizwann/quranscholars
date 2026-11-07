@@ -2,6 +2,7 @@ import { Pencil } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import CourseMetadataEditor from "./CourseMetadataEditor.jsx";
+import CourseDescription from "@/features/recorded-courses/components/CourseDescription.jsx";
 
 function Field({ label, children, wide = false }) {
   return <div className={wide ? "cw-field-wide" : undefined}><dt className="cw-muted">{label}</dt><dd>{children || "Not added"}</dd></div>;
@@ -18,8 +19,8 @@ export function CourseDetailsPanel({ course, disabled, onBusy, onEditing }) {
     <dl className="cw-details-grid">
       <Field label="Course title">{course.title}</Field><Field label="Category">{course.category?.name}</Field>
       <Field label="Language">{course.language}</Field><Field label="Level">{course.level}</Field>
-      <Field wide label="Short description">{course.shortDescription}</Field>
-      <Field wide label="Description">{course.description}</Field>
+      <Field wide label="Subtitle">{course.shortDescription}</Field>
+      <Field wide label="Description"><CourseDescription text={course.description} textClassName="cw-course-description" buttonClassName="cw-button cw-button-compact mt-2" /></Field>
       <Field wide label="Tags">{course.tags?.length ? course.tags.join(", ") : null}</Field>
     </dl>
     <div className="cw-detail-lists">{[["Learning outcomes", course.outcomes], ["Requirements", course.requirements], ["Who this course is for", course.audience]].map(([label, items]) => <div key={label}><h3>{label}</h3>{items?.length ? <ul>{items.map((item, index) => <li key={index}>{item}</li>)}</ul> : <p className="cw-muted">Not added</p>}</div>)}</div>

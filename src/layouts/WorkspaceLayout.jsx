@@ -4,27 +4,28 @@ import { Dialog } from "@base-ui/react/dialog";
 import CollapsibleSidebar, { HamburgerIcon, SidebarToggle } from "@/components/navigation/CollapsibleSidebar.jsx";
 import WorkspaceAccountMenu from "./WorkspaceAccountMenu.jsx";
 import Brand from "@/components/branding/Brand.jsx";
-import { ArrowUpRight, BarChart3, BookOpen, ChevronRight, CircleDollarSign, ClipboardCheck, GraduationCap, LayoutDashboard, Library, MessageSquareText, Radio, Settings, UserRound, Users, X } from "lucide-react";
+import { ArrowUpRight, BarChart3, BookOpen, ChevronRight, CircleDollarSign, GraduationCap, LayoutDashboard, Settings, UserRound, Users, X } from "lucide-react";
 import "./workspace.css";
 
 const studentLinks = [
   { to: "/dashboard", label: "Overview", icon: LayoutDashboard, end: true },
   { to: "/dashboard/learning", label: "My learning", icon: BookOpen },
   { to: "/dashboard/progress", label: "Progress", icon: BarChart3 },
-  { to: "/dashboard/assignments", label: "Assignments", icon: ClipboardCheck },
-  { to: "/dashboard/wishlist", label: "Wishlist", icon: Library },
-  { to: "/dashboard/purchases", label: "Purchases", icon: CircleDollarSign },
+  // Deferred until these workflows are implemented (retain their pages in source).
+  // { to: "/dashboard/assignments", label: "Assignments", icon: ClipboardCheck },
+  // { to: "/dashboard/wishlist", label: "Wishlist", icon: Library },
+  // { to: "/dashboard/purchases", label: "Purchases", icon: CircleDollarSign },
 ];
 const instructorLinks = [
   { to: "/instructor/dashboard", label: "Overview", icon: LayoutDashboard },
   { to: "/instructor/courses", label: "Courses", icon: BookOpen },
-  { to: "/instructor/live-classes", label: "Live classes", icon: Radio },
+  // { to: "/instructor/live-classes", label: "Live classes", icon: Radio },
   { to: "/instructor/students", label: "Students", icon: Users },
-  { to: "/instructor/assignments", label: "Assignments", icon: ClipboardCheck },
-  { to: "/instructor/resources", label: "Resources", icon: Library },
+  // { to: "/instructor/assignments", label: "Assignments", icon: ClipboardCheck },
+  // { to: "/instructor/resources", label: "Resources", icon: Library },
   { to: "/instructor/earnings", label: "Earnings", icon: CircleDollarSign },
   { to: "/instructor/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/instructor/reviews", label: "Reviews", icon: MessageSquareText },
+  // { to: "/instructor/reviews", label: "Reviews", icon: MessageSquareText },
 ];
 
 const adminLinks = [

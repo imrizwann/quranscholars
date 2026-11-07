@@ -44,7 +44,7 @@ const ServicesList = () => (
             <article key={slug} className="group flex min-h-full flex-col rounded-2xl border border-[#dfe6e2] bg-white p-6 transition duration-200 hover:-translate-y-1 hover:border-[#bdd1c8]">
               <div className="flex items-start justify-between gap-4">
                 <span className="grid size-11 place-items-center rounded-xl bg-[#e7f3ee] text-primary"><Icon className="size-5" /></span>
-                <span className="rounded-full bg-[#f3f6f4] px-2.5 py-1 text-[0.63rem] font-black uppercase tracking-[0.1em] text-[#697970]">{category}</span>
+                <span className="rounded-full bg-[#f3f6f4] px-2.5 py-1 text-xs font-black uppercase tracking-[0.1em] text-[#697970]">{category}</span>
               </div>
               <h2 className="mt-6 text-xl font-black tracking-[-0.025em]">{label}</h2>
               <p className="mt-3 flex-1 text-sm font-medium leading-7 text-[#687970]">{shortDescription}</p>

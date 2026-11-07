@@ -10,7 +10,6 @@ import {
   Check,
   ChevronDown,
   Diamond,
-  Quote,
   ShieldCheck,
 } from "lucide-react";
 import heroWomanTransparent from "@/assets/images/hero-woman-transparent.svg";
@@ -19,15 +18,15 @@ import {
   showcaseStats,
   learningFormats,
   platformFeatures,
-  teachers,
-  testimonials,
+  // teachers, // sample content retained in homeData.js
+  // testimonials,
   faqs,
 } from "@/data/homeData.js";
 import RecordedCourseSkeleton from "@/features/recorded-courses/components/RecordedCourseSkeleton.jsx";
 import RecordedCourseCard from "@/features/recorded-courses/components/RecordedCourseCard.jsx";
 import { useGetRecordedCoursesQuery } from "@/features/recorded-courses/services/recordedCoursesRepository.js";
-import { liveClasses } from "@/data/lmsData.js";
-import { LiveClassCard } from "@/pages/live-classes/LiveClasses.jsx";
+// import { liveClasses } from "@/data/lmsData.js";
+// import { LiveClassCard } from "@/pages/live-classes/LiveClasses.jsx";
 import CourseCardMedia from "@/features/recorded-courses/components/CourseCardMedia.jsx";
 import "./home.css";
 
@@ -112,7 +111,7 @@ const Home = () => {
           >
             <motion.div
               variants={reveal}
-              className="mb-5 inline-flex max-w-full items-center gap-2 rounded-md border border-white/[.18] bg-white/[.09] px-3.5 py-2 text-[0.68rem] font-black uppercase tracking-[0.15em] text-[#d6efe8] backdrop-blur max-sm:text-[0.6rem] max-sm:tracking-[0.1em]"
+              className="mb-5 inline-flex max-w-full items-center gap-2 rounded-md border border-white/[.18] bg-white/[.09] px-3.5 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#d6efe8] backdrop-blur max-sm:tracking-[0.1em]"
             >
               <ShieldCheck className="size-3.5 text-[#f4c95d]" />
               Quran & Islamic learning, at your pace
@@ -261,8 +260,8 @@ const Home = () => {
         </motion.div>
       </section>
 
-      {/* Live Classes */}
-      <section className="border-t border-[#e3e9e5] bg-white px-6 py-24 max-sm:px-4 max-sm:py-18">
+      {/* Post-MVP: Live classes are deferred until the API-backed classroom is available.
+<section className="border-t border-[#e3e9e5] bg-white px-6 py-24 max-sm:px-4 max-sm:py-18">
         <motion.div
           className="mx-auto max-w-7xl"
           initial="hidden"
@@ -296,6 +295,7 @@ const Home = () => {
           </div>
         </motion.div>
       </section>
+      */}
 
       {/* Platform */}
       <section
@@ -402,8 +402,8 @@ const Home = () => {
         </motion.div>
       </section>
 
-      {/* Mentors */}
-      <section
+      {/* Post-MVP: Keep sample instructor cards and testimonial content out of the release.
+<section
         id="mentors"
         className="scroll-mt-24 border-y border-[#e6e9e5] bg-[#f5f2e9] px-6 py-24 max-sm:px-4 max-sm:py-18"
       >
@@ -439,7 +439,7 @@ const Home = () => {
                   />
                 </div>
                 <div className="p-6">
-                  <p className="text-[0.66rem] font-black uppercase tracking-[0.14em] text-primary">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-primary">
                     {teacher.role}
                   </p>
                   <h3 className="mt-2 font-display text-xl font-black tracking-[-0.025em]">
@@ -462,7 +462,7 @@ const Home = () => {
         </motion.div>
       </section>
 
-      {/* Stories/Testimonials */}
+
       <section
         id="stories"
         className="scroll-mt-24 bg-white px-6 py-24 max-sm:px-4 max-sm:py-18"
@@ -524,6 +524,7 @@ const Home = () => {
           </div>
         </motion.div>
       </section>
+      */}
 
       {/* FAQ */}
       <section

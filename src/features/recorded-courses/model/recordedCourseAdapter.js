@@ -69,7 +69,7 @@ const adaptRecordedCourse = (record = {}) => {
     status: record.status,
     title: record?.title || "Untitled course",
     slug: record?.slug || "",
-    shortDescription: record?.shortDescription || record?.description || "",
+    shortDescription: record?.shortDescription || "",
     description: record?.description || record?.shortDescription || "",
     category:
       record?.category?.name ||

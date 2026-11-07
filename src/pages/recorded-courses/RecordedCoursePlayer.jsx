@@ -9,6 +9,8 @@ import ProtectedLessonVideo from "@/features/recorded-courses/components/Protect
 import LearningCurriculum from "@/features/recorded-courses/components/LearningCurriculum.jsx";
 import LessonNotes from "@/features/recorded-courses/components/LessonNotes.jsx";
 import SectionQuizPanel from "@/features/recorded-courses/components/SectionQuizPanel.jsx";
+import LessonResources from "@/features/recorded-courses/components/LessonResources.jsx";
+import CourseDescription from "@/features/recorded-courses/components/CourseDescription.jsx";
 import useLessonWatch from "@/features/recorded-courses/useLessonWatch.js";
 import { useGetCourseProgressQuery } from "@/services/api/user/learnerApi.js";
 import learnerApi from "@/services/api/user/learnerApi.js";
@@ -28,7 +30,7 @@ function CourseOverview({ course, lesson, section }) {
   return <div className="learning-overview">
     {lesson.description && <section><h2>About this lesson</h2><p className="learning-description">{lesson.description}</p></section>}
     {section.description && <section><h2>In this section</h2><p className="learning-description">{section.description}</p></section>}
-    <section><h2>About this course</h2><p className="learning-description">{course.description || "Work through the lessons in order and return to any topic whenever you need to practice."}</p><dl className="learning-course-facts"><div><dt><Globe2 size={16} aria-hidden="true" />Language</dt><dd>{course.language}</dd></div><div><dt><Signal size={16} aria-hidden="true" />Level</dt><dd>{course.level}</dd></div>{course.totalDurationSeconds > 0 && <div><dt><Clock3 size={16} aria-hidden="true" />Duration</dt><dd>{course.durationLabel}</dd></div>}</dl></section>
+    <section><h2>About this course</h2><CourseDescription key={course.id} text={course.description || "Work through the lessons in order and return to any topic whenever you need to practice."} textClassName="learning-description" buttonClassName="cw-button mt-2" /><dl className="learning-course-facts"><div><dt><Globe2 size={16} aria-hidden="true" />Language</dt><dd>{course.language}</dd></div><div><dt><Signal size={16} aria-hidden="true" />Level</dt><dd>{course.level}</dd></div>{course.totalDurationSeconds > 0 && <div><dt><Clock3 size={16} aria-hidden="true" />Duration</dt><dd>{course.durationLabel}</dd></div>}</dl></section>
     {course.outcomes.length > 0 && <section><h2>What you’ll learn</h2><ul className="learning-outcomes">{course.outcomes.map((outcome, index) => <li key={index}><Check size={16} aria-hidden="true" /><span>{outcome}</span></li>)}</ul></section>}
     {course.requirements.length > 0 && <section><h2>Before you begin</h2><ul className="learning-requirements">{course.requirements.map((item, index) => <li key={index}>{item}</li>)}</ul></section>}
     <section className="learning-instructor"><span className="learning-instructor-icon"><GraduationCap size={23} aria-hidden="true" /></span><div><span className="studio-label">Your instructor</span><h2>{course.instructor.name}</h2>{course.instructor.bio && <p>{course.instructor.bio}</p>}<Link to={instructorProfileUrl(course.instructor) || `/courses/${encodeURIComponent(course.slug)}#course-instructor`}>View instructor<ChevronRight size={15} aria-hidden="true" /></Link></div></section>
@@ -37,17 +39,30 @@ function CourseOverview({ course, lesson, section }) {
 
 function LearningWorkspace({ course, userId, lessonId }) {
   const progress = useGetCourseProgressQuery(course.id, { refetchOnMountOrArgChange: true, refetchOnFocus: true, refetchOnReconnect: true });
+  const [restored, setRestored] = useState(null);
+  const refresh = progress.refetch;
+  useEffect(() => {
+    let active = true;
+    // RTK deduplicates this with the mount request. Await its result rather than
+    // briefly accepting a cached result before the subscription starts fetching.
+    refresh().then(result => { if (active) setRestored(result); });
+    return () => { active = false; };
+  }, [refresh]);
   // The protected player reads its starting position when mounted. Wait for the
-  // account's progress before mounting it, so a late response cannot reset a
-  // learner who has already started watching.
-  if (!progress.currentData && !progress.error) return <ClassroomSkeleton label="Restoring your lesson and progress" />;
-  return <LearningWorkspaceBody course={course} userId={userId} lessonId={lessonId} progress={progress} />;
+  // fresh account response, including when an older RTK result is cached. Later
+  // background refreshes must not remount or seek a player already in use.
+  if (!restored) return <ClassroomSkeleton label="Restoring your lesson and progress" />;
+  const current = (progress.fulfilledTimeStamp || 0) >= (restored.fulfilledTimeStamp || 0)
+    ? progress : { ...progress, currentData: restored.data, error: restored.error };
+  return <LearningWorkspaceBody course={course} userId={userId} lessonId={lessonId} progress={current} />;
 }
 
 function LearningWorkspaceBody({ course, userId, lessonId, progress }) {
   const sections = useMemo(() => orderedLearningSections(course.sections), [course.sections]);
   const lessons = useMemo(() => sections.flatMap(section => section.lessons), [sections]);
-  const [lastLesson] = useState(() => progress.currentData?.lastLessonId || readLastLesson(userId, course.id, lessons));
+  const [lastLesson] = useState(() => !progress.error && progress.currentData
+    ? progress.currentData.continueLessonId || progress.currentData.lastLessonId
+    : readLastLesson(userId, course.id, lessons));
   const lesson = lessonId ? lessons.find(item => item.id === lessonId) : lessons.find(item => item.id === lastLesson) || lessons[0];
   const [contentOpen, setContentOpen] = useState(true);
   const [finished, setFinished] = useState(false);
@@ -131,7 +146,7 @@ function LearningWorkspaceBody({ course, userId, lessonId, progress }) {
         {watch.status === "saving" && <p className="learning-save-status" role="status">Saving lesson progress…</p>}
       </section>
       <aside id="learning-course-content" className="learning-curriculum" aria-labelledby="learning-content-title" hidden={!contentOpen}><LearningCurriculum course={course} sections={sections} lesson={lesson} lessons={lessons} learningState={learningState} progressLoading={progress.isLoading} onQuiz={openQuiz} /></aside>
-      <section className="learning-details" aria-label="Lesson information and notes" ref={details} tabIndex={-1}><Tabs.Root value={tab} onValueChange={setTab}><Tabs.List className="learning-tabs" aria-label="Lesson tools"><Tabs.Tab value="overview"><BookOpen size={16} aria-hidden="true" />Overview</Tabs.Tab><Tabs.Tab value="notes"><NotebookPen size={16} aria-hidden="true" />My notes</Tabs.Tab>{quizTarget?.quiz && <Tabs.Tab value="quiz" disabled={!quizTarget.quiz.unlocked} title={quizTarget.quiz.unlocked ? "Optional knowledge check" : "Complete this section’s lessons to unlock"}><ClipboardCheck size={16} aria-hidden="true" />Quiz (optional)</Tabs.Tab>}</Tabs.List><Tabs.Panel value="overview"><CourseOverview course={course} lesson={lesson} section={section} /></Tabs.Panel><Tabs.Panel value="notes" keepMounted><LessonNotes key={`${userId}/${course.id}/${lesson.id}`} userId={userId} courseId={course.id} lesson={lesson} getTime={() => playback.current.time} /></Tabs.Panel>{quizTarget?.quiz?.unlocked && <Tabs.Panel value="quiz"><SectionQuizPanel key={quizTarget.sectionId} courseId={course.id} sectionId={quizTarget.sectionId} onDone={() => setTab("overview")} /></Tabs.Panel>}</Tabs.Root></section>
+      <section className="learning-details" aria-label="Lesson information and notes" ref={details} tabIndex={-1}><Tabs.Root value={tab} onValueChange={setTab}><Tabs.List className="learning-tabs" aria-label="Lesson tools"><Tabs.Tab value="overview"><BookOpen size={16} aria-hidden="true" />Overview</Tabs.Tab><Tabs.Tab value="notes"><NotebookPen size={16} aria-hidden="true" />My notes</Tabs.Tab>{quizTarget?.quiz && <Tabs.Tab value="quiz" disabled={!quizTarget.quiz.unlocked} title={quizTarget.quiz.unlocked ? "Optional knowledge check" : "Complete this section’s lessons to unlock"}><ClipboardCheck size={16} aria-hidden="true" />Quiz (optional)</Tabs.Tab>}</Tabs.List><Tabs.Panel value="overview"><CourseOverview course={course} lesson={lesson} section={section} /><LessonResources key={lesson.id} target={{ courseId: course.id, sectionId: lesson.sectionId, lessonId: lesson.id }} /></Tabs.Panel><Tabs.Panel value="notes" keepMounted><LessonNotes key={`${userId}/${course.id}/${lesson.id}`} userId={userId} courseId={course.id} lesson={lesson} getTime={() => playback.current.time} /></Tabs.Panel>{quizTarget?.quiz?.unlocked && <Tabs.Panel value="quiz"><SectionQuizPanel key={quizTarget.sectionId} courseId={course.id} sectionId={quizTarget.sectionId} onDone={() => setTab("overview")} /></Tabs.Panel>}</Tabs.Root></section>
     </div>
     <footer className="learning-footer"><p>Your playback position syncs with your account. Notes stay in this browser.</p><Link to="/contact"><CircleHelp size={16} aria-hidden="true" />Get help with this course</Link></footer>
   </>;

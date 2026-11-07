@@ -55,6 +55,7 @@ test("resume uses account progress on a fresh device and respects server resets 
   assert.equal(lessonResumePosition("learner", "course", "lesson", state(0)), 0, "replaced videos reset resume to zero");
   assert.equal(lessonResumePosition("learner", "course", "lesson", state(999)), 300);
   assert.equal(lessonResumePosition("learner", "course", "lesson", state(-10)), 0);
+  assert.equal(lessonResumePosition("learner", "course", "lesson", { lessons: [] }), 0, "an authoritative empty response cannot revive stale browser progress");
   assert.equal(lessonResumePosition("learner", "course", "lesson"), 180, "local resume remains a fallback when progress cannot load");
   assert.equal(lessonResumePosition("other", "course", "lesson"), 0);
 });

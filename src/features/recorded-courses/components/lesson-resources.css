@@ -1,0 +1,18 @@
+.lesson-resources { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); min-width: 0; }
+.learning-overview + .lesson-resources { margin: 0 24px 24px; }
+.lesson-resources-heading { display: flex; gap: 10px; align-items: start; }
+.lesson-resources-heading > svg { flex-shrink: 0; color: var(--primary); margin-top: 2px; }
+.lesson-resources-heading h3 { font-size: 1rem; font-weight: 600; }
+.lesson-resources-heading p, .lesson-resource-list p { color: var(--muted-foreground); font-size: var(--font-size-label); line-height: 1.6; margin-top: 5px; }
+.lesson-resource-list { display: grid; gap: 10px; margin-block: 16px; }
+.lesson-resource-list > li { display: flex; gap: 10px; align-items: center; border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.lesson-resource-list > li > svg { color: var(--primary); flex-shrink: 0; }
+.lesson-resource-list > li > div:first-of-type { flex: 1; min-width: 0; }
+.lesson-resource-list strong { font-size: var(--font-size-body); font-weight: 600; overflow-wrap: anywhere; }
+.lesson-resource-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.lesson-resource-form { display: grid; gap: 12px; margin-top: 16px; }
+.lesson-resource-form > button { justify-self: start; }
+.lesson-resource-form label { display: grid; gap: 8px; min-width: 0; }
+.lesson-resource-form input[type=file] { max-width: 100%; font-size: var(--font-size-label); }
+.lesson-resources > .cw-muted { margin-top: 14px; }
+@media (max-width: 600px) { .learning-overview + .lesson-resources { margin-inline: 18px; } .lesson-resource-list > li { flex-wrap: wrap; } .lesson-resource-actions { margin-left: auto; } }

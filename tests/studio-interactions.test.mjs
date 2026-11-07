@@ -46,7 +46,8 @@ test("studio preserves editing drafts and requires a typed title before course d
         deletionWrites.push(await request.json());
         if (deletionWrites.length === 1) return new Promise(resolve => { finishDeletion = () => resolve(Response.json({ success: false, message: "Deletion is temporarily unavailable." }, { status: 503 })); });
         return Response.json({ success: true, data: { deletionId: "deletion1", storageCleanupPending: true } }, { status: 202 });
-      } else if (url.pathname.endsWith("/readiness")) data = { ready: false, checks: [] };
+      } else if (url.pathname.endsWith("/resources")) data = { available: true, canManage: true, items: [], maxFiles: 5, maxBytes: 3 * 1024 * 1024 };
+      else if (url.pathname.endsWith("/readiness")) data = { ready: false, checks: [] };
       else if (request.method === "POST" && url.pathname.endsWith("/sections")) {
         const body = await request.json();
         writes.push(body);
@@ -140,8 +141,10 @@ test("studio preserves editing drafts and requires a typed title before course d
     assert.equal(writes.length, 4);
 
     const visibleButton = text => [...document.querySelectorAll("button")].find(item => item.textContent.trim() === text && !item.closest("[hidden]"));
+    await settle(() => visibleButton("Cancel"));
     await click(visibleButton("Cancel"));
     await click(button("Course Details"));
+    await settle(() => visibleButton("Cancel"));
     await click(visibleButton("Cancel"));
     await click(button("Publish"));
     await click(button("Delete course"));
