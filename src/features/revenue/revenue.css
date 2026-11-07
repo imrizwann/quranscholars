@@ -1,0 +1,61 @@
+.revenue-policy { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 20px; }
+.revenue-policy > svg { color: var(--primary); flex-shrink: 0; margin-top: 3px; }
+.revenue-policy p, .revenue-note, .revenue-payout p, .revenue-sync p, .revenue-form > p { color: var(--muted-foreground); font-size: var(--font-size-label); line-height: 1.7; margin-top: 8px; }
+.revenue-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; margin-block: 20px; }
+.revenue-filters > div, .revenue-filters > label { flex: 1 1 180px; max-width: 260px; }
+.revenue-field { display: grid; gap: 8px; font-size: var(--font-size-label); font-weight: 500; }
+.revenue-field input, .revenue-field textarea { width: 100%; min-width: 0; min-height: 44px; border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; color: var(--foreground); background: var(--surface); font: inherit; font-weight: 400; }
+.revenue-field textarea { resize: vertical; }
+.revenue-tabs { display: flex; gap: 24px; border-bottom: 1px solid var(--border); margin-bottom: 20px; overflow-x: auto; }
+.revenue-tabs button { padding: 12px 0; border-bottom: 2px solid transparent; white-space: nowrap; color: var(--muted-foreground); font-weight: 500; }
+.revenue-tabs button[aria-current] { color: var(--primary); border-bottom-color: var(--primary); }
+.revenue-totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 20px; margin-block: 20px; }
+.revenue-totals dt, .revenue-detail dt { font-size: var(--font-size-label); color: var(--muted-foreground); }
+.revenue-totals dd { margin-top: 6px; font-weight: 650; font-size: 1.125rem; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.revenue-table-scroll { min-width: 0; overflow-x: auto; }
+.revenue-panel { margin-bottom: 20px; }
+.revenue-calculation { display: grid; gap: 14px; border-block: 1px solid var(--border); padding-block: 20px; margin-block: 20px; }
+.revenue-calculation h3 { font-family: var(--font-display); font-size: var(--font-size-body); font-weight: 650; }
+.revenue-calculation .revenue-note { margin-top: 0; }
+.revenue-formula { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px 14px; border-radius: 7px; background: var(--muted); color: var(--primary); font-weight: 600; font-size: var(--font-size-label); }
+.revenue-calculation-lines { display: grid; gap: 12px; max-width: 640px; }
+.revenue-calculation-lines > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 16px; }
+.revenue-calculation-lines dt { font-size: var(--font-size-label); color: var(--muted-foreground); }
+.revenue-calculation-lines dd { text-align: right; font-variant-numeric: tabular-nums; font-size: var(--font-size-body); font-weight: 500; }
+.revenue-calculation-lines .revenue-calculation-subtotal { padding-top: 12px; border-top: 1px solid var(--border); }
+.revenue-calculation-lines .revenue-calculation-result { padding: 12px 14px; border-radius: 7px; background: color-mix(in srgb, var(--primary) 6%, var(--surface)); }
+.revenue-calculation-result dt, .revenue-calculation-result dd { color: var(--primary); font-weight: 650; }
+.revenue-panel small { display: block; font-size: var(--font-size-caption); color: var(--muted-foreground); margin-top: 6px; }
+.revenue-panel td .cw-button { margin: 6px 0 0 8px; white-space: nowrap; }
+.revenue-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.revenue-payouts { display: grid; gap: 20px; margin-top: 20px; }
+.revenue-payout { padding: 18px; border: 1px solid var(--border); border-radius: 10px; min-width: 0; overflow-wrap: anywhere; }
+.revenue-status { text-transform: capitalize; background: var(--muted); }
+.revenue-status[data-status=paid] { color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, var(--surface)); }
+.revenue-status[data-status=failed] { color: var(--destructive); }
+.revenue-notice { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--muted); font-size: var(--font-size-label); line-height: 1.7; margin-block: 16px; }
+.revenue-notice ul { list-style: disc; padding-left: 20px; }
+.revenue-sync { display: flex; gap: 16px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.revenue-sync > div { flex: 1 1 300px; }
+.revenue-sync > p { flex-basis: 100%; }
+.revenue-dialog-content, .revenue-form, .revenue-form fieldset { display: grid; gap: 16px; min-width: 0; }
+.revenue-dialog-content { margin-top: 20px; }
+.revenue-form { margin-top: 16px; }
+.revenue-form fieldset { border: 0; padding: 0; margin: 0; }
+.revenue-form fieldset:disabled { opacity: .7; }
+.revenue-confirm { display: flex; align-items: flex-start; gap: 10px; font-size: var(--font-size-label); line-height: 1.65; font-weight: 400; }
+.revenue-confirm input { width: 18px; height: 18px; flex: 0 0 18px; margin-top: 4px; accent-color: var(--primary); }
+.revenue-detail { display: grid; gap: 12px; }
+.revenue-detail > div { display: flex; justify-content: space-between; gap: 16px; }
+.revenue-detail dd { font-variant-numeric: tabular-nums; text-align: right; font-size: var(--font-size-label); }
+.revenue-history { display: grid; gap: 12px; padding: 16px 0 0 20px; list-style: disc; font-size: var(--font-size-label); }
+.revenue-history p { color: var(--muted-foreground); margin-top: 4px; }
+.revenue-payout details { margin-block: 16px; font-size: var(--font-size-label); }
+.revenue-dialog-content details summary, .revenue-payout summary { cursor: pointer; min-height: 36px; }
+@media (max-width: 540px) {
+  .revenue-filters > div, .revenue-filters > label { max-width: none; flex-basis: calc(50% - 8px); }
+  .revenue-tabs { gap: 20px; }
+  .revenue-panel td .cw-button { margin-left: 0; }
+  .revenue-payout { padding: 14px; }
+  .revenue-totals { gap: 16px; }
+}

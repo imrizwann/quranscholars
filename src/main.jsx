@@ -12,6 +12,7 @@ import NotLoggedIn from "@/components/guards/NotLoggedIn.jsx";
 import CourseRouteRedirect from "@/components/navigation/CourseRouteRedirect.jsx";
 import RouteErrorPage from "@/components/feedback/RouteErrorPage.jsx";
 const Home = lazy(() => import("@/pages/home/Home.jsx"));
+const RevenueDashboard = lazy(() => import("@/features/revenue/RevenueDashboard.jsx"));
 const Services = lazy(() => import("@/pages/services/Services.jsx"));
 const ServicesList = lazy(() => import("@/pages/services/ServicesList.jsx"));
 const About = lazy(() => import("@/pages/about/About.jsx"));
@@ -329,6 +330,11 @@ const router = createBrowserRouter([
       {
         path: "/admin/admissions",
         element: <AdminRoute><Navigate to="/admin/instructor-applications" replace /></AdminRoute>,
+      },
+      {
+        path: "/admin/revenue",
+        element: <AdminRoute><WorkspaceLayout type="admin" /></AdminRoute>,
+        children: [{ index: true, element: <RevenueDashboard admin /> }],
       },
       {
         path: "/admin/instructor-applications",

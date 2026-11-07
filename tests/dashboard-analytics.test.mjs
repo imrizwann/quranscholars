@@ -119,13 +119,7 @@ test("dashboard analytics render loading, zero, verified currency totals, pagina
     await settle(() => document.body.textContent.includes("Advanced recitation"));
     assert.equal(document.querySelector('[role="alert"]'), null);
 
-    await mount(mod.InstructorReports, { kind: "earnings" });
-    await settle(() => document.body.textContent.includes("123.45"));
-    assert.equal(document.querySelectorAll(".dashboard-metric").length, 2);
-    assert.match(document.body.textContent, /Understanding your earnings/);
-    assert.doesNotMatch(document.body.textContent, /Enrollments by course|Coming soon/);
-    await click("Refresh");
-    await settle(() => !document.querySelector("button[disabled]"));
+    // Earnings now has its own private financial ledger API and UI tests.
     await mount(mod.InstructorReports, { kind: "analytics" });
     await settle(() => document.body.textContent.includes("Recitation foundations"));
     assert.equal(document.querySelectorAll(".dashboard-metric").length, 4);

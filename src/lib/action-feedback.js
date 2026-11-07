@@ -22,6 +22,11 @@ const studio = {
   deleteVideo: feedback("Removing video…", "Video removal started"),
 };
 const actions = {
+  revenueApi: { revenueAction: { pending: "Updating revenue record…", success: data => {
+    if (Number.isInteger(data.processed)) return { type: data.failed?.length ? "info" : "success", title: "Payments reconciled", description: `${data.synced} payment(s) updated. ${data.failed?.length || 0} need further review.` };
+    const title = { pending: "Payout reserved", approved: "Payout approved", processing: "Payout processing started", paid: "Payment recorded", cancelled: "Payout cancelled", failed: "Transfer failure recorded" }[data.status];
+    return { type: "success", title: title || "Sale record updated", description: data.status === "paid" ? "The confirmed transfer and its reference are saved. The instructor has been notified." : "The latest balances and audit history are available on this page." };
+  } } },
   instructorCoursesApi: studio,
   instructorApplicationApi: {
     submitInstructorApplication: { pending: "Submitting your application…", success: data => data.application?.status === "pending"

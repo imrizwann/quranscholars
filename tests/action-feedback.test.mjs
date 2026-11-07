@@ -57,6 +57,7 @@ test("application resubmission and checkout feedback reflect confirmed server ou
 test("notification links are kind-specific local routes and never accept external URLs or malformed dates", () => {
   for (const kind of ["instructor.approved", "instructor.rejected"]) assert.equal(notificationPresentation({ kind }).to, "/instructor/application");
   assert.equal(notificationPresentation({ kind: "enrollment.active", courseSlug: "tajweed-basics" }).to, "/learn/tajweed-basics");
+  assert.equal(notificationPresentation({ kind: "payout.paid" }).to, "/instructor/earnings");
   for (const courseSlug of ["https://evil.example", "//evil.example", "../admin", "a?token=secret", "a%2fb"]) assert.equal(notificationPresentation({ kind: "enrollment.active", courseSlug }).to, "/dashboard/learning");
   assert.equal(notificationPresentation({ kind: "video.failed", courseId: "invalid" }).to, "/instructor/courses");
   assert.equal(notificationPresentation({ kind: "unknown", url: "https://evil.example" }).to, "/dashboard/learning");

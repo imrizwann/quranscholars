@@ -18,8 +18,10 @@ import adminInstructorApplicationsApi from "@/services/api/admin/instructorAppli
 import notificationsApi from "@/services/api/user/notificationsApi.js";
 import realtime from "@/realtime/realtimeSlice.js";
 import { actionFeedbackMiddleware } from "@/components/feedback/actionFeedbackMiddleware.js";
+import revenueApi, { revenueSessionMiddleware } from "@/services/api/revenueApi.js";
 export const store = configureStore({
   reducer: {
+    [revenueApi.reducerPath]: revenueApi.reducer,
     realtime,
     [notificationsApi.reducerPath]: notificationsApi.reducer,
     [adminInstructorApplicationsApi.reducerPath]: adminInstructorApplicationsApi.reducer,
@@ -38,6 +40,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
       .concat(actionFeedbackMiddleware)
+      .concat(revenueSessionMiddleware, revenueApi.middleware)
       .concat(authSessionMiddleware)
       .concat(notificationsApi.middleware)
       .concat(adminInstructorApplicationsApi.middleware)

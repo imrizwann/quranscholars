@@ -29,6 +29,7 @@ const instructorLinks = [
 ];
 
 const adminLinks = [
+  { to: "/admin/revenue", label: "Revenue & payouts", icon: CircleDollarSign },
   { to: "/admin/instructor-applications", label: "Instructor applications", icon: GraduationCap },
 ];
 

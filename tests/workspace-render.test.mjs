@@ -18,6 +18,7 @@ test("workspaces render real courses and library data, covers, and honest unavai
       export { default as coursesApi } from './src/services/api/instructor/recordedCoursesApi.js';
       export { default as paymentApi } from './src/services/api/user/paymentApi.js';
       export { default as learnerApi } from './src/services/api/user/learnerApi.js';
+      export { default as revenueApi } from './src/services/api/revenueApi.js';
       export { default as Courses } from './src/pages/instructor/InstructorCourses.jsx';
       export { default as InstructorDashboard } from './src/pages/instructor/InstructorDashboard.jsx';
       export { default as StudentDashboard } from './src/pages/dashboard/StudentDashboard.jsx';
@@ -32,10 +33,11 @@ test("workspaces render real courses and library data, covers, and honest unavai
   let store, apis;
   try {
     const mod = await import(pathToFileURL(output));
-    apis = [mod.coursesApi, mod.paymentApi, mod.learnerApi];
+    apis = [mod.coursesApi, mod.paymentApi, mod.learnerApi, mod.revenueApi];
     const records = [{ _id: "course-1", title: "Real Tajweed Course", slug: "tajweed", status: "Draft", category: { name: "Tajweed" }, thumbnailUrl: "https://media.example.test/cover.webp", stats: { totalSections: 2, totalLessons: 7 }, trailerVideo: { status: "COMPLETED" } }, { _id: "course-2", title: "Course Without Cover", slug: "no-cover", status: "Published", published: true }];
     globalThis.fetch = async (request) => {
       const url = new URL(request.url);
+      if (url.pathname.endsWith("/revenue/summary")) return Response.json({ success: true, data: { currency: "INR", currencyExponent: 2, currencies: ["INR"], balance: { availableMinor: 0, heldMinor: 0, reservedMinor: 0, paidMinor: 0, carryForwardMinor: 0 }, totals: { sales: 0, grossMinor: 0, refundedMinor: 0, gatewayFeeMinor: 0, salesTaxMinor: 0, earnedMinor: 0, platformMinor: 0, reviewPending: 0, feePending: 0 }, groups: [], pagination: { page: 1, total: 0, hasNextPage: false } } });
       if (url.pathname.endsWith("/analytics")) return Response.json({ success: true, data: url.pathname.includes("/instructor/") ? { summary: { totalCourses: 2, publishedCourses: 1, draftCourses: 1, totalEnrollments: 0, verifiedSales: 0 }, courses: records.map(course => ({ ...course, enrollments: 0 })), revenue: [], pagination: { page: 1, total: 2, hasNextPage: false } } : { summary: { totalEnrolledCourses: 2, completedCourses: 0, completedLessons: 0, coursesInProgress: 0 } } });
       return Response.json({ success: true, data: { courses: records, pagination: { page: 1, total: 2, totalCourses: url.searchParams.get("status") ? 1 : 2, hasNextPage: false } } });
     };
@@ -46,6 +48,7 @@ test("workspaces render real courses and library data, covers, and honest unavai
       store.dispatch(mod.coursesApi.endpoints.getAnalytics.initiate({ page: 1, limit: 5 })).unwrap(),
       store.dispatch(mod.coursesApi.endpoints.getAnalytics.initiate({ page: 1, limit: 10 })).unwrap(),
       store.dispatch(mod.learnerApi.endpoints.getLearnerAnalytics.initiate()).unwrap(),
+      store.dispatch(mod.revenueApi.endpoints.getRevenue.initiate({ admin: false, currency: "INR", mode: "live", period: "all", page: 1, limit: 10, view: "summary" })).unwrap(),
       ...[3, 12].map((limit) => store.dispatch(mod.paymentApi.endpoints.getLearningLibrary.initiate({ page: 1, limit })).unwrap()),
     ]);
     const render = (Component, url) => renderToStaticMarkup(React.createElement(Provider, { store }, React.createElement(MemoryRouter, { initialEntries: [url] }, React.createElement(Component))));
@@ -57,7 +60,7 @@ test("workspaces render real courses and library data, covers, and honest unavai
     assert.match(render(mod.MyLearning, "/dashboard/learning"), /\/learn\/tajweed/);
     assert.doesNotMatch(render(mod.MyLearning, "/dashboard/learning?type=live-classes"), /demoLiveEnrollments|students enrolled/);
     const earnings = render(mod.InstructorSectionPage, "/instructor/earnings");
-    assert.match(earnings, /Verified revenue/); assert.match(earnings, /No verified revenue yet/); assert.match(earnings, /Payouts and withdrawals are not configured/);
+    assert.match(earnings, /Your earnings/); assert.match(earnings, /No sales match these filters/); assert.match(earnings, /30-day hold/);
     assert.doesNotMatch(earnings, /Coming soon|Enrollments by course/);
     const analytics = render(mod.InstructorSectionPage, "/instructor/analytics");
     assert.match(analytics, /Enrollments by course/); assert.match(analytics, /Real Tajweed Course/);

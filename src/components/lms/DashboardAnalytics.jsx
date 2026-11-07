@@ -74,11 +74,11 @@ export function InstructorAnalytics({ view = "overview" }) {
           <Pagination pagination={data.pagination} page={page} onPage={setPage} loading={query.isFetching} />
         </> : <p className="analytics-empty">{page > 1 ? "No courses on this page." : "Create a course to start tracking your enrollments."}{page > 1 && <button className="cw-button" onClick={() => setPage(1)}>Back to first page</button>}</p>}
       </section>}
-      {view !== "analytics" && <section className="studio-panel analytics-revenue"><h2>Verified revenue</h2><p>Verified sales after refunds and disputes. Free enrollments are excluded.</p>
+      {view !== "analytics" && <section className="studio-panel analytics-revenue"><h2>Verified course sales</h2><p>Verified live payments. Free enrollments, refunds, and disputes are excluded.</p>
         {!data ? <AnalyticsSkeleton label="Loading verified revenue" /> : data.revenue.length ? <dl>{data.revenue.map(item => <div key={`${item.currency}-${item.currencyExponent}`}><dt>{item.currency}</dt><dd>{new Intl.NumberFormat(undefined, { style: "currency", currency: item.currency }).format(item.amountMinor / 10 ** item.currencyExponent)}</dd><p>{count(item.sales)} verified {item.sales === 1 ? "sale" : "sales"}</p></div>)}</dl> : <div className="analytics-empty"><Receipt size={22} aria-hidden="true" /><strong>No verified revenue yet</strong><p>Verified payments will appear here when learners purchase your courses.</p></div>}
-        <p className="analytics-footnote">Sales totals before provider fees and payouts. Currencies are shown separately.</p>
+        <p className="analytics-footnote">Course sales before sales tax, gateway fees, and instructor revenue sharing. Currencies are shown separately.</p>
       </section>}
-      {view === "earnings" && <aside className="studio-panel analytics-report-note"><Receipt size={22} aria-hidden="true" /><h2>Understanding your earnings</h2><p>Each currency is reported separately using verified payment records. Changes to a course price do not change earlier sales.</p><p>This report shows course sales before provider fees and any instructor revenue share. It is not an available payout balance.</p><p>Payouts and withdrawals are not configured yet.</p><Link className="cw-button" to="/instructor/analytics">View course analytics</Link></aside>}
+      {view === "earnings" && <aside className="studio-panel analytics-report-note"><Receipt size={22} aria-hidden="true" /><h2>Understanding your earnings</h2><p>Each currency is reported separately using verified payment records. Changes to a course price do not change earlier sales.</p><p>This report shows course sales before provider fees and any instructor revenue share. It is not an available payout balance.</p><p>Review your revenue share, holding period, and monthly payouts on the Earnings page.</p><Link className="cw-button" to="/instructor/analytics">View course analytics</Link></aside>}
     </div>}
   </section>;
 }
