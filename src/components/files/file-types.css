@@ -1,0 +1,27 @@
+[data-file-kind] { --file-color: #475569; }
+[data-file-kind=pdf] { --file-color: #b42318; }
+[data-file-kind=document] { --file-color: #1d4ed8; }
+[data-file-kind=spreadsheet] { --file-color: #166534; }
+[data-file-kind=presentation] { --file-color: #9a3412; }
+[data-file-kind=image] { --file-color: #7e22ce; }
+[data-file-kind=video] { --file-color: #4338ca; }
+[data-file-kind=audio] { --file-color: #0e7490; }
+[data-file-kind=notes] { --file-color: #92400e; }
+[data-file-kind=archive] { --file-color: #854d0e; }
+.dark [data-file-kind], .qs-file-dark [data-file-kind], .qs-file-dark[data-file-kind] { --file-color: #cbd5e1; }
+.dark [data-file-kind=pdf], .qs-file-dark [data-file-kind=pdf], .qs-file-dark[data-file-kind=pdf] { --file-color: #fda29b; }
+.dark [data-file-kind=document], .qs-file-dark [data-file-kind=document], .qs-file-dark[data-file-kind=document] { --file-color: #93c5fd; }
+.dark [data-file-kind=spreadsheet], .qs-file-dark [data-file-kind=spreadsheet], .qs-file-dark[data-file-kind=spreadsheet] { --file-color: #86efac; }
+.dark [data-file-kind=presentation], .qs-file-dark [data-file-kind=presentation], .qs-file-dark[data-file-kind=presentation] { --file-color: #fdba74; }
+.dark [data-file-kind=image], .qs-file-dark [data-file-kind=image], .qs-file-dark[data-file-kind=image] { --file-color: #d8b4fe; }
+.dark [data-file-kind=video], .qs-file-dark [data-file-kind=video], .qs-file-dark[data-file-kind=video] { --file-color: #a5b4fc; }
+.dark [data-file-kind=audio], .qs-file-dark [data-file-kind=audio], .qs-file-dark[data-file-kind=audio] { --file-color: #67e8f9; }
+.dark [data-file-kind=notes], .qs-file-dark [data-file-kind=notes], .qs-file-dark[data-file-kind=notes] { --file-color: #fcd34d; }
+.dark [data-file-kind=archive], .qs-file-dark [data-file-kind=archive], .qs-file-dark[data-file-kind=archive] { --file-color: #fde047; }
+.qs-file-dark { --file-surface: #082f2b; --file-line: #ffffff26; }
+.qs-file-icon[data-file-kind] { display: inline-grid; place-items: center; flex: 0 0 36px; width: 36px; height: 36px; border: 1px solid color-mix(in srgb, var(--file-color) 18%, var(--file-line, var(--border))); border-radius: 8px; background: color-mix(in srgb, var(--file-color) 9%, var(--file-surface, var(--surface))); color: var(--file-color); vertical-align: middle; }
+.qs-file-icon[data-size=sm] { flex-basis: 28px; width: 28px; height: 28px; border-radius: 6px; }
+.qs-file-icon[data-size=lg] { flex-basis: 42px; width: 42px; height: 44px; }
+.qs-file-icon[data-file-kind] > svg { flex-shrink: 0; color: var(--file-color); }
+.qs-file-label[data-file-kind] { display: inline; color: var(--file-color); font-size: var(--font-size-caption); font-weight: 600; }
+.qs-file-surface[data-file-kind] { border-color: color-mix(in srgb, var(--file-color) 15%, var(--file-line, var(--border))); background: color-mix(in srgb, var(--file-color) 3%, var(--file-surface, var(--surface))); }

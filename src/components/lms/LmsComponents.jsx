@@ -4,8 +4,9 @@ import {
   CheckCircle2,
   Clock3,
   Download,
-  FileText,
 } from "lucide-react";
+import FileTypeIcon, { FileTypeLabel } from "@/components/files/FileTypeIcon.jsx";
+import { filePresentation } from "@/components/files/file-types.js";
 
 const statusClasses = {
   "Enrollment Open": "bg-emerald-50 text-emerald-800 border-emerald-200",
@@ -26,21 +27,20 @@ export const StatusBadge = ({ status }) => (
   </span>
 );
 
-export const ResourceCard = ({ resource, dark = false }) => (
+export const ResourceCard = ({ resource, dark = false }) => {
+  const file = { name: resource.name || resource.title, contentType: resource.contentType, type: resource.type };
+  return (
   <article
-    className={`flex min-w-0 items-center gap-3 rounded-xl border p-4 ${dark ? "border-white/10 bg-white/5" : "border-border bg-white"}`}
+    className={`qs-file-surface flex min-w-0 items-center gap-3 rounded-xl border p-4 ${dark ? "qs-file-dark" : ""}`}
+    data-file-kind={filePresentation(file).kind}
   >
-    <span
-      className={`grid size-10 shrink-0 place-items-center rounded-lg ${dark ? "bg-white/10 text-[#f4c95d]" : "bg-primary/10 text-primary"}`}
-    >
-      <FileText className="size-5" />
-    </span>
+    <FileTypeIcon {...file} />
     <div className="min-w-0 flex-1">
       <h3 className="truncate text-sm font-black">{resource.title}</h3>
       <p
         className={`mt-1 text-xs font-semibold ${dark ? "text-white/50" : "text-muted-foreground"}`}
       >
-        {resource.type} · {resource.size}
+        <FileTypeLabel {...file} /> · {resource.size}
       </p>
     </div>
     <button
@@ -51,7 +51,8 @@ export const ResourceCard = ({ resource, dark = false }) => (
       <Download className="size-4" />
     </button>
   </article>
-);
+  );
+};
 
 export const AssignmentCard = ({ assignment, compact = false }) => (
   <article className="rounded-xl border border-border bg-white p-5">

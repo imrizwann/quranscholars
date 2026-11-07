@@ -32,7 +32,7 @@ export default function InstructorCourseCard({ course }) {
           </div>
         )}
         <span
-          className="studio-course-status"
+          className="studio-course-status studio-course-publication"
           data-published={course.published === true && course.status !== "Archived"}
         >
           {courseStatusLabel(course.status)}

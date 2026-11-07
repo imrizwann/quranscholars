@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Clock3, Download, NotebookPen } from "lucide-react";
+import { Clock3, Download } from "lucide-react";
+import FileTypeIcon from "@/components/files/FileTypeIcon.jsx";
 import { NOTE_LIMIT, lessonTime, readLessonStudy, saveLessonStudy } from "../services/lessonStudyStorage.js";
 
 export default function LessonNotes({ userId, courseId, lesson, getTime }) {
@@ -37,7 +38,7 @@ export default function LessonNotes({ userId, courseId, lesson, getTime }) {
     link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   return <div className="learning-notes">
-    <div className="learning-notes-heading"><div><h2><NotebookPen size={19} aria-hidden="true" />Your lesson notes</h2><p>Capture a key idea or something to practice.</p></div><button type="button" className="cw-button" onClick={timestamp}><Clock3 size={15} aria-hidden="true" />Add timestamp</button></div>
+    <div className="learning-notes-heading"><div><h2><FileTypeIcon kind="notes" size="sm" />Your lesson notes</h2><p>Capture a key idea or something to practice.</p></div><button type="button" className="cw-button" onClick={timestamp}><Clock3 size={15} aria-hidden="true" />Add timestamp</button></div>
     <label className="sr-only" htmlFor={id}>Notes for {lesson.title}</label><textarea ref={input} id={id} value={notes} onChange={event => setNotes(event.target.value)} maxLength={NOTE_LIMIT} placeholder="Write your notes here…" aria-describedby={`${id}-privacy`} rows={7} />
     <div className="learning-notes-footer"><p role="status">{status === "error" ? "Notes could not be saved. Download a copy to keep your work." : status === "saving" ? "Saving notes…" : status === "saved" ? "Saved in this browser" : "Notes save automatically as you write"}</p><span>{notes.length.toLocaleString()} / {NOTE_LIMIT.toLocaleString()}</span><button type="button" className="cw-button" disabled={!notes.trim()} onClick={download}><Download size={15} aria-hidden="true" />Download notes</button></div>
     <p id={`${id}-privacy`} className="learning-device-note">Saved for your account in this browser. Notes do not sync between devices; download a copy to keep them.</p>

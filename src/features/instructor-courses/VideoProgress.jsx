@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import { Check, CheckCircle2, CircleAlert, FileVideo, X } from "lucide-react";
 import Spinner from "@/components/feedback/Spinner.jsx";
+import FileTypeIcon, { FileTypeLabel } from "@/components/files/FileTypeIcon.jsx";
 import { videoErrorMessage } from "@/lib/user-messages.js";
 import { videoProgressState, videoFileSize } from "./video-progress.js";
 
@@ -11,7 +12,7 @@ export default function VideoProgress({ video, phase, progress, file, unconfirme
   const filename = file?.name || video?.originalFileName;
   const size = videoFileSize(file?.size || video?.fileSize);
   return <section className="cw-transfer" data-state={state.failed ? "failed" : state.complete ? "ready" : "pending"} aria-label="Video upload and preparation">
-    {filename && <div className="cw-transfer-file"><FileVideo size={18} aria-hidden="true" /><div><strong>{filename}</strong>{size && <span>{size}</span>}</div>{file && onClear && <button type="button" className="cw-actions-trigger" aria-label="Clear selected video" title="Cancel selection" onClick={onClear}><X size={14} aria-hidden="true" /></button>}</div>}
+    {filename && <div className="cw-transfer-file"><FileTypeIcon kind="video" size="sm" /><div><strong>{filename}</strong><span><FileTypeLabel kind="video" />{size && ` · ${size}`}</span></div>{file && onClear && <button type="button" className="cw-actions-trigger" aria-label="Clear selected video" title="Cancel selection" onClick={onClear}><X size={14} aria-hidden="true" /></button>}</div>}
     <div className="cw-transfer-heading">{state.active && state.removing ? <Spinner size={18} decorative /> : state.complete ? <CheckCircle2 size={19} aria-hidden="true" /> : state.failed ? <CircleAlert size={19} aria-hidden="true" /> : <FileVideo size={18} aria-hidden="true" />}<strong role="status">{state.title}</strong></div>
     <p>{state.failed ? videoErrorMessage(video?.lastError) : state.description}</p>
     {state.percent !== undefined && <><div className="cw-transfer-percent"><span>File upload</span><strong>{state.percent}%</strong></div><progress className="cw-transfer-progress" value={state.percent} max={100} aria-label="File upload progress" /></>}

@@ -16,6 +16,7 @@ test("rejected application UI exposes revisions and multipart resubmission recon
   const compiled = await build({
     stdin: { contents: `export { default as api } from './src/services/api/user/instructorApplicationApi.js'; export { default as Application } from './src/pages/instructor/InstructorApplication.jsx';`, resolveDir: process.cwd() },
     bundle: true, write: false, format: "esm", platform: "node", packages: "external", jsx: "automatic", alias: { "@": resolve("src") },
+    loader: { ".css": "empty" },
     define: { "import.meta.env": JSON.stringify({ VITE_API_URL: "https://api.example.test" }) },
   });
   await writeFile(output, compiled.outputFiles[0].text);
@@ -41,6 +42,7 @@ test("rejected application UI exposes revisions and multipart resubmission recon
     const render = () => renderToStaticMarkup(React.createElement(Provider, { store }, React.createElement(MemoryRouter, null, React.createElement(module.Application))));
     const rejected = render();
     assert.match(rejected, /Revise application/);
+    assert.match(rejected, /data-file-kind="pdf"/);
     assert.match(rejected, /Please provide a readable certificate/);
     assert.doesNotMatch(rejected, /application-form/);
     const body = new FormData();

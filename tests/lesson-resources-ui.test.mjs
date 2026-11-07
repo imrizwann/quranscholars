@@ -54,6 +54,8 @@ test("lesson resources validate PDFs, upload once, download through authenticati
     await act(async () => { button("Upload PDF").click(); button("Upload PDF").click(); }); await settle(() => uploads === 1); assert.equal(button("Uploading PDF").disabled, true);
     await act(async () => release()); await settle(() => document.querySelector('button[aria-label="Download Practice worksheet"]'));
     assert.deepEqual(busy, [true, false]); assert.match(document.body.textContent, /ready for learners/);
+    assert.equal(document.querySelector(".lesson-resource-list li").dataset.fileKind, "pdf");
+    assert.equal(document.querySelector(".lesson-resource-list .qs-file-label").textContent, "PDF", "file type remains explicit alongside its color");
     await act(async () => document.querySelector('button[aria-label="Download Practice worksheet"]').click()); await settle(() => downloads.length === 1); assert.equal(downloads[0].name, "worksheet.pdf"); assert.match(downloads[0].href, /^blob:/);
     await act(async () => document.querySelector('button[aria-label="Remove Practice worksheet"]').click()); await settle(() => document.querySelector('[role="dialog"]')); assert.equal(removals, 0);
     await act(async () => button("Cancel").click()); await settle(() => !document.querySelector('[role="dialog"]')); assert.equal(removals, 0);

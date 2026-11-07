@@ -9,6 +9,7 @@ import { getProfileInitials } from "@/features/profile/profile-initials.js";
 import ProfileDeleteModal from "@/features/profile/components/ProfileDeleteModal.jsx";
 import LearnerProfileForm from "@/features/profile/components/LearnerProfileForm.jsx";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
+import FileTypeIcon from "@/components/files/FileTypeIcon.jsx";
 import { userMessage } from "@/lib/user-messages.js";
 import "./profile.css";
 
@@ -81,7 +82,7 @@ export default function ProfilePage() {
               <button type="button" className="cw-button" onClick={() => fileInput.current?.click()} disabled={isUploading}><Camera size={16} aria-hidden="true" />{photo.data?.url ? "Change photo" : "Choose photo"}</button>
               {file && <><AsyncButton className="cw-button cw-primary" loading={isUploading} loadingLabel="Saving photo" onClick={savePhoto}><Upload size={16} aria-hidden="true" />Save photo</AsyncButton><button type="button" className="cw-button" disabled={isUploading} onClick={() => { setFile(null); setError(""); }}>Cancel</button></>}
             </div>
-            {file && <p className="profile-file">Selected: {file.name}</p>}
+            {file && <div className="profile-selected-file qs-file-surface" data-file-kind="image"><FileTypeIcon kind="image" size="sm" /><p className="profile-file">Selected image: {file.name}</p></div>}
             {error && <p className="profile-feedback profile-feedback-error" role="alert">{error}</p>}
             {message && <p className="profile-feedback" role="status">{message}</p>}
             {photo.isError && <div className="profile-photo-error"><p>Your saved photo could not be loaded.</p><AsyncButton className="cw-button cw-button-compact" loading={photo.isFetching} loadingLabel="Loading" onClick={photo.refetch}>Try again</AsyncButton></div>}

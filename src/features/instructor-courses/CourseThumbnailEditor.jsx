@@ -4,6 +4,7 @@ import instructorCoursesApi from "@/services/api/instructor/recordedCoursesApi.j
 import { resolveCourseImage } from "@/features/recorded-courses/model/recordedCourseAdapter.js";
 import { readableError } from "./courseApi.js";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
+import FileTypeIcon, { FileTypeLabel } from "@/components/files/FileTypeIcon.jsx";
 
 export default function CourseThumbnailEditor({ course, disabled, onBusy }) {
   const [upload, result] = instructorCoursesApi.endpoints.uploadThumbnail.useMutation();
@@ -48,7 +49,7 @@ export default function CourseThumbnailEditor({ course, disabled, onBusy }) {
   }
   return <section className="cw-card">
     <div className="cw-card-heading">
-      <span className="cw-heading-icon"><Image size={21} aria-hidden="true" /></span>
+      <FileTypeIcon kind="image" size="lg" />
       <div><h2>Course cover</h2><p className="cw-muted">Give your course a recognizable first impression.</p></div>
     </div>
     <div className="cw-thumbnail-layout">
@@ -64,7 +65,7 @@ export default function CourseThumbnailEditor({ course, disabled, onBusy }) {
           <p id={hintId} className="cw-field-hint">JPG, PNG, or WebP, up to 3 MB. Use a 16:9 image for the best fit.</p>
         </div>
         <input id={`${hintId}-file`} ref={input} type="file" hidden accept="image/jpeg,image/png,image/webp" aria-label="Choose a cover image" aria-describedby={hintId} disabled={locked} onChange={selectFile} />
-        {file && <div className="cw-thumbnail-selection" aria-live="polite"><Image size={18} aria-hidden="true" /><div><p className="cw-file">{file.name}</p><span className="cw-field-hint">{file.size < 1024 * 1024 ? `${Math.max(1, Math.round(file.size / 1024))} KB` : `${(file.size / 1024 / 1024).toFixed(1)} MB`} · Selected image</span></div></div>}
+        {file && <div className="cw-thumbnail-selection qs-file-surface" data-file-kind="image" aria-live="polite"><FileTypeIcon kind="image" /><div><p className="cw-file">{file.name}</p><span className="cw-field-hint"><FileTypeLabel kind="image" /> · {file.size < 1024 * 1024 ? `${Math.max(1, Math.round(file.size / 1024))} KB` : `${(file.size / 1024 / 1024).toFixed(1)} MB`} · Selected image</span></div></div>}
         <div className="cw-row cw-thumbnail-actions">
           <button type="button" className="cw-button" disabled={locked} onClick={() => input.current?.click()}><Image size={16} aria-hidden="true" />{file ? "Choose another" : "Choose image"}</button>
           {file && <>

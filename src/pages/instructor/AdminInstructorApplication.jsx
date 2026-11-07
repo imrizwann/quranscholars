@@ -9,6 +9,8 @@ import { userMessage } from "../../lib/user-messages.js";
 import { ReviewError, ReviewStatus } from "./InstructorReviewUI.jsx";
 import { reviewDate } from "./review-format.js";
 import "./instructor-review.css";
+import FileTypeIcon, { FileTypeLabel } from "@/components/files/FileTypeIcon.jsx";
+import { filePresentation } from "@/components/files/file-types.js";
 
 function Certificate({ id, document, index }) {
   const [access, request] = useAccessInstructorCertificateMutation();
@@ -25,7 +27,7 @@ function Certificate({ id, document, index }) {
     catch (cause) { setError(userMessage(cause)); }
     finally { request.reset(); }
   }
-  return <li><FileText size={20} aria-hidden="true" /><div className="review-document-name"><strong>{document.name}</strong><p>{(document.size / 1024 / 1024).toFixed(1)} MB &middot; Private certificate</p>{error && <p className="review-error-text" role="alert">{error}</p>}{link && <p>Download link expires in one minute.</p>}</div>
+  return <li className="qs-file-surface" data-file-kind={filePresentation(document).kind}><FileTypeIcon name={document.name} contentType={document.contentType} /><div className="review-document-name"><strong>{document.name}</strong><p><FileTypeLabel name={document.name} contentType={document.contentType} /> &middot; {(document.size / 1024 / 1024).toFixed(1)} MB &middot; Private certificate</p>{error && <p className="review-error-text" role="alert">{error}</p>}{link && <p>Download link expires in one minute.</p>}</div>
     {link ? <a href={link.url} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer" className="cw-button cw-primary"><Download size={16} aria-hidden="true" />Download certificate</a> : <button type="button" className="cw-button" disabled={request.isLoading} onClick={prepare}><Download size={16} aria-hidden="true" />{request.isLoading ? "Preparing..." : "Prepare download"}</button>}
   </li>;
 }

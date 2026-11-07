@@ -8,6 +8,8 @@
 .profile-photo-content > p, .profile-section-description { margin-top: 8px; }
 .profile-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
 .profile-file { overflow-wrap: anywhere; font-size: var(--font-size-label); }
+.profile-selected-file { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 10px; border: 1px solid var(--border); border-radius: 7px; }
+.profile-selected-file > p { min-width: 0; }
 .profile-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 24px; }
 .profile-details dt { color: var(--muted-foreground); font-size: var(--font-size-label); }
 .profile-details dd { margin-top: 6px; font-size: var(--font-size-body); font-weight: 500; overflow-wrap: anywhere; }

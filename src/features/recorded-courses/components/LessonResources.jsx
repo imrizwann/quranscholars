@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Download, FileText, Trash2, Upload } from "lucide-react";
+import { Download, Trash2, Upload } from "lucide-react";
+import FileTypeIcon, { FileTypeLabel } from "@/components/files/FileTypeIcon.jsx";
 import api from "@/services/api/instructor/recordedCoursesApi.js";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import ConfirmationModal from "@/components/ui/ConfirmationModal.jsx";
@@ -42,11 +43,11 @@ export default function LessonResources({ target, manage = false, active = true,
   }
   if (!active || (!manage && !query.error && data?.items.length === 0)) return null;
   return <section className="lesson-resources" aria-labelledby={`${id}-title`}>
-    <div className="lesson-resources-heading"><FileText size={19} aria-hidden="true" /><div><h3 id={`${id}-title`}>Lesson resources</h3><p>Notes, worksheets, and practice materials for this lesson.</p></div></div>
+    <div className="lesson-resources-heading"><FileTypeIcon kind="pdf" size="sm" /><div><h3 id={`${id}-title`}>Lesson resources</h3><p>Notes, worksheets, and practice materials for this lesson.</p></div></div>
     <QueryMessage query={{ data, error: query.error, loading: query.isFetching, refresh: query.refetch }} label="Loading lesson resources" compact />
     {error && <p className="cw-error" role="alert">{error}</p>}{message && <p className="cw-notice" role="status">{message}</p>}
-    {!query.error && data?.items.length > 0 && <ul className="lesson-resource-list">{data.items.map(resource => <li key={resource.id}>
-      <FileText size={19} aria-hidden="true" /><div><strong>{resource.title}</strong><p>PDF · {sizeLabel(resource.size)}</p></div>
+    {!query.error && data?.items.length > 0 && <ul className="lesson-resource-list">{data.items.map(resource => <li key={resource.id} className="qs-file-surface" data-file-kind="pdf">
+      <FileTypeIcon kind="pdf" /><div><strong>{resource.title}</strong><p><FileTypeLabel kind="pdf" /> · {sizeLabel(resource.size)}</p></div>
       <div className="lesson-resource-actions"><AsyncButton className="cw-button cw-icon-button" aria-label={`Download ${resource.title}`} loading={downloadId === resource.id} disabled={!data.available || downloading.isLoading} onClick={() => downloadFile(resource)}><Download size={16} aria-hidden="true" /></AsyncButton>
         {canManage && <button type="button" className="cw-button cw-icon-button cw-danger" aria-label={`Remove ${resource.title}`} disabled={blocked} onClick={() => { setError(""); setConfirmation(resource); }}><Trash2 size={16} aria-hidden="true" /></button>}</div>
     </li>)}</ul>}
@@ -59,7 +60,7 @@ export default function LessonResources({ target, manage = false, active = true,
         setFile(selected);
       }} /></label><p id={`${id}-help`} className="cw-field-hint">PDF files up to 3 MB. Up to five resources per lesson. Downloads require course access.</p>
       {file && <label htmlFor={`${id}-name`}>Resource title (optional)<input id={`${id}-name`} name="title" value={title} onChange={event => setTitle(event.target.value)} maxLength={150} placeholder={file.name.replace(/\.pdf$/i, "")} disabled={blocked} /></label>}
-      <AsyncButton type="submit" className="cw-button cw-secondary" loading={uploading.isLoading} loadingLabel="Uploading PDF" disabled={blocked || !file}><Upload size={16} aria-hidden="true" />Upload PDF</AsyncButton>
+      <AsyncButton type="submit" className="cw-button" loading={uploading.isLoading} loadingLabel="Uploading PDF" disabled={blocked || !file}><Upload size={16} aria-hidden="true" />Upload PDF</AsyncButton>
     </form>)}
     <ConfirmationModal open={Boolean(confirmation)} title="Remove lesson resource?" description={`Remove “${confirmation?.title || "this PDF"}” from the lesson? Enrolled learners will lose access to this resource.`} danger confirmLabel="Remove resource" busy={removing.isLoading} busyLabel="Removing resource" onCancel={() => setConfirmation(null)} onConfirm={async () => {
       if (pending.current || !confirmation || blocked) return;

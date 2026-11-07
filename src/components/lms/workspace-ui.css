@@ -89,6 +89,7 @@
 .studio-course-placeholder > small { font-size: var(--font-size-caption); opacity: .7; }
 .studio-course-status { position: absolute; top: 14px; left: 14px; border: 1px solid var(--border); border-radius: 5px; background: var(--surface); color: var(--foreground); font-size: var(--font-size-caption); font-weight: 600; padding: 4px 9px; }
 .studio-course-status[data-published=true] { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+.studio-course-status.studio-course-publication { background: var(--secondary); color: var(--secondary-foreground); border-color: var(--secondary); }
 .studio-course-body { padding: clamp(18px, 2vw, 22px); display: flex; flex-direction: column; flex: 1; }
 .studio-course-content { min-width: 0; margin-bottom: 20px; }
 .studio-course-body h2 { margin: 12px 0 8px; font-size: 1.125rem; line-height: 1.5; overflow-wrap: anywhere; font-weight: 650; }
