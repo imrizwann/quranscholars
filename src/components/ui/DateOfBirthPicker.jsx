@@ -2,22 +2,11 @@ import { useId, useState } from "react";
 import { Popover } from "@base-ui/react/popover";
 import { DayPicker } from "react-day-picker";
 import { CalendarDays } from "lucide-react";
-import SelectField from "./SelectField.jsx";
+import CalendarDropdown from "./CalendarDropdown.jsx";
 import { formatDateOnly, parseDateOnly } from "@/lib/date-only.js";
-import "react-day-picker/style.css";
 import "./form-controls.css";
 
 const earliestDate = new Date(1900, 0, 1);
-
-function CalendarDropdown({ options, value, onChange, disabled, "aria-label": label }) {
-  return <SelectField
-    aria-label={label}
-    value={value}
-    options={options || []}
-    disabled={disabled}
-    onChange={(next) => onChange?.({ target: { value: String(next) } })}
-  />;
-}
 
 export default function DateOfBirthPicker({ id, value, onChange, onBlur, triggerRef, disabled, error }) {
   const generatedId = useId();

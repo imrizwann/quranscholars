@@ -1,3 +1,5 @@
+@import "react-day-picker/style.css";
+
 .qs-select-field { min-width: 0; }
 .qs-select-trigger, .qs-date-trigger { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-width: 0; min-height: 44px; padding: 10px 13px; border: 1px solid var(--input); border-radius: 7px; background: var(--surface); color: var(--foreground); font: inherit; font-size: var(--font-size-body); font-weight: 400; line-height: 1.5; text-align: left; cursor: pointer; transition: border-color 160ms var(--ease-out-ui), background-color 160ms var(--ease-out-ui); }
 .qs-select-trigger:hover:not(:disabled), .qs-date-trigger:hover:not(:disabled) { border-color: var(--primary); }

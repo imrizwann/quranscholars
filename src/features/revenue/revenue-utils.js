@@ -13,7 +13,19 @@ export function parseMoney(value, exponent = 2) {
   if (minor > BigInt(Number.MAX_SAFE_INTEGER)) throw new Error("This amount is too large.");
   return Number(minor);
 }
-export const currentPeriod = () => new Date().toISOString().slice(0, 7);
+export const businessDate = (value = Date.now()) => new Date(+new Date(value) + 330 * 60_000).toISOString().slice(0, 10);
+export const currentPeriod = () => businessDate().slice(0, 7);
+export function salesMonthOptions(now = Date.now()) {
+  const [year, month] = businessDate(now).slice(0, 7).split("-").map(Number);
+  return [{ value: "all", label: "All months" }, ...Array.from({ length: 36 }, (_, index) => {
+    const date = new Date(Date.UTC(year, month - 1 - index, 1));
+    return { value: date.toISOString().slice(0, 7), label: date.toLocaleDateString(undefined, { month: "long", year: "numeric", timeZone: "UTC" }) };
+  })];
+}
+export const suggestedSalesPeriod = () => {
+  const local = new Date(Date.now() - 30 * 86400_000 + 330 * 60_000);
+  return new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth() - 1, 1)).toISOString().slice(0, 7);
+};
 export const dateText = value => value ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(value)) : "Not confirmed";
 export const localDateTime = value => {
   const date = new Date(value || Date.now());

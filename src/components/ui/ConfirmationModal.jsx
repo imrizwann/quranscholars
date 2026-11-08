@@ -7,6 +7,7 @@ export default function ConfirmationModal({
   open, title, description, children, confirmLabel = "Confirm",
   cancelLabel = "Cancel", danger = false, onConfirm, onCancel,
   busy = false, busyLabel = "Please wait", returnFocus, confirmDisabled = false,
+  dismissOnly = false,
 }) {
   const cancel = useRef(null);
   return <Dialog.Root open={open} onOpenChange={(next) => { if (!next && !busy) onCancel(); }}>
@@ -17,8 +18,8 @@ export default function ConfirmationModal({
         <Dialog.Description className="qs-confirm-description">{description}</Dialog.Description>
         {children}
         <div className="qs-confirm-actions">
-          <Dialog.Close ref={cancel} disabled={busy} className="cw-button">{cancelLabel}</Dialog.Close>
-          <AsyncButton loading={busy} loadingLabel={busyLabel} disabled={confirmDisabled} onClick={onConfirm} className={`cw-button ${danger ? "qs-confirm-danger" : "cw-primary"}`}>{confirmLabel}</AsyncButton>
+          <Dialog.Close ref={cancel} disabled={busy} className="cw-button">{dismissOnly ? "Close" : cancelLabel}</Dialog.Close>
+          {!dismissOnly && <AsyncButton loading={busy} loadingLabel={busyLabel} disabled={confirmDisabled} onClick={onConfirm} className={`cw-button ${danger ? "qs-confirm-danger" : "cw-primary"}`}>{confirmLabel}</AsyncButton>}
         </div>
       </Dialog.Popup>
     </Dialog.Portal>

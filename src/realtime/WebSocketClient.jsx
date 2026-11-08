@@ -8,6 +8,7 @@ import { useGetNotificationsQuery } from "@/services/api/user/notificationsApi.j
 import authApi from "@/services/api/user/userAuthApis.js";
 import applicationApi from "@/services/api/user/instructorApplicationApi.js";
 import paymentApi from "@/services/api/user/paymentApi.js";
+import revenueApi from "@/services/api/revenueApi.js";
 
 export default function WebSocketClient() {
   const user = useSelector(state => state.user.user);
@@ -44,6 +45,7 @@ export default function WebSocketClient() {
       onEvent: event => {
         if (stopped) return;
         if (event.type === "notifications.changed") {
+          if (["instructor", "admin"].includes(user.role)) dispatch(revenueApi.util.invalidateTags(["Revenue"]));
           if (!inboxTimer) inboxTimer = setTimeout(() => {
             inboxTimer = undefined;
             dispatch(notificationsApi.util.invalidateTags(["Notifications"]));
@@ -51,6 +53,7 @@ export default function WebSocketClient() {
           return;
         }
         if (event.type === "ready") {
+          if (["instructor", "admin"].includes(user.role)) dispatch(revenueApi.util.invalidateTags(["Revenue"]));
           dispatch(notificationsApi.util.invalidateTags(["Notifications"]));
           if (user.role === "instructor") dispatch(instructorApi.util.invalidateTags(["InstructorCourse", "InstructorLessons", "InstructorSections"]));
           return;

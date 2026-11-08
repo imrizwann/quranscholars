@@ -1,8 +1,8 @@
 .revenue-policy { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 20px; }
 .revenue-policy > svg { color: var(--primary); flex-shrink: 0; margin-top: 3px; }
 .revenue-policy p, .revenue-note, .revenue-payout p, .revenue-sync p, .revenue-form > p { color: var(--muted-foreground); font-size: var(--font-size-label); line-height: 1.7; margin-top: 8px; }
-.revenue-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; margin-block: 20px; }
-.revenue-filters > div, .revenue-filters > label { flex: 1 1 180px; max-width: 260px; }
+.revenue-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); align-items: start; gap: 16px; margin-block: 20px; }
+.revenue-filters > div, .revenue-filters > label { min-width: 0; }
 .revenue-field { display: grid; gap: 8px; font-size: var(--font-size-label); font-weight: 500; }
 .revenue-field input, .revenue-field textarea { width: 100%; min-width: 0; min-height: 44px; border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; color: var(--foreground); background: var(--surface); font: inherit; font-weight: 400; }
 .revenue-field textarea { resize: vertical; }
@@ -53,9 +53,20 @@
 .revenue-payout details { margin-block: 16px; font-size: var(--font-size-label); }
 .revenue-dialog-content details summary, .revenue-payout summary { cursor: pointer; min-height: 36px; }
 @media (max-width: 540px) {
-  .revenue-filters > div, .revenue-filters > label { max-width: none; flex-basis: calc(50% - 8px); }
   .revenue-tabs { gap: 20px; }
   .revenue-panel td .cw-button { margin-left: 0; }
   .revenue-payout { padding: 14px; }
   .revenue-totals { gap: 16px; }
 }
+
+.revenue-date-range .qs-date-trigger { width: 100%; }
+.revenue-date-range .qs-date-trigger span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.revenue-filter-summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+@media (max-width: 540px) { .revenue-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 380px) { .revenue-filters { grid-template-columns: minmax(0, 1fr); } }
+
+.revenue-report-heading { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 14px; }
+.revenue-report-heading > .qs-select-field { min-width: 190px; max-width: 240px; }
+.revenue-ledger-controls { display: flex; flex-wrap: wrap; gap: 12px; }
+.revenue-ledger-controls > .qs-select-field { min-width: 170px; flex: 1; }
+@media (max-width: 540px) { .revenue-report-heading > .qs-select-field, .revenue-ledger-controls { width: 100%; max-width: none; } .revenue-ledger-controls > .qs-select-field { min-width: 0; } }
