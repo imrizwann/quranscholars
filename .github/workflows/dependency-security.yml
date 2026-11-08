@@ -1,0 +1,58 @@
+name: Dependency security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '23 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependency-security-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 22
+          package-manager-cache: false
+      # Audit the lockfile without installing packages or executing install hooks.
+      # Bash pipefail preserves audit/network failures despite piping to tee.
+      - name: Scan production and development dependencies
+        id: audit
+        shell: bash
+        run: npm run security:audit 2>&1 | tee "$RUNNER_TEMP/dependency-audit.txt"
+      - name: Publish readable summary
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f "$RUNNER_TEMP/dependency-audit.txt" ]]; then
+            {
+              echo '## Dependency audit'
+              echo 'High or critical findings fail this check. All severities are listed below.'
+              echo 'No packages were installed, upgraded, or automatically fixed.'
+              echo '```text'
+              cat "$RUNNER_TEMP/dependency-audit.txt"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Save audit report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: dependency-audit
+          path: ${{ runner.temp }}/dependency-audit.txt
+          retention-days: 14
+          if-no-files-found: warn
