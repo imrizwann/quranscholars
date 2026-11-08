@@ -37,6 +37,14 @@ const paymentApi = createApi({
       query: (intentId) => ({ url: `/api/payments/${encodeURIComponent(intentId)}`, timeout: 15_000 }),
       transformResponse: unwrap,
     }),
+    reconcileCoursePayment: builder.mutation({
+      query: ({ intentId }) => ({
+        url: `/api/payments/${encodeURIComponent(intentId)}/reconcile`, method: "POST",
+        body: {}, timeout: 20_000,
+      }),
+      transformResponse: unwrap,
+      invalidatesTags: result => ["PurchaseHistory", ...(result?.state === "paid" ? ["CourseAccess", "LearningLibrary"] : [])],
+    }),
     verifyCourseCheckout: builder.mutation({
       query: ({ intentId, paymentId, signature }) => ({
         url: `/api/payments/${encodeURIComponent(intentId)}/verify`, method: "POST",
@@ -53,7 +61,7 @@ const paymentApi = createApi({
   }),
 });
 
-export const { useGetLearningLibraryQuery, useGetPurchaseHistoryQuery, useCreateCourseCheckoutMutation, useVerifyCourseCheckoutMutation, useGetCoursePaymentStatusQuery, useLazyGetCoursePaymentStatusQuery, useGetCourseAccessQuery } = paymentApi;
+export const { useGetLearningLibraryQuery, useGetPurchaseHistoryQuery, useCreateCourseCheckoutMutation, useVerifyCourseCheckoutMutation, useReconcileCoursePaymentMutation, useGetCoursePaymentStatusQuery, useLazyGetCoursePaymentStatusQuery, useGetCourseAccessQuery } = paymentApi;
 // Compatibility for the old unused import; arguments now follow the strict contract.
 export const useCoursePaymentMutation = useCreateCourseCheckoutMutation;
 export default paymentApi;

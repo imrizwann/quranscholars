@@ -59,6 +59,13 @@ test("payment hooks use authenticated backend contracts and clear data across ac
     await store.dispatch(api.endpoints.createCourseCheckout.initiate({ courseId: "course-2", idempotencyKey: randomUUID() })).unwrap();
     for (let attempt = 0; attempt < 50 && requests.filter(request => new URL(request.url).pathname === "/api/purchases/history").length < 2; attempt++) await new Promise(done => setTimeout(done, 5));
     assert.equal(requests.filter(request => new URL(request.url).pathname === "/api/purchases/history").length, 2, "new checkout orders refresh purchase history even before payment completes");
+    await store.dispatch(api.endpoints.reconcileCoursePayment.initiate({ intentId: "intent-1", orderId: "forged", paymentId: "pay_forged", state: "paid", amountMinor: 1 })).unwrap();
+    const recovery = requests.find(request => new URL(request.url).pathname.endsWith("/reconcile"));
+    assert.equal(recovery.url, "https://api.example/api/payments/intent-1/reconcile");
+    assert.equal(recovery.method, "POST");
+    assert.equal(recovery.credentials, "include");
+    assert.equal(recovery.headers.get("x-csrf-protection"), "1");
+    assert.deepEqual(await recovery.json(), {});
     store.dispatch({ type: "user/setUser", payload: { _id: "buyer-2", role: "user" } });
     assert.equal(Object.keys(store.getState()[api.reducerPath].queries).length, 0);
     assert.equal(Object.keys(store.getState()[api.reducerPath].mutations).length, 0);

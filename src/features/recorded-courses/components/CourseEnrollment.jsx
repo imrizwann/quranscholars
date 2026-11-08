@@ -1,15 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import LoadingState from "@/components/feedback/LoadingState.jsx";
-import paymentApi, { useCreateCourseCheckoutMutation, useVerifyCourseCheckoutMutation, useGetCourseAccessQuery, useGetCoursePaymentStatusQuery } from "@/services/api/user/paymentApi.js";
+import paymentApi, { useCreateCourseCheckoutMutation, useVerifyCourseCheckoutMutation, useReconcileCoursePaymentMutation, useGetCourseAccessQuery, useGetCoursePaymentStatusQuery } from "@/services/api/user/paymentApi.js";
 import { useEnrollFreeCourseMutation } from "@/services/api/user/learnerApi.js";
 import { checkoutAttempt, clearCheckout, hostedCheckoutUrl, readCheckout, saveCheckout } from "@/features/payments/checkout-session.js";
 import { userMessage } from "@/lib/user-messages.js";
 import { enrollmentFailureMessage } from "@/features/payments/enrollment-feedback.js";
 import { openRazorpayCheckout } from "@/features/payments/razorpay-checkout.js";
+
+const awaitingConfirmation = "We could not confirm your payment yet. Check payment status again shortly; do not make another payment.";
 
 export default function CourseEnrollment({ course }) {
   const user = useSelector(state => state.user.user);
@@ -25,9 +27,11 @@ function EnrollmentAction({ course, user }) {
   const [enroll, enrolling] = useEnrollFreeCourseMutation();
   const [checkout, paying] = useCreateCourseCheckoutMutation();
   const [verify, verifying] = useVerifyCourseCheckoutMutation();
+  const [reconcile, reconciling] = useReconcileCoursePaymentMutation();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const gateway = useRef(null);
   const [intentId, setIntentId] = useState(() => readCheckout(user._id, course.id)?.intentId || null);
+  const restoredIntent = useRef(intentId);
   const [latest, setLatest] = useState(null);
   const [error, setError] = useState("");
   const [polling, setPolling] = useState(true);
@@ -39,9 +43,23 @@ function EnrollmentAction({ course, user }) {
   const payment = status.currentData || latest;
   const free = course.price.current === 0;
   const active = access.currentData?.canAccessCourse === true && !access.error;
-  const busy = enrolling.isLoading || paying.isLoading || verifying.isLoading || checkoutOpen;
+  const busy = enrolling.isLoading || paying.isLoading || verifying.isLoading || reconciling.isLoading || checkoutOpen;
   const enrollmentOpen = access.currentData?.enrollmentOpen ?? course.enrollmentOpen;
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; gateway.current?.close(); }; }, []);
+  const rememberPayment = useCallback(async confirmed => {
+    if (!mounted.current) return;
+    setLatest(confirmed);
+    await dispatch(paymentApi.util.upsertQueryData("getCoursePaymentStatus", confirmed.intentId, confirmed));
+  }, [dispatch]);
+  const recoverPayment = useCallback(async id => {
+    const confirmed = await reconcile({ intentId: id }).unwrap();
+    await rememberPayment(confirmed);
+  }, [reconcile, rememberPayment]);
+  useEffect(() => {
+    if (!intentId || restoredIntent.current !== intentId || payment?.state !== "pending") return;
+    restoredIntent.current = null;
+    recoverPayment(intentId).catch(() => { if (mounted.current) setError(awaitingConfirmation); });
+  }, [intentId, payment?.state, recoverPayment]);
   useEffect(() => {
     if (status.error?.status === 410) {
       clearCheckout(user._id, course.id); setIntentId(null); setLatest(null); setPolling(false);
@@ -83,11 +101,14 @@ function EnrollmentAction({ course, user }) {
               try {
                 const confirmed = await verify({ intentId: result.intentId, ...response }).unwrap();
                 if (!mounted.current) return;
-                setLatest(confirmed);
-                await dispatch(paymentApi.util.upsertQueryData("getCoursePaymentStatus", result.intentId, confirmed));
+                await rememberPayment(confirmed);
               } catch {
-                setError("Your payment is awaiting confirmation. Check payment status before trying to pay again.");
+                try { await recoverPayment(result.intentId); }
+                catch { if (mounted.current) setError(awaitingConfirmation); }
               }
+            } else {
+              try { await recoverPayment(result.intentId); }
+              catch { if (mounted.current) setError(awaitingConfirmation); }
             }
             setPollRevision(revision => revision + 1);
           } else {
@@ -119,10 +140,14 @@ function EnrollmentAction({ course, user }) {
         <p role="status">{verifying.isLoading ? "Confirming your payment…" : checkoutOpen ? "Complete your payment in the secure checkout window." : "If you have already paid, check payment status before continuing."}</p>
       </div>}
       {["failed", "refunded", "disputed"].includes(payment?.state) && <p className="cd-enrollment-note" role="status">{payment.state === "failed" ? "The payment was not completed." : "This payment no longer provides course access."}</p>}
-      <AsyncButton className="cw-button cw-primary cd-enrollment-action" loading={busy} loadingLabel={verifying.isLoading ? "Confirming payment" : checkoutOpen ? "Checkout open" : free && !intentId ? "Enrolling" : "Preparing checkout"} disabled={Boolean(intentId && status.isLoading) || access.isFetching} onClick={join}>{payment?.state === "pending" ? "Continue payment" : free && !intentId ? "Enroll for free" : "Buy course"}<ArrowRight size={16} /></AsyncButton>
+      <AsyncButton className="cw-button cw-primary cd-enrollment-action" loading={busy} loadingLabel={verifying.isLoading || reconciling.isLoading ? "Confirming payment" : checkoutOpen ? "Checkout open" : free && !intentId ? "Enrolling" : "Preparing checkout"} disabled={Boolean(intentId && status.isLoading) || access.isFetching} onClick={join}>{payment?.state === "pending" ? "Continue payment" : free && !intentId ? "Enroll for free" : "Buy course"}<ArrowRight size={16} /></AsyncButton>
       <p className="cd-enrollment-note">{free && !intentId ? "Join now and learn at your own pace." : "Course access starts after payment is confirmed."}</p>
     </>}
-    {intentId && !active && <AsyncButton className="cw-button cd-payment-check" loading={status.isFetching} loadingLabel="Checking payment" onClick={() => status.refetch()}>Check payment status</AsyncButton>}
+    {intentId && !active && <AsyncButton className="cw-button cd-payment-check" loading={status.isFetching || reconciling.isLoading} disabled={paying.isLoading || verifying.isLoading || checkoutOpen} loadingLabel="Checking payment" onClick={() => {
+      setError("");
+      if (payment?.state === "pending") recoverPayment(intentId).catch(() => { if (mounted.current) setError(awaitingConfirmation); });
+      else status.refetch();
+    }}>Check payment status</AsyncButton>}
     {(error || status.error) && <p className="cd-enrollment-feedback" role="alert">{error || "We could not check your payment. Try again; do not start a second payment."}</p>}
     {intentId && <p className="cd-checkout-reference">Payment reference: {intentId}</p>}
   </div>;
