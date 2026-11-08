@@ -200,8 +200,9 @@ const router = createBrowserRouter([
           { index: true, element: <StudentDashboard /> },
           { path: "learning", element: <MyLearning /> },
           { path: "progress", element: <StudentSectionPage /> },
+          { path: "purchases", element: <StudentSectionPage /> },
           // Placeholder implementations remain in StudentSectionPage.jsx.
-          ...["assignments", "wishlist", "purchases"].map(path => ({ path, element: <Navigate to="/dashboard/learning" replace /> })),
+          ...["assignments", "wishlist"].map(path => ({ path, element: <Navigate to="/dashboard/learning" replace /> })),
           { path: "profile", element: <StudentSectionPage /> },
           { path: "settings", element: <StudentSectionPage /> },
         ],

@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Dialog } from "@base-ui/react/dialog";
 import { Menu } from "@base-ui/react/menu";
-import { ArrowRight, BookOpen, ChevronDown, Compass, Info, LayoutDashboard, LogOut, Mail, Menu as MenuIcon, Presentation, Search, ShieldCheck, UserRound, X } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronDown, Compass, Info, LayoutDashboard, LogOut, Mail, Menu as MenuIcon, Presentation, ReceiptText, Search, ShieldCheck, UserRound, X } from "lucide-react";
 import Brand from "@/components/branding/Brand.jsx";
 import useSignOut from "@/features/auth/useSignOut.js";
 import useProfilePhoto from "@/features/profile/useProfilePhoto.js";
@@ -27,6 +27,7 @@ const moreLinks = [
 function accountLinks(user) {
   return [
     { to: "/dashboard/learning", label: "My learning", icon: BookOpen },
+    { to: "/dashboard/purchases", label: "Purchases", icon: ReceiptText },
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/profile", label: "My profile", icon: UserRound },
     ...(user.role === "instructor" ? [{ to: "/instructor/dashboard", label: "Instructor dashboard", icon: Presentation }] : []),

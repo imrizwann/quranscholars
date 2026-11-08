@@ -28,7 +28,7 @@ export default function WebSocketClient() {
       if (category === "instructor.") {
         dispatch(applicationApi.util.invalidateTags(["MyApplication"]));
         void dispatch(authApi.endpoints.me.initiate(undefined, { forceRefetch: true, subscribe: false }));
-      } else dispatch(paymentApi.util.invalidateTags(["LearningLibrary", "CourseAccess"]));
+      } else dispatch(paymentApi.util.invalidateTags(["LearningLibrary", "CourseAccess", "PurchaseHistory"]));
     }
   }, [configuration.currentData, user?._id, dispatch]);
   useEffect(() => {

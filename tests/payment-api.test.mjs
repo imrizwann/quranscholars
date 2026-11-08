@@ -24,6 +24,7 @@ test("payment hooks use authenticated backend contracts and clear data across ac
     const requests = [];
     globalThis.fetch = async (request) => {
       requests.push(request);
+      if (new URL(request.url).pathname === "/api/purchases/history") return Response.json({ success: true, data: { items: [], pagination: { hasNextPage: false, nextCursor: null } } });
       return Response.json({ success: true, data: request.method === "POST" ? { intentId: "intent-1", state: "pending" } : { canAccessCourse: false, checkoutAvailable: true } });
     };
     store = configureStore({
@@ -50,6 +51,14 @@ test("payment hooks use authenticated backend contracts and clear data across ac
     assert.equal(requests[3].credentials, "include");
     assert.equal(requests[3].headers.get("x-csrf-protection"), "1");
     assert.deepEqual(await requests[3].json(), { paymentId: "pay_one", signature: "a".repeat(64) });
+    const before = "a".repeat(24);
+    await store.dispatch(api.endpoints.getPurchaseHistory.initiate({ before, limit: 5, userId: "attacker", status: "paid" })).unwrap();
+    assert.equal(requests[4].url, `https://api.example/api/purchases/history?before=${before}&limit=5`);
+    assert.equal(requests[4].credentials, "include");
+    assert.equal(requests[4].method, "GET");
+    await store.dispatch(api.endpoints.createCourseCheckout.initiate({ courseId: "course-2", idempotencyKey: randomUUID() })).unwrap();
+    for (let attempt = 0; attempt < 50 && requests.filter(request => new URL(request.url).pathname === "/api/purchases/history").length < 2; attempt++) await new Promise(done => setTimeout(done, 5));
+    assert.equal(requests.filter(request => new URL(request.url).pathname === "/api/purchases/history").length, 2, "new checkout orders refresh purchase history even before payment completes");
     store.dispatch({ type: "user/setUser", payload: { _id: "buyer-2", role: "user" } });
     assert.equal(Object.keys(store.getState()[api.reducerPath].queries).length, 0);
     assert.equal(Object.keys(store.getState()[api.reducerPath].mutations).length, 0);

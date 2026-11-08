@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Menu } from "@base-ui/react/menu";
-import { ArrowUpRight, BookOpen, LayoutDashboard, LogOut, Presentation, Settings, UserRound } from "lucide-react";
+import { ArrowUpRight, BookOpen, LayoutDashboard, LogOut, Presentation, ReceiptText, Settings, UserRound } from "lucide-react";
 import useProfilePhoto from "@/features/profile/useProfilePhoto.js";
 import ProfileAvatar from "@/features/profile/components/ProfileAvatar.jsx";
 import useSignOut from "@/features/auth/useSignOut.js";
@@ -19,6 +19,7 @@ export default function WorkspaceAccountMenu({ type }) {
   const base = type === "instructor" ? "/instructor" : "/dashboard";
   const links = [
     { to: "/profile", label: "My profile", icon: UserRound },
+    { to: "/dashboard/purchases", label: "Purchases", icon: ReceiptText },
     ...(user?.role === "instructor" ? [{ to: "/instructor/dashboard", label: "Instructor dashboard", icon: Presentation }] : []),
     ...(type === "admin" ? [] : [{ to: `${base}/settings`, label: "Account settings", icon: Settings }]),
     { to: type === "admin" ? "/admin/instructor-applications" : type === "instructor" ? `${base}/courses` : `${base}/learning`, label: type === "admin" ? "Instructor applications" : type === "instructor" ? "Manage courses" : "My learning", icon: LayoutDashboard },
