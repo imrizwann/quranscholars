@@ -7,10 +7,34 @@ const unwrap = (response) => {
   if (response?.success !== true || !response.data) throw new Error("Invalid learner response");
   return response.data;
 };
+// accountId scopes the browser cache only; the API always uses authentication.
+const noteTarget = ({ courseId, sectionId, lessonId, accountId }) => ({ courseId, sectionId, lessonId, accountId });
+const notePath = ({ courseId, sectionId, lessonId }) => `/api/learner/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/lessons/${encodeURIComponent(lessonId)}/notes`;
+async function noteSaved(args, { dispatch, queryFulfilled }) {
+  try {
+    const { data } = await queryFulfilled;
+    dispatch(learnerApi.util.updateQueryData("getLessonNote", noteTarget(args), current => {
+      if (data.revision >= current.revision) Object.assign(current, data);
+    }));
+  } catch { /* An unconfirmed write must not change the account copy. */ }
+}
 const learnerApi = createApi({
   reducerPath: "learnerApi", baseQuery: apiBaseQuery, keepUnusedDataFor: 0,
-  tagTypes: ["LearnerProfile", "Enrollment", "LearningProgress", "SectionQuiz", "LearnerAnalytics", "LearningCourse"],
+  tagTypes: ["LearnerProfile", "Enrollment", "LearningProgress", "SectionQuiz", "LearnerAnalytics", "LearningCourse", "LessonNote"],
   endpoints: builder => ({
+    getLessonNote: builder.query({
+      serializeQueryArgs: ({ queryArgs }) => noteTarget(queryArgs),
+      query: target => ({ url: notePath(target), timeout: 15_000 }), transformResponse: unwrap,
+      providesTags: (_result, _error, target) => [{ type: "LessonNote", id: notePath(target) }],
+    }),
+    saveLessonNote: builder.mutation({
+      query: ({ content, revision, ...target }) => ({ url: notePath(target), method: "PUT", body: { content, revision }, keepalive: true, timeout: 15_000 }),
+      transformResponse: unwrap, onQueryStarted: noteSaved,
+    }),
+    deleteLessonNote: builder.mutation({
+      query: ({ revision, confirm, ...target }) => ({ url: notePath(target), method: "DELETE", body: { revision, confirm }, timeout: 15_000 }),
+      transformResponse: unwrap, onQueryStarted: noteSaved,
+    }),
     updateLearningLibrary: builder.mutation({
       query: ({ courseId, action, confirmationTitle }) => ({ url: `/api/learner/enrollments/${encodeURIComponent(courseId)}`, method: "PATCH", body: { action, ...(action === "leave" && { confirmationTitle }) }, timeout: 20_000 }),
       transformResponse: unwrap,
