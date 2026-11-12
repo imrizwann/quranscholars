@@ -43,9 +43,8 @@ const actions = {
     submitSectionQuiz: feedback("Submitting answers…", "Quiz submitted", "Your results are ready to review."),
   },
   paymentApi: {
-    verifyCourseCheckout: { pending: "Confirming your payment…", error: () => "Your payment is awaiting confirmation. Check payment status before paying again.", success: data => data.state === "paid"
-      ? { type: "success", title: "Payment confirmed", description: "Your course is ready in My learning." }
-      : null },
+    // The enrollment UI owns confirmation feedback: an authenticated access
+    // check can finish through a webhook before the browser callback settles.
     createCourseCheckout: { pending: "Preparing your checkout…", error: enrollmentFailureMessage, success: data => data.state === "paid"
       ? { type: "success", title: "Payment confirmed", description: "Your course access is being checked. Open My learning when enrollment is confirmed." }
       : data.state === "pending" ? { type: "info", title: "Checkout prepared", description: "Complete payment to enroll. Course access starts after payment is confirmed." }

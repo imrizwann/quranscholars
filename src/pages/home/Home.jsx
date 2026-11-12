@@ -28,6 +28,8 @@ import { useGetRecordedCoursesQuery } from "@/features/recorded-courses/services
 // import { liveClasses } from "@/data/lmsData.js";
 // import { LiveClassCard } from "@/pages/live-classes/LiveClasses.jsx";
 import CourseCardMedia from "@/features/recorded-courses/components/CourseCardMedia.jsx";
+import CourseSelection from "@/features/recorded-courses/components/CourseSelection.jsx";
+import { isFeaturedCatalogue } from "@/lib/course-presentation.js";
 import "./home.css";
 
 
@@ -47,7 +49,7 @@ const SectionLabel = ({ children, light = false }) => (
 const Home = () => {
   const { data: recordedData, isLoading: coursesLoading, isError: coursesError, refetch: retryCourses } = useGetRecordedCoursesQuery({ limit: 3 });
   const homeRecordedCourses = recordedData?.courses || [];
-  const featuredCourse = homeRecordedCourses.find(course => course.trailerVideo) || homeRecordedCourses[0];
+  const featuredCourse = homeRecordedCourses.find(course => isFeaturedCatalogue ? course.featured : course.trailerVideo) || homeRecordedCourses[0];
   const [openFaq, setOpenFaq] = useState(0);
   const faqId = useId();
   const prefersReducedMotion = useReducedMotion();
@@ -72,7 +74,7 @@ const Home = () => {
       {/* Showcase */}
       <section
         id="main"
-        className="home-hero relative isolate overflow-hidden bg-[#082f2b] text-white"
+        className={`home-hero relative isolate overflow-hidden bg-[#082f2b] text-white${isFeaturedCatalogue ? " home-hero--featured" : ""}`}
         aria-labelledby="home-hero-title"
       >
         <div
@@ -135,7 +137,9 @@ const Home = () => {
               to help you build a consistent learning routine.
             </motion.p>
 
-            <motion.div
+            {isFeaturedCatalogue ? <motion.div variants={reveal} className="home-hero-actions mt-8 flex flex-wrap items-center gap-3">
+              <Link to={homeRecordedCourses.length === 1 && featuredCourse ? `/courses/${featuredCourse.slug}` : "#courses"} className="cw-button cw-secondary">{homeRecordedCourses.length === 1 ? "View course" : "View courses"}<ArrowRight size={16} aria-hidden="true" /></Link>
+            </motion.div> : <motion.div
               variants={reveal}
               className="home-hero-actions mt-8 flex flex-wrap items-center gap-3"
             >
@@ -154,7 +158,7 @@ const Home = () => {
                 Get started
               </Link>
               <Link to="/instructor/application" className="home-mobile-instructor-link">Become an instructor<ArrowRight size={15} aria-hidden="true" /></Link>
-            </motion.div>
+            </motion.div>}
 
             <motion.div
               variants={reveal}
@@ -177,14 +181,17 @@ const Home = () => {
             </motion.div>
           </motion.div>
 
-          <motion.aside className="home-start-panel" initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: prefersReducedMotion ? 0 : .5, ease: [.16, 1, .3, 1] }} aria-labelledby="home-start-title">
+          {isFeaturedCatalogue ? <aside className="home-featured-course" aria-labelledby="home-featured-title" aria-busy={coursesLoading}>
+            <h2 id="home-featured-title" className="public-eyebrow">Featured course</h2>
+            {coursesLoading ? <><span role="status" className="sr-only">Loading featured course</span><RecordedCourseSkeleton /></> : coursesError ? <div className="home-featured-state" role="alert"><h2>Course preview is temporarily unavailable</h2><p>Please try again in a moment.</p><button type="button" className="cw-button" onClick={retryCourses}>Try again</button></div> : featuredCourse ? <RecordedCourseCard key={featuredCourse.id} course={featuredCourse} /> : <div className="home-featured-state"><h2>Your next chapter starts here.</h2><p>New courses are on the way. Contact our team for help getting started.</p><Link to="/contact" className="cw-button">Contact us<ArrowRight size={16} aria-hidden="true" /></Link></div>}
+          </aside> : <motion.aside className="home-start-panel" initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: prefersReducedMotion ? 0 : .5, ease: [.16, 1, .3, 1] }} aria-labelledby="home-start-title">
             <p className="public-eyebrow">A place to begin</p><h2 id="home-start-title">Make room for meaningful learning.</h2><p>Choose your next step. You can always explore the other paths later.</p>
             <div className="home-start-links">{[
               { to: "/courses", title: "Explore courses", detail: "Find a subject and level that fit you.", icon: BookOpen },
               { to: "/dashboard/learning", title: "My learning", detail: "Return to your courses and saved progress.", icon: GraduationCap },
               { to: "/get-started/instructor", title: "Become an instructor", detail: "Share your knowledge with learners.", icon: UsersRound },
             ].map(({ to, title, detail, icon: Icon }) => <Link key={to} to={to}><span className="home-start-icon"><Icon size={19} aria-hidden="true" /></span><span><strong>{title}</strong><small>{detail}</small></span><ArrowRight size={16} aria-hidden="true" /></Link>)}</div>
-          </motion.aside>
+          </motion.aside>}
         </div>
       </section>
 
@@ -249,14 +256,14 @@ const Home = () => {
             </Link>
           </div>
 
-          <div className="home-course-grid mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3" aria-busy={coursesLoading}>
+          {isFeaturedCatalogue ? <CourseSelection courses={homeRecordedCourses} loading={coursesLoading} error={coursesError} retry={retryCourses} /> : <div className="home-course-grid mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3" aria-busy={coursesLoading}>
             {coursesLoading && <span className="sr-only" role="status">Loading courses</span>}
             {coursesLoading ? Array.from({ length: 3 }, (_, index) => <RecordedCourseSkeleton key={index} />) : coursesError ? (
               <div className="home-course-state" role="alert"><BookOpen size={24} aria-hidden="true" /><div><h3>Courses are temporarily unavailable</h3><p>Please try again in a moment.</p></div><button type="button" onClick={retryCourses} className="cw-button">Try again</button></div>
             ) : !homeRecordedCourses.length ? <div className="home-course-state" role="status"><BookOpen size={24} aria-hidden="true" /><div><h3>New courses are on the way</h3><p>Contact our team for help finding your next learning opportunity.</p></div><Link to="/contact" className="cw-button">Contact us<ArrowRight size={15} aria-hidden="true" /></Link></div> : homeRecordedCourses.map((course) => (
               <RecordedCourseCard key={course.id} course={course} />
             ))}
-          </div>
+          </div>}
         </motion.div>
       </section>
 

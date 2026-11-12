@@ -1,0 +1,102 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import process from "node:process";
+import { build } from "esbuild";
+import { writeFile, unlink } from "node:fs/promises";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+import { randomUUID } from "node:crypto";
+import { JSDOM } from "jsdom";
+import React, { act } from "react";
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
+
+test("admin review starts with pending applications and preserves private documents and explicit decisions", async () => {
+  const dom = new JSDOM("<html><body><div id='root'></div></body></html>", { url: "https://frontend.example.test", pretendToBeVisual: true });
+  for (const key of ["window", "document", "navigator", "Node", "Element", "HTMLElement", "HTMLInputElement", "HTMLTextAreaElement", "HTMLButtonElement", "Document", "ShadowRoot", "MutationObserver", "Event", "MouseEvent"]) Object.defineProperty(globalThis, key, { configurable: true, writable: true, value: key === "window" ? dom.window : dom.window[key] });
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
+  globalThis.requestAnimationFrame = dom.window.requestAnimationFrame.bind(dom.window);
+  globalThis.cancelAnimationFrame = dom.window.cancelAnimationFrame.bind(dom.window);
+  dom.window.matchMedia = query => ({ matches: query.includes("prefers-reduced-motion"), media: query, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} });
+  dom.window.HTMLElement.prototype.getAnimations = () => [];
+  const { createRoot } = await import("react-dom/client");
+  const { MemoryRouter, Routes, Route } = await import("react-router-dom");
+  const output = resolve("tests", `admin-ui-fixture-${randomUUID()}.mjs`);
+  const originalFetch = globalThis.fetch;
+  let root, store, api, release;
+  try {
+    const compiled = await build({ stdin: { contents: `export {default as List} from './src/pages/instructor/AdminInstructorApplications.jsx'; export {default as Review} from './src/pages/instructor/AdminInstructorApplication.jsx'; export {default as api} from './src/services/api/admin/instructorApplicationsApi.js';`, resolveDir: process.cwd() }, bundle: true, write: false, format: "esm", platform: "node", packages: "external", jsx: "automatic", alias: { "@": resolve("src") }, loader: { ".css": "empty" }, define: { "import.meta.env": JSON.stringify({ VITE_API_URL: "https://api.example.test" }) } });
+    await writeFile(output, compiled.outputFiles[0].text);
+    const mod = await import(pathToFileURL(output)); api = mod.api;
+    const id = "a".repeat(24), requests = [], decisions = [];
+    let fail = false;
+    const gate = new Promise(done => { release = done; });
+    let application = { id, fullName: "Sara Ahmed", email: "sara@example.test", specialization: "Tajweed", experienceYears: 4, languages: "English", biography: "Teaching foundational Quran reading.", status: "pending", revision: 1, submittedAt: "2026-11-08T08:00:00Z", documents: [{ name: "qualification.pdf", size: 102400, contentType: "application/pdf" }], reviewHistory: [{ revision: 0, reviewerName: "Administrator", reviewedAt: "2026-11-01T08:00:00Z", reason: "Please provide a clearer certificate." }] };
+    const base = "/api/admin/instructor-applications";
+    globalThis.fetch = async request => {
+      requests.push(request); await gate;
+      const url = new URL(request.url);
+      assert.equal(request.credentials, "include");
+      if (request.method !== "GET") assert.equal(request.headers.get("X-CSRF-Protection"), "1");
+      if (url.pathname.endsWith("/documents/0/access")) return Response.json({ url: "https://private.example.test/certificate", expiresAt: new Date(Date.now() + 60000).toISOString() });
+      if (url.pathname.endsWith("/decision")) {
+        const body = await request.json(); decisions.push(body);
+        application = { ...application, status: body.status, review: { reason: body.reason, reviewedAt: "2026-11-08T09:00:00Z" } };
+        return Response.json({ application });
+      }
+      if (url.pathname === `${base}/${id}`) return Response.json({ application, applicantRole: "user" });
+      assert.equal(url.pathname, base);
+      if (fail) return Response.json({ userMessage: "Applications are temporarily unavailable." }, { status: 503 });
+      const status = url.searchParams.get("status");
+      return Response.json({ items: !status || status === application.status ? [application] : [], counts: { pending: application.status === "pending" ? 1 : 0, approved: application.status === "approved" ? 1 : 0, rejected: 0 }, pagination: { total: 1, totalPages: 1 } });
+    };
+    store = configureStore({ reducer: { user: () => ({ user: { _id: "b".repeat(24), role: "admin" } }), [api.reducerPath]: api.reducer }, middleware: defaults => defaults().concat(api.middleware) });
+    root = createRoot(document.getElementById("root"));
+    await act(async () => root.render(React.createElement(Provider, { store }, React.createElement(MemoryRouter, { initialEntries: [base.replace("/api", "")] }, React.createElement(Routes, null, React.createElement(Route, { path: "/admin/instructor-applications", element: React.createElement(mod.List) }), React.createElement(Route, { path: "/admin/instructor-applications/:id", element: React.createElement(mod.Review) }))))));
+    assert.equal(document.querySelectorAll("dd[aria-busy=true]").length, 4);
+    assert.match(document.body.textContent, /Loading applications/);
+    const settle = async condition => { for (let i = 0; i < 150; i++) { await act(async () => { await new Promise(done => setTimeout(done, 10)); }); if (condition()) return; } assert.fail(document.body.textContent); };
+    const button = (label, scope = document) => [...scope.querySelectorAll("button")].find(node => node.textContent.trim() === label);
+    const click = async node => { assert(node); await act(async () => node.click()); };
+    await act(async () => release());
+    await settle(() => document.querySelector(".review-table tbody a"));
+    assert.equal(new URL(requests[0].url).searchParams.get("status"), "pending");
+    assert.equal(document.querySelector('.review-tabs [aria-current="page"]').textContent, "Pending review");
+    await click(button("Approved", document.querySelector(".review-tabs")));
+    await settle(() => document.body.textContent.includes("No applications found"));
+    await click(button("All applications", document.querySelector(".review-tabs")));
+    await settle(() => document.querySelector(".review-table tbody a"));
+    await click(button("Pending review", document.querySelector(".review-tabs")));
+    await settle(() => !button("Refresh").disabled);
+    fail = true; await click(button("Refresh"));
+    await settle(() => document.body.textContent.includes("We could not load applications"));
+    fail = false; await click(button("Try again"));
+    await settle(() => document.querySelector(".review-table tbody a"));
+    await click(document.querySelector(".review-table tbody a"));
+    await settle(() => document.querySelector(".review-decision"));
+    assert.equal(document.querySelector("textarea").rows, 3);
+    assert.equal(document.querySelector(".review-history").open, false);
+    assert.equal(document.querySelector(".review-guidance").open, false);
+    assert(button("Approve instructor").disabled);
+    assert.equal(requests.filter(request => request.url.includes("/documents/")).length, 0);
+    await click(button("Prepare download"));
+    await settle(() => document.querySelector('a[href="https://private.example.test/certificate"]'));
+    assert.equal(document.querySelector('a[href="https://private.example.test/certificate"]').getAttribute("referrerpolicy"), "no-referrer");
+    await click(document.querySelector('input[name="teachingDetailsReviewed"]'));
+    await click(button("Reject application"));
+    assert.match(document.body.textContent, /at least 10 characters/);
+    assert.equal(decisions.length, 0);
+    await click(button("Approve instructor"));
+    await settle(() => document.querySelector('[role="dialog"]'));
+    assert.equal(decisions.length, 0, "approval still needs confirmation");
+    await click(button("Approve instructor", document.querySelector('[role="dialog"]')));
+    await settle(() => decisions.length === 1 && document.body.textContent.includes("Decision recorded"));
+    assert.deepEqual(decisions[0], { status: "approved", revision: 1, reason: "" });
+  } finally {
+    release?.();
+    if (root) await act(async () => root.unmount());
+    if (store && api) { store.dispatch(api.util.getRunningQueriesThunk()).forEach(request => request.abort()); store.dispatch(api.util.getRunningMutationsThunk()).forEach(request => request.abort()); store.dispatch(api.util.resetApiState()); }
+    globalThis.fetch = originalFetch; await unlink(output).catch(() => {}); dom.window.close();
+  }
+});

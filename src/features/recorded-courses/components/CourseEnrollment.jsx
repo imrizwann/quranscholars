@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import LoadingState from "@/components/feedback/LoadingState.jsx";
 import paymentApi, { useCreateCourseCheckoutMutation, useVerifyCourseCheckoutMutation, useReconcileCoursePaymentMutation, useGetCourseAccessQuery, useGetCoursePaymentStatusQuery } from "@/services/api/user/paymentApi.js";
@@ -32,6 +33,7 @@ function EnrollmentAction({ course, user }) {
   const gateway = useRef(null);
   const [intentId, setIntentId] = useState(() => readCheckout(user._id, course.id)?.intentId || null);
   const restoredIntent = useRef(intentId);
+  const awaitingAccess = useRef(false);
   const [latest, setLatest] = useState(null);
   const [error, setError] = useState("");
   const [polling, setPolling] = useState(true);
@@ -58,8 +60,17 @@ function EnrollmentAction({ course, user }) {
   useEffect(() => {
     if (!intentId || restoredIntent.current !== intentId || payment?.state !== "pending") return;
     restoredIntent.current = null;
+    awaitingAccess.current = true;
     recoverPayment(intentId).catch(() => { if (mounted.current) setError(awaitingConfirmation); });
   }, [intentId, payment?.state, recoverPayment]);
+  useEffect(() => {
+    if (!active || !awaitingAccess.current) return;
+    awaitingAccess.current = false;
+    toast.success("Your course is ready", {
+      id: `course-access:${user._id}:${course.id}`,
+      description: "You can start learning now or find this course in My learning.",
+    });
+  }, [active, user._id, course.id]);
   useEffect(() => {
     if (status.error?.status === 410) {
       clearCheckout(user._id, course.id); setIntentId(null); setLatest(null); setPolling(false);
@@ -84,6 +95,7 @@ function EnrollmentAction({ course, user }) {
       if (free && !intentId) {
         await enroll({ courseId: course.id }).unwrap();
       } else {
+        awaitingAccess.current = true;
         const attempt = checkoutAttempt(user._id, course.id, payment);
         if (!attempt.intentId) { setLatest(null); setIntentId(null); }
         const result = await checkout({ courseId: course.id, idempotencyKey: attempt.idempotencyKey }).unwrap();
