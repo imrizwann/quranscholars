@@ -22,7 +22,13 @@
 .review-pagination, .review-pagination nav, .review-overview { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .review-pagination { padding: 18px; justify-content: space-between; font-size: var(--font-size-label); color: var(--muted-foreground); }
 .review-overview { font-size: var(--font-size-label); color: var(--muted-foreground); }
-.review-main { display: grid; gap: 24px; min-width: 0; }
+.review-main { display: grid; gap: 24px; min-width: 0; align-content: start; }
+.review-tabs { display: flex; gap: 24px; overflow-x: auto; border-bottom: 1px solid var(--border); margin-top: 24px; }
+.review-tabs button { padding: 12px 0; white-space: nowrap; border-bottom: 2px solid transparent; color: var(--muted-foreground); font-size: var(--font-size-label); font-weight: 500; }
+.review-tabs button[aria-current] { color: var(--primary); border-bottom-color: var(--primary); }
+.review-guidance { margin-top: 12px; }
+.review-guidance summary, .review-history summary { cursor: pointer; min-height: 36px; font-size: var(--font-size-label); font-weight: 600; }
+.review-guidance > p { margin-top: 8px; }
 .review-layout { grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); }
 .review-decision > h2:first-child { margin-top: 0; }
 .review-reason { margin-top: 22px; }

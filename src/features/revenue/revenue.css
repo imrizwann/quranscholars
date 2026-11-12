@@ -1,5 +1,13 @@
-.revenue-policy { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 20px; }
-.revenue-policy > svg { color: var(--primary); flex-shrink: 0; margin-top: 3px; }
+.revenue-policy { margin-bottom: 20px; }
+.revenue-policy summary, .revenue-maintenance summary { display: flex; align-items: center; gap: 12px; min-height: 36px; cursor: pointer; list-style: none; font-size: var(--font-size-body); font-weight: 600; }
+.revenue-policy summary::-webkit-details-marker, .revenue-maintenance summary::-webkit-details-marker { display: none; }
+.revenue-policy summary > svg:first-child { color: var(--primary); flex-shrink: 0; }
+.revenue-policy summary > svg:last-child, .revenue-maintenance summary > svg:last-child { margin-left: auto; flex-shrink: 0; transition: transform .2s ease; }
+.revenue-policy[open] summary > svg:last-child, .revenue-maintenance[open] summary > svg:last-child { transform: rotate(180deg); }
+.revenue-maintenance summary > span { color: var(--muted-foreground); font-size: var(--font-size-label); font-weight: 400; }
+.revenue-maintenance .revenue-sync { padding-top: 16px; }
+.revenue-report-filters { margin-bottom: 16px; }
+.revenue-report-filters .revenue-filters { margin-bottom: 0; }
 .revenue-policy p, .revenue-note, .revenue-payout p, .revenue-sync p, .revenue-form > p { color: var(--muted-foreground); font-size: var(--font-size-label); line-height: 1.7; margin-top: 8px; }
 .revenue-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); align-items: start; gap: 16px; margin-block: 20px; }
 .revenue-filters > div, .revenue-filters > label { min-width: 0; }

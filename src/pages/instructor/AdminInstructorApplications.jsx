@@ -1,4 +1,3 @@
-import SelectField from "@/components/ui/SelectField.jsx";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Inbox, RefreshCw, Search, XCircle } from "lucide-react";
@@ -7,19 +6,21 @@ import { DashboardMetrics } from "../../components/lms/DashboardParts.jsx";
 import { useGetAdminInstructorApplicationsQuery } from "../../services/api/admin/instructorApplicationsApi.js";
 import { ReviewStatus, ReviewError } from "./InstructorReviewUI.jsx";
 import { reviewDate } from "./review-format.js";
+import LoadingState from "@/components/feedback/LoadingState.jsx";
 import "../admissions/admin-admissions.css";
 import "./instructor-review.css";
 
 export default function AdminInstructorApplications() {
   const [params, setParams] = useSearchParams();
-  const status = ["pending", "approved", "rejected"].includes(params.get("status")) ? params.get("status") : "";
+  const requestedStatus = params.get("status");
+  const status = requestedStatus === "all" ? "" : ["pending", "approved", "rejected"].includes(requestedStatus) ? requestedStatus : "pending";
   const page = Math.max(1, Math.min(1000, Number.parseInt(params.get("page"), 10) || 1));
   const search = (params.get("search") || "").slice(0, 100);
   const [input, setInput] = useState(search);
   useEffect(() => setInput(search), [search]);
   const query = useGetAdminInstructorApplicationsQuery({ page, limit: 15, status, search }, { refetchOnMountOrArgChange: true, refetchOnFocus: true });
   const data = query.currentData;
-  function filter(changes) { setParams({ status, search, page: "1", ...changes }); }
+  function filter(changes) { setParams({ status: status || "all", search, page: "1", ...changes }); }
   const counts = data?.counts;
   const loadingCounts = !data && !query.isError;
   const unavailable = query.isError ? "Unavailable" : undefined;
@@ -32,17 +33,19 @@ export default function AdminInstructorApplications() {
       { label: "Approved", value: counts?.approved ?? unavailable, icon: CheckCircle2, loading: loadingCounts, note: "Instructor access granted" },
       { label: "Rejected", value: counts?.rejected ?? unavailable, icon: XCircle, loading: loadingCounts, note: "Decision recorded" },
     ]} />
+    <nav className="review-tabs" aria-label="Application status">
+      {[["pending", "Pending review"], ["approved", "Approved"], ["rejected", "Rejected"], ["all", "All applications"]].map(([value, label]) => <button key={value} type="button" aria-current={(status || "all") === value ? "page" : undefined} onClick={() => filter({ status: value })}>{label}</button>)}
+    </nav>
     <section className="studio-panel review-filters" aria-label="Filter instructor applications">
       <form onSubmit={event => { event.preventDefault(); filter({ search: input.trim() }); }}>
-        <label htmlFor="instructor-search">Search applications</label><div className="review-search"><input id="instructor-search" value={input} maxLength={100} onChange={event => setInput(event.target.value)} placeholder="Name, email or specialization" /><button type="submit" className="cw-button"><Search size={16} aria-hidden="true" />Search</button></div>
+        <label htmlFor="instructor-search">Search applications</label><div className="review-search"><input id="instructor-search" name="search" type="search" value={input} maxLength={100} onChange={event => setInput(event.target.value)} placeholder="Name, email or specialization" /><button type="submit" className="cw-button"><Search size={16} aria-hidden="true" />Search</button></div>
       </form>
-      <SelectField id="instructor-status" label="Status" className="w-full sm:w-48" value={status || "all"} onChange={(value) => filter({ status: value === "all" ? "" : value })} options={[{ value: "all", label: "All statuses" }, { value: "pending", label: "Pending review" }, { value: "approved", label: "Approved" }, { value: "rejected", label: "Rejected" }]} />
-      {(status || search) && <button className="cw-button" type="button" onClick={() => { setInput(""); setParams({}); }}>Clear filters</button>}
+      {search && <button className="cw-button" type="button" onClick={() => { setInput(""); filter({ search: "" }); }}>Clear search</button>}
     </section>
-    {query.isError ? <ReviewError error={query.error} retry={query.refetch} busy={query.isFetching} /> : !data ? <div className="studio-panel" role="status">Loading applications...</div> : <section className="studio-panel admin-admissions review-list" aria-label="Instructor applications list" aria-busy={query.isFetching}>
+    {query.isError ? <ReviewError error={query.error} retry={query.refetch} busy={query.isFetching} /> : !data ? <div className="studio-panel"><LoadingState variant="inline" label="Loading applications" /></div> : <section className="studio-panel admin-admissions review-list" aria-label="Instructor applications list" aria-busy={query.isFetching}>
       <table className="admissions-table review-table"><thead><tr><th>Applicant</th><th>Teaching background</th><th>Submitted</th><th>Status</th><th><span className="sr-only">Action</span></th></tr></thead><tbody>
         {data.items.map(item => <tr key={item.id}><td data-label="Applicant"><strong>{item.fullName}</strong><p>{item.email}</p></td><td data-label="Teaching background"><strong>{item.specialization}</strong><p>{item.experienceYears} years &middot; {item.languages}</p></td><td data-label="Submitted">{reviewDate(item.submittedAt)}</td><td data-label="Status"><ReviewStatus status={item.status} /></td><td><Link className="cw-button" to={item.id} state={{ from: `/admin/instructor-applications?${params}` }} aria-label={`View application from ${item.fullName}`}>{item.status === "pending" ? "Review" : "View details"}<ArrowRight size={15} aria-hidden="true" /></Link></td></tr>)}
-        {!data.items.length && <tr><td colSpan={5} className="admissions-empty"><h2>No applications found</h2><p>{status || search ? "Try a different search or clear the filters." : "Submitted instructor applications will appear here."}</p></td></tr>}
+        {!data.items.length && <tr><td colSpan={5} className="admissions-empty"><h2>{status === "pending" && !search ? "No applications waiting for review" : "No applications found"}</h2><p>{search ? "Try a different search or clear your search." : status === "pending" ? "You're up to date. New submissions will appear here." : "Applications with this status will appear here."}</p></td></tr>}
       </tbody></table>
       <div className="review-pagination"><span>{pagination.total} matching {pagination.total === 1 ? "application" : "applications"}</span><nav aria-label="Application pages"><button className="cw-button" aria-label="Previous page" disabled={page <= 1 || query.isFetching} onClick={() => filter({ page: String(page - 1) })}><ChevronLeft size={16} /></button><span>Page {page} of {pagination.totalPages}</span><button className="cw-button" aria-label="Next page" disabled={page >= pagination.totalPages || query.isFetching} onClick={() => filter({ page: String(page + 1) })}><ChevronRight size={16} /></button></nav></div>
     </section>}

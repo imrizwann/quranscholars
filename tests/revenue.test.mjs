@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import process from "node:process";
 import { build } from "esbuild";
 import { writeFile, unlink } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -141,10 +142,21 @@ test("earnings UI handles loading, live balances, test notice, sales, payout his
     assert.equal([...document.querySelectorAll('button')].some(node => node.textContent.trim() === "Prepare payout"), false);
     offerTestOnly = false;
     await click("Test payments");
+    const allOption = [...document.querySelectorAll('[role="option"]')].find(node => node.textContent.trim() === "All payments");
+    assert.ok(allOption); await act(async () => allOption.click());
+    await settle(() => document.body.textContent.includes("Select live payments to prepare payouts"));
+    assert.equal([...document.querySelectorAll('button')].some(node => node.textContent.trim() === "Prepare payout"), false);
+    await click("All payments");
     const liveOption = [...document.querySelectorAll('[role="option"]')].find(node => node.textContent.trim() === "Live payments");
     assert.ok(liveOption);
     await act(async () => { liveOption.click(); });
     await click("Refresh"); await settle(() => document.body.textContent.includes("Prepare payout"));
+    const maintenance = document.querySelector("details.revenue-maintenance");
+    assert.equal(maintenance.open, false, "infrequent payment tools stay out of the main report");
+    await act(async () => maintenance.querySelector("summary").click());
+    assert.equal(maintenance.open, true);
+    assert(document.querySelector('[aria-label="Report filters"]'));
+    assert.match(document.body.textContent, /Live payout balances/);
     await click("Reconcile payments");
     await settle(() => document.body.textContent.includes("Continuing automatically"));
     await click("Pause reconciliation");

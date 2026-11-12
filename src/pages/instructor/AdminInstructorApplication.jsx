@@ -11,6 +11,7 @@ import { reviewDate } from "./review-format.js";
 import "./instructor-review.css";
 import FileTypeIcon, { FileTypeLabel } from "@/components/files/FileTypeIcon.jsx";
 import { filePresentation } from "@/components/files/file-types.js";
+import LoadingState from "@/components/feedback/LoadingState.jsx";
 
 function Certificate({ id, document, index }) {
   const [access, request] = useAccessInstructorCertificateMutation();
@@ -53,7 +54,7 @@ function ApplicationReview({ id }) {
   const canReview = application?.status === "pending" && query.currentData?.applicantRole === "user" && id !== admin?._id && application.documents.length > 0;
   const busy = mutation.isLoading;
   function confirm(status) {
-    if (!checked || !canReview || busy) return;
+    if (!checked || !canReview || busy || query.isFetching) return;
     if (status === "rejected" && reason.trim().length < 10) { setError("Explain the rejection in at least 10 characters so the applicant knows why."); return; }
     setError(""); setDecision({ status, revision: application.revision || 1 });
   }
@@ -64,20 +65,21 @@ function ApplicationReview({ id }) {
   }
   return <WorkspacePage eyebrow="Administration" title={application?.fullName || "Review application"} description="Check the applicant's teaching background and supporting certificates before recording your decision." action={<button type="button" className="cw-button" disabled={query.isFetching || busy} onClick={query.refetch}><RefreshCw size={16} aria-hidden="true" />Refresh</button>}>
     <Link className="public-back" to={back}><ArrowLeft size={16} aria-hidden="true" />All instructor applications</Link>
-    {query.isError ? <ReviewError error={query.error} retry={query.refetch} busy={query.isFetching} /> : !application ? <div className="studio-panel" role="status">Loading application...</div> : <>
+    {query.isError ? <ReviewError error={query.error} retry={query.refetch} busy={query.isFetching} /> : !application ? <div className="studio-panel"><LoadingState variant="inline" label="Loading application" /></div> : <>
       <div className="review-overview" role="status"><ReviewStatus status={application.status} /><span>Submitted {reviewDate(application.submittedAt)}{application.revision > 1 ? ` · Submission ${application.revision}` : ""}</span></div>
       <div className="studio-split review-layout"><div className="review-main">
         <section className="studio-panel"><div className="studio-section-title"><ShieldCheck size={20} /><h2>Teaching background</h2></div><dl className="application-summary-grid"><div><dt>Full name</dt><dd>{application.fullName}</dd></div><div><dt>Account email</dt><dd>{application.email}</dd></div><div><dt>Specialization</dt><dd>{application.specialization}</dd></div><div><dt>Teaching experience</dt><dd>{application.experienceYears} years</dd></div><div><dt>Teaching languages</dt><dd>{application.languages}</dd></div><div className="application-wide"><dt>Biography</dt><dd className="whitespace-pre-wrap">{application.biography}</dd></div></dl></section>
-        <section className="studio-panel"><div className="studio-section-title"><FileText size={20} /><h2>Supporting certificates</h2></div><p>Download certificates to review them. Access is restricted to administrators; public course links cannot serve these documents.</p><ul className="review-documents">{application.documents.map((document, index) => <Certificate key={`${application.revision || 1}-${index}`} id={id} document={document} index={index} />)}</ul>{!application.documents.length && <p>No certificates were submitted.</p>}</section>
-        {application.reviewHistory?.length > 0 && <section className="studio-panel"><h2>Previous reviews</h2>{application.reviewHistory.map(entry => <div className="mt-4" key={entry.revision}><h3>Submission {entry.revision}</h3><p>{entry.reviewerName || "Administrator"} · {reviewDate(entry.reviewedAt)}</p><p className="whitespace-pre-wrap">{entry.reason}</p></div>)}</section>}
+        <section className="studio-panel"><div className="studio-section-title"><FileText size={20} /><h2>Supporting certificates</h2></div><p>Review each certificate before deciding. These documents are private and available only to administrators.</p><ul className="review-documents">{application.documents.map((document, index) => <Certificate key={`${application.revision || 1}-${index}`} id={id} document={document} index={index} />)}</ul>{!application.documents.length && <p>No certificates were submitted.</p>}</section>
+        {application.reviewHistory?.length > 0 && <details className="studio-panel review-history"><summary>Previous reviews ({application.reviewHistory.length})</summary>{application.reviewHistory.map(entry => <div className="mt-4" key={entry.revision}><h3>Submission {entry.revision}</h3><p>{entry.reviewerName || "Administrator"} · {reviewDate(entry.reviewedAt)}</p><p className="whitespace-pre-wrap">{entry.reason}</p></div>)}</details>}
       </div><aside className="studio-panel review-decision" aria-label="Application decision">
         <h2>{application.status === "pending" ? "Review decision" : "Decision recorded"}</h2>
         {application.status === "pending" ? <>
-          <p>Approval grants access to Course Studio and makes the instructor&apos;s name, photo, and teaching background public. Check that the biography is suitable for public display and contains no personal contact details or sensitive information. Certificates and review feedback remain private.</p>
+          <p>Approve the applicant to grant instructor access and publish their professional profile.</p>
+          <details className="review-guidance"><summary>What approval makes public</summary><p>The instructor&apos;s name, photo, and teaching background become public. Check that the biography contains no personal contact details or sensitive information. Certificates and review feedback stay private.</p></details>
           {!canReview && <p className="review-error-text" role="alert">This application cannot be reviewed because the account changed, is unavailable, belongs to you, or has no certificates. Refresh to check its current state.</p>}
-          <label className="review-reason" htmlFor="review-reason">Reason or feedback<span>Required for rejection. Visible to the applicant.</span><textarea id="review-reason" rows={5} maxLength={1000} value={reason} disabled={busy || !canReview} onChange={event => setReason(event.target.value)} placeholder="Explain your decision clearly..." /></label>
+          <label className="review-reason" htmlFor="review-reason">Feedback to applicant<span id="review-reason-help">Optional for approval. Required for rejection (at least 10 characters).</span><textarea id="review-reason" name="reason" aria-describedby="review-reason-help" rows={3} maxLength={1000} value={reason} disabled={busy || !canReview || query.isFetching} onChange={event => setReason(event.target.value)} placeholder="Explain your decision clearly..." /></label>
           <label className="review-check"><input name="teachingDetailsReviewed" type="checkbox" checked={checked} disabled={busy || !canReview} onChange={event => setChecked(event.target.checked)} /><span>I have reviewed the teaching details for public display and checked the supporting certificates.</span></label>
-          <div className="public-actions"><button type="button" className="cw-button cw-primary" disabled={!canReview || !checked || busy} onClick={() => confirm("approved")}><CheckCircle2 size={16} />Approve instructor</button><button type="button" className="cw-button cw-danger" disabled={!canReview || !checked || busy} onClick={() => confirm("rejected")}><XCircle size={16} />Reject application</button></div>
+          <div className="public-actions"><button type="button" className="cw-button cw-primary" disabled={!canReview || !checked || busy || query.isFetching} onClick={() => confirm("approved")}><CheckCircle2 size={16} />Approve instructor</button><button type="button" className="cw-button cw-danger" disabled={!canReview || !checked || busy || query.isFetching} onClick={() => confirm("rejected")}><XCircle size={16} />Reject application</button></div>
         </> : <><p>{application.status === "approved" ? "Instructor access was granted when this application was approved." : "This application was rejected. This decision did not grant instructor access."}</p><dl className="application-summary-grid"><div><dt>Reviewed by</dt><dd>{application.reviewedBy?.name || "Administrator"}</dd></div><div><dt>Reviewed on</dt><dd>{reviewDate(application.review?.reviewedAt)}</dd></div><div className="application-wide"><dt>Feedback to applicant</dt><dd className="whitespace-pre-wrap">{application.review?.reason || "No additional feedback."}</dd></div></dl><p>Completed decisions cannot be changed here.</p></>}
         {error && <p className="review-error-text" role="alert">{error}</p>}
       </aside></div>
