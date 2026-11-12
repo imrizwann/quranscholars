@@ -37,6 +37,9 @@ const actions = {
     reviewInstructorApplication: { pending: "Saving review decision…", success: data => ({ type: "success", title: data.application?.status === "approved" ? "Instructor approved" : "Review decision saved", description: "The applicant can see the decision and feedback in their account." }) },
   },
   learnerApi: {
+    saveCourseReview: feedback("Saving your review…", "Your review is saved", "Thank you for sharing your learning experience."),
+    deleteCourseReview: feedback("Removing your review…", "Your review was removed"),
+    moderateCourseReview: feedback("Updating review visibility…", "Review visibility updated"),
     updateLearningLibrary: { pending: "Updating your library…", success: data => ({ type: "success", title: { hide: "Course hidden", restore: "Course restored", leave: "You left the course" }[data.action], description: data.action === "leave" ? "Your progress is saved. Rejoining depends on course availability and current enrollment options." : "Your course access and learning progress are unchanged." }) },
     enrollFreeCourse: { pending: "Enrolling in course…", error: enrollmentFailureMessage, success: data => data.status === "ACTIVE" ? { type: "success", title: "You're enrolled", description: "Your course is ready in My learning." } : { type: "info", title: "Enrollment status updated", description: "Check your course access before starting a lesson." } },
     updateLearnerProfile: feedback("Saving profile…", "Learning profile updated"),

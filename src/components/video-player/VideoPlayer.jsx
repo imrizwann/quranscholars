@@ -31,7 +31,7 @@ const PlayerCenterControl = () => {
   return <div className="player-center-controls"><PlayerPlayButton large /></div>;
 };
 
-const VideoPlayer = ({ src, title = "Course lesson", poster, tracks = [], thumbnails, className = "", autoPlay = false, muted = false, loop = false, playsInline = true, crossOrigin = "anonymous", onEnded, onTimeUpdate, onSeeked, aspectRatio = "16 / 9", errorMessage, playerRef, onProviderSetup, onCanPlay, onPlay, onPause, onRetry }) => {
+const VideoPlayer = ({ src, title = "Course lesson", poster, tracks = [], thumbnails, className = "", autoPlay = false, muted = false, loop = false, playsInline = true, crossOrigin = "anonymous", onEnded, onTimeUpdate, onSeeking, onSeeked, aspectRatio = "16 / 9", errorMessage, playerRef, onProviderSetup, onCanPlay, onPlay, onPause, onRetry }) => {
   const [attempt, setAttempt] = useState(0);
   const [failedPoster, setFailedPoster] = useState(null);
   const sourceKey = typeof src === "string" ? src : src?.src;
@@ -50,7 +50,7 @@ const VideoPlayer = ({ src, title = "Course lesson", poster, tracks = [], thumbn
       onProviderChange={(provider) => { configureProvider(provider); onProviderSetup?.(provider); }}
       autoPlay={autoPlay} muted={muted} loop={loop} playsInline={playsInline} crossOrigin={crossOrigin}
       keyShortcuts={{ togglePaused: "k Space", toggleMuted: "m", toggleFullscreen: "f", seekBackward: "ArrowLeft", seekForward: "ArrowRight", toggleCaptions: "c" }}
-      onEnded={onEnded} onTimeUpdate={onTimeUpdate} onSeeked={onSeeked}
+      onEnded={onEnded} onTimeUpdate={onTimeUpdate} onSeeking={onSeeking} onSeeked={onSeeked}
       onCanPlay={onCanPlay} onPlay={onPlay} onPause={onPause}
     >
       <MediaProvider>

@@ -1,6 +1,8 @@
 // Watch IDs remain in memory. The API owns duration, coverage and completion.
-export function createLearningWatch({ start, heartbeat, onLesson, onStatus, now = Date.now }) {
+export const WATCH_REPORT_INTERVAL = 5000;
+export function createLearningWatch({ start, heartbeat, onLesson = () => {}, onStatus, now = Date.now }) {
   let session = null, pending = false, queued = [], playing = false, position = 0, disposed = false, blocked = false, restart = false, complete = false;
+  let seeking = false;
   let lastReportAt = 0;
   let failedRequest = null;
   const retryable = error => [500, 502, 503, 504, "FETCH_ERROR", "TIMEOUT_ERROR"].includes(error?.status);
@@ -49,18 +51,29 @@ export function createLearningWatch({ start, heartbeat, onLesson, onStatus, now 
     } catch (error) { failedRequest = retryable(error) ? { update } : null; blocked = true; status("error", error); }
     finally { finish(); }
   }
+  const report = () => {
+    if (!disposed && playing && !seeking && now() - lastReportAt >= WATCH_REPORT_INTERVAL) void send();
+  };
+  const snapshot = () => ({ event: seeking ? "seek" : "tick", position });
   return {
     update(value) {
-      if (disposed) return;
+      if (disposed || seeking) return;
       if (Number.isFinite(value)) position = Math.max(0, value);
       // Media events continue during playback when browsers throttle interval
       // timers in background tabs. Both paths share the same reporting cadence.
-      if (playing && now() - lastReportAt >= 10000) void send();
+      report();
     },
     play(value) { if (disposed) return; if (Number.isFinite(value)) position = value; if (playing && !blocked) return; playing = true; blocked = false; if (pending) { restart = true; return; } session = null; void connect(); },
-    pause(value) { if (disposed) return; if (Number.isFinite(value)) position = value; playing = false; void send(); },
-    seek(value) { if (disposed) return; if (Number.isFinite(value)) position = value; void send({ event: "seek", position }); },
-    tick() { if (!disposed && playing) void send(); },
+    pause(value) { if (disposed) return; if (Number.isFinite(value)) position = value; playing = false; void send(snapshot()); },
+    seeking() {
+      if (disposed || seeking) return;
+      // Save the last observed frame before seeking, then ignore time updates
+      // until seeked. Vidstack emits a time update at the destination first.
+      if (playing) void send();
+      seeking = true;
+    },
+    seek(value) { if (disposed) return; seeking = false; if (Number.isFinite(value)) position = value; void send({ event: "seek", position }); },
+    tick: report,
     retry() {
       if (disposed || pending) return;
       blocked = false;
@@ -70,7 +83,7 @@ export function createLearningWatch({ start, heartbeat, onLesson, onStatus, now 
       if (failedRequest && "startPosition" in failedRequest) { void connect(failedRequest.startPosition); return; }
       session = null; if (playing) void connect(); else status("ready");
     },
-    flush() { if (!disposed && (session || pending) && !blocked) void send(); },
-    dispose() { if (disposed) return; if ((session || pending) && !blocked) void send(); disposed = true; playing = false; },
+    flush() { if (!disposed && (session || pending) && !blocked) void send(snapshot()); },
+    dispose() { if (disposed) return; if ((session || pending) && !blocked) void send(snapshot()); disposed = true; playing = false; },
   };
 }
