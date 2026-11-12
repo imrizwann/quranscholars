@@ -19,11 +19,13 @@ const recordedCoursesApi = courseApi.injectEndpoints({
         params: buildRecordedCourseQuery(args),
       }),
       transformResponse: normalizeRecordedCourseList,
+      providesTags: ["Courses"],
       keepUnusedDataFor: 60,
     }),
     getRecordedCourseBySlug: builder.query({
       query: (slug) => `/api/public/recorded-courses/${encodeURIComponent(slug)}`,
       transformResponse: normalizeRecordedCourseDetail,
+      providesTags: ["Courses"],
       keepUnusedDataFor: 60,
     }),
   }),

@@ -12,7 +12,7 @@ export default function ProtectedLessonVideo(props) {
   return <LessonVideo key={`${courseId}/${sectionId}/${lessonId}`} {...props} />;
 }
 
-function LessonVideo({ target, title = "Lesson preview", poster, startTime = 0, onPlaybackProgress, onPlaybackPlay, onPlaybackPause, onPlaybackSeek, onEnded }) {
+function LessonVideo({ target, title = "Lesson preview", poster, startTime = 0, onPlaybackProgress, onPlaybackPlay, onPlaybackPause, onPlaybackSeeking, onPlaybackSeek, onEnded }) {
   const query = instructorCoursesApi.endpoints.getLessonPlayback.useQuery(target, {
     pollingInterval: 120_000, refetchOnFocus: true, refetchOnReconnect: true, refetchOnMountOrArgChange: true,
   });
@@ -67,10 +67,18 @@ function LessonVideo({ target, title = "Lesson preview", poster, startTime = 0, 
   if (unsupported) return <div className="cw-preview-placeholder" role="status"><LockKeyhole size={28} aria-hidden="true" /><strong>Browser update needed</strong><p>Please use a current browser to watch this protected lesson.</p></div>;
   if (!source.current || denied) return <div className="cw-preview-placeholder" role={query.error ? "alert" : "status"}><LockKeyhole size={28} aria-hidden="true" /><strong>{denied ? "Lesson access required" : "Playback unavailable"}</strong><p>{query.error ? userMessage(query.error) : "Refresh to check your access to this lesson."}</p><button type="button" className="cw-button" disabled={query.isFetching} onClick={query.refetch}>{query.isFetching ? "Checking access…" : "Refresh playback"}</button></div>;
   return <div className="protected-lesson-video"><Suspense fallback={<div className="cw-preview-placeholder"><LoadingState label="Opening lesson" /></div>}><VideoPlayer src={source.current} crossOrigin="anonymous" title={title} poster={poster} className="cw-preview-player" playerRef={player} onProviderSetup={configure}
-    onTimeUpdate={() => { if (player.current && !restorePending.current) { position.current.time = player.current.currentTime; onPlaybackProgress?.({ currentTime: player.current.currentTime, duration: player.current.duration }); } }}
+    onTimeUpdate={() => { if (player.current && !restorePending.current && !player.current.seeking) { position.current.time = player.current.currentTime; onPlaybackProgress?.({ currentTime: player.current.currentTime, duration: player.current.duration }); } }}
     onPlay={() => { position.current.playing = true; if (!restorePending.current) onPlaybackPlay?.({ currentTime: player.current?.currentTime || 0 }); }}
     onPause={() => { if (player.current?.canPlay) position.current.playing = false; if (!restorePending.current) onPlaybackPause?.({ currentTime: player.current?.currentTime || 0 }); }}
-    onSeeked={() => { if (!restorePending.current) onPlaybackSeek?.({ currentTime: player.current?.currentTime || 0 }); }}
+    onSeeking={() => { if (!restorePending.current) onPlaybackSeeking?.(); }}
+    onSeeked={() => {
+      if (restorePending.current) return;
+      position.current.time = player.current?.currentTime || 0;
+      // Reset coverage before exposing the new position to resume/notes UI.
+      const data = { currentTime: position.current.time, duration: player.current?.duration };
+      onPlaybackSeek?.(data);
+      onPlaybackProgress?.(data);
+    }}
     onCanPlay={() => {
       if (!player.current || !restorePending.current) return;
       const duration = player.current.duration;

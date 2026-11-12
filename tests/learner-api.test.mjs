@@ -26,7 +26,7 @@ test("learner API whitelists fields, rechecks access after enrollment, and clear
       requests.push(request);
       if (path.includes("/courses/by-slug/")) return Response.json({ success: true, data: { course: { _id: "course-1", slug: "tajweed", title: "Archived learning", status: "Archived", sections: [] }, canManage: false } });
       if (path.endsWith("/analytics")) { analyticsReads++; return Response.json({ success: true, data: { summary: { totalEnrolledCourses: canAccess ? 1 : 0, completedCourses: 0, completedLessons: 0, coursesInProgress: 0 } } }); }
-      if (path.endsWith("/progress")) { progressReads++; return Response.json({ success: true, data: { lessons: [{ lessonId: "lesson-1", completed }] } }); }
+      if (path.endsWith("/progress")) { progressReads++; return Response.json({ success: true, data: { lessons: [{ lessonId: "lesson-1", sectionId: "section-1", completed }], sections: [{ sectionId: "section-1", quiz: { unlocked: false } }] } }); }
       if (path.endsWith("/watch/heartbeat")) { completed = true; return Response.json({ success: true, data: { sequence: 1, lesson: { lessonId: "lesson-1", completed: true } } }); }
       if (path.endsWith("/access")) { accessReads++; return Response.json({ success: true, data: { canAccessCourse: canAccess } }); }
       if (path.endsWith("/library")) { libraryReads++; return Response.json({ success: true, data: { courses: canAccess ? [{ id: "course-1" }] : [] } }); }
@@ -72,10 +72,14 @@ test("learner API whitelists fields, rechecks access after enrollment, and clear
     const heartbeat = { courseId: "course-1", sectionId: "section-1", lessonId: "lesson-1", watchId: randomUUID(), sequence: 1, position: 90, event: "tick" };
     await store.dispatch(learner.endpoints.recordLessonWatch.initiate(heartbeat)).unwrap();
     await Promise.all(store.dispatch(learner.util.getRunningQueriesThunk()));
-    assert.equal(progressReads, 2); assert.equal(analyticsReads, 3);
+    assert.equal(progressReads, 1, "completion uses the confirmed response without another progress read"); assert.equal(analyticsReads, 3);
+    const confirmed = learner.endpoints.getCourseProgress.select("course-1")(store.getState()).data;
+    assert.equal(confirmed.lessons[0].completed, true, "the checkbox receives the confirmed completion immediately");
+    assert.equal(confirmed.completedLessons, 1); assert.equal(confirmed.progressPercent, 100);
+    assert.equal(confirmed.sections[0].quiz.unlocked, true);
     await store.dispatch(learner.endpoints.recordLessonWatch.initiate({ ...heartbeat, sequence: 2, position: 95 })).unwrap();
     await Promise.all(store.dispatch(learner.util.getRunningQueriesThunk()));
-    assert.equal(progressReads, 2, "post-completion resume saves must not reload the course every ten seconds");
+    assert.equal(progressReads, 1, "post-completion resume saves must not reload the course");
     assert.equal(analyticsReads, 3);
     const resumeWrite = requests.filter(request => request.url.endsWith("/watch/heartbeat")).at(-1);
     assert.equal(resumeWrite.keepalive, true);

@@ -11,6 +11,17 @@ function setup() {
   const action = (phase, endpointName, payload, { api = "instructorCoursesApi", requestId = "one", ...meta } = {}) => store.dispatch({ type: `${api}/executeMutation/${phase}`, payload, meta: { requestId, arg: { endpointName }, ...meta } });
   return { calls, store, action };
 }
+
+test("review actions use the shared toast while background review reads stay quiet", () => {
+  const { action, calls } = setup();
+  for (const endpoint of ["saveCourseReview", "deleteCourseReview", "moderateCourseReview"]) {
+    action("pending", endpoint, undefined, { api: "learnerApi", requestId: endpoint });
+    action("fulfilled", endpoint, {}, { api: "learnerApi", requestId: endpoint });
+  }
+  assert.deepEqual(calls.map(call => call.type), ["loading", "success", "loading", "success", "loading", "success"]);
+  action("pending", "getMyCourseReview", undefined, { api: "learnerApi" });
+  assert.equal(calls.length, 6);
+});
 test("mutations replace their loading toast with action-specific success or safe error feedback", () => {
   const { calls, action } = setup();
   action("pending", "createCourse");

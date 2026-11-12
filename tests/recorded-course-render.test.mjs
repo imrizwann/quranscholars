@@ -18,6 +18,7 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
     stdin: { contents: `
       import "./src/features/recorded-courses/services/recordedCoursesRepository.js";
       export { default as api } from "./src/services/api/courses/courses.api.js";
+      export { default as learner } from "./src/services/api/user/learnerApi.js";
       export { default as Catalog } from "./src/pages/recorded-courses/RecordedCourses.jsx";
       export { default as Detail } from "./src/pages/recorded-courses/RecordedCourseDetails.jsx";
       export { default as LoadingState } from "./src/components/feedback/LoadingState.jsx";
@@ -31,21 +32,24 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
   });
   await writeFile(outputPath, compiled.outputFiles[0].text);
   const originalFetch = globalThis.fetch;
-  let store;
+  let store, learner;
   const requests = [];
   const record = { _id: "course-1", slug: "example-course", title: "Example course", category: { name: "Quran", slug: "quran" }, instructor: { _id: "teacher-1" }, price: { original: 299.5, sale: 0, currency: "INR" }, stats: { totalSections: 0 }, totalDuration: 0 };
   try {
     globalThis.fetch = async (request) => {
       const url = new URL(request.url || request);
       requests.push(url);
+      if (url.pathname.endsWith("/reviews")) return Response.json({ success: true, data: { summary: { count: 0, average: 0 }, reviews: [], pagination: { page: 1, limit: 10, totalPages: 0 } } });
       if (url.pathname.endsWith("/missing")) return Response.json({ message: "Course not found" }, { status: 404 });
       if (url.pathname.endsWith("/unavailable")) return Response.json({ message: "Unavailable" }, { status: 500 });
       if (url.pathname.endsWith("/example-course")) return Response.json({ success: true, data: { course: record } });
       if (url.pathname.endsWith("/with-trailer")) return Response.json({ success: true, data: { course: { ...record, slug: "with-trailer", updatedAt: "invalid-date", outcomes: ["Read with confidence"], requirements: ["A willingness to learn"], audience: ["New learners"], sections: [{ _id: "section-1", title: "Foundations", description: "Start here", lessons: [{ _id: "lesson-1", title: "Understanding the alphabet", durationSeconds: 180, previewable: false }, { _id: "lesson-2", title: "Practice recitation", durationSeconds: null }] }, { _id: "section-2", title: "Next steps", lessons: [] }] }, trailerPlaybackUrl: "https://video.example.test/master.m3u8" } });
       return Response.json({ success: true, data: { courses: [record], pagination: { page: 2, limit: 8, totalCourses: 33, totalPages: 5 }, filters: {} } });
     };
-    const { api, Catalog, Detail, CourseVideo, VideoPreview, LoadingState, CardMedia } = await import(pathToFileURL(outputPath));
-    store = configureStore({ reducer: { [api.reducerPath]: api.reducer, user: () => ({ user: null }) }, middleware: (getDefault) => getDefault().concat(api.middleware) });
+    const mod = await import(pathToFileURL(outputPath));
+    const { api, Catalog, Detail, CourseVideo, VideoPreview, LoadingState, CardMedia } = mod;
+    learner = mod.learner;
+    store = configureStore({ reducer: { [api.reducerPath]: api.reducer, [learner.reducerPath]: learner.reducer, user: () => ({ user: null }) }, middleware: (getDefault) => getDefault().concat(api.middleware, learner.middleware) });
     const render = (Component, url, path) => renderToStaticMarkup(React.createElement(Provider, { store },
       React.createElement(MemoryRouter, { initialEntries: [url] }, React.createElement(Routes, null,
         React.createElement(Route, { path, element: React.createElement(Component) })))));
@@ -61,6 +65,7 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
     assert.equal(requests[0].searchParams.get("page"), "2");
     assert.equal(requests[0].searchParams.get("sort"), null);
     await store.dispatch(api.endpoints.getRecordedCourseBySlug.initiate("example-course"));
+    await store.dispatch(learner.endpoints.getCourseReviews.initiate({ slug: "example-course", page: 1 }));
     const detail = render(Detail, "/courses/example-course", "/courses/:slug");
     assert.match(detail, /Instructor not listed/);
     assert.match(detail, /Lesson count not listed/);
@@ -72,6 +77,7 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
     assert.match(detail, /href="\/contact"/);
     assert.doesNotMatch(detail, /Lifetime access|money.back guarantee|refund guaranteed/i);
     assert.match(detail, /No trailer available/);
+    assert.match(detail, /Learner reviews/); assert.match(detail, /No reviews yet/);
     assert.doesNotMatch(detail, /aria-label="Preview course trailer"|Preview this course/);
     assert.doesNotMatch(detail, /Verified learner|undefined|\[object Object\]/);
     const withTrailer = await store.dispatch(api.endpoints.getRecordedCourseBySlug.initiate("with-trailer"));
@@ -123,6 +129,7 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
     assert.match(media({}), /Explore this course/);
     store.dispatch(api.util.resetApiState());
   } finally {
+    if (store && learner) store.dispatch(learner.util.resetApiState());
     globalThis.fetch = originalFetch;
     await unlink(outputPath);
   }

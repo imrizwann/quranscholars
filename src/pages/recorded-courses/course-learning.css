@@ -72,7 +72,7 @@
 .learning-section li a[aria-current=page] .learning-lesson-number { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
 .learning-lesson-copy { min-width: 0; }
 .learning-lesson-copy { flex: 1; }
-.learning-completion-check { display: grid; place-items: center; flex: 0 0 20px; height: 20px; margin-top: 2px; border: 1px solid color-mix(in srgb, var(--muted-foreground) 65%, var(--border)); border-radius: 4px; color: var(--primary-foreground); background: var(--surface); }
+.learning-completion-check { display: grid; place-items: center; flex: 0 0 20px; height: 20px; margin-top: 2px; border: 1px solid color-mix(in srgb, var(--muted-foreground) 65%, var(--border)); border-radius: 4px; color: var(--primary-foreground); background: var(--surface); transition: background 180ms var(--ease-out-ui), border-color 180ms var(--ease-out-ui); }
 .learning-completion-check[aria-checked=true] { background: var(--primary); border-color: var(--primary); }
 .learning-completion-check[aria-checked=mixed] { background: var(--muted); opacity: .7; }
 .learning-course-progress { padding: 0 20px 18px; font-size: var(--font-size-label); }
@@ -83,6 +83,9 @@
 .learning-course-progress progress::-webkit-progress-bar { background: var(--muted); }
 .learning-course-progress progress::-webkit-progress-value { background: var(--primary); }
 .learning-course-progress progress::-moz-progress-bar { background: var(--primary); }
+@media (prefers-reduced-motion: reduce) {
+  .learning-completion-check { transition: none; }
+}
 .learning-course-progress p { font-size: var(--font-size-label); line-height: 1.7; }
 .learning-quiz-link { display: flex; gap: 12px; align-items: center; width: 100%; padding: 16px 20px; text-align: start; border-top: 1px solid var(--border); background: var(--surface); color: var(--primary); }
 .learning-quiz-link > svg { flex-shrink: 0; }
