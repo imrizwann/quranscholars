@@ -256,7 +256,7 @@ const Home = () => {
             </Link>
           </div>
 
-          {isFeaturedCatalogue ? <CourseSelection courses={homeRecordedCourses} featured loading={coursesLoading} error={coursesError} retry={retryCourses} /> : <div className="home-course-grid mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3" aria-busy={coursesLoading}>
+          {isFeaturedCatalogue ? <CourseSelection courses={homeRecordedCourses} loading={coursesLoading} error={coursesError} retry={retryCourses} /> : <div className="home-course-grid mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3" aria-busy={coursesLoading}>
             {coursesLoading && <span className="sr-only" role="status">Loading courses</span>}
             {coursesLoading ? Array.from({ length: 3 }, (_, index) => <RecordedCourseSkeleton key={index} />) : coursesError ? (
               <div className="home-course-state" role="alert"><BookOpen size={24} aria-hidden="true" /><div><h3>Courses are temporarily unavailable</h3><p>Please try again in a moment.</p></div><button type="button" onClick={retryCourses} className="cw-button">Try again</button></div>
