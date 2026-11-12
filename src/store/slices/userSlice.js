@@ -4,9 +4,7 @@ const normalizeUser = (user) => {
   if (!user || typeof user !== "object") return null;
   return {
     ...user,
-    role: String(user.role || "")
-      .trim()
-      .toLowerCase(),
+    role: ["user", "admin", "instructor"].includes(user.role) ? user.role : "user",
     email: String(user.email || "")
       .trim()
       .toLowerCase(),

@@ -48,7 +48,7 @@ const DiscoverIslam = () => {
 
                 
                 Quran Scholar brings live, mentor-led learning that blends
-                Qur'an, Sunnah, adab, and spiritual refinement. Study in small
+                Qur&apos;an, Sunnah, adab, and spiritual refinement. Study in small
                 cohorts, follow curated study plans, and witness your iman grow
                 in community.
               </motion.p>
@@ -62,11 +62,11 @@ const DiscoverIslam = () => {
 
               
               <p>
-                Qur'an & Sunnah Spotlight
+                Qur&apos;an & Sunnah Spotlight
               </p>
               <p>
-                "The best among you are those who learn the Qur'an and teach
-                it." - Prophetic tradition (Bukhari)
+                &quot;The best among you are those who learn the Qur&apos;an and teach
+                it.&quot; - Prophetic tradition (Bukhari)
               </p>
               <p>
                 Weekly reflections on verses and hadith with practical action
@@ -176,8 +176,8 @@ const DiscoverIslam = () => {
                 Verse to Live By
               </p>
               <p>
-                "Indeed, in the remembrance of Allah do hearts find rest."
-                (Qur'an 13:28)
+                &quot;Indeed, in the remembrance of Allah do hearts find rest.&quot;
+                (Qur&apos;an 13:28)
               </p>
             </div>
           </motion.div>

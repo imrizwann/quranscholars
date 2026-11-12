@@ -13,7 +13,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { toast } from "sonner";
 import { createActionFeedbackMiddleware } from "../src/components/feedback/actionFeedbackMiddleware.js";
 
-for (const scenario of ["verified callback", "failed callback", "return without callback", "manual recovery", "webhook first"]) {
+for (const scenario of ["verified callback", "failed callback", "return without callback", "manual recovery", "webhook first", "expired test checkout"]) {
 test(`themed checkout safely recovers ${scenario} without a second order`, async t => {
   const notices = [];
   for (const type of ["loading", "success", "error", "info", "dismiss"]) t.mock.method(toast, type, (...args) => { notices.push({ type, title: args[0] }); });
@@ -31,12 +31,12 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
   const previousFetch = globalThis.fetch;
   let root, store, apis, options;
   try {
-    const compiled = await build({ stdin: { contents: `export {default as Enrollment} from './src/features/recorded-courses/components/CourseEnrollment.jsx'; export {default as paymentApi} from './src/services/api/user/paymentApi.js'; export {default as learnerApi} from './src/services/api/user/learnerApi.js';`, resolveDir: process.cwd() }, bundle: true, write: false, format: "esm", platform: "node", packages: "external", jsx: "automatic", alias: { "@": resolve("src") }, loader: { ".css": "empty" }, define: { "import.meta.env": JSON.stringify({ VITE_API_URL: "https://api.example.test" }) } });
+    const compiled = await build({ stdin: { contents: `export {default as Enrollment} from './src/features/recorded-courses/components/CourseEnrollment.jsx'; export {default as paymentApi} from './src/services/api/user/paymentApi.js'; export {default as learnerApi} from './src/services/api/user/learnerApi.js';`, resolveDir: process.cwd() }, bundle: true, write: false, format: "esm", platform: "node", packages: "external", jsx: "automatic", alias: { "@": resolve("src") }, loader: { ".css": "empty" }, define: { "import.meta.env": JSON.stringify({ VITE_API_URL: "https://api.example.test", PROD: true }) } });
     await writeFile(output, compiled.outputFiles[0].text);
     const mod = await import(pathToFileURL(output)); apis = [mod.paymentApi, mod.learnerApi];
     const user = { _id: "buyer1", name: "Learner", email: "learner@example.test", role: "user" };
     const course = { id: "course1", title: "Tajweed foundations", slug: "tajweed", enrollmentOpen: true, instructor: { id: "teacher1" }, price: { current: 149 } };
-    const intent = { intentId: "a".repeat(24), courseId: course.id, state: "pending", testMode: true, amountMinor: 14900, currency: "INR", checkout: { provider: "razorpay", orderId: "order_one", publicKey: "rzp_test_public" } };
+    const intent = { intentId: "a".repeat(24), courseId: course.id, state: "pending", testMode: false, amountMinor: 14900, currency: "INR", checkout: { provider: "razorpay", orderId: "order_one", publicKey: "rzp_live_public" } };
     let active = false, verified = 0, captured = false, recoveryChecks = 0;
     const attempts = [];
     window.Razorpay = class { constructor(input) { options = input; } open() {} close() { options.modal.ondismiss(); } };
@@ -46,6 +46,7 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
       if (path === "/api/purchases/course1/access") return Response.json({ success: true, data: { canAccessCourse: active, checkoutAvailable: true, enrollmentOpen: true } });
       if (path === "/api/payments/checkout") {
         attempts.push(await request.json());
+        if (scenario === "expired test checkout" && attempts.length === 1) return Response.json({ userMessage: "This checkout is no longer available. Please start a new checkout." }, { status: 410 });
         return Response.json({ success: true, data: intent });
       }
       if (path.endsWith("/verify")) {
@@ -85,11 +86,19 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
     const button = label => [...document.querySelectorAll("button")].find(button => button.textContent.includes(label));
     await settle(() => button("Buy course"));
     await act(async () => button("Buy course").click());
+    if (scenario === "expired test checkout") {
+      await settle(() => document.body.textContent.includes("This checkout is no longer available.") && !button("Buy course").disabled);
+      assert.equal(options, undefined);
+      await act(async () => button("Buy course").click());
+      await settle(() => options);
+      assert.notEqual(attempts[0].idempotencyKey, attempts[1].idempotencyKey, "only the retired sandbox checkout gets a new retry key");
+      return;
+    }
     await settle(() => options);
     assert.equal(options.theme.color, "#0f766e"); assert.equal(options.amount, 14900);
     assert.equal(verified, 0); assert.equal(document.querySelector('a[href="/learn/tajweed"]'), null);
     assert.match(document.body.textContent, /Secure checkout/);
-    assert.match(document.body.textContent, /Test mode/);
+    assert.doesNotMatch(document.body.textContent, /Test mode/);
     assert(button("Checkout open").disabled);
     await act(async () => options.modal.ondismiss());
     await settle(() => button("Continue payment") && !button("Continue payment").disabled);

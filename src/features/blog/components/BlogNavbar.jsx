@@ -1,4 +1,3 @@
-import React from "react";
 import Logo from "/blog_logo.svg";
 import { Link } from "react-router-dom";
 const Navbar = () => {

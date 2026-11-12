@@ -1,4 +1,3 @@
-import React from "react";
 
 const SeekingKnowledgeReadMore = ({ readMoreToggle, setReadMoreToggle }) => {
   return (
@@ -13,7 +12,7 @@ const SeekingKnowledgeReadMore = ({ readMoreToggle, setReadMoreToggle }) => {
             In Islam, the pursuit of knowledge stands as a fundamental duty and
             an honored endeavor for every Muslim. The Prophet Muhammad (peace be
             upon him) unequivocally stated,{" "}
-            <strong>"Seeking knowledge is a duty upon every Muslim."</strong>{" "}
+            <strong>&quot;Seeking knowledge is a duty upon every Muslim.&quot;</strong>{" "}
             This Hadith underscores the obligatory nature of acquiring
             knowledge, encompassing both religious understanding and worldly
             education.
@@ -22,7 +21,7 @@ const SeekingKnowledgeReadMore = ({ readMoreToggle, setReadMoreToggle }) => {
             The Quran echoes this sentiment, urging believers to seek
             enlightenment through learning. In Surah Taha, verse 114, it is
             mentioned,{" "}
-            <strong>"And say: My Lord, increase me in knowledge."</strong> This
+            <strong>&quot;And say: My Lord, increase me in knowledge.&quot;</strong> This
             divine encouragement emphasizes the significance of seeking
             knowledge and beseeching God for its augmentation.
           </p>

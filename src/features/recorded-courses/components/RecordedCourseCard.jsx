@@ -10,7 +10,7 @@ const compactNumber = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 1,
 });
 
-const RecordedCourseCard = ({ course, featured = false }) => {
+const RecordedCourseCard = ({ course, featured = false, action }) => {
   const location = useLocation();
   const courseCatalog = location.pathname === "/courses"
     ? { url: location.pathname + location.search, key: location.key }
@@ -59,7 +59,7 @@ const RecordedCourseCard = ({ course, featured = false }) => {
       </div>
       <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-5">
         <CoursePrice price={course.price} />
-        <Link to={`/courses/${course.slug}`} state={linkState} aria-label={`View details for ${course.title}`} className="inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-primary no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">View course <ArrowRight size={15} aria-hidden="true" /></Link>
+        {action || <Link to={`/courses/${course.slug}`} state={linkState} aria-label={`View details for ${course.title}`} className="inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-primary no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">View course <ArrowRight size={15} aria-hidden="true" /></Link>}
       </div>
     </div>
   </article>

@@ -12,6 +12,8 @@ import NotLoggedIn from "@/components/guards/NotLoggedIn.jsx";
 import CourseRouteRedirect from "@/components/navigation/CourseRouteRedirect.jsx";
 import RouteErrorPage from "@/components/feedback/RouteErrorPage.jsx";
 const Home = lazy(() => import("@/pages/home/Home.jsx"));
+const CoursePolicy = lazy(() => import("@/pages/legal/CoursePolicy.jsx"));
+const AdminOperations = lazy(() => import("@/pages/instructor/AdminOperations.jsx"));
 const RevenueDashboard = lazy(() => import("@/features/revenue/RevenueDashboard.jsx"));
 const Services = lazy(() => import("@/pages/services/Services.jsx"));
 const ServicesList = lazy(() => import("@/pages/services/ServicesList.jsx"));
@@ -321,6 +323,8 @@ const router = createBrowserRouter([
       },
 
       { path: "/privacy", element: <PrivacyPolicy /> },
+      { path: "/course-policy", element: <CoursePolicy /> },
+      { path: "/share/courses/:slug", element: <CourseRouteRedirect basePath="/courses" includeSlug /> },
       { path: "/forgot-password", element: <ForgotPassword /> },
       { path: "/reset-password", element: <ResetPassword /> },
       { path: "/verify-email", element: <VerifyEmail /> },
@@ -337,6 +341,7 @@ const router = createBrowserRouter([
         element: <AdminRoute><WorkspaceLayout type="admin" /></AdminRoute>,
         children: [{ index: true, element: <RevenueDashboard admin /> }],
       },
+      { path: "/admin/operations", element: <AdminRoute><WorkspaceLayout type="admin" /></AdminRoute>, children: [{ index: true, element: <AdminOperations /> }] },
       {
         path: "/admin/instructor-applications",
         element: <AdminRoute><WorkspaceLayout type="admin" /></AdminRoute>,

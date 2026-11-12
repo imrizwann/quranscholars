@@ -27,8 +27,8 @@ const SeekingKnowledge = () => {
 
           <p>
             The first command revealed was{" "}
-            <strong>"Iqra" (Read)</strong>. The
-            Qur'an and Sunnah call every believer to pursue knowledge that
+            <strong>&quot;Iqra&quot; (Read)</strong>. The
+            Qur&apos;an and Sunnah call every believer to pursue knowledge that
             illuminates the heart and benefits creation. Join live circles,
             reflect with mentors, and serve by teaching what you learn.
           </p>
@@ -38,7 +38,7 @@ const SeekingKnowledge = () => {
               Prophetic Guidance
             </p>
             <p>
-              "Seeking knowledge is an obligation upon every Muslim." - Hadith
+              &quot;Seeking knowledge is an obligation upon every Muslim.&quot; - Hadith
               (Ibn Majah)
             </p>
             <p>

@@ -4,7 +4,7 @@ import { Dialog } from "@base-ui/react/dialog";
 import CollapsibleSidebar, { HamburgerIcon, SidebarToggle } from "@/components/navigation/CollapsibleSidebar.jsx";
 import WorkspaceAccountMenu from "./WorkspaceAccountMenu.jsx";
 import Brand from "@/components/branding/Brand.jsx";
-import { ArrowUpRight, BarChart3, BookOpen, ChevronRight, CircleDollarSign, GraduationCap, LayoutDashboard, Settings, UserRound, Users, X } from "lucide-react";
+import { ArrowUpRight, BarChart3, BookOpen, ChevronRight, CircleDollarSign, GraduationCap, LayoutDashboard, Settings, ShieldCheck, UserRound, Users, X } from "lucide-react";
 import "./workspace.css";
 
 const studentLinks = [
@@ -29,6 +29,7 @@ const instructorLinks = [
 ];
 
 const adminLinks = [
+  { to: "/admin/operations", label: "Operations", icon: ShieldCheck },
   { to: "/admin/revenue", label: "Revenue & payouts", icon: CircleDollarSign },
   { to: "/admin/instructor-applications", label: "Instructor applications", icon: GraduationCap },
 ];

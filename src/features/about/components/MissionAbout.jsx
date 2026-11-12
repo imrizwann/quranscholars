@@ -9,7 +9,7 @@ export default function MissionAbout() {
           </h2>
           <div></div>
           <p>
-            "At Islamic Academy, our mission is to empower Muslims worldwide with authentic Islamic knowledge through accessible online education. We strive to bridge the gap between traditional Islamic learning and modern technology, making Quranic wisdom, Prophetic teachings, and Islamic sciences available to all believers - regardless of age, location, or background. Our commitment is to nurture an informed Ummah grounded in Quran and Sunnah, equipped to practice and preserve our faith in its purest form."
+            &quot;At Islamic Academy, our mission is to empower Muslims worldwide with authentic Islamic knowledge through accessible online education. We strive to bridge the gap between traditional Islamic learning and modern technology, making Quranic wisdom, Prophetic teachings, and Islamic sciences available to all believers - regardless of age, location, or background. Our commitment is to nurture an informed Ummah grounded in Quran and Sunnah, equipped to practice and preserve our faith in its purest form.&quot;
           </p>
         </div>
 
@@ -21,7 +21,7 @@ export default function MissionAbout() {
           <div></div>
           <div>
             <p>
-              Islamic Academy is a revolutionary online platform dedicated to spreading authentic Islamic knowledge to every Muslim household. Founded on the principle 'Ilm for All', we break down geographical and temporal barriers to Islamic education, offering structured learning programs for children, adults, and seniors alike.
+              Islamic Academy is a revolutionary online platform dedicated to spreading authentic Islamic knowledge to every Muslim household. Founded on the principle &apos;Ilm for All&apos;, we break down geographical and temporal barriers to Islamic education, offering structured learning programs for children, adults, and seniors alike.
             </p>
 
             <p>
@@ -29,7 +29,7 @@ export default function MissionAbout() {
             </p>
 
             <p>
-              We believe every Muslim deserves access to proper Islamic education. Whether you're a busy parent, working professional, or retiree - our virtual classrooms adapt to your schedule while maintaining academic rigor. Our vision is to create a global community of learned Muslims who carry the light of knowledge to future generations.
+              We believe every Muslim deserves access to proper Islamic education. Whether you&apos;re a busy parent, working professional, or retiree - our virtual classrooms adapt to your schedule while maintaining academic rigor. Our vision is to create a global community of learned Muslims who carry the light of knowledge to future generations.
             </p>
           </div>
           

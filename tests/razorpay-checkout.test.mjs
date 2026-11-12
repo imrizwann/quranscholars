@@ -2,6 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 import { loadRazorpay, openRazorpayCheckout } from "../src/features/payments/razorpay-checkout.js";
+import { build } from "esbuild";
+import { writeFile, unlink } from "node:fs/promises";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+import { randomUUID } from "node:crypto";
 
 test("checkout loads only Razorpay's script, uses the existing theme and validates its callback", async () => {
   const dom = new JSDOM("<!doctype html><html style='--primary: #0f766e'><head></head><body></body></html>", { url: "https://www.quranscholar.in" });
@@ -30,6 +35,17 @@ test("checkout loads only Razorpay's script, uses the existing theme and validat
     const stopped = openRazorpayCheckout({ ...input, onInstance: () => false });
     assert.equal(await stopped, null); assert.equal(opened, 3, "unmounted or signed-out user cannot open checkout");
     await assert.rejects(openRazorpayCheckout({ ...input, payment: { ...input.payment, amountMinor: 0 } }), /not available/);
+    const file = resolve("tests", `razorpay-production-fixture-${randomUUID()}.mjs`);
+    try {
+      const compiled = await build({ entryPoints: ["src/features/payments/razorpay-checkout.js"], bundle: true, write: false, format: "esm", platform: "node", define: { "import.meta.env": JSON.stringify({ PROD: true }) } });
+      await writeFile(file, compiled.outputFiles[0].text);
+      const production = await import(pathToFileURL(file));
+      await assert.rejects(production.openRazorpayCheckout(input), /not available/);
+      assert.equal(opened, 3, "production cannot open a sandbox checkout");
+      const live = { ...input, payment: { ...input.payment, checkout: { ...input.payment.checkout, publicKey: "rzp_live_public" } }, onInstance: () => false };
+      assert.equal(await production.openRazorpayCheckout(live), null);
+      assert.equal(options.key, "rzp_live_public");
+    } finally { await unlink(file).catch(() => {}); }
   } finally {
     for (const [key, value] of Object.entries(saved)) { if (value === undefined) delete globalThis[key]; else globalThis[key] = value; }
     dom.window.close();

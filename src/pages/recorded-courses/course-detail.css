@@ -137,6 +137,17 @@
 @media (max-width: 540px) { .course-detail { padding-bottom: 40px; } .cd-container { padding: 0 18px; } .cd-breadcrumbs { padding-top: 20px; font-size: var(--font-size-caption); } .cd-hero { padding: 22px 0 26px; } .cd-intro { font-size: 1rem; } .cd-hero-meta { gap: 12px 16px; font-size: var(--font-size-caption); font-weight: 500; } .cd-hero-meta .cd-instructor-link { flex-basis: 100%; } .cd-preview-caption { padding: 14px; } .cd-preview-caption .cd-preview-icon { display: none; } .cd-preview-caption p { font-size: var(--font-size-caption); } .cd-no-trailer { min-height: 280px; } .cd-no-trailer-content { padding: 25px; } .cd-section-nav { gap: 25px; } .cd-section-nav a { font-size: var(--font-size-label); } .cd-content-section { padding: 28px 0; } .cd-content-section h2, .cd-related h2 { font-size: 21px; } .cd-outcomes { padding: 20px; } .cd-outcomes ul { grid-template-columns: minmax(0, 1fr); } .cd-section-toggle { padding: 16px 14px; gap: 10px; } .cd-section-number { width: 26px; height: 26px; font-size: var(--font-size-label); color: var(--cd-ink); } .cd-lessons li { padding: 14px 17px; } .cd-trailer-lesson { padding: 16px 14px; gap: 9px; } .cd-trailer-lesson span span { display: none; font-size: var(--font-size-label); color: var(--cd-muted); } .cd-facts dl { grid-template-columns: minmax(0, 1fr); gap: 16px; } .cd-instructor-card { gap: 14px; } .cd-instructor-avatar { width: 50px; height: 50px; font-size: 17px; } .cd-instructor-card h3 { font-size: 16px; } .cd-related-grid { grid-template-columns: minmax(0, 1fr); } .cd-related .cd-section-heading { align-items: flex-start; } .cd-text-button { font-size: var(--font-size-caption); } }
 @media (prefers-reduced-motion: reduce) { .cd-section-toggle > svg { transition: none; } }
 .cd-enrollment-action { width: 100%; margin-top: 12px; }
+.cd-mobile-enrollment-link { display: none; }
+.cd-course-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 20px; }
+#course-enrollment { scroll-margin-top: 100px; }
+@media (max-width: 900px) { .cd-mobile-enrollment-link { display: inline-flex; min-height: 44px; } .cd-course-actions .cw-button { min-height: 44px; } }
+.cd-purchase-includes { margin-top: 18px; padding-block: 16px; border-block: 1px solid var(--border); }
+.cd-purchase-includes h3 { font-size: var(--font-size-label); font-weight: 600; }
+.cd-purchase-includes ul { display: grid; gap: 8px; margin-top: 10px; }
+.cd-purchase-includes li { display: flex; align-items: start; gap: 8px; font-size: var(--font-size-label); line-height: 1.6; }
+.cd-purchase-includes li svg { flex-shrink: 0; color: var(--primary); margin-top: 3px; }
+.cd-purchase-includes p, .cd-purchase-terms { margin-top: 10px; font-size: var(--font-size-caption); line-height: 1.7; color: var(--muted-foreground); }
+.cd-purchase-terms a { text-decoration: underline; text-underline-offset: 3px; color: var(--foreground); }
 .cd-enrollment-status { display: flex; align-items: center; gap: 8px; margin-top: 14px; color: var(--primary); font-size: var(--font-size-body); line-height: 1.6; }
 .cd-enrollment-feedback { margin-top: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 7px; font-size: var(--font-size-label); line-height: 1.6; overflow-wrap: anywhere; }
 .cd-enrollment-feedback a { text-decoration: underline; }

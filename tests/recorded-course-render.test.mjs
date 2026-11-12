@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import process from "node:process";
 import { build } from "esbuild";
 import { writeFile, unlink } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -65,6 +66,11 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
     assert.match(detail, /Lesson count not listed/);
     assert.match(detail, /The lesson outline is not available yet/);
     assert.match(detail, /Sign in to enroll/);
+    assert.match(detail, /Included with enrollment/);
+    assert.match(detail, /where your instructor provides them/);
+    assert.match(detail, /Questions about access or refunds/);
+    assert.match(detail, /href="\/contact"/);
+    assert.doesNotMatch(detail, /Lifetime access|money.back guarantee|refund guaranteed/i);
     assert.match(detail, /No trailer available/);
     assert.doesNotMatch(detail, /aria-label="Preview course trailer"|Preview this course/);
     assert.doesNotMatch(detail, /Verified learner|undefined|\[object Object\]/);

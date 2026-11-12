@@ -5,6 +5,7 @@
       "source": "/api/:path*",
       "destination": "https://quranscholars-apis.vercel.app/api/:path*"
     },
+    { "source": "/share/courses/:slug", "destination": "https://quranscholars-apis.vercel.app/api/public/recorded-courses/:slug/share" },
     { "source": "/((?!api(?:/|$)|assets(?:/|$)).*)", "destination": "/index.html" }
   ],
   "headers": [

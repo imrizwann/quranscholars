@@ -10,6 +10,8 @@ import DevelopmentWelcome from "@/components/feedback/DevelopmentWelcome.jsx";
 import RouteScrollManager from "@/components/navigation/RouteScrollManager.jsx";
 import WebSocketClient from "@/realtime/WebSocketClient.jsx";
 import AppToaster from "@/components/feedback/AppToaster.jsx";
+import RouteMetadata from "@/components/marketing/RouteMetadata.jsx";
+import FormLabelBehavior from "@/components/forms/FormLabelBehavior.jsx";
 function App() {
   useMeQuery();
   useSessionRenewal();
@@ -24,6 +26,8 @@ function App() {
   return (
     <>
       <RouteScrollManager />
+      <FormLabelBehavior />
+      <RouteMetadata />
       <AppToaster />
       <WebSocketClient />
       <div>
@@ -33,7 +37,7 @@ function App() {
         </div>
         {!isWorkspace && <Footer />}
       </div>
-      <DevelopmentWelcome />
+      {import.meta.env.DEV && <DevelopmentWelcome />}
     </>
   );
 }

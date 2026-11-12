@@ -132,7 +132,10 @@ function EnrollmentAction({ course, user }) {
       }
       if (mounted.current) await access.refetch();
     } catch (failure) {
-      if (mounted.current) setError(enrollmentFailureMessage(failure));
+      if (mounted.current) {
+        if (failure?.status === 410) { clearCheckout(user._id, course.id); setIntentId(null); setLatest(null); setPolling(false); }
+        setError(enrollmentFailureMessage(failure));
+      }
     } finally { lock.current = false; if (mounted.current) setCheckoutOpen(false); }
   }
 

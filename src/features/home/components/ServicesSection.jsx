@@ -21,7 +21,7 @@ const ServicesSection = () => {
             Guided pathways for every seeker.
           </motion.h2>
           <p>
-            Build your journey with Qur'an-first learning, live mentorship,
+            Build your journey with Qur&apos;an-first learning, live mentorship,
             family programs, and community khidmah.
           </p>
         </div>

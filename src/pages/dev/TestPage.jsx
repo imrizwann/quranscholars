@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useRef, useState } from "react";
 import Canvas_1 from "@/sketches/p5/test-code/Canvas_1.jsx";
 const TestPage = () => {
