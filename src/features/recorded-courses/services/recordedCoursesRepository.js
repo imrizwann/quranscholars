@@ -14,6 +14,7 @@ const recordedCoursesApi = courseApi.injectEndpoints({
       keepUnusedDataFor: 300,
     }),
     getRecordedCourses: builder.query({
+      extraOptions: { retryTransientRead: true },
       query: (args = {}) => ({
         url: "/api/public/recorded-courses",
         params: buildRecordedCourseQuery(args),
@@ -23,6 +24,7 @@ const recordedCoursesApi = courseApi.injectEndpoints({
       keepUnusedDataFor: 60,
     }),
     getRecordedCourseBySlug: builder.query({
+      extraOptions: { retryTransientRead: true },
       query: (slug) => `/api/public/recorded-courses/${encodeURIComponent(slug)}`,
       transformResponse: normalizeRecordedCourseDetail,
       providesTags: ["Courses"],

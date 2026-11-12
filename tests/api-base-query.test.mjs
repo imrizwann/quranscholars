@@ -33,3 +33,36 @@ test("shared API requests include cookies and CSRF headers without breaking mult
     assert.match(requests[2].headers.get("content-type"), /^multipart\/form-data; boundary=/);
   } finally { globalThis.fetch = originalFetch; await unlink(output); }
 });
+
+test("temporary course/playback reads retry, while failed writes and permission denials are never replayed", async () => {
+  const output = resolve("tests", `retry-fixture-${randomUUID()}.mjs`);
+  const compiled = await build({ entryPoints: ["src/services/api/base-query.js"], bundle: true, write: false, format: "esm", platform: "node", packages: "external", define: { "import.meta.env": JSON.stringify({ VITE_API_URL: "https://api.example" }) } });
+  await writeFile(output, compiled.outputFiles[0].text);
+  const previousFetch = globalThis.fetch;
+  try {
+    const { apiBaseQuery } = await import(pathToFileURL(output));
+    const api = { signal: new AbortController().signal, getState: () => ({}), dispatch() {} };
+    for (const url of ["/api/public/recorded-courses", "/api/recorded-courses/course/sections/section/lessons/lesson/playback"]) {
+      let attempts = 0;
+      globalThis.fetch = async () => ++attempts === 1 ? Response.json({ code: "DATABASE_UNAVAILABLE" }, { status: 503 }) : Response.json({ success: true, data: {} });
+      const result = await apiBaseQuery(url, api, { retryTransientRead: true });
+      assert(result.data); assert.equal(attempts, 2);
+    }
+    for (const method of ["POST", "PUT", "PATCH", "DELETE"]) {
+      let attempts = 0;
+      globalThis.fetch = async () => { attempts++; return Response.json({ code: "DATABASE_UNAVAILABLE" }, { status: 503 }); };
+      const result = await apiBaseQuery({ url: "/api/payments/checkout", method, body: {} }, api, { retryTransientRead: true });
+      assert.equal(result.error.status, 503); assert.equal(attempts, 1);
+    }
+    for (const status of [403, 404]) {
+      let attempts = 0;
+      globalThis.fetch = async () => { attempts++; return Response.json({}, { status }); };
+      assert.equal((await apiBaseQuery("/api/learner/courses/course", api, { retryTransientRead: true })).error.status, status);
+      assert.equal(attempts, 1);
+    }
+    let attempts = 0;
+    globalThis.fetch = async () => { attempts++; return Response.json({}, { status: 503 }); };
+    assert.equal((await apiBaseQuery("/api/public/recorded-courses", api, { retryTransientRead: true })).error.status, 503);
+    assert.equal(attempts, 3, "an ongoing outage is surfaced after bounded retries");
+  } finally { globalThis.fetch = previousFetch; await unlink(output); }
+});
