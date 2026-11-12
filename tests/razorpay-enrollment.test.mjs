@@ -10,9 +10,15 @@ import { JSDOM } from "jsdom";
 import React, { act } from "react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
+import { toast } from "sonner";
+import { createActionFeedbackMiddleware } from "../src/components/feedback/actionFeedbackMiddleware.js";
 
-for (const scenario of ["verified callback", "failed callback", "return without callback", "manual recovery"]) {
-test(`themed checkout safely recovers ${scenario} without a second order`, async () => {
+for (const scenario of ["verified callback", "failed callback", "return without callback", "manual recovery", "webhook first"]) {
+test(`themed checkout safely recovers ${scenario} without a second order`, async t => {
+  const notices = [];
+  for (const type of ["loading", "success", "error", "info", "dismiss"]) t.mock.method(toast, type, (...args) => { notices.push({ type, title: args[0] }); });
+  let releaseVerification;
+  const verificationGate = new Promise(resolve => { releaseVerification = resolve; });
   const dom = new JSDOM("<!doctype html><html style='--primary: #0f766e'><body><div id='root'></div></body></html>", { url: "https://frontend.example.test/courses/tajweed", pretendToBeVisual: true });
   for (const key of ["window", "document", "navigator", "Node", "Element", "HTMLElement", "Event", "MouseEvent", "localStorage"]) Object.defineProperty(globalThis, key, { configurable: true, writable: true, value: key === "window" ? dom.window : dom.window[key] });
   globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
@@ -47,6 +53,12 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
         assert.deepEqual(await request.json(), { paymentId: "pay_one", signature: "b".repeat(64) });
         assert.equal(active, false); verified++;
         captured = true;
+        if (scenario === "webhook first") {
+          active = true;
+          store.dispatch(mod.paymentApi.endpoints.getCourseAccess.initiate(course.id, { subscribe: false, forceRefetch: true }));
+          await verificationGate;
+          return Response.json({ success: false, message: "Callback response was interrupted" }, { status: 503 });
+        }
         if (["failed callback", "manual recovery"].includes(scenario)) return Response.json({ success: false, message: "Database temporarily unavailable" }, { status: 503 });
         active = true;
         return Response.json({ success: true, data: { ...intent, state: "paid" } });
@@ -63,7 +75,7 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
       assert.equal(path, `/api/payments/${intent.intentId}`);
       return Response.json({ success: true, data: { ...intent, checkout: undefined, state: active ? "paid" : "pending" } });
     };
-    store = configureStore({ reducer: { user: () => ({ user }), ...Object.fromEntries(apis.map(api => [api.reducerPath, api.reducer])) }, middleware: defaults => defaults().concat(...apis.map(api => api.middleware)) });
+    store = configureStore({ reducer: { user: () => ({ user }), ...Object.fromEntries(apis.map(api => [api.reducerPath, api.reducer])) }, middleware: defaults => defaults().concat(createActionFeedbackMiddleware(), ...apis.map(api => api.middleware)) });
     root = createRoot(document.getElementById("root"));
     await act(async () => root.render(React.createElement(Provider, { store }, React.createElement(MemoryRouter, null, React.createElement(mod.Enrollment, { course })))));
     const settle = async condition => {
@@ -90,6 +102,14 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
     } else {
       await act(async () => options.handler({ razorpay_order_id: "order_one", razorpay_payment_id: "pay_one", razorpay_signature: "b".repeat(64) }));
     }
+    if (scenario === "webhook first") {
+      await settle(() => document.querySelector('a[href="/learn/tajweed"]'));
+      assert.equal(notices.filter(notice => notice.title === "Your course is ready").length, 1);
+      assert(!notices.some(notice => /Confirming your payment|awaiting confirmation/i.test(String(notice.title))), "an already-confirmed enrollment must not retain a separate pending toast");
+      await act(async () => releaseVerification());
+      await settle(() => recoveryChecks >= 2);
+      assert.equal(notices.filter(notice => notice.type === "error").length, 0, "a late callback failure must not contradict verified course access");
+    }
     if (scenario === "manual recovery") {
       await settle(() => document.body.textContent.includes("We could not confirm your payment yet"));
       assert.equal(document.querySelector('a[href="/learn/tajweed"]'), null);
@@ -100,8 +120,13 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
     assert.equal(verified, scenario === "return without callback" ? 0 : 1);
     assert.equal(attempts.length, 2, "recovery must not initiate another checkout");
     assert(recoveryChecks >= (scenario === "verified callback" ? 1 : 2));
+    assert.equal(notices.filter(notice => notice.title === "Your course is ready").length, 1);
     assert.doesNotMatch(JSON.stringify({ ...localStorage }), /signature|pay_one|rzp_|bbbb/);
+    await act(async () => root.render(React.createElement(Provider, { store }, React.createElement(MemoryRouter, null, React.createElement(mod.Enrollment, { key: "already-enrolled", course })))));
+    await settle(() => document.querySelector('a[href="/learn/tajweed"]'));
+    assert.equal(notices.filter(notice => notice.title === "Your course is ready").length, 1, "reopening an already enrolled course must not repeat purchase feedback");
   } finally {
+    releaseVerification();
     if (root) await act(async () => root.unmount());
     if (store && apis) for (const api of apis) { const requests = [...store.dispatch(api.util.getRunningQueriesThunk()), ...store.dispatch(api.util.getRunningMutationsThunk())]; requests.forEach(item => item.abort()); await Promise.allSettled(requests); store.dispatch(api.util.resetApiState()); }
     await new Promise(resolve => setTimeout(resolve, 100));

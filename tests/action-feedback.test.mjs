@@ -63,3 +63,12 @@ test("notification links are kind-specific local routes and never accept externa
   assert.equal(notificationPresentation({ kind: "unknown", url: "https://evil.example" }).to, "/dashboard/learning");
   assert.equal(notificationDate("invalid"), "Recent update");
 });
+
+test("checkout verification feedback is owned by enrollment access rather than a second callback toast", () => {
+  const { calls, action } = setup();
+  action("pending", "verifyCourseCheckout", undefined, { api: "paymentApi" });
+  action("rejected", "verifyCourseCheckout", { status: 503 }, { api: "paymentApi" });
+  action("pending", "reconcileCoursePayment", undefined, { api: "paymentApi" });
+  action("fulfilled", "reconcileCoursePayment", { state: "paid", canAccessCourse: true }, { api: "paymentApi" });
+  assert.equal(calls.length, 0);
+});
