@@ -10,17 +10,17 @@ const compactNumber = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 1,
 });
 
-const RecordedCourseCard = ({ course }) => {
+const RecordedCourseCard = ({ course, featured = false }) => {
   const location = useLocation();
   const courseCatalog = location.pathname === "/courses"
     ? { url: location.pathname + location.search, key: location.key }
     : location.state?.courseCatalog;
   const linkState = courseCatalog ? { courseCatalog } : undefined;
   return (
-  <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-surface transition-colors duration-200 hover:border-primary/30">
+  <article className={`group flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-surface transition-colors duration-200 hover:border-primary/30${featured ? " recorded-course-card--featured" : ""}`}>
     <CourseCardMedia course={course} to={`/courses/${course.slug}`} linkState={linkState} />
 
-    <div className="flex flex-1 flex-col p-5">
+    <div className="recorded-course-card-content flex flex-1 flex-col p-5">
       <div className="flex items-start justify-between gap-3">
         <p className="min-w-0 break-words text-xs font-black uppercase tracking-[0.12em] text-primary">
           {course.category}
