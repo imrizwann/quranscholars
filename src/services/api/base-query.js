@@ -73,7 +73,10 @@ export async function apiBaseQuery(args, api, extraOptions) {
   const revision = refreshRevision;
   const version = authChange;
   const checkAccount = path === "api/auth/me";
-  const request = checkAccount ? accountQuery : rawBaseQuery;
+  const method = (typeof args === "string" ? "GET" : args.method || "GET").toUpperCase();
+  // Safe reads can recover from a short database/proxy interruption. Never
+  // replay writes on a temporary failure: their outcome may be ambiguous.
+  const request = method === "GET" && (checkAccount || extraOptions?.retryTransientRead) ? accountQuery : rawBaseQuery;
   const requestArgs = checkAccount
     ? { ...(typeof args === "string" ? { url: args } : args), timeout: 10_000 }
     : args;

@@ -54,6 +54,7 @@ const paymentApi = createApi({
       invalidatesTags: result => ["PurchaseHistory", ...(result?.state === "paid" ? ["CourseAccess", "LearningLibrary"] : [])],
     }),
     getCourseAccess: builder.query({
+      extraOptions: { retryTransientRead: true },
       query: (courseId) => ({ url: `/api/purchases/${encodeURIComponent(courseId)}/access`, timeout: 15_000 }),
       transformResponse: unwrap,
       providesTags: (_result, _error, courseId) => [{ type: "CourseAccess", id: courseId }],

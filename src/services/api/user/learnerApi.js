@@ -92,6 +92,7 @@ const learnerApi = createApi({
       },
     }),
     getLearningCourse: builder.query({
+      extraOptions: { retryTransientRead: true },
       query: slug => ({ url: `/api/learner/courses/by-slug/${encodeURIComponent(slug)}`, timeout: 15_000 }),
       transformResponse: response => ({ ...normalizeRecordedCourseDetail(response), canManage: response.data.canManage === true }),
       providesTags: ["LearningCourse"],
@@ -101,6 +102,7 @@ const learnerApi = createApi({
       transformResponse: unwrap, providesTags: ["LearnerAnalytics"],
     }),
     getCourseProgress: builder.query({
+      extraOptions: { retryTransientRead: true },
       query: courseId => ({ url: `/api/learner/courses/${encodeURIComponent(courseId)}/progress`, timeout: 15_000 }),
       transformResponse: unwrap, providesTags: (_result, _error, id) => [{ type: "LearningProgress", id }],
     }),
