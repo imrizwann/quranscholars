@@ -169,9 +169,9 @@ const instructorCoursesApi = createApi({
       providesTags: (_result, _error, args) => [lessonTag(args), courseTag(args)],
     }),
     getCategories: builder.query({
-      query: ({ page = 1, limit = 50 } = {}) => ({
+      query: ({ page = 1, limit = 50, search = "" } = {}) => ({
         url: `${root}/categories`,
-        params: { page, limit },
+        params: { page, limit, ...(search.trim() && { search: search.trim() }) },
       }),
       extraOptions: { validate: isPage("items", "name") },
     }),

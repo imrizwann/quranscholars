@@ -31,6 +31,7 @@ const footerColumns = [
       { to: "/register", label: "Register" },
       { to: "/dashboard/learning", label: "My Learning" },
       { to: "/privacy", label: "Privacy" },
+      { to: "/course-policy", label: "Access & refunds" },
     ],
   },
 ];

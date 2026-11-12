@@ -23,7 +23,7 @@ test("MVP navigation exposes working features, deferred links redirect safely, a
     source = source.slice(0, source.indexOf("ReactDOM.createRoot"))
       .replace("const router = createBrowserRouter([", "export const routes = [")
       .replace(/\]\);\s*$/, "];\n");
-    source += `export {store}; export {default as Navbar} from './layouts/Navbar.jsx'; export {default as Footer} from './layouts/Footer.jsx'; export {default as Workspace} from './layouts/WorkspaceLayout.jsx'; export {default as Home} from './pages/home/Home.jsx'; export {default as MyLearning} from './pages/account/MyLearning.jsx';`;
+    source += `export {store}; export {default as App} from './app/App.jsx'; export {default as Navbar} from './layouts/Navbar.jsx'; export {default as Footer} from './layouts/Footer.jsx'; export {default as Workspace} from './layouts/WorkspaceLayout.jsx'; export {default as Home} from './pages/home/Home.jsx'; export {default as MyLearning} from './pages/account/MyLearning.jsx';`;
     const compiled = await build({ stdin: { contents: source, resolveDir: resolve("src"), loader: "jsx" }, bundle: true, write: false, format: "esm", platform: "node", packages: "external", jsx: "automatic", alias: { "@": resolve("src") }, loader: { ".css": "empty", ".svg": "dataurl", ".png": "dataurl", ".jpg": "dataurl", ".jpeg": "dataurl", ".webp": "dataurl", ".gif": "dataurl", ".mp4": "empty", ".webm": "empty" }, define: { "import.meta.env": JSON.stringify({ DEV: false, PROD: true, VITE_API_URL: "https://api.example.test" }) } });
     await writeFile(output, compiled.outputFiles[0].text); const mod = await import(pathToFileURL(output));
     const render = (Component, props, path = "/") => renderToStaticMarkup(React.createElement(Provider, { store: mod.store }, React.createElement(MemoryRouter, { initialEntries: [path] }, React.createElement(Component, props))));
@@ -36,6 +36,7 @@ test("MVP navigation exposes working features, deferred links redirect safely, a
     assert.doesNotMatch(learner, /href="\/dashboard\/(assignments|wishlist)/);
     const publicNavigation = render(mod.Navbar) + render(mod.Footer);
     assert.doesNotMatch(publicNavigation, /href="\/(live-classes|blogs|services)/);
+    assert.doesNotMatch(render(mod.App), /Website under development|development-welcome-title/);
     const home = render(mod.Home);
     assert.doesNotMatch(home, /Learn live|Live scholar-led|Blended learning|home-testimonials|id="mentors"|href="\/live-classes/);
     assert.match(home, /recorded video lessons/);

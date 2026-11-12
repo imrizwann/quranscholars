@@ -9,6 +9,7 @@ test("network and gateway failures have usable messages without leaking technica
   assert.match(userMessage({ status: "FETCH_ERROR" }), /reach the server.*try again/i);
   assert.match(userMessage({ status: 429 }), /wait a few minutes/);
   assert.match(userMessage({ status: 403, data: { code: "CSRF_REJECTED" } }), /Refresh the page/);
+  assert.match(userMessage({ status: 403, data: { code: "ADMIN_ACCESS_REQUIRED", userMessage: "You do not have permission to perform this action." } }), /administrator account/);
   assert.match(userMessage({ status: 401, data: { message: "Invalid email or password" } }), /email or password is incorrect/);
 });
 

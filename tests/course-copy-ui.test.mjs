@@ -28,9 +28,16 @@ test("course creation and editing preserve subtitle and long paragraphs; descrip
     await writeFile(output, compiled.outputFiles[0].text);
     const mod = await import(pathToFileURL(output)); api = mod.api;
     const writes = [], category = { _id: "category1", name: "Quran" };
+    let categorySearchFailed = false;
     const course = { _id: "course1", title: "Tajweed foundations", description: "A complete introduction to Quran recitation.", shortDescription: "Original subtitle", language: "English", level: "Beginner", category, tags: [], outcomes: [], requirements: [], audience: [] };
     globalThis.fetch = async request => {
-      if (new URL(request.url).pathname.endsWith("/categories")) return Response.json({ success: true, data: { items: [category], pagination: { page: 1, hasNextPage: false } } });
+      if (new URL(request.url).pathname.endsWith("/categories")) {
+        const params = new URL(request.url).searchParams;
+        assert.equal(params.get("page"), "1"); assert.equal(params.get("limit"), "50");
+        const search = params.get("search");
+        if (search === "Quran" && !categorySearchFailed) { categorySearchFailed = true; return Response.json({ userMessage: "Categories are temporarily unavailable." }, { status: 503 }); }
+        return Response.json({ success: true, data: { items: search === "missing" ? [] : search === "Quran" ? [category] : [{ _id: "category2", name: "Arabic" }], pagination: { page: 1, hasNextPage: !search } } });
+      }
       const body = await request.json(); writes.push({ method: request.method, body });
       assert.equal(request.credentials, "include"); assert.equal(request.headers.get("x-csrf-protection"), "1");
       return Response.json({ success: true, data: request.method === "POST" ? { courseId: course._id } : { course: { ...course, ...body } } });
@@ -44,10 +51,17 @@ test("course creation and editing preserve subtitle and long paragraphs; descrip
     const click = async element => { assert(element); await act(async () => element.click()); };
     const router = createMemoryRouter([{ path: "/new", element: React.createElement(mod.Create) }, { path: "/instructor/courses/:courseId", element: React.createElement("p", null, "Created workspace") }], { initialEntries: ["/new"] });
     await act(async () => root.render(React.createElement(Provider, { store }, React.createElement(RouterProvider, { router }))));
-    await settle(() => [...document.querySelectorAll('[role="combobox"]')].find(item => item.textContent.includes("Choose a category"))?.disabled === false);
-    await click([...document.querySelectorAll('[role="combobox"]')].find(item => item.textContent.includes("Choose a category")));
+    await click([...document.querySelectorAll('button')].find(item => item.textContent.includes("Choose a category")));
     await settle(() => document.querySelector('[role="option"]'));
+    assert.match(document.body.textContent, /More categories are available/);
+    assert.equal(document.querySelector('.cw-pages'), null);
+    await fill("category-search", "Quran");
+    assert.equal(document.querySelector('[role="option"]'), null, "old results disappear while search is pending");
+    await settle(() => document.body.textContent.includes("Categories are temporarily unavailable."));
+    await click([...document.querySelectorAll('button')].find(item => item.textContent === "Try again"));
+    await settle(() => [...document.querySelectorAll('[role="option"]')].some(item => item.textContent === "Quran"));
     await click([...document.querySelectorAll('[role="option"]')].find(item => item.textContent === "Quran"));
+    assert.equal(new FormData(document.querySelector("form")).get("category"), category._id);
     const subtitle = "s".repeat(200), description = `${"First paragraph about this course.\n\n".repeat(400)}`.slice(0, 9999) + "x";
     await fill("title", course.title); await fill("shortDescription", subtitle); await fill("description", description); await fill("price", "100");
     assert.equal(document.querySelector('[name="shortDescription"]').maxLength, 200);
@@ -59,6 +73,13 @@ test("course creation and editing preserve subtitle and long paragraphs; descrip
     assert.equal(writes[0].body.instructor, undefined);
     let saved = 0;
     await act(async () => root.render(React.createElement(Provider, { store }, React.createElement(MemoryRouter, null, React.createElement(mod.Editor, { course, onBusy() {}, onCancel() {}, onSaved() { saved++; } })))));
+    const categoryButton = [...document.querySelectorAll('button')].find(item => item.textContent === "Quran");
+    assert(categoryButton, "an existing category remains named before opening the dropdown");
+    await click(categoryButton); await fill("category-search", "missing");
+    await settle(() => document.body.textContent.includes("No categories match your search."));
+    assert.equal(categoryButton.textContent, "Quran", "searching does not replace the saved category");
+    await act(async () => document.querySelector('[name="category-search"]').dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true })));
+    await settle(() => !document.querySelector('[name="category-search"]'));
     await fill("shortDescription", subtitle); await fill("description", description);
     await act(async () => document.querySelector("form").dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true })));
     await settle(() => saved === 1);

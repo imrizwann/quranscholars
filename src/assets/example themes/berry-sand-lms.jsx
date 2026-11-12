@@ -8,7 +8,6 @@ import {
   Settings,
   Search,
   Bell,
-  ChevronDown,
   MoreHorizontal,
   X,
   ChevronLeft,

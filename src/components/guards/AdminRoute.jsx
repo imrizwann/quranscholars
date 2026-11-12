@@ -6,7 +6,7 @@ import { useMeQuery } from "@/services/api/user/userAuthApis.js";
 const AdminRoute = ({ children }) => {
   const location = useLocation();
   const { data: user, isLoading, isFetching, error, refetch } = useMeQuery(undefined, { refetchOnMountOrArgChange: true });
-  const isAdmin = String(user?.role || "").trim().toLowerCase() === "admin";
+  const isAdmin = user?.role === "admin";
 
   if (isLoading) {
     return <AppLoader label="Loading your account..." />;

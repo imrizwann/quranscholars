@@ -89,7 +89,7 @@ export default function HowItWorks() {
             </div>
             <div>
               <h3>Can I choose my teacher</h3>
-              <p>Yes, we'll match you with suitable teachers based on your needs and preferences.</p>
+              <p>Yes, we&apos;ll match you with suitable teachers based on your needs and preferences.</p>
             </div>
             <div>
               <h3>What payment methods do you accept</h3>

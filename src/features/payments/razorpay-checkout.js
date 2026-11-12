@@ -23,6 +23,7 @@ export async function openRazorpayCheckout({ payment, course, user, onInstance }
   const { checkout } = payment;
   if (checkout?.provider !== "razorpay" || !/^order_[A-Za-z0-9]+$/.test(checkout.orderId || "") ||
       !/^rzp_(test|live)_[A-Za-z0-9]+$/.test(checkout.publicKey || "") ||
+      (import.meta.env?.PROD && !/^rzp_live_/.test(checkout.publicKey || "")) ||
       !Number.isSafeInteger(payment.amountMinor) || payment.amountMinor <= 0 || !/^[A-Z]{3}$/.test(payment.currency || "")) {
     throw new Error("Online payment is not available for this checkout yet. Please contact our team.");
   }

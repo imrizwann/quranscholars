@@ -5,6 +5,7 @@ import AppLoader from "@/components/feedback/AppLoader.jsx";
 import LoadingState from "@/components/feedback/LoadingState.jsx";
 import CoursePrice from "@/features/recorded-courses/components/CoursePrice.jsx";
 import CourseEnrollment from "@/features/recorded-courses/components/CourseEnrollment.jsx";
+import CourseShareButton from "@/features/recorded-courses/components/CourseShareButton.jsx";
 // import CourseRating from "@/features/recorded-courses/components/CourseRating.jsx";
 import CourseVideo from "@/features/recorded-courses/components/CourseVideo.jsx";
 import PublicCourseCurriculum from "@/features/recorded-courses/components/PublicCourseCurriculum.jsx";
@@ -39,6 +40,7 @@ function CourseDetailsContent({ course, catalogUrl, catalogState, relatedCourses
           {course.totalStudents > 0 && <span><Users aria-hidden="true" />{number.format(course.totalStudents)} learners</span>}
           {updated && <span className="cd-updated">Updated {updated}</span>}
         </div>
+        <div className="cd-course-actions"><a className="cw-button cw-primary cd-mobile-enrollment-link" href="#course-enrollment">View enrollment options<ChevronRight size={16} aria-hidden="true" /></a><CourseShareButton course={course} /></div>
       </header>
 
       <div className="cd-layout">
@@ -76,10 +78,12 @@ function CourseDetailsContent({ course, catalogUrl, catalogState, relatedCourses
           */}
         </div>
         <aside className="cd-sidebar" aria-label="Course enrollment and details">
-          <div className="cd-enrollment">
+          <div className="cd-enrollment" id="course-enrollment" tabIndex={-1}>
             <p className="cd-eyebrow">Your next chapter</p><h2>Start learning at your pace</h2>
             <div className="cd-price"><CoursePrice price={course.price} size="large" />{course.price.discounted && <span className="cd-sale-label">Sale price</span>}</div>
+            <div className="cd-purchase-includes"><h3>Included with enrollment</h3><ul><li><Check size={16} aria-hidden="true" /><span>{course.totalLessons > 0 ? `${number.format(course.totalLessons)} recorded lessons` : "Recorded course lessons"}</span></li><li><Check size={16} aria-hidden="true" /><span>Saved progress across your devices</span></li></ul><p>Downloadable materials are available on lessons where your instructor provides them.</p></div>
             <CourseEnrollment course={course} />
+            <p className="cd-purchase-terms">Before enrolling, review our <Link to="/course-policy">course access and refund policy</Link>. Questions about access or refunds? <Link to="/contact">Contact our team.</Link></p>
             {trailerSource && <a className="cd-preview-link" href="#course-preview"><PlayCircle aria-hidden="true" />Watch the course trailer</a>}
             <div className="cd-facts"><h3>Course at a glance</h3><dl>
               <div><dt><MonitorPlay aria-hidden="true" />Format</dt><dd>Recorded lessons</dd></div>

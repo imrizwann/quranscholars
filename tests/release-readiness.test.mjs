@@ -1,0 +1,91 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import process from "node:process";
+import { build } from "esbuild";
+import { writeFile, unlink } from "node:fs/promises";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+import { randomUUID } from "node:crypto";
+import React, { act } from "react";
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
+import { JSDOM } from "jsdom";
+import { toast } from "sonner";
+
+test("shared policy, admin operations, course metadata and sharing handle loading, outcomes and safe errors", async t => {
+  const dom = new JSDOM("<html><head><title>QuranScholar</title></head><body><div id='root'></div></body></html>", { url: "https://frontend.example.test", pretendToBeVisual: true });
+  for (const key of ["window", "document", "navigator", "Node", "Element", "HTMLElement", "HTMLInputElement", "HTMLButtonElement", "Document", "ShadowRoot", "MutationObserver", "Event", "MouseEvent"]) Object.defineProperty(globalThis, key, { configurable: true, writable: true, value: key === "window" ? dom.window : dom.window[key] });
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  globalThis.requestAnimationFrame = dom.window.requestAnimationFrame.bind(dom.window);
+  globalThis.cancelAnimationFrame = dom.window.cancelAnimationFrame.bind(dom.window);
+  globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
+  dom.window.matchMedia = query => ({ matches: true, media: query, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} });
+  const { createRoot } = await import("react-dom/client");
+  const { MemoryRouter, Link, useLocation } = await import("react-router-dom");
+  const output = resolve("tests", `release-ui-fixture-${randomUUID()}.mjs`);
+  const oldFetch = globalThis.fetch, notices = [], copies = [];
+  for (const type of ["success", "error"]) t.mock.method(toast, type, (...args) => notices.push({ type, args }));
+  Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: async value => copies.push(value) } });
+  let root, store, apis, release;
+  try {
+    const compiled = await build({ stdin: { contents: `export {default as Policy} from './src/pages/legal/CoursePolicy.jsx'; export {default as Operations} from './src/pages/instructor/AdminOperations.jsx'; export {default as Metadata} from './src/components/marketing/RouteMetadata.jsx'; export {default as Share} from './src/features/recorded-courses/components/CourseShareButton.jsx'; export {default as publicApi} from './src/services/api/courses/courses.api.js'; export {default as adminApi} from './src/services/api/revenueApi.js';`, resolveDir: process.cwd() }, bundle: true, write: false, format: "esm", platform: "node", packages: "external", jsx: "automatic", alias: { "@": resolve("src") }, loader: { ".css": "empty", ".svg": "dataurl", ".png": "dataurl" }, define: { "import.meta.env": JSON.stringify({ VITE_API_URL: "https://api.example.test", VITE_PUBLIC_SITE_URL: "https://www.quranscholar.in" }) } });
+    await writeFile(output, compiled.outputFiles[0].text); const mod = await import(pathToFileURL(output));
+    apis = [mod.publicApi, mod.adminApi];
+    store = configureStore({ reducer: { user: () => ({ user: { _id: "a".repeat(24), role: "admin" } }), ...Object.fromEntries(apis.map(api => [api.reducerPath, api.reducer])) }, middleware: defaults => defaults().concat(...apis.map(api => api.middleware)) });
+    const course = { _id: "c".repeat(24), title: 'Recitation & practice <safely>', slug: "recitation", shortDescription: "A clear course introduction", thumbnailUrl: "https://images.example.test/cover.webp", price: { original: 499, currency: "INR" } };
+    let operationsStatus = 200;
+    const gate = new Promise(done => { release = done; });
+    const writes = [];
+    globalThis.fetch = async request => {
+      await gate; const path = new URL(request.url).pathname;
+      assert.equal(request.credentials, "include");
+      if (request.method !== "GET") { assert.equal(request.headers.get("X-CSRF-Protection"), "1"); writes.push({ path, body: await request.json() }); return Response.json({ success: true, data: path.endsWith("retry") ? { sent: 1, pending: 0, uncertain: 0 } : { state: "paid" } }); }
+      if (path.endsWith("/course-policy")) return Response.json({ success: true, data: { version: "2026-11-12", effectiveDate: "12 November 2026", sections: [{ id: "access", title: "Your course access", paragraphs: ["Seven-day refund requests are reviewed against actual viewing activity."] }] } });
+      if (path.endsWith("/operations")) return operationsStatus !== 200 ? Response.json({ message: "Request failed", requestId: "safe-support-reference" }, { status: operationsStatus }) : Response.json({ success: true, data: { checkedAt: new Date().toISOString(), databaseReady: true, emailConfigured: true, checkoutConfigured: true, payments: [{ _id: "b".repeat(24), expiresAt: new Date().toISOString() }], exceptions: [], failedLessons: [{ _id: "d".repeat(24), title: "Practice lesson", courseId: course._id }], failedTrailers: [], pendingEmails: 1, uncertainEmails: 0, listLimit: 10 } });
+      assert.equal(path, "/api/public/recorded-courses/recitation"); return Response.json({ data: { course } });
+    };
+    root = createRoot(document.getElementById("root"));
+    const render = (element, path = "/") => act(async () => root.render(React.createElement(Provider, { store }, React.createElement(MemoryRouter, { key: path, initialEntries: [path] }, element))));
+    const settle = async condition => { for (let i = 0; i < 150; i++) { await act(async () => { await new Promise(done => setTimeout(done, 10)); }); if (condition()) return; } assert.fail(document.body.textContent); };
+    const click = async label => { const button = [...document.querySelectorAll("button")].find(item => item.textContent.trim() === label); assert(button, label); await act(async () => button.click()); };
+    await render(React.createElement(mod.Policy)); assert.match(document.body.textContent, /Loading course policy/);
+    await act(async () => release()); await settle(() => document.getElementById("access"));
+    assert.match(document.body.textContent, /Seven-day refund/); assert.match(document.body.textContent, /12 November 2026/);
+    await render(React.createElement(mod.Operations), "/admin/operations");
+    await settle(() => document.body.textContent.includes("Unconfirmed checkout"));
+    assert.match(document.body.textContent, /does not mean money was captured/);
+    assert.match(document.body.textContent, /separate test cluster/);
+    assert.equal(document.querySelector(".operations-rehearsal").open, false);
+    await click("Check payment"); await settle(() => writes.length === 1 && notices.some(notice => notice.args[0] === "Payment status checked"));
+    assert.deepEqual(writes[0], { path: `/api/admin/operations/payments/${"b".repeat(24)}/reconcile`, body: {} });
+    await click("Retry pending emails"); await settle(() => writes.length === 2);
+    assert.equal(writes[1].path, "/api/admin/operations/emails/retry");
+    operationsStatus = 403; await act(async () => store.dispatch(mod.adminApi.util.invalidateTags(["Revenue"])));
+    await settle(() => !document.body.textContent.includes("Unconfirmed checkout") && document.body.textContent.includes("Not checked"));
+    assert.doesNotMatch(document.body.textContent, /Unavailable/);
+    assert.match(document.body.textContent, /Administrator access could not be verified/);
+    assert.equal(document.querySelector('a[href="/login"]').textContent, "Sign in again");
+    assert.match(document.body.textContent, /Support reference: safe-support-reference/);
+    operationsStatus = 404; await act(async () => store.dispatch(mod.adminApi.util.invalidateTags(["Revenue"])));
+    await settle(() => document.body.textContent.includes("Update the API before using this page"));
+    assert.equal(document.querySelector('a[href="/login"]'), null);
+    assert.doesNotMatch(document.body.textContent, /Unconfirmed checkout|Unavailable/);
+    const MetadataHarness = () => { const location = useLocation(); return React.createElement(React.Fragment, null, React.createElement(mod.Metadata), React.createElement(Link, { to: "/login" }, "Sign in"), React.createElement("output", null, location.pathname)); };
+    await render(React.createElement(MetadataHarness), "/courses/recitation?privateReference=remove-this");
+    await settle(() => document.title.includes(course.title));
+    assert.equal(document.head.querySelector('meta[property="og:title"]').content, `${course.title} | QuranScholar`);
+    assert.equal(document.head.querySelector('link[rel="canonical"]').href, "https://www.quranscholar.in/courses/recitation");
+    assert.equal(document.querySelector("script"), null);
+    await act(async () => document.querySelector('a[href="/login"]').click());
+    await settle(() => document.title === "Sign in | QuranScholar");
+    assert.equal(document.head.querySelector('meta[name="robots"]').content, "noindex, nofollow");
+    assert.equal(document.head.querySelectorAll('meta[name="description"]').length, 1);
+    await render(React.createElement(mod.Share, { course })); await click("Share course");
+    assert.deepEqual(copies, ["https://frontend.example.test/share/courses/recitation"]);
+    assert(notices.some(notice => notice.args[0] === "Course link copied"));
+  } finally {
+    release?.(); if (root) await act(async () => root.unmount());
+    if (store && apis) for (const api of apis) { store.dispatch(api.util.getRunningQueriesThunk()).forEach(request => request.abort()); store.dispatch(api.util.resetApiState()); }
+    globalThis.fetch = oldFetch; await unlink(output).catch(() => {}); dom.window.close();
+  }
+});

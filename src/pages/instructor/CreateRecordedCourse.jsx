@@ -1,12 +1,11 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCreateCourseMutation } from "@/services/api/instructor/recordedCoursesApi.js";
-import useCourseQuery from "@/features/instructor-courses/useCourseQuery.js";
 import { readableError } from "@/features/instructor-courses/courseApi.js";
-import { Pagination, QueryMessage } from "@/features/instructor-courses/WorkspaceParts.jsx";
 import { ArrowLeft, BookOpen, ClipboardCheck, FileText, Image, Layers, Plus } from "lucide-react";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import SelectField from "@/components/ui/SelectField.jsx";
+import CourseCategorySelect from "@/features/instructor-courses/CourseCategorySelect.jsx";
 import { coursePrice } from "@/features/instructor-courses/course-price.js";
 import CourseMetadataLists from "@/features/instructor-courses/CourseMetadataLists.jsx";
 import { courseLearningLists, parseCourseMetadataLists } from "@/features/instructor-courses/course-metadata-lists.js";
@@ -14,8 +13,6 @@ import "@/features/instructor-courses/course-workspace.css";
 
 export default function CreateRecordedCourse() {
   const navigate = useNavigate();
-  const [page, setPage] = useState(1);
-  const categories = useCourseQuery("getCategories", { page });
   const [category, setCategory] = useState(null);
   const [error, setError] = useState("");
   const [learningDetails, setLearningDetails] = useState({ outcomes: "", requirements: "", audience: "" });
@@ -24,8 +21,6 @@ export default function CreateRecordedCourse() {
   const [description, setDescription] = useState("");
   const [createCourse, { isLoading: busy }] = useCreateCourseMutation();
   const saving = useRef(false);
-  const categoryOptions = (categories.data?.items || []).map((item) => ({ value: item._id, label: item.name }));
-  if (category && !categoryOptions.some((item) => item.value === category._id)) categoryOptions.unshift({ value: category._id, label: category.name });
   async function submit(event) {
     event.preventDefault();
     if (saving.current) return;
@@ -59,11 +54,7 @@ export default function CreateRecordedCourse() {
           <label>Subtitle (optional)<input name="shortDescription" value={subtitle} onChange={event => setSubtitle(event.target.value)} placeholder="e.g. Build confidence in recitation with guided Tajweed practice" maxLength={200} aria-describedby="create-course-subtitle-help" disabled={busy} /><span id="create-course-subtitle-help" className="cw-field-hint">Summarize what learners will gain. {subtitle.length}/200 characters.</span></label>
           <label>Description<textarea name="description" value={description} onChange={event => setDescription(event.target.value)} placeholder="Introduce your course, explain your approach, and describe what learners can expect." required minLength={30} maxLength={10000} rows={6} aria-describedby="create-course-description-help" disabled={busy} /><span id="create-course-description-help" className="cw-field-hint">Use paragraphs for a clear course introduction. At least 30 characters. {description.length.toLocaleString("en")}/10,000 characters.</span></label>
           <div className="cw-form-grid">
-            <div><SelectField label="Category" name="category" value={category?._id || null} options={categoryOptions} placeholder="Choose a category" loading={categories.loading} disabled={busy || Boolean(categories.error)} onChange={(value) => setCategory(categories.data?.items.find((item) => item._id === value) || (category?._id === value ? category : null))} required />
-              {categories.error && <QueryMessage query={categories} compact />}
-              {categories.data?.items.length === 0 && <p className="cw-notice">No active categories are available. An administrator needs to add a category before a course can be created.</p>}
-              <Pagination pagination={categories.data?.pagination} page={page} onPage={setPage} disabled={busy} loading={categories.loading} />
-            </div>
+            <CourseCategorySelect value={category} onChange={setCategory} disabled={busy} />
             <SelectField label="Level" name="level" defaultValue="Beginner" options={["Beginner", "Intermediate", "Advanced"]} disabled={busy} required />
             <label>Language<input name="language" defaultValue="English" required minLength={2} maxLength={50} disabled={busy} /></label>
             <label>Original price (INR)<input name="price" placeholder="e.g. 1500" type="number" min="0.01" step="0.01" required disabled={busy} /><span className="cw-field-hint">Enter an amount greater than zero.</span></label>

@@ -17,6 +17,7 @@ const statuses = {
 // userMessage is produced by the API's reviewed response boundary, or locally
 // by userFacingError. Older deployments fall back to status-based wording.
 export function userMessage(error, fallback = fallbackMessage) {
+  if (Number(error?.status) === 403 && error?.data?.code === "ADMIN_ACCESS_REQUIRED") return "Administrator access is required. Sign in with an administrator account to continue.";
   if (typeof error?.data?.userMessage === "string" && error.data.userMessage.trim()) {
     const fields = error.data.code === "VALIDATION_ERROR" ? error.data.errors : null;
     const messages = Array.isArray(fields)

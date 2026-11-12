@@ -3,8 +3,7 @@ import { Check, X } from "lucide-react";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import SelectField from "@/components/ui/SelectField.jsx";
 import { useUpdateCourseMutation } from "@/services/api/instructor/recordedCoursesApi.js";
-import useCourseQuery from "./useCourseQuery.js";
-import { Pagination, QueryMessage } from "./WorkspaceParts.jsx";
+import CourseCategorySelect from "./CourseCategorySelect.jsx";
 import { readableError } from "./courseApi.js";
 import CourseMetadataLists from "./CourseMetadataLists.jsx";
 import { courseMetadataLists, parseCourseMetadataLists } from "./course-metadata-lists.js";
@@ -20,15 +19,11 @@ export default function CourseMetadataEditor({ course, disabled, onBusy, onCance
   ]));
   const [values, setValues] = useState(() => ({ ...initial, ...Object.fromEntries(courseMetadataLists.map(({ key }) => [key, initial[key].join("\n")])) }));
   const [category, setCategory] = useState(course.category);
-  const [page, setPage] = useState(1);
-  const categories = useCourseQuery("getCategories", { page });
   const [updateCourse, { isLoading }] = useUpdateCourseMutation();
   const saving = useRef(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const busy = disabled || isLoading;
-  const options = (categories.data?.items || []).map((item) => ({ value: item._id, label: item.name }));
-  if (values.category && !options.some((item) => item.value === values.category)) options.unshift({ value: values.category, label: category?.name || "Current category" });
   function change(key, value) { setValues((previous) => ({ ...previous, [key]: value })); }
   function feedback(key) {
     return fieldErrors[key] ? <span id={`metadata-${key}-error`} className="cw-field-error" role="alert">{fieldErrors[key]}</span> : null;
@@ -66,10 +61,7 @@ export default function CourseMetadataEditor({ course, disabled, onBusy, onCance
     <label>Subtitle (optional)<input {...inputProps("shortDescription")} maxLength={200} placeholder="Summarize what learners will gain" aria-describedby={["metadata-subtitle-help", fieldErrors.shortDescription && "metadata-shortDescription-error"].filter(Boolean).join(" ")} /><span id="metadata-subtitle-help" className="cw-field-hint">Shown below the course title and on course cards. {values.shortDescription.length}/200 characters.</span>{feedback("shortDescription")}</label>
     <label>Description<textarea {...inputProps("description")} required minLength={30} maxLength={10000} rows={6} aria-describedby={["metadata-description-help", fieldErrors.description && "metadata-description-error"].filter(Boolean).join(" ")} /><span id="metadata-description-help" className="cw-field-hint">Use paragraphs for a clear course introduction. At least 30 characters. {values.description.length.toLocaleString("en")}/10,000 characters.</span>{feedback("description")}</label>
     <div className="cw-form-grid">
-      <div><SelectField label="Category" name="category" value={values.category || null} options={options} required disabled={busy || Boolean(categories.error)} loading={categories.loading} error={fieldErrors.category} onChange={(value) => { change("category", value); setCategory(categories.data?.items.find((item) => item._id === value) || category); }} />
-        {categories.error && <QueryMessage query={categories} compact />}
-        <Pagination pagination={categories.data?.pagination} page={page} onPage={setPage} disabled={busy} loading={categories.loading} />
-      </div>
+      <CourseCategorySelect value={category || values.category} disabled={busy} error={fieldErrors.category} onChange={item => { change("category", item?._id || ""); setCategory(item); }} />
       <SelectField label="Level" name="level" value={values.level || null} options={["Beginner", "Intermediate", "Advanced"]} required disabled={busy} error={fieldErrors.level} onChange={(value) => change("level", value)} />
       <label>Language<input {...inputProps("language")} required minLength={2} maxLength={50} />{feedback("language")}</label>
     </div>

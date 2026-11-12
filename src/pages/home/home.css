@@ -7,6 +7,14 @@
 .home-featured-state h2 { font-family: var(--font-display); font-size: 1.25rem; font-weight: 650; line-height: 1.5; }
 .home-featured-state p { color: var(--muted-foreground); font-size: var(--font-size-body); line-height: 1.75; }
 .home-hero--featured .home-hero-layout { min-height: 0; align-items: center; padding-block: 40px; }
+.home-hero--featured #home-hero-title { font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1.12; overflow-wrap: anywhere; }
+.home-study-guide { display: grid; justify-items: start; gap: 16px; padding: 24px; border: 1px solid #ffffff33; border-radius: 12px; background: #ffffff0d; }
+.home-study-guide h3 { font-family: var(--font-display); font-size: 1.25rem; font-weight: 650; }
+.home-study-guide ol { display: grid; gap: 20px; }
+.home-study-guide li { display: flex; align-items: start; gap: 12px; min-width: 0; }
+.home-study-guide li > span { display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border: 1px solid #ffffff33; border-radius: 50%; color: #9ed6c8; font-size: var(--font-size-label); }
+.home-study-guide strong { font-size: var(--font-size-body); font-weight: 600; }
+.home-study-guide p { margin-top: 4px; font-size: var(--font-size-label); line-height: 1.75; color: #ffffffbf; overflow-wrap: anywhere; }
 .home-page .course-selection[data-course-count="1"] { grid-template-columns: minmax(0, 1fr); max-width: 400px; }
 @media (max-width: 1023px) { .home-featured-course { justify-self: start; } }
 .home-start-panel { align-self: center; min-width: 0; padding: 24px; border: 1px solid #ffffff2e; border-radius: 12px; background: #082f2be8; }

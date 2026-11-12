@@ -77,6 +77,7 @@ test("instructor RTK Query integration", async (t) => {
       const target = { courseId: "course1", sectionId: "section1", lessonId: "lesson1" };
       const cases = [
         ["getCategories", { page: 2 }, "GET", `${root}/categories?page=2&limit=50`],
+        ["getCategories", { search: "  Arabic  " }, "GET", `${root}/categories?page=1&limit=50&search=Arabic`],
         ["getCourses", { page: 2, search: "Quran & Arabic" }, "GET", `${root}?page=2&limit=12&sort=updated&search=Quran+%26+Arabic`],
         ["getReadiness", target, "GET", `${root}/course1/readiness`],
         ["getStudents", { page: 1, limit: 20, status: "active" }, "GET", `${root}/students?page=1&limit=20&status=active`],
