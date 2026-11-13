@@ -37,7 +37,8 @@ test("course cards remain linked image previews through thumbnail failures and p
     assert.equal(image.getAttribute("loading"), "lazy");
     assert.equal(document.querySelector("video"), null);
     assert.equal(document.querySelector("button"), null);
-    assert.doesNotMatch(document.body.textContent, /Not rated yet|reviews/);
+    assert.match(document.body.textContent, /No reviews yet/);
+    assert.equal(document.querySelector('a[aria-label="Read reviews for Recitation foundations"]').getAttribute("href"), "/courses/recitation#course-reviews");
     assert.doesNotMatch(document.body.textContent, /0 learners|Watch trailer|Loading trailer|undefined|NaN/);
     await act(async () => cover().querySelector("img").dispatchEvent(new window.Event("error")));
     assert.equal(cover().querySelector("img"), null);
@@ -48,8 +49,16 @@ test("course cards remain linked image previews through thumbnail failures and p
     course = { ...course, thumbnail: "https://images.example.test/new-cover.webp", featured: true, totalReviews: 12, rating: 4.5, totalStudents: 18 }; await render();
     assert.equal(cover().querySelector("img").getAttribute("src"), course.thumbnail);
     assert.match(cover().textContent, /Featured/);
-    assert.doesNotMatch(document.body.textContent, /rating from 12 reviews/);
+    assert.equal(document.querySelector('[aria-label="4.5 out of 5 stars from 12 reviews"]').getAttribute("role"), "img");
+    assert.equal(document.querySelectorAll(".course-rating-star").length, 5);
+    assert.equal(document.querySelectorAll(".course-rating-star-fill")[4].style.width, "50%");
     assert.match(document.body.textContent, /18 learners/);
+    course = { ...course, totalReviews: 1, rating: 5, totalLessons: 1 }; await render();
+    assert(document.querySelector('[aria-label="5.0 out of 5 stars from 1 review"]'));
+    assert.doesNotMatch(document.body.textContent, /1 lessons|1 reviews/);
+    course = { ...course, totalReviews: 0, rating: 5 }; await render();
+    assert.match(document.body.textContent, /No reviews yet/);
+    assert([...document.querySelectorAll(".course-rating-star-fill")].every(star => star.style.width === "0%"), "an unrated course cannot display fabricated stars");
     await act(async () => cover().dispatchEvent(new window.MouseEvent("click", { bubbles: true, cancelable: true, button: 0 })));
     assert.equal(document.querySelector('[data-location]').textContent, "/courses/recitation");
     const state = JSON.parse(document.querySelector('[data-location]').getAttribute("data-state"));

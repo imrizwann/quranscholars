@@ -1,7 +1,10 @@
 import { useId, useRef, useState } from "react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, MessageSquare, Save, Shield, Star, Trash2 } from "lucide-react";
 import learnerApi from "@/services/api/user/learnerApi.js";
+import { useGetCourseAccessQuery } from "@/services/api/user/paymentApi.js";
+import { RatingStars } from "./CourseRating.jsx";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import ConfirmationModal from "@/components/ui/ConfirmationModal.jsx";
 import ProfileAvatar from "@/features/profile/components/ProfileAvatar.jsx";
@@ -11,9 +14,6 @@ import "./course-reviews.css";
 
 const date = value => value ? new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value)) : "";
 const ratings = ["Poor", "Fair", "Good", "Very good", "Excellent"];
-function Stars({ rating }) {
-  return <span className="course-review-stars" role="img" aria-label={`${rating} out of 5 stars`}>{ratings.map((label, index) => <Star key={label} size={16} fill={index < Math.round(rating) ? "currentColor" : "none"} aria-hidden="true" />)}</span>;
-}
 
 export function CourseReviewEditor({ courseId }) {
   const query = learnerApi.endpoints.getMyCourseReview.useQuery(courseId, { refetchOnMountOrArgChange: true, refetchOnFocus: true, refetchOnReconnect: true });
@@ -81,15 +81,18 @@ export default function CourseReviews({ course }) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
   const id = useId();
-  const admin = useSelector(state => state.user.user?.role === "admin");
+  const viewer = useSelector(state => state.user.user);
+  const admin = viewer?.role === "admin";
+  const access = useGetCourseAccessQuery(course.id, { skip: !viewer?._id || !course.id });
+  const canReview = !access.error && access.currentData?.canAccessCourse === true && String(course.instructor?.id) !== String(viewer?._id);
   const query = learnerApi.endpoints.getCourseReviews.useQuery({ slug: course.slug, page }, { refetchOnMountOrArgChange: true });
   const [moderate, moderating] = learnerApi.endpoints.moderateCourseReview.useMutation();
   const data = query.currentData;
   return <div className="course-reviews" aria-busy={query.isFetching || undefined}>
-    <div className="course-review-summary"><div><h2 id="reviews-heading">Learner reviews</h2><p>Experiences shared by learners enrolled in this course.</p></div>{data?.summary.count > 0 && <div className="course-review-score"><strong>{data.summary.average.toFixed(1)}<span>/5</span></strong><Stars rating={data.summary.average} /><span>{data.summary.count} {data.summary.count === 1 ? "review" : "reviews"}</span></div>}</div>
+    <div className="course-review-summary"><div><h2 id="reviews-heading">Learner reviews</h2><p>Experiences shared by learners enrolled in this course.</p></div>{data?.summary.count > 0 && <div className="course-review-score"><strong>{data.summary.average.toFixed(1)}<span>/5</span></strong><RatingStars rating={data.summary.average} /><span>{data.summary.count} {data.summary.count === 1 ? "review" : "reviews"}</span></div>}{canReview && <Link className="cw-button" to={`/learn/${encodeURIComponent(course.slug)}?tab=reviews`}><Star size={16} aria-hidden="true" />Rate this course</Link>}</div>
     <QueryMessage query={{ error: query.error, data, loading: query.isFetching && !data, refresh: query.refetch }} label="Loading learner reviews" />
     {data && !query.error && <>{data.reviews.length ? <ul className="course-review-list">{data.reviews.map(review => <li key={review.id}><article>
-      <header><ProfileAvatar name={review.name} size={36} /><div><h3>{review.name}</h3><time dateTime={review.createdAt}>{date(review.createdAt)}</time></div><Stars rating={review.rating} /></header>
+      <header><ProfileAvatar name={review.name} size={36} /><div><h3>{review.name}</h3><time dateTime={review.createdAt}>{date(review.createdAt)}</time></div><RatingStars rating={review.rating} /></header>
       {review.comment && <p>{review.comment}</p>}
       {admin && <button type="button" className="cw-button" onClick={() => { setSelected(review); setReason(""); setError(""); }}><Shield size={15} aria-hidden="true" />Hide review</button>}
     </article></li>)}</ul> : <div className="course-review-empty"><MessageSquare size={23} aria-hidden="true" /><div><h3>{data.summary.count ? "No reviews on this page" : "No reviews yet"}</h3><p>Enrolled learners can share their experience from the Reviews tab inside their course.</p></div></div>}

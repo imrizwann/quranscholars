@@ -7,6 +7,7 @@ import CoursePrice from "@/features/recorded-courses/components/CoursePrice.jsx"
 import CourseEnrollment from "@/features/recorded-courses/components/CourseEnrollment.jsx";
 import CourseShareButton from "@/features/recorded-courses/components/CourseShareButton.jsx";
 import CourseReviews from "@/features/recorded-courses/components/CourseReviews.jsx";
+import CourseRating from "@/features/recorded-courses/components/CourseRating.jsx";
 import CourseVideo from "@/features/recorded-courses/components/CourseVideo.jsx";
 import PublicCourseCurriculum from "@/features/recorded-courses/components/PublicCourseCurriculum.jsx";
 import RecordedCourseCard from "@/features/recorded-courses/components/RecordedCourseCard.jsx";
@@ -22,7 +23,7 @@ function CourseDetailsContent({ course, catalogUrl, catalogState, relatedCourses
   const trailerSource = useMemo(() => course.trailerVideo ? { src: course.trailerVideo, type: "application/x-mpegurl" } : null, [course.trailerVideo]);
   const date = course.updatedAt ? new Date(course.updatedAt) : null;
   const updated = date && Number.isFinite(date.getTime()) ? new Intl.DateTimeFormat("en", { month: "long", year: "numeric" }).format(date) : null;
-  const lessonCount = course.totalLessons == null ? "Lesson count not listed" : `${number.format(course.totalLessons)} lessons`;
+  const lessonCount = course.totalLessons == null ? "Lesson count not listed" : `${number.format(course.totalLessons)} ${course.totalLessons === 1 ? "lesson" : "lessons"}`;
 
   return <main className="course-detail">
     <div className="cd-container">
@@ -36,7 +37,7 @@ function CourseDetailsContent({ course, catalogUrl, catalogState, relatedCourses
         <div className="cd-hero-meta">
           <a href="#course-instructor" className="cd-instructor-link"><GraduationCap aria-hidden="true" /><span>With <strong>{course.instructor.name}</strong></span></a>
           <span><Globe2 aria-hidden="true" />{course.language}</span>
-          {course.totalReviews > 0 && <a href="#course-reviews">{course.rating.toFixed(1)} / 5 ({number.format(course.totalReviews)} reviews)</a>}
+          <a href="#course-reviews" className="course-rating-link"><CourseRating rating={course.rating} reviews={course.totalReviews} /></a>
           {course.totalStudents > 0 && <span><Users aria-hidden="true" />{number.format(course.totalStudents)} learners</span>}
           {updated && <span className="cd-updated">Updated {updated}</span>}
         </div>

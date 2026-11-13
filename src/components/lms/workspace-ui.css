@@ -100,6 +100,8 @@
 .studio-course-meta { display: flex; gap: 10px 16px; flex-wrap: wrap; color: var(--muted-foreground); font-size: var(--font-size-caption); margin-top: 16px; }
 .studio-course-meta > span { display: inline-flex; align-items: center; gap: 7px; }
 .studio-course-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.library-review-link { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; }
+.library-course-rating { margin: 10px 0; }
 .studio-course-trailer { font-size: var(--font-size-caption); color: var(--muted-foreground); display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
 .studio-classroom { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
 .studio-lesson-main { min-width: 0; display: grid; gap: 22px; }

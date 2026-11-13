@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Tabs } from "@base-ui/react/tabs";
 import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, CircleHelp, Clock3, ClipboardCheck, Globe2, GraduationCap, ListVideo, LockKeyhole, NotebookPen, MessageSquare, PanelRightClose, PanelRightOpen, Signal } from "lucide-react";
@@ -67,7 +67,17 @@ function LearningWorkspaceBody({ course, userId, lessonId, progress }) {
   const lesson = lessonId ? lessons.find(item => item.id === lessonId) : lessons.find(item => item.id === lastLesson) || lessons[0];
   const [contentOpen, setContentOpen] = useState(true);
   const [finished, setFinished] = useState(false);
-  const [tab, setTab] = useState("overview");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get("tab") || "overview";
+  const tab = ["overview", "notes", "reviews", "quiz"].includes(requestedTab) && !(requestedTab === "reviews" && course.canManage) ? requestedTab : "overview";
+  const setTab = useCallback(value => setSearchParams(previous => {
+    const next = new URLSearchParams(previous);
+    if (value === "overview") next.delete("tab"); else next.set("tab", value);
+    return next;
+  }, { replace: true }), [setSearchParams]);
+  // URL tab changes must not restart the lesson's playback/progress effect.
+  const changeTab = useRef(setTab);
+  changeTab.current = setTab;
   const [quizSectionId, setQuizSectionId] = useState(null);
   const details = useRef(null);
   const heading = useRef(null);
@@ -84,14 +94,23 @@ function LearningWorkspaceBody({ course, userId, lessonId, progress }) {
   const learningState = !progress.error ? progress.currentData : undefined;
   const sectionProgress = learningState?.sections.find(item => item.sectionId === section?.id);
   const quizTarget = learningState?.sections.find(item => item.sectionId === (quizSectionId || section?.id));
-  useEffect(() => { if (tab === "quiz" && !quizTarget?.quiz?.unlocked) setTab("overview"); }, [tab, quizTarget?.quiz?.unlocked]);
+  useEffect(() => { if (tab === "quiz" && !quizTarget?.quiz?.unlocked) setTab("overview"); }, [tab, quizTarget?.quiz?.unlocked, setTab]);
+  useEffect(() => {
+    if (tab !== "reviews") return;
+    const frame = requestAnimationFrame(() => {
+      details.current?.scrollIntoView({ behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ? "instant" : "smooth", block: "start" });
+      details.current?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [tab]);
   const watch = useLessonWatch({ courseId: course.id, sectionId: lesson?.sectionId, lessonId: lesson?.id });
   const { update: updateWatch, pause: pauseWatch } = watch;
   useEffect(() => {
     if (!activeLessonId) return;
     saveLastLesson(userId, course.id, activeLessonId);
     setFinished(false);
-    setTab("overview"); setQuizSectionId(null);
+    if (lastViewed.current !== activeLessonId) changeTab.current("overview");
+    setQuizSectionId(null);
     const time = resume.current;
     playback.current = { lessonId: activeLessonId, time, saved: time };
     if (lastViewed.current !== activeLessonId) heading.current?.focus({ preventScroll: true });
@@ -132,7 +151,7 @@ function LearningWorkspaceBody({ course, userId, lessonId, progress }) {
   }
   if (!lesson) return <WorkspaceEmpty icon={BookOpen} title={lessonId ? "Lesson not found" : "Lessons are being prepared"} description={lessonId ? "This lesson may have moved. Return to the course to find the current lessons." : "Your course lessons will appear here when they are available."} to={lessonId ? `/learn/${encodeURIComponent(course.slug)}` : `/courses/${encodeURIComponent(course.slug)}`} action={lessonId ? "Open course" : "View course details"} />;
   return <>
-    <div className="learning-course-heading"><div><p className="studio-label">Your classroom</p><h1>{course.title}</h1><p>{course.instructor.name}<span aria-hidden="true"> · </span>{lessons.length} lessons{course.totalDurationSeconds > 0 && <><span aria-hidden="true"> · </span>{course.durationLabel}</>}</p></div><button type="button" className="cw-button" onClick={() => setContentOpen(value => !value)} aria-expanded={contentOpen} aria-controls="learning-course-content">{contentOpen ? <PanelRightClose size={17} aria-hidden="true" /> : <PanelRightOpen size={17} aria-hidden="true" />}<span>{contentOpen ? "Hide course content" : "Show course content"}</span></button></div>
+    <div className="learning-course-heading"><div><p className="studio-label">Your classroom</p><h1>{course.title}</h1><p>{course.instructor.name}<span aria-hidden="true"> · </span>{lessons.length} {lessons.length === 1 ? "lesson" : "lessons"}{course.totalDurationSeconds > 0 && <><span aria-hidden="true"> · </span>{course.durationLabel}</>}</p></div><button type="button" className="cw-button" onClick={() => setContentOpen(value => !value)} aria-expanded={contentOpen} aria-controls="learning-course-content">{contentOpen ? <PanelRightClose size={17} aria-hidden="true" /> : <PanelRightOpen size={17} aria-hidden="true" />}<span>{contentOpen ? "Hide course content" : "Show course content"}</span></button></div>
     <div className={`learning-grid${contentOpen ? "" : " learning-focus"}`}>
       <section className="learning-stage" aria-labelledby="learning-lesson-title">
         <div className="learning-video"><ProtectedLessonVideo key={`${course.id}/${lesson.id}`} target={{ courseId: course.id, sectionId: lesson.sectionId, lessonId: lesson.id }} title={lesson.title} poster={course.thumbnail} startTime={startTime} onPlaybackProgress={remember} onPlaybackPlay={watch.play} onPlaybackPause={data => { flush(); watch.pause(data); }} onPlaybackSeeking={watch.seeking} onPlaybackSeek={watch.seek} onEnded={end} /></div>

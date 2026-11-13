@@ -1,0 +1,15 @@
+.course-rating { display: inline-flex; max-width: 100%; font-size: var(--font-size-label, .875rem); line-height: 1.5; color: var(--foreground); }
+.course-rating-content { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 7px; }
+.course-rating strong { font-weight: 600; font-variant-numeric: tabular-nums; }
+.course-rating-content > span:last-child:not(.course-review-stars) { color: var(--muted-foreground); }
+.course-review-stars { display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0; color: #b67f11; }
+.course-rating-star { position: relative; display: inline-block; width: 14px; height: 14px; flex: 0 0 14px; }
+.course-review-stars .course-rating-star svg { display: block; width: 14px; height: 14px; }
+.course-rating-star > svg { opacity: .7; }
+.course-rating-star-fill { position: absolute; inset-block: 0; left: 0; overflow: hidden; }
+.course-rating-star-fill svg { fill: currentColor; max-width: none; }
+.course-rating--light { color: white; }
+.course-rating--light .course-rating-content > span:last-child:not(.course-review-stars) { color: rgb(255 255 255 / .8); }
+.course-rating--light .course-review-stars { color: #e8b339; }
+.course-rating-link { display: inline-flex; max-width: 100%; text-decoration: none; }
+.course-rating-link:hover .course-rating-content > span:last-child { text-decoration: underline; text-underline-offset: 3px; }

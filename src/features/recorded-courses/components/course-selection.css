@@ -10,11 +10,28 @@
 .featured-catalogue-intro p { color: var(--muted-foreground); font-size: var(--font-size-body); line-height: 1.75; }
 @media (min-width: 640px) { .course-selection { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1280px) { .course-selection { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.course-selection--featured[data-course-count="1"], .course-selection--featured[data-course-count="0"] { grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 1100px) { .course-selection--featured[data-course-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (min-width: 900px) {
-  .recorded-course-card--featured { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); }
-  .recorded-course-card--featured .catalogue-course-media { height: 100%; min-height: 280px; aspect-ratio: auto; }
-  .recorded-course-card--featured .recorded-course-card-content { padding: 28px; }
+.course-selection--featured, .course-catalogue-list { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 768px) {
+  .recorded-course-card--featured, .recorded-course-skeleton--featured {
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.3fr);
+    min-height: 340px;
+  }
+  .recorded-course-card--featured .catalogue-course-media,
+  .recorded-course-skeleton--featured .recorded-course-skeleton-media {
+    align-self: center;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+  /* Keep the cover's height independent of the course description. */
+  .recorded-course-card--featured .catalogue-cover > img { object-fit: contain; }
+  .recorded-course-card--featured .recorded-course-card-content,
+  .recorded-course-skeleton--featured .recorded-course-skeleton-content { padding: 24px; }
+  .recorded-course-card--featured h3 { font-size: 1.375rem; }
+}
+@media (min-width: 1024px) {
+  .recorded-course-card--featured .recorded-course-card-content,
+  .recorded-course-skeleton--featured .recorded-course-skeleton-content { padding: 28px; }
   .recorded-course-card--featured h3 { font-size: 1.5rem; }
 }

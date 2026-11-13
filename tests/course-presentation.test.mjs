@@ -86,7 +86,7 @@ for (const layout of [undefined, "full"]) test(`${layout || "featured (default)"
         await load({ limit: 3 });
         inspect(mod.Catalog, "/courses", document => {
           assert.equal(document.querySelectorAll(".course-selection article").length, count);
-          assert.equal(document.querySelector(".recorded-course-card--featured"), null);
+          assert.equal(document.querySelectorAll(".recorded-course-card--featured").length, count);
           assert.equal(document.querySelector('input[type="search"]'), null);
         });
       }

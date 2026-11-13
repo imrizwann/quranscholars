@@ -73,7 +73,8 @@ test("learner library menus confirm hiding, restore from the hidden view and req
     assert(document.querySelector('a[aria-label="Start course: Recitation foundations"]'));
     paid.progress = { ...paid.progress, completedLessons: 2, progressPercent: 100, completed: true };
     await act(async () => store.dispatch(mod.paymentApi.util.invalidateTags(["LearningLibrary"])));
-    await settle(() => document.querySelector('a[aria-label="Review course: Advanced recitation"]'));
+    await settle(() => document.querySelector('a[aria-label="Revisit course: Advanced recitation"]'));
+    assert.equal(document.querySelector('a[aria-label="Rate course: Advanced recitation"]').getAttribute("href"), "/learn/advanced?tab=reviews");
     assert.equal(document.querySelector('progress[aria-label="Advanced recitation progress"]').value, 100);
     assert.match(document.body.textContent, /Course complete/);
     await click(options(free.title)); await settle(() => menu("Hide from My learning"));

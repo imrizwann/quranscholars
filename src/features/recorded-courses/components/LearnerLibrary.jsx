@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen, Clock3 } from "lucide-react";
+import { useSelector } from "react-redux";
+import { ArrowRight, BookOpen, Clock3, Star } from "lucide-react";
 import { useGetLearningLibraryQuery } from "@/services/api/user/paymentApi.js";
 import { resolveCourseImage, formatDuration } from "../model/recordedCourseAdapter.js";
 import { WorkspaceEmpty } from "@/components/lms/WorkspaceUI.jsx";
@@ -8,15 +9,18 @@ import { Pagination, QueryMessage } from "@/features/instructor-courses/Workspac
 import InstructorByline from "@/features/profile/components/InstructorByline.jsx";
 import SelectField from "@/components/ui/SelectField.jsx";
 import LibraryCourseActions from "./LibraryCourseActions.jsx";
+import CourseRating from "./CourseRating.jsx";
 
 function LibraryCard({ course, disabled }) {
+  const userId = useSelector(state => state.user.user?._id);
+  const canReview = Boolean(userId) && String(course.createdBy || course.instructor?.id) !== String(userId);
   const image = resolveCourseImage(course.thumbnailUrl || course.thumbnail);
   const [failed, setFailed] = useState(null);
   const progress = course.progress;
   // Let the classroom resolve the latest account destination on entry. A card
   // left open on one device must not pin a lesson last watched on another.
   const destination = `/learn/${encodeURIComponent(course.slug)}`;
-  const action = progress?.completed ? "Review course" : progress?.started ? "Continue learning" : progress ? "Start course" : "Open course";
+  const action = progress?.completed ? "Revisit course" : progress?.started ? "Continue learning" : progress ? "Start course" : "Open course";
   return <article className="studio-course-card">
     <Link to={destination} className="studio-course-cover" aria-label={`Open ${course.title}`}>
       {image && failed !== image ? <img src={image} alt="" loading="lazy" onError={() => setFailed(image)} /> : <div className="studio-course-placeholder"><BookOpen size={42} strokeWidth={1.25} aria-hidden="true" /><span>QURANSCHOLAR</span></div>}
@@ -28,7 +32,8 @@ function LibraryCard({ course, disabled }) {
         <h2><Link to={destination}>{course.title}</Link></h2>
         {course.status === "Archived" && <p className="studio-course-description">Your access continues while this course is archived.</p>}
         <p className="studio-course-description"><InstructorByline instructor={course.instructor} /></p>
-        <p className="studio-course-description">{course.totalLessons ?? 0} lessons{course.language ? ` · ${course.language}` : ""}</p>
+        <div className="library-course-rating">{course.status === "Archived" ? <CourseRating rating={course.averageRating} reviews={course.totalReviews} /> : <Link className="course-rating-link" to={`/courses/${encodeURIComponent(course.slug)}#course-reviews`} aria-label={`Read reviews for ${course.title}`}><CourseRating rating={course.averageRating} reviews={course.totalReviews} /></Link>}</div>
+        <p className="studio-course-description">{course.totalLessons ?? 0} {course.totalLessons === 1 ? "lesson" : "lessons"}{course.language ? ` · ${course.language}` : ""}</p>
         <p className="studio-course-duration"><Clock3 size={14} aria-hidden="true" />{course.totalDuration > 0 ? formatDuration(course.totalDuration) : "Duration not listed"}</p>
         {progress && <div className="library-course-progress">
           <div><span>{progress.completed ? "Course complete" : `${progress.completedLessons} of ${progress.totalLessons} lessons complete`}</span><strong>{progress.progressPercent}%</strong></div>
@@ -37,7 +42,7 @@ function LibraryCard({ course, disabled }) {
           {progress.totalLessons === 0 && <p>Your lessons will appear here when available.</p>}
         </div>}
       </div>
-      <div className="studio-course-footer"><Link className="cw-button cw-primary" to={destination} aria-label={`${action}: ${course.title}`}>{action} <ArrowRight size={16} aria-hidden="true" /></Link></div>
+      <div className="studio-course-footer"><Link className="cw-button cw-primary" to={destination} aria-label={`${action}: ${course.title}`}>{action} <ArrowRight size={16} aria-hidden="true" /></Link>{canReview && <Link className="cw-text-link library-review-link" to={`${destination}?tab=reviews`} aria-label={`Rate course: ${course.title}`}><Star size={15} aria-hidden="true" />Rate course</Link>}</div>
     </div>
   </article>;
 }

@@ -19,6 +19,7 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
       import "./src/features/recorded-courses/services/recordedCoursesRepository.js";
       export { default as api } from "./src/services/api/courses/courses.api.js";
       export { default as learner } from "./src/services/api/user/learnerApi.js";
+      export { default as payment } from "./src/services/api/user/paymentApi.js";
       export { default as Catalog } from "./src/pages/recorded-courses/RecordedCourses.jsx";
       export { default as Detail } from "./src/pages/recorded-courses/RecordedCourseDetails.jsx";
       export { default as LoadingState } from "./src/components/feedback/LoadingState.jsx";
@@ -49,7 +50,7 @@ test("API-backed catalog and detail render real DTO shapes, counts, errors and m
     const mod = await import(pathToFileURL(outputPath));
     const { api, Catalog, Detail, CourseVideo, VideoPreview, LoadingState, CardMedia } = mod;
     learner = mod.learner;
-    store = configureStore({ reducer: { [api.reducerPath]: api.reducer, [learner.reducerPath]: learner.reducer, user: () => ({ user: null }) }, middleware: (getDefault) => getDefault().concat(api.middleware, learner.middleware) });
+    store = configureStore({ reducer: { [api.reducerPath]: api.reducer, [learner.reducerPath]: learner.reducer, [mod.payment.reducerPath]: mod.payment.reducer, user: () => ({ user: null }) }, middleware: (getDefault) => getDefault().concat(api.middleware, learner.middleware, mod.payment.middleware) });
     const render = (Component, url, path) => renderToStaticMarkup(React.createElement(Provider, { store },
       React.createElement(MemoryRouter, { initialEntries: [url] }, React.createElement(Routes, null,
         React.createElement(Route, { path, element: React.createElement(Component) })))));

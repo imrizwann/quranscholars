@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, BookOpen, Clock3, Users } from "lucide-react";
 import CourseCardMedia from "./CourseCardMedia.jsx";
 import CoursePrice from "@/features/recorded-courses/components/CoursePrice.jsx";
-// import CourseRating from "@/features/recorded-courses/components/CourseRating.jsx";
+import CourseRating from "./CourseRating.jsx";
 import InstructorByline from "@/features/profile/components/InstructorByline.jsx";
 
 const compactNumber = new Intl.NumberFormat("en-IN", {
@@ -39,13 +39,13 @@ const RecordedCourseCard = ({ course, featured = false, action }) => {
         {course.shortDescription}
       </p>}
 
-      {course.totalStudents > 0 && <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-        {/* Ratings stay hidden until the review workflow is released. */}
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <Link className="course-rating-link" to={`/courses/${encodeURIComponent(course.slug)}#course-reviews`} state={linkState} aria-label={`Read reviews for ${course.title}`}><CourseRating rating={course.rating} reviews={course.totalReviews} /></Link>
         {course.totalStudents > 0 && <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
           <Users className="size-3.5 text-primary" aria-hidden="true" />
           {compactNumber.format(course.totalStudents)} learners
         </span>}
-      </div>}
+      </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border pt-4 text-xs font-semibold text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
@@ -54,7 +54,7 @@ const RecordedCourseCard = ({ course, featured = false, action }) => {
         </span>
         <span className="inline-flex items-center gap-1.5">
           <BookOpen className="size-3.5 text-primary" aria-hidden="true" />
-          {course.totalLessons == null ? "See course details" : `${course.totalLessons} lessons`}
+          {course.totalLessons == null ? "See course details" : `${course.totalLessons} ${course.totalLessons === 1 ? "lesson" : "lessons"}`}
         </span>
       </div>
       <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-5">

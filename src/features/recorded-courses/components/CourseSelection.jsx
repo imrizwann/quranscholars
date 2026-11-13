@@ -8,7 +8,7 @@ export default function CourseSelection({ courses, loading, error, fetching, ret
   return <div className={`course-selection${featured ? " course-selection--featured" : ""}`} data-course-count={courses.length} aria-busy={loading || fetching}>
     {loading ? <>
       <span className="sr-only" role="status">Loading courses</span>
-      {Array.from({ length: featured ? 1 : 3 }, (_, index) => <RecordedCourseSkeleton key={index} />)}
+      {Array.from({ length: featured ? 1 : 3 }, (_, index) => <RecordedCourseSkeleton key={index} featured={featured} />)}
     </> : error ? <div className="course-selection-state" role="alert">
       <BookOpen size={24} aria-hidden="true" />
       <div><h3>Courses are temporarily unavailable</h3><p>Please try again in a moment.</p></div>
@@ -17,6 +17,6 @@ export default function CourseSelection({ courses, loading, error, fetching, ret
       <BookOpen size={24} aria-hidden="true" />
       <div><h3>New courses are on the way</h3><p>Contact our team for help finding your next learning opportunity.</p></div>
       <Link to="/contact" className="cw-button">Contact us<ArrowRight size={15} aria-hidden="true" /></Link>
-    </div> : courses.map(course => <RecordedCourseCard key={course.id} course={course} featured={featured && courses.length === 1} />)}
+    </div> : courses.map(course => <RecordedCourseCard key={course.id} course={course} featured={featured} />)}
   </div>;
 }

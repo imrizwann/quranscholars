@@ -67,7 +67,7 @@ const learnerApi = createApi({
     moderateCourseReview: builder.mutation({
       query: ({ reviewId, revision, hidden, reason }) => ({ url: `/api/admin/course-reviews/${encodeURIComponent(reviewId)}`, method: "PATCH", body: { revision, hidden, reason }, timeout: 20_000 }),
       transformResponse: unwrap, invalidatesTags: result => result ? ["CourseReviews", "MyCourseReview"] : [],
-      async onQueryStarted(_args, { dispatch, queryFulfilled }) { try { await queryFulfilled; dispatch(courseApi.util.invalidateTags(["Courses"])); } catch { /* Keep confirmed ratings. */ } },
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) { try { await queryFulfilled; dispatch(courseApi.util.invalidateTags(["Courses"])); dispatch(paymentApi.util.invalidateTags(["LearningLibrary"])); } catch { /* Keep confirmed ratings. */ } },
     }),
     getLessonNote: builder.query({
       serializeQueryArgs: ({ queryArgs }) => noteTarget(queryArgs),
@@ -155,6 +155,7 @@ async function reviewSaved({ courseId }, { dispatch, queryFulfilled }) {
     const { data } = await queryFulfilled;
     dispatch(learnerApi.util.updateQueryData("getMyCourseReview", courseId, current => { if (data.revision >= current.revision) Object.assign(current, data); }));
     dispatch(courseApi.util.invalidateTags(["Courses"]));
+    dispatch(paymentApi.util.invalidateTags(["LearningLibrary"]));
   } catch { /* Keep the last confirmed review on failure. */ }
 }
 export const { useGetLearnerProfileQuery, useUpdateLearnerProfileMutation, useGetEnrollmentQuery, useEnrollFreeCourseMutation, useGetCourseProgressQuery, useStartLessonWatchMutation, useRecordLessonWatchMutation, useGetSectionQuizQuery, useSubmitSectionQuizMutation } = learnerApi;
