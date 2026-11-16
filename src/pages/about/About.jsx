@@ -46,16 +46,18 @@ const journey = [
 const About = () => (
   <main className="about-page">
     <MarketingHero
+      tone="dark"
       eyebrow="About QuranScholar"
-      title="Islamic learning designed for real life."
-      description="QuranScholar is an online learning platform for students and families who want trustworthy Islamic education with modern structure, flexible access, and meaningful teacher support."
+      title="A clearer path to Quran and Islamic learning."
+      description="Understand more, one lesson at a time. QuranScholar brings recorded courses, clear lesson outlines, and saved progress together so you can learn around your daily life."
       icon={BookOpenCheck}
       primaryAction={{ to: "/courses", label: "Explore courses" }}
       secondaryAction={{ to: "/mission", label: "Read our mission" }}
+      highlightsTitle="Learning with QuranScholar"
       highlights={[
-        { label: "Before you enroll", value: "Review the lesson outline, course level, instructor, and price" },
-        { label: "As you learn", value: "Follow video lessons and track your progress in My learning" },
-        { label: "Need guidance?", value: "Ask our team about course levels or help with your learning account" },
+        { icon: BookOpenCheck, label: "Know where to begin", value: "Check the course level, instructor, and lesson outline before enrolling." },
+        { icon: Laptop2, label: "Learn at your pace", value: "Watch, pause, and revisit lessons. Your progress is saved for next time." },
+        { icon: HeartHandshake, label: "Find the help you need", value: "Ask our team about choosing a course or accessing your account." },
       ]}
       labelledBy="about-title"
     />

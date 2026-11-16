@@ -46,12 +46,14 @@ const focusAreas = [
 const Mission = () => (
   <main className="bg-[#fbfcfa] text-[#172b24]">
     <MarketingHero
+      tone="dark"
       eyebrow="Our mission"
-      title="Help Muslims learn with depth, confidence, and continuity."
-      description="We exist to make trustworthy Islamic learning easier to begin, easier to understand, and easier to carry into daily life—wherever a student lives and whatever pace they can sustain."
+      title="Making Islamic learning easier to begin."
+      description="Our purpose is to help people understand their faith and bring that knowledge into daily life, through clear teaching, thoughtful courses, and steady progress."
       icon={Sparkles}
       primaryAction={{ to: "/courses", label: "Start learning" }}
       secondaryAction={{ to: "/about", label: "About QuranScholar" }}
+      highlightsTitle="What guides our work"
       highlights={[
         { label: "Grounded in", value: "Quran, authentic Sunnah, scholarship, and good character" },
         { label: "Enabled by", value: "Clear curriculum, thoughtful technology, and human guidance" },

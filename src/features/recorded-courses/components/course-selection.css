@@ -19,13 +19,15 @@
   }
   .recorded-course-card--featured .catalogue-course-media,
   .recorded-course-skeleton--featured .recorded-course-skeleton-media {
-    align-self: center;
+    align-self: stretch;
+    position: relative;
     height: auto;
     min-height: 0;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: auto;
   }
-  /* Keep the cover's height independent of the course description. */
-  .recorded-course-card--featured .catalogue-cover > img { object-fit: contain; }
+  /* Fill the media column without letting the image dictate the row height. */
+  .recorded-course-card--featured .catalogue-cover { position: absolute; inset: 0; }
+  .recorded-course-card--featured .catalogue-cover > img { object-fit: cover; }
   .recorded-course-card--featured .recorded-course-card-content,
   .recorded-course-skeleton--featured .recorded-course-skeleton-content { padding: 24px; }
   .recorded-course-card--featured h3 { font-size: 1.375rem; }

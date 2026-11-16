@@ -35,7 +35,7 @@ export default function WebSocketClient() {
   useEffect(() => {
     if (!user?._id || !enabled) return;
     let url;
-    try { url = realtimeUrl(import.meta.env.VITE_REALTIME_URL || import.meta.env.VITE_API_URL || "http://localhost:3000", window.location.origin); }
+    try { url = realtimeUrl(import.meta.env.VITE_REALTIME_URL || import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "/" : "http://localhost:3000"), window.location.origin); }
     catch { return; }
     let stopped = false, timer, inboxTimer;
     const pending = new Map();

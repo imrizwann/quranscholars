@@ -3,7 +3,7 @@ import { transientRetryOptions } from "./transient-retry.js";
 
 // Shared by API slices only; direct storage uploads must use their own request.
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_API_URL || "http://localhost:3000",
+  baseUrl: import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "/" : "http://localhost:3000"),
   credentials: "include",
   prepareHeaders(headers, { arg }) {
     const method = (

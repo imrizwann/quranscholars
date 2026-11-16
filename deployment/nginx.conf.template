@@ -1,0 +1,62 @@
+# Render with envsubst using ONLY the variables listed in DEPLOYMENT.md.
+# Place inside nginx's http context. API_UPSTREAM is an origin without a trailing slash.
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+server {
+    listen 80;
+    server_name ${APP_HOST};
+    return 308 https://${APP_HOST}$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name ${APP_HOST};
+    ssl_certificate ${TLS_CERT_PATH};
+    ssl_certificate_key ${TLS_KEY_PATH};
+    ssl_protocols TLSv1.2 TLSv1.3;
+    root ${FRONTEND_ROOT};
+    index index.html;
+    client_max_body_size 64m;
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+
+    # Default: no caching of HTML, JSON, errors or responses setting cookies.
+    add_header Cache-Control "no-store" always;
+    proxy_cache off;
+    proxy_intercept_errors off;
+    proxy_http_version 1.1;
+    proxy_set_header Host $proxy_host;
+    # This example is the public edge. Overwrite client-supplied forwarding values.
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Host ${APP_HOST};
+    proxy_ssl_server_name on;
+    proxy_ssl_verify on;
+    proxy_ssl_trusted_certificate ${CA_BUNDLE_PATH};
+
+    location = /api { proxy_pass ${API_UPSTREAM}; }
+    location ^~ /api/ { proxy_pass ${API_UPSTREAM}; }
+    location = /api/realtime {
+        proxy_pass ${API_UPSTREAM};
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host ${APP_HOST};
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 75s;
+    }
+    location ~ ^/share/courses/([a-z0-9-]+)$ {
+        rewrite ^/share/courses/([a-z0-9-]+)$ /api/public/recorded-courses/$1/share break;
+        proxy_pass ${API_UPSTREAM};
+    }
+    location = /assets { return 404; }
+    location ^~ /assets/ { try_files $uri =404; }
+    location ~ /\. { deny all; }
+    # Frontend deep links only. API requests never enter this fallback.
+    location / { try_files $uri $uri/ /index.html; }
+}

@@ -76,16 +76,18 @@ const Contact = () => {
   return (
     <main className="contact-page">
       <MarketingHero
+        tone="dark"
         eyebrow="Contact QuranScholar"
-        title="Get the right answer from the right team."
-        description="Ask about a course, enrollment, your account, or an instructor application. Share the context and we’ll help you find the next step."
+        title="How can we help you?"
+        description="Whether you are choosing your first course or need help getting back to a lesson, our team can help you find the next step."
         icon={MessageSquareText}
-        primaryAction={{ to: "/courses", label: "Explore courses" }}
-        secondaryAction={{ to: "/services", label: "View learner services" }}
+        primaryAction={{ href: "#contact-message", label: "Write to us" }}
+        secondaryAction={{ to: "/courses", label: "Explore courses" }}
+        highlightsTitle="How we can help"
         highlights={[
-          { label: "Course questions", value: "Include the course title and what you would like to know" },
-          { label: "Account or application", value: "Use your registered email and include a reference if available" },
-          { label: "Something went wrong?", value: "Describe what happened and the message shown on your screen" },
+          { icon: BookOpenCheck, label: "Choosing a course", value: "Ask about the level, lessons, or what you need before enrolling." },
+          { icon: Headphones, label: "Accessing your lessons", value: "Get help with signing in, enrollment, or a playback problem." },
+          { icon: CheckCircle2, label: "Teaching with us", value: "Ask about instructor applications and the review process." },
         ]}
         labelledBy="contact-title"
       />
@@ -120,7 +122,7 @@ const Contact = () => {
             <a className="cw-button contact-whatsapp" href={contactDetails.whatsappHref} target="_blank" rel="noopener noreferrer"><MessageSquareText size={16} aria-hidden="true" />Message on WhatsApp<span className="sr-only"> (opens in a new tab)</span><ArrowRight size={15} aria-hidden="true" /></a>
           </div>
 
-          <div className="public-panel contact-form-panel">
+          <div id="contact-message" tabIndex={-1} className="public-panel contact-form-panel">
             <p className="public-eyebrow">Send a message</p>
             <h2 id="contact-form-title" className="contact-form-title">How can we help?</h2>
             <p id="contact-form-help" className="contact-form-description">Prepare a message in your email app, then review and send it there.</p>

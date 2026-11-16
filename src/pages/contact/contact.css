@@ -14,6 +14,7 @@ a.contact-method-value:focus-visible { outline: 2px solid var(--ring); outline-o
 .contact-method-description { margin-top: 6px; font-size: var(--font-size-label); line-height: 1.65; color: var(--muted-foreground); }
 .contact-availability { display: flex; align-items: start; gap: 10px; margin-top: 16px; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--muted); color: var(--muted-foreground); font-size: var(--font-size-label); line-height: 1.75; }
 .contact-form-title { margin-top: 8px; }
+.contact-form-panel { scroll-margin-top: 100px; }
 .contact-form-panel .public-eyebrow { color: var(--primary); font-size: var(--font-size-caption); }
 .contact-form-description { margin-top: 10px; }
 .contact-whatsapp { margin-top: 16px; min-height: 44px; }

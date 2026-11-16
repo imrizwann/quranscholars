@@ -22,7 +22,8 @@ function App() {
     pathName.pathname.startsWith("/dashboard") ||
     pathName.pathname.startsWith("/admin/") ||
     pathName.pathname === "/instructor" ||
-    (pathName.pathname.startsWith("/instructor/") && !/^\/instructor\/application\/?$/.test(pathName.pathname));
+    (pathName.pathname.startsWith("/instructor/") &&
+      !/^\/instructor\/application\/?$/.test(pathName.pathname));
   return (
     <>
       <RouteScrollManager />
@@ -33,7 +34,9 @@ function App() {
       <div>
         {!isWorkspace && <Navbar />}
         <div className={!isWorkspace ? "public-route-content" : undefined}>
-          <Suspense fallback={<AppLoader />}><Outlet /></Suspense>
+          <Suspense fallback={<AppLoader />}>
+            <Outlet />
+          </Suspense>
         </div>
         {!isWorkspace && <Footer />}
       </div>

@@ -4,8 +4,8 @@ import { useGetRecordedCourseBySlugQuery } from "@/features/recorded-courses/ser
 
 const names = { "/": "Quran & Islamic learning", "/courses": "Recorded courses", "/about": "About", "/contact": "Contact", "/course-policy": "Course access & refunds", "/privacy": "Privacy policy", "/get-started": "Get started", "/login": "Sign in", "/register": "Create your account", "/forgot-password": "Forgot password", "/reset-password": "Reset password" };
 function siteOrigin(value = import.meta.env.VITE_PUBLIC_SITE_URL) {
-  try { const url = new URL(value); if (url.protocol === "https:" && !url.username && !url.password && url.pathname === "/" && !url.search && !url.hash) return url.origin; } catch { /* Use the established public domain. */ }
-  return "https://www.quranscholar.in";
+  try { const url = new URL(value); if (url.protocol === "https:" && !url.username && !url.password && url.pathname === "/" && !url.search && !url.hash) return url.origin; } catch { /* Development uses the current origin; production builds validate this value. */ }
+  return window.location.origin;
 }
 export default function RouteMetadata() {
   const { pathname } = useLocation();
