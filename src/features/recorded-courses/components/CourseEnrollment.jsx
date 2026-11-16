@@ -10,13 +10,16 @@ import { useEnrollFreeCourseMutation } from "@/services/api/user/learnerApi.js";
 import { checkoutAttempt, clearCheckout, hostedCheckoutUrl, readCheckout, saveCheckout } from "@/features/payments/checkout-session.js";
 import { userMessage } from "@/lib/user-messages.js";
 import { enrollmentFailureMessage } from "@/features/payments/enrollment-feedback.js";
-import { openRazorpayCheckout } from "@/features/payments/razorpay-checkout.js";
+import { openCourseCheckout } from "@/features/payments/checkout-dispatcher.js";
 
 const awaitingConfirmation = "We could not confirm your payment yet. Check payment status again shortly; do not make another payment.";
 
 export default function CourseEnrollment({ course }) {
   const user = useSelector(state => state.user.user);
   const location = useLocation();
+  if (import.meta.env.DEV && import.meta.env.VITE_PAYMENT_CHECKOUT === "preview" && course.price.current > 0) {
+    return <><a className="cw-button cw-primary cd-enrollment-action" href="/checkout-preview.html">Preview checkout<ArrowRight size={16} /></a><p className="cd-enrollment-note">Design preview with sample data. No order, payment, or enrollment will be created.</p></>;
+  }
   if (!user?._id && course.enrollmentOpen === false) return <p className="cd-enrollment-feedback" role="status">Enrollment is currently closed. Existing learners can continue from My learning.</p>;
   if (!user?._id) return <><Link className="cw-button cw-primary cd-enrollment-action" to="/login" state={{ from: `/courses/${encodeURIComponent(course.slug)}${location.search}` }}>Sign in to enroll<ArrowRight size={16} /></Link><p className="cd-enrollment-note">Use your account to enroll and keep your learning in one place.</p></>;
   return <EnrollmentAction key={`${user._id}/${course.id}`} course={course} user={user} />;
@@ -48,6 +51,7 @@ function EnrollmentAction({ course, user }) {
   const busy = enrolling.isLoading || paying.isLoading || verifying.isLoading || reconciling.isLoading || checkoutOpen;
   const enrollmentOpen = access.currentData?.enrollmentOpen ?? course.enrollmentOpen;
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; gateway.current?.close(); }; }, []);
+  useEffect(() => { if (active && import.meta.env?.VITE_PAYMENT_CHECKOUT === "custom") gateway.current?.close(); }, [active]);
   const rememberPayment = useCallback(async confirmed => {
     if (!mounted.current) return;
     setLatest(confirmed);
@@ -105,7 +109,7 @@ function EnrollmentAction({ course, user }) {
         if (result.state === "pending") {
           if (result.checkout?.provider === "razorpay") {
             setCheckoutOpen(true);
-            const response = await openRazorpayCheckout({ payment: result, course, user, onInstance: instance => { if (!mounted.current) return false; gateway.current = instance; } });
+            const response = await openCourseCheckout({ payment: result, course, user, onInstance: instance => { if (!mounted.current) return false; gateway.current = instance; } });
             gateway.current = null;
             if (!mounted.current) return;
             setCheckoutOpen(false);

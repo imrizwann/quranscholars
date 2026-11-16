@@ -13,14 +13,16 @@ import { configureStore } from "@reduxjs/toolkit";
 import { toast } from "sonner";
 import { createActionFeedbackMiddleware } from "../src/components/feedback/actionFeedbackMiddleware.js";
 
+for (const checkoutKind of ["standard", "custom"]) {
 for (const scenario of ["verified callback", "failed callback", "return without callback", "manual recovery", "webhook first", "expired test checkout"]) {
-test(`themed checkout safely recovers ${scenario} without a second order`, async t => {
+test(`${checkoutKind} checkout safely recovers ${scenario} without a second order`, async t => {
   const notices = [];
   for (const type of ["loading", "success", "error", "info", "dismiss"]) t.mock.method(toast, type, (...args) => { notices.push({ type, title: args[0] }); });
   let releaseVerification;
   const verificationGate = new Promise(resolve => { releaseVerification = resolve; });
   const dom = new JSDOM("<!doctype html><html style='--primary: #0f766e'><body><div id='root'></div></body></html>", { url: "https://frontend.example.test/courses/tajweed", pretendToBeVisual: true });
-  for (const key of ["window", "document", "navigator", "Node", "Element", "HTMLElement", "Event", "MouseEvent", "localStorage"]) Object.defineProperty(globalThis, key, { configurable: true, writable: true, value: key === "window" ? dom.window : dom.window[key] });
+  for (const key of ["window", "document", "navigator", "Node", "Element", "HTMLElement", "Event", "MouseEvent", "localStorage", "FormData", "MutationObserver", "Document", "ShadowRoot", "HTMLInputElement"]) Object.defineProperty(globalThis, key, { configurable: true, writable: true, value: key === "window" ? dom.window : dom.window[key] });
+  window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
   globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
   globalThis.requestAnimationFrame = dom.window.requestAnimationFrame.bind(dom.window);
@@ -29,9 +31,9 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
   const { MemoryRouter } = await import("react-router-dom");
   const output = resolve("tests", `razorpay-ui-fixture-${randomUUID()}.mjs`);
   const previousFetch = globalThis.fetch;
-  let root, store, apis, options;
+  let root, store, apis, options, sdkObserver;
   try {
-    const compiled = await build({ stdin: { contents: `export {default as Enrollment} from './src/features/recorded-courses/components/CourseEnrollment.jsx'; export {default as paymentApi} from './src/services/api/user/paymentApi.js'; export {default as learnerApi} from './src/services/api/user/learnerApi.js';`, resolveDir: process.cwd() }, bundle: true, write: false, format: "esm", platform: "node", packages: "external", jsx: "automatic", alias: { "@": resolve("src") }, loader: { ".css": "empty" }, define: { "import.meta.env": JSON.stringify({ VITE_API_URL: "https://api.example.test", PROD: true }) } });
+    const compiled = await build({ stdin: { contents: `export {default as Enrollment} from './src/features/recorded-courses/components/CourseEnrollment.jsx'; export {default as paymentApi} from './src/services/api/user/paymentApi.js'; export {default as learnerApi} from './src/services/api/user/learnerApi.js';`, resolveDir: process.cwd() }, bundle: true, write: false, format: "esm", platform: "node", packages: "external", jsx: "automatic", alias: { "@": resolve("src") }, loader: { ".css": "empty" }, define: { "import.meta.env": JSON.stringify({ VITE_API_URL: "https://api.example.test", PROD: true, VITE_PAYMENT_CHECKOUT: checkoutKind, VITE_CUSTOM_CHECKOUT_LIVE_ENABLED: "true" }) } });
     await writeFile(output, compiled.outputFiles[0].text);
     const mod = await import(pathToFileURL(output)); apis = [mod.paymentApi, mod.learnerApi];
     const user = { _id: "buyer1", name: "Learner", email: "learner@example.test", role: "user" };
@@ -40,6 +42,19 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
     let active = false, verified = 0, captured = false, recoveryChecks = 0;
     const attempts = [];
     window.Razorpay = class { constructor(input) { options = input; } open() {} close() { options.modal.ondismiss(); } };
+    if (checkoutKind === "custom") {
+      window.Razorpay = class {
+        events = {};
+        constructor(input) { options = { ...input, handler: response => this.events["payment.success"](response), modal: { ondismiss: () => document.querySelector('.custom-pay-close').click() } }; }
+        once(name, callback) { if (name === "ready") queueMicrotask(() => callback({ methods: { card: true, netbanking: { HDFC: "HDFC Bank" } } })); }
+        on(name, callback) { this.events[name] = callback; }
+        emit() {}
+        getSupportedUpiIntentApps() { return Promise.resolve([]); }
+        createPayment(data) { assert.equal(data.amount, 14900); assert.equal(data.order_id, "order_one"); assert.equal(data.method, "netbanking"); options.amount = data.amount; }
+      };
+      sdkObserver = new MutationObserver(() => { const script = document.querySelector('script[src="https://checkout.razorpay.com/v1/razorpay.js"]'); if (script) { sdkObserver.disconnect(); script.dispatchEvent(new Event("load")); } });
+      sdkObserver.observe(document.head, { childList: true });
+    }
     globalThis.fetch = async request => {
       const path = new URL(request.url).pathname;
       assert.equal(request.credentials, "include");
@@ -84,6 +99,14 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
       assert.fail(`UI did not settle: ${document.body.textContent}`);
     };
     const button = label => [...document.querySelectorAll("button")].find(button => button.textContent.includes(label));
+    const submitCustom = async () => {
+      if (checkoutKind !== "custom") return;
+      await settle(() => document.querySelector('.custom-pay input[value="netbanking"]'));
+      await act(async () => document.querySelector('.custom-pay input[value="netbanking"]').click());
+      document.querySelector('.custom-pay input[name="contact"]').value = "+919000000000";
+      document.querySelector('.custom-pay select[name="bank"]').value = "HDFC";
+      await act(async () => document.querySelector('.custom-pay form').dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
+    };
     await settle(() => button("Buy course"));
     await act(async () => button("Buy course").click());
     if (scenario === "expired test checkout") {
@@ -95,7 +118,9 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
       return;
     }
     await settle(() => options);
-    assert.equal(options.theme.color, "#0f766e"); assert.equal(options.amount, 14900);
+    await submitCustom();
+    if (checkoutKind === "standard") assert.equal(options.theme.color, "#0f766e");
+    assert.equal(options.amount, 14900);
     assert.equal(verified, 0); assert.equal(document.querySelector('a[href="/learn/tajweed"]'), null);
     assert.match(document.body.textContent, /Secure checkout/);
     assert.doesNotMatch(document.body.textContent, /Test mode/);
@@ -104,6 +129,7 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
     await settle(() => button("Continue payment") && !button("Continue payment").disabled);
     await act(async () => button("Continue payment").click());
     await settle(() => attempts.length === 2);
+    await submitCustom();
     assert.deepEqual(attempts[0], attempts[1], "resume reuses original checkout key");
     if (scenario === "return without callback") {
       captured = true;
@@ -135,6 +161,7 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
     await settle(() => document.querySelector('a[href="/learn/tajweed"]'));
     assert.equal(notices.filter(notice => notice.title === "Your course is ready").length, 1, "reopening an already enrolled course must not repeat purchase feedback");
   } finally {
+    sdkObserver?.disconnect();
     releaseVerification();
     if (root) await act(async () => root.unmount());
     if (store && apis) for (const api of apis) { const requests = [...store.dispatch(api.util.getRunningQueriesThunk()), ...store.dispatch(api.util.getRunningMutationsThunk())]; requests.forEach(item => item.abort()); await Promise.allSettled(requests); store.dispatch(api.util.resetApiState()); }
@@ -143,4 +170,5 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
     await unlink(output).catch(() => {}); dom.window.close();
   }
 });
+}
 }
