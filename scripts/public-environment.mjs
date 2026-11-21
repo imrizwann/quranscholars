@@ -34,7 +34,7 @@ export function validatePublicEnvironment(env) {
   for (const name of Object.keys(env)) {
     if (
       name.startsWith("VITE_") &&
-      !publicNames.startsWith("VITE_VERCEL_") &&
+      !name.startsWith("VITE_VERCEL_") &&
       !vercelPublicNames.has(name)
     ) {
       throw new Error(
