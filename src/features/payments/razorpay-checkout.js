@@ -39,7 +39,7 @@ export async function openRazorpayCheckout({ payment, course, user, onInstance }
       name: "QuranScholar", description: course.title,
       image: new URL("/web-app-manifest-192x192.png", window.location.origin).href,
       prefill: { name: user.name || "", email: user.email || "" },
-      theme: { color, backdrop_color: "#18201d" },
+      theme: { color, backdrop_color: "#fcfcfa" },
       modal: { backdropclose: false, confirm_close: true, ondismiss: () => { if (!completed) resolve(null); } },
       handler: response => {
         completed = true;
