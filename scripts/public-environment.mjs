@@ -6,7 +6,10 @@ const publicNames = new Set([
   "VITE_CATALOGUE_LAYOUT",
   "VITE_USER_NODE_ENV",
 ]);
-const vercelPublicNames = new Set(["VITE_VERCEL_GIT_REPO_ID", "VITE_VERCEL_ENV"]);
+const vercelPublicNames = new Set([
+  "VITE_VERCEL_GIT_REPO_ID",
+  "VITE_VERCEL_ENV",
+]);
 function publicUrl(name, value, { originOnly = false, realtime = false } = {}) {
   try {
     const url = new URL(value);
@@ -31,7 +34,7 @@ export function validatePublicEnvironment(env) {
   for (const name of Object.keys(env)) {
     if (
       name.startsWith("VITE_") &&
-      !publicNames.has("VITE_VERCEL_") &&
+      !publicNames.startsWith("VITE_VERCEL_") &&
       !vercelPublicNames.has(name)
     ) {
       throw new Error(
