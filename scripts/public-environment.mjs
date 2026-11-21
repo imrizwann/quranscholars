@@ -6,7 +6,7 @@ const publicNames = new Set([
   "VITE_CATALOGUE_LAYOUT",
   "VITE_USER_NODE_ENV",
 ]);
-const vercelPublicNames = new Set(["VITE_VERCEL_GIT_REPO_ID"]);
+const vercelPublicNames = new Set(["VITE_VERCEL_GIT_REPO_ID", "VITE_VERCEL_ENV"]);
 function publicUrl(name, value, { originOnly = false, realtime = false } = {}) {
   try {
     const url = new URL(value);
