@@ -1,10 +1,26 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
-import CollapsibleSidebar, { HamburgerIcon, SidebarToggle } from "@/components/navigation/CollapsibleSidebar.jsx";
+import CollapsibleSidebar, {
+  HamburgerIcon,
+  SidebarToggle,
+} from "@/components/navigation/CollapsibleSidebar.jsx";
 import WorkspaceAccountMenu from "./WorkspaceAccountMenu.jsx";
 import Brand from "@/components/branding/Brand.jsx";
-import { ArrowUpRight, BarChart3, BookOpen, ChevronRight, CircleDollarSign, GraduationCap, LayoutDashboard, Settings, ShieldCheck, UserRound, Users, X } from "lucide-react";
+import {
+  ArrowUpRight,
+  BarChart3,
+  BookOpen,
+  ChevronRight,
+  CircleDollarSign,
+  GraduationCap,
+  LayoutDashboard,
+  Settings,
+  ShieldCheck,
+  UserRound,
+  Users,
+  X,
+} from "lucide-react";
 import "./workspace.css";
 
 const studentLinks = [
@@ -31,41 +47,106 @@ const instructorLinks = [
 const adminLinks = [
   { to: "/admin/operations", label: "Operations", icon: ShieldCheck },
   { to: "/admin/revenue", label: "Revenue & payouts", icon: CircleDollarSign },
-  { to: "/admin/instructor-applications", label: "Instructor applications", icon: GraduationCap },
+  {
+    to: "/admin/instructor-applications",
+    label: "Instructor applications",
+    icon: GraduationCap,
+  },
 ];
 
-function WorkspaceSidebar({ instructor, admin, onNavigate, mobile = false, collapsed = false }) {
+function WorkspaceSidebar({
+  instructor,
+  admin,
+  onNavigate,
+  mobile = false,
+  collapsed = false,
+}) {
   const base = instructor ? "/instructor" : "/dashboard";
   const { pathname } = useLocation();
-  const links = admin ? adminLinks : instructor ? instructorLinks : studentLinks;
+  const links = admin
+    ? adminLinks
+    : instructor
+      ? instructorLinks
+      : studentLinks;
   const role = admin ? "Admin" : instructor ? "Instructor" : "Learner";
   const renderLink = ({ icon: Icon, ...link }) => (
-    <NavLink key={link.to} {...link} onClick={onNavigate} aria-label={link.label} title={collapsed ? link.label : undefined}
-      className={({ isActive }) => `workspace-nav-link${isActive || (instructor && pathname === "/instructor" && link.label === "Overview") ? " is-active" : ""}`}>
-      <Icon size={18} aria-hidden="true" /><span>{link.label}</span>
+    <NavLink
+      key={link.to}
+      {...link}
+      onClick={onNavigate}
+      aria-label={link.label}
+      title={collapsed ? link.label : undefined}
+      className={({ isActive }) =>
+        `workspace-nav-link${isActive || (instructor && pathname === "/instructor" && link.label === "Overview") ? " is-active" : ""}`
+      }
+    >
+      <Icon size={18} aria-hidden="true" />
+      <span>{link.label}</span>
     </NavLink>
   );
   return (
     <div className="workspace-sidebar">
       <div className="workspace-brand-row">
-        <NavLink to="/" className="workspace-brand" onClick={onNavigate} aria-label="QuranScholar home" title={collapsed ? "QuranScholar home" : undefined}>
+        <NavLink
+          to="/"
+          className="workspace-brand"
+          onClick={onNavigate}
+          aria-label="QuranScholar home"
+          title={collapsed ? "QuranScholar home" : undefined}
+        >
           <Brand caption />
         </NavLink>
-        {mobile && <Dialog.Close className="workspace-icon-button" aria-label="Close navigation"><X size={20} /></Dialog.Close>}
+        {mobile && (
+          <Dialog.Close
+            className="workspace-icon-button"
+            aria-label="Close navigation"
+          >
+            <X size={20} />
+          </Dialog.Close>
+        )}
       </div>
-      <div className="workspace-role" title={collapsed ? `${role} workspace` : undefined}><GraduationCap size={17} aria-hidden="true" /><span>{role} workspace</span></div>
+      <div
+        className="workspace-role"
+        title={collapsed ? `${role} workspace` : undefined}
+      >
+        <GraduationCap size={17} aria-hidden="true" />
+        <span>{role} workspace</span>
+      </div>
       <nav aria-label={`${role} navigation`} className="workspace-navigation">
-        <p className="workspace-nav-caption">{admin ? "Administration" : instructor ? "Teaching" : "Your learning"}</p>
+        <p className="workspace-nav-caption">
+          {admin ? "Administration" : instructor ? "Teaching" : "Your learning"}
+        </p>
         {links.map(renderLink)}
-        <p className="workspace-nav-caption workspace-account-caption">Account</p>
-        {(admin ? [{ to: "/profile", label: "Profile", icon: UserRound }] : [
-          { to: `${base}/profile`, label: instructor ? "Public profile" : "Profile", icon: UserRound },
-          { to: `${base}/settings`, label: "Settings", icon: Settings },
-        ]).map(renderLink)}
+        <p className="workspace-nav-caption workspace-account-caption">
+          Account
+        </p>
+        {(admin
+          ? [{ to: "/profile", label: "Profile", icon: UserRound }]
+          : [
+              {
+                to: `${base}/profile`,
+                label: instructor ? "Public profile" : "Profile",
+                icon: UserRound,
+              },
+              { to: `${base}/settings`, label: "Settings", icon: Settings },
+            ]
+        ).map(renderLink)}
       </nav>
       <div className="workspace-sidebar-footer">
-        <p>Learn with purpose.<br />Grow with every lesson.</p>
-        <NavLink to="/" onClick={onNavigate} aria-label="Back to website" title={collapsed ? "Back to website" : undefined}><span>Back to website</span><ArrowUpRight size={16} aria-hidden="true" /></NavLink>
+        <p>
+          Learn with purpose.
+          <br />
+          Grow with every lesson.
+        </p>
+        <NavLink
+          to="/"
+          onClick={onNavigate}
+          aria-label="Back to website"
+          title={collapsed ? "Back to website" : undefined}
+        >
+          <span>Back to website</span>
+          <ArrowUpRight size={16} aria-hidden="true" />
+        </NavLink>
       </div>
     </div>
   );
@@ -79,16 +160,22 @@ export default function WorkspaceLayout({ type = "student" }) {
   const { pathname } = useLocation();
   const base = instructor ? "/instructor" : "/dashboard";
   const closeNavigation = useCallback(() => setMobileOpen(false), []);
-  const activeLink = [...(admin ? adminLinks : instructor ? instructorLinks : studentLinks),
-    { to: `${base}/profile`, label: "Profile" }, { to: `${base}/settings`, label: "Settings" },
-  ].find((link) => link.end ? pathname === link.to : pathname.startsWith(link.to));
+  const activeLink = [
+    ...(admin ? adminLinks : instructor ? instructorLinks : studentLinks),
+    { to: `${base}/profile`, label: "Profile" },
+    { to: `${base}/settings`, label: "Settings" },
+  ].find((link) =>
+    link.end ? pathname === link.to : pathname.startsWith(link.to),
+  );
 
   useEffect(() => {
     closeNavigation();
   }, [pathname, closeNavigation]);
   useEffect(() => {
     const desktop = window.matchMedia("(min-width: 1024px)");
-    const closeOnDesktop = () => { if (desktop.matches) closeNavigation(); };
+    const closeOnDesktop = () => {
+      if (desktop.matches) closeNavigation();
+    };
     desktop.addEventListener("change", closeOnDesktop);
     return () => desktop.removeEventListener("change", closeOnDesktop);
   }, [closeNavigation]);
@@ -96,28 +183,65 @@ export default function WorkspaceLayout({ type = "student" }) {
   return (
     <Dialog.Root open={mobileOpen} onOpenChange={setMobileOpen}>
       <div className="workspace-shell">
-        <a href="#workspace-content" className="workspace-skip-link">Skip to content</a>
-        <CollapsibleSidebar id="workspace-desktop-navigation" className="workspace-desktop-sidebar" collapsed={collapsed}>
-          <WorkspaceSidebar instructor={instructor} admin={admin} collapsed={collapsed} />
+        <a href="#workspace-content" className="workspace-skip-link">
+          Skip to content
+        </a>
+        <CollapsibleSidebar
+          id="workspace-desktop-navigation"
+          className="workspace-desktop-sidebar"
+          collapsed={collapsed}
+        >
+          <WorkspaceSidebar
+            instructor={instructor}
+            admin={admin}
+            collapsed={collapsed}
+          />
         </CollapsibleSidebar>
         <Dialog.Portal>
           <Dialog.Backdrop className="workspace-mobile-backdrop" />
-          <Dialog.Popup id="workspace-mobile-navigation" className="workspace-mobile-drawer">
-            <Dialog.Title className="sr-only">Workspace navigation</Dialog.Title>
-            <WorkspaceSidebar instructor={instructor} admin={admin} mobile onNavigate={closeNavigation} />
+          <Dialog.Popup
+            id="workspace-mobile-navigation"
+            className="workspace-mobile-drawer"
+          >
+            <Dialog.Title className="sr-only">
+              Workspace navigation
+            </Dialog.Title>
+            <WorkspaceSidebar
+              instructor={instructor}
+              admin={admin}
+              mobile
+              onNavigate={closeNavigation}
+            />
           </Dialog.Popup>
         </Dialog.Portal>
         <div className="workspace-body">
           <header className="workspace-topbar">
             <div className="workspace-breadcrumb">
-              <SidebarToggle className="workspace-desktop-toggle" collapsed={collapsed} onToggle={() => setCollapsed((value) => !value)} controls="workspace-desktop-navigation" />
-              <Dialog.Trigger className="workspace-icon-button workspace-menu-button" aria-label="Open navigation" aria-expanded={mobileOpen} aria-controls="workspace-mobile-navigation"><HamburgerIcon /></Dialog.Trigger>
-              <span>{admin ? "Admin" : instructor ? "Instructor" : "My workspace"}</span><ChevronRight size={14} aria-hidden="true" />
+              <SidebarToggle
+                className="workspace-desktop-toggle"
+                collapsed={collapsed}
+                onToggle={() => setCollapsed((value) => !value)}
+                controls="workspace-desktop-navigation"
+              />
+              <Dialog.Trigger
+                className="workspace-icon-button workspace-menu-button"
+                aria-label="Open navigation"
+                aria-expanded={mobileOpen}
+                aria-controls="workspace-mobile-navigation"
+              >
+                <HamburgerIcon />
+              </Dialog.Trigger>
+              <span>
+                {admin ? "Admin" : instructor ? "Instructor" : "My workspace"}
+              </span>
+              <ChevronRight size={14} aria-hidden="true" />
               <strong>{activeLink?.label || "Overview"}</strong>
             </div>
             <WorkspaceAccountMenu type={type} />
           </header>
-          <div id="workspace-content" tabIndex={-1}><Outlet /></div>
+          <div id="workspace-content" tabIndex={-1}>
+            <Outlet />
+          </div>
         </div>
       </div>
     </Dialog.Root>

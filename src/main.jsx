@@ -1,6 +1,10 @@
 import React, { lazy } from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import { Provider } from "react-redux";
 import App from "@/app/App.jsx";
 import "@/styles/globals.css";
@@ -13,8 +17,12 @@ import CourseRouteRedirect from "@/components/navigation/CourseRouteRedirect.jsx
 import RouteErrorPage from "@/components/feedback/RouteErrorPage.jsx";
 const Home = lazy(() => import("@/pages/home/Home.jsx"));
 const CoursePolicy = lazy(() => import("@/pages/legal/CoursePolicy.jsx"));
-const AdminOperations = lazy(() => import("@/pages/instructor/AdminOperations.jsx"));
-const RevenueDashboard = lazy(() => import("@/features/revenue/RevenueDashboard.jsx"));
+const AdminOperations = lazy(
+  () => import("@/pages/instructor/AdminOperations.jsx"),
+);
+const RevenueDashboard = lazy(
+  () => import("@/features/revenue/RevenueDashboard.jsx"),
+);
 const Services = lazy(() => import("@/pages/services/Services.jsx"));
 const ServicesList = lazy(() => import("@/pages/services/ServicesList.jsx"));
 const About = lazy(() => import("@/pages/about/About.jsx"));
@@ -58,6 +66,7 @@ const InstructorStart = lazy(() =>
 );
 const WorkspaceLayout = lazy(() => import("@/layouts/WorkspaceLayout.jsx"));
 const StudentDashboard = lazy(
+
   () => import("@/pages/dashboard/StudentDashboard.jsx"),
 );
 const StudentSectionPage = lazy(
@@ -117,8 +126,12 @@ const YouthPrograms = lazy(() => import("@/pages/services/YouthPrograms.jsx"));
 const AccountDeleted = lazy(() => import("@/pages/account/AccountDeleted.jsx"));
 // const Blogs = lazy(() => import("@/pages/blog/Blogs.jsx"));
 
-const AdminInstructorApplications = lazy(() => import("@/pages/instructor/AdminInstructorApplications.jsx"));
-const AdminInstructorApplication = lazy(() => import("@/pages/instructor/AdminInstructorApplication.jsx"));
+const AdminInstructorApplications = lazy(
+  () => import("@/pages/instructor/AdminInstructorApplications.jsx"),
+);
+const AdminInstructorApplication = lazy(
+  () => import("@/pages/instructor/AdminInstructorApplication.jsx"),
+);
 
 const router = createBrowserRouter([
   {
@@ -132,10 +145,22 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       // Demo pages are for local development, never the released application.
-      ...(import.meta.env.DEV ? [
-        { path: "example-theme", element: React.createElement(lazy(() => import("./assets/example themes/berry-sand-lms"))) },
-        { path: "test", element: React.createElement(lazy(() => import("@/pages/dev/TestPage.jsx"))) },
-      ] : []),
+      ...(import.meta.env.DEV
+        ? [
+            {
+              path: "example-theme",
+              element: React.createElement(
+                lazy(() => import("./assets/example themes/berry-sand-lms")),
+              ),
+            },
+            {
+              path: "test",
+              element: React.createElement(
+                lazy(() => import("@/pages/dev/TestPage.jsx")),
+              ),
+            },
+          ]
+        : []),
       {
         path: "courses",
         element: <RecordedCourses />,
@@ -183,7 +208,11 @@ const router = createBrowserRouter([
       },
       {
         path: "learn/:courseSlug",
-        element: <ProtectedRoute><RecordedCoursePlayer /></ProtectedRoute>,
+        element: (
+          <ProtectedRoute>
+            <RecordedCoursePlayer />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "learn/:courseSlug/:lessonId",
@@ -194,17 +223,27 @@ const router = createBrowserRouter([
         element: <ProtectedRoute>{<RecordedCoursePlayer />}</ProtectedRoute>,
       },
       // { path: "classroom/:liveClassSlug", element: <Classroom /> },
-      { path: "classroom/*", element: <Navigate to="/dashboard/learning" replace /> },
+      {
+        path: "classroom/*",
+        element: <Navigate to="/dashboard/learning" replace />,
+      },
       {
         path: "dashboard",
-        element: <ProtectedRoute><WorkspaceLayout type="student" /></ProtectedRoute>,
+        element: (
+          <ProtectedRoute>
+            <WorkspaceLayout type="student" />
+          </ProtectedRoute>
+        ),
         children: [
           { index: true, element: <StudentDashboard /> },
           { path: "learning", element: <MyLearning /> },
           { path: "progress", element: <StudentSectionPage /> },
           { path: "purchases", element: <StudentSectionPage /> },
           // Placeholder implementations remain in StudentSectionPage.jsx.
-          ...["assignments", "wishlist"].map(path => ({ path, element: <Navigate to="/dashboard/learning" replace /> })),
+          ...["assignments", "wishlist"].map((path) => ({
+            path,
+            element: <Navigate to="/dashboard/learning" replace />,
+          })),
           { path: "profile", element: <StudentSectionPage /> },
           { path: "settings", element: <StudentSectionPage /> },
         ],
@@ -212,7 +251,11 @@ const router = createBrowserRouter([
       { path: "instructor/application", element: <InstructorApplication /> },
       {
         path: "instructor",
-        element: <InstructorCourseAccess><WorkspaceLayout type="instructor" /></InstructorCourseAccess>,
+        element: (
+          <InstructorCourseAccess>
+            <WorkspaceLayout type="instructor" />
+          </InstructorCourseAccess>
+        ),
         children: [
           { index: true, element: <InstructorDashboard /> },
           { path: "dashboard", element: <InstructorDashboard /> },
@@ -234,9 +277,15 @@ const router = createBrowserRouter([
           },
           // { path: "live-classes", element: <InstructorSectionPage /> },
           // { path: "live-classes/new", element: <CreationWizard type="live" /> },
-          { path: "live-classes/*", element: <Navigate to="/instructor/courses" replace /> },
+          {
+            path: "live-classes/*",
+            element: <Navigate to="/instructor/courses" replace />,
+          },
           { path: "students", element: <InstructorSectionPage /> },
-          ...["assignments", "resources", "reviews"].map(path => ({ path, element: <Navigate to="/instructor/courses" replace /> })),
+          ...["assignments", "resources", "reviews"].map((path) => ({
+            path,
+            element: <Navigate to="/instructor/courses" replace />,
+          })),
           { path: "earnings", element: <InstructorSectionPage /> },
           { path: "analytics", element: <InstructorSectionPage /> },
           { path: "profile", element: <InstructorSectionPage /> },
@@ -254,9 +303,7 @@ const router = createBrowserRouter([
           },
           {
             path: "courses/:slug",
-            element: (
-              <Navigate to="/courses" replace />
-            ),
+            element: <Navigate to="/courses" replace />,
           },
           {
             path: "interactive-lessons",
@@ -324,7 +371,10 @@ const router = createBrowserRouter([
 
       { path: "/privacy", element: <PrivacyPolicy /> },
       { path: "/course-policy", element: <CoursePolicy /> },
-      { path: "/share/courses/:slug", element: <CourseRouteRedirect basePath="/courses" includeSlug /> },
+      {
+        path: "/share/courses/:slug",
+        element: <CourseRouteRedirect basePath="/courses" includeSlug />,
+      },
       { path: "/forgot-password", element: <ForgotPassword /> },
       { path: "/reset-password", element: <ResetPassword /> },
       { path: "/verify-email", element: <VerifyEmail /> },
@@ -334,17 +384,37 @@ const router = createBrowserRouter([
       },
       {
         path: "/admin/admissions",
-        element: <AdminRoute><Navigate to="/admin/instructor-applications" replace /></AdminRoute>,
+        element: (
+          <AdminRoute>
+            <Navigate to="/admin/instructor-applications" replace />
+          </AdminRoute>
+        ),
       },
       {
         path: "/admin/revenue",
-        element: <AdminRoute><WorkspaceLayout type="admin" /></AdminRoute>,
+        element: (
+          <AdminRoute>
+            <WorkspaceLayout type="admin" />
+          </AdminRoute>
+        ),
         children: [{ index: true, element: <RevenueDashboard admin /> }],
       },
-      { path: "/admin/operations", element: <AdminRoute><WorkspaceLayout type="admin" /></AdminRoute>, children: [{ index: true, element: <AdminOperations /> }] },
+      {
+        path: "/admin/operations",
+        element: (
+          <AdminRoute>
+            <WorkspaceLayout type="admin" />
+          </AdminRoute>
+        ),
+        children: [{ index: true, element: <AdminOperations /> }],
+      },
       {
         path: "/admin/instructor-applications",
-        element: <AdminRoute><WorkspaceLayout type="admin" /></AdminRoute>,
+        element: (
+          <AdminRoute>
+            <WorkspaceLayout type="admin" />
+          </AdminRoute>
+        ),
         children: [
           { index: true, element: <AdminInstructorApplications /> },
           { path: ":id", element: <AdminInstructorApplication /> },

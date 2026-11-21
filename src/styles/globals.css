@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@custom-variant dark (&:where(.dark, .dark *));
 @import "./fonts.css";
 @import "./theme.css";
 @import "./components.css";
@@ -12,7 +11,7 @@
 @import "@fontsource-variable/geist";
 /* Trial focus style: remove this import to restore the previous input rings. */
 @import "./input-focus-preview.css";
-
+@custom-variant dark (&:where(.dark, .dark *));
 @layer base {
   * {
     @apply p-0 m-0 box-border;
@@ -70,4 +69,8 @@
   .qs-spinner-ring {
     animation: none;
   }
+}
+
+.css-update-check-2026 {
+  outline: 7px solid lime !important;
 }
