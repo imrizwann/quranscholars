@@ -250,3 +250,63 @@ test("publishing review exposes hidden draft quizzes and saving a published quiz
   assert.equal(writes.length, 1); assert.equal(writes[0].published, true); assert(readinessReads >= 2);
   assert.match(document.body.textContent, /Quiz published/);
 }));
+
+
+test("instructor questions survive a failed refresh, validate clearly, save and reopen", async () => fixture(async ({ mod, store, render, settle }) => {
+  let stored = { title: "Practice quiz", version: null, published: false, passingPercent: 70, questions: [] };
+  let failRead = false, failWrite = false;
+  const writes = [];
+  globalThis.fetch = async request => {
+    if (request.method === "PUT") {
+      const body = await request.json(); writes.push(body);
+      if (failWrite) return Response.json({ userMessage: "Save temporarily unavailable." }, { status: 503 });
+      stored = { ...body, version: randomUUID() }; return response(stored);
+    }
+    if (failRead) return Response.json({ userMessage: "Read temporarily unavailable." }, { status: 503 });
+    return response(stored);
+  };
+  function Harness() {
+    const [busy, setBusy] = React.useState(false), [editing, setEditing] = React.useState(false), [open, setOpen] = React.useState(true);
+    return React.createElement(React.Fragment, null,
+      React.createElement("button", { onClick: () => setOpen(true) }, "Reopen editor"),
+      React.createElement("span", { "data-editing": editing }, editing ? "Unsaved changes" : "No unsaved changes"),
+      React.createElement(mod.Editor, { courseId: "course1", sectionId: "section1", open, disabled: busy, onOpenChange: setOpen, onEditing: setEditing, onBusy: setBusy }));
+  }
+  await render(React.createElement(Harness)); await settle(() => button("Save draft"));
+  const input = name => document.getElementsByName(name)[0];
+  const fill = async (name, value) => act(async () => {
+    const element = input(name);
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set.call(element, value);
+    element.dispatchEvent(new window.Event("input", { bubbles: true }));
+  });
+  await fill("questions[0][prompt]", "Which answer is correct?");
+  await click(button("Save draft"));
+  assert.match(document.querySelector('[role="alert"]').textContent, /option 1/);
+  assert.equal(document.activeElement, input("questions[0][options][0]"));
+  assert.equal(writes.length, 0);
+  await fill("questions[0][options][0]", "First answer");
+  await fill("questions[0][options][1]", "first ANSWER");
+  await click(button("Save draft"));
+  assert.match(document.querySelector('[role="alert"]').textContent, /must be different/);
+  await fill("questions[0][options][1]", "Second answer");
+  await click(document.querySelector('[aria-label="Remove option 4 from question 1"]'));
+  await click(document.querySelector('[aria-label="Remove option 3 from question 1"]'));
+  failRead = true;
+  await act(async () => { await store.dispatch(mod.instructorApi.endpoints.getSectionQuiz.initiate({ courseId: "course1", sectionId: "section1" }, { forceRefetch: true, subscribe: false })); });
+  assert.equal(input("questions[0][prompt]").value, "Which answer is correct?", "background errors must keep the editor mounted");
+  assert.match(document.body.textContent, /Unsaved changes/);
+  failRead = false; failWrite = true;
+  await click(button("Save draft")); await settle(() => document.querySelector('.cw-quiz-form [role="alert"]'));
+  assert.equal(input("questions[0][options][1]").value, "Second answer");
+  assert.equal(button("Save draft").disabled, false);
+  failWrite = false;
+  await click(button("Save draft")); await settle(() => document.body.textContent.includes("Draft saved."));
+  assert.equal(stored.questions.length, 1); assert.deepEqual(stored.questions[0].options, ["First answer", "Second answer"]);
+  assert.equal(stored.questions[0].correctOption, 0);
+  await click(button("Close quiz editor")); await click(button("Reopen editor"));
+  await settle(() => input("questions[0][prompt]"));
+  assert.equal(input("questions[0][prompt]").value, stored.questions[0].prompt);
+  await fill("questions[0][prompt]", "An updated question?");
+  await click(button("Save draft")); await settle(() => stored.questions[0].prompt === "An updated question?");
+  assert.notEqual(writes.at(-1).version, null, "editing uses the saved version instead of creating a second quiz");
+}));

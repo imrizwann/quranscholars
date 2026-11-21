@@ -209,37 +209,4 @@
   .studio-page .analytics-metrics .dashboard-metric {
     padding: 16px;
   }
-  .analytics-table,
-  .analytics-table tbody {
-    display: block;
-  }
-  .analytics-table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-  .analytics-table tbody tr {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 10px;
-    border-bottom: 1px solid var(--border);
-    padding-block: 14px;
-  }
-  .analytics-table tbody th {
-    grid-column: 1 / -1;
-  }
-  .analytics-table tbody th,
-  .analytics-table td {
-    border: 0;
-    padding: 0;
-  }
-  .analytics-table td::before {
-    content: attr(data-label);
-    display: block;
-    font-size: var(--font-size-caption);
-    color: var(--muted-foreground);
-    margin-bottom: 6px;
-  }
 }

@@ -247,7 +247,7 @@
   gap: 6px;
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  scrollbar-width: thin;
+  scrollbar-width: none;
   border-bottom: 1px solid var(--border);
   margin: 28px 0 24px;
 }
@@ -729,4 +729,20 @@
     min-height: 280px;
     padding: 28px 18px;
   }
+}
+
+/* Shared workspace controls: one search field, a compact action, and wrapping filters. */
+.studio-search { padding: 0; border: 0; background: transparent; gap: 12px; }
+.studio-search > label { border: 1px solid var(--input); background: var(--surface); padding-inline: 12px; border-radius: 8px; }
+.studio-search > .qs-select-field { flex: 0 1 200px; }
+.studio-search > button { flex-shrink: 0; }
+@media (max-width: 600px) {
+  .dashboard-page.studio-page { padding: 20px 16px 32px; }
+  .studio-page .dashboard-heading { gap: 12px; margin-bottom: 20px; }
+  .studio-page .studio-panel { padding: 16px; }
+  .studio-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+  .studio-search > label { min-width: 0; }
+  .studio-search > .qs-select-field { grid-column: 1 / -1; width: 100%; }
+  .studio-tabs { margin-block: 20px 16px; }
+  .studio-page input:not([type=checkbox]):not([type=radio]), .studio-page textarea { font-size: 16px; }
 }

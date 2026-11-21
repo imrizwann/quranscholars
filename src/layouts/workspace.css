@@ -256,3 +256,18 @@
 .workspace-desktop-toggle, .workspace-menu-button { transition: background-color 160ms var(--ease-out-ui), color 160ms var(--ease-out-ui), border-color 160ms var(--ease-out-ui); }
 @media (any-pointer: coarse) { .workspace-topbar .workspace-desktop-toggle { width: 44px; height: 44px; } }
 @media (prefers-reduced-motion: reduce) { .workspace-desktop-toggle, .workspace-menu-button { transition: none; } }
+
+/* On phones, the account panel belongs to the viewport, not the avatar box. */
+@media (max-width: 639px) {
+  .workspace-account-positioner {
+    position: fixed !important;
+    inset: max(68px, env(safe-area-inset-top)) 12px auto 12px !important;
+    transform: none !important;
+    width: auto !important;
+  }
+  .workspace-account-popup {
+    width: 100%;
+    max-height: calc(100dvh - 84px - env(safe-area-inset-bottom));
+    transform-origin: top right;
+  }
+}

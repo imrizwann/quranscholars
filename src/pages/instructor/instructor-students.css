@@ -31,20 +31,5 @@
 .roster-quiz-details dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
 .roster-quiz-details dt { color: var(--muted-foreground); font-size: var(--font-size-caption); }
 .roster-quiz-details dd { margin-top: 5px; font-size: var(--font-size-body); font-weight: 500; font-variant-numeric: tabular-nums; }
-@container admissions (max-width: 1100px) {
-  .instructor-roster .admissions-table, .instructor-roster tbody { display: block; width: 100%; }
-  .instructor-roster thead { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .instructor-roster tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding: 20px 0; border-bottom: 1px solid var(--border); }
-  .instructor-roster tbody td { display: block; padding: 0; min-width: 0; border: 0; }
-  .instructor-roster td[data-label]::before { content: attr(data-label); display: block; margin-bottom: 8px; color: var(--muted-foreground); font-size: var(--font-size-caption); font-weight: 600; }
-  .instructor-roster tbody .roster-details-row { display: block; padding-top: 0; }
-  .instructor-roster tbody tr:has(+ .roster-details-row) { border-bottom: 0; }
-}
-@container admissions (max-width: 600px) {
-  .roster-quiz-details > ul { grid-template-columns: minmax(0, 1fr); }
-}
-@container admissions (max-width: 480px) {
-  .instructor-roster tbody tr { grid-template-columns: minmax(0, 1fr); }
-  .roster-quiz-heading { flex-wrap: wrap; }
-}
+.instructor-roster .admissions-table { min-width: 1000px; }
 @media (prefers-reduced-motion: reduce) { .roster-results-toggle svg { transition: none; } }

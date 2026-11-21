@@ -1,3 +1,4 @@
+import TableScroll from "@/components/ui/TableScroll.jsx";
 import SelectField from "@/components/ui/SelectField.jsx";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import { useEffect, useId, useState } from "react";
@@ -63,7 +64,7 @@ export default function InstructorStudents() {
     <QueryMessage query={{ data, loading: query.isFetching, error: query.error, refresh: query.refetch }} label="Loading your learners and progress" />
     {courseId && <div className="cw-row cw-between mt-5"><p className="cw-muted">Enrollments for {data?.course?.title || "the selected course"}</p><button type="button" className="cw-button" onClick={() => { setParams({}); setPage(1); }}>Show all courses</button></div>}
     {!query.error && data?.items.length === 0 && <WorkspaceEmpty icon={Users} title={search || status ? "No matching learners" : "Your learners will appear here"} description={search || status ? "Try another name or choose all enrollments." : "When someone enrolls in one of your courses, you can follow their progress here."} />}
-    {!query.error && Boolean(data?.items.length) && <div className="admin-admissions studio-panel instructor-roster mt-5"><p className="cw-muted">{data.pagination.total} {data.pagination.total === 1 ? "enrollment" : "enrollments"}. Progress reflects the course’s current published lessons.</p><div className="admissions-results"><table className="admissions-table w-full text-left text-sm" aria-label="Course enrollments and learning progress"><thead><tr>{["Learner", "Course", "Progress", "Recent activity", "Quizzes", "Access"].map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead><tbody>{data.items.map(item => <LearnerRow key={item._id} item={item} />)}</tbody></table></div></div>}
+    {!query.error && Boolean(data?.items.length) && <div className="admin-admissions studio-panel instructor-roster mt-5"><p className="cw-muted">{data.pagination.total} {data.pagination.total === 1 ? "enrollment" : "enrollments"}. Progress reflects the course’s current published lessons.</p><TableScroll label="Learner records" className="admissions-results"><table className="admissions-table w-full text-left text-sm" aria-label="Course enrollments and learning progress"><thead><tr>{["Learner", "Course", "Progress", "Recent activity", "Quizzes", "Access"].map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead><tbody>{data.items.map(item => <LearnerRow key={item._id} item={item} />)}</tbody></table></TableScroll></div>}
     {!query.error && <Pagination pagination={data?.pagination} page={page} onPage={setPage} loading={query.isFetching} />}
   </WorkspacePage>;
 }

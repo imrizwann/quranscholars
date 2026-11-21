@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, BookOpen, ReceiptText, RefreshCw } from "lucide-react";
+import { ArrowUpRight, ReceiptText, RefreshCw } from "lucide-react";
 import {
   WorkspaceEmpty,
   WorkspacePage,
@@ -77,11 +77,7 @@ function PurchaseHistory({ authenticated }) {
       title="Purchases"
       description="Your course orders, payment references, and payment status in one place."
       action={
-        <div className="flex items-center gap-6">
-          <Link className="cw-button" to="/dashboard/learning">
-            <BookOpen size={16} aria-hidden="true" />
-            My learning
-          </Link>
+        <div className="flex flex-wrap items-center gap-2">
           <AsyncButton
             className="cw-button"
             loading={query.isFetching}
@@ -92,7 +88,6 @@ function PurchaseHistory({ authenticated }) {
             <RefreshCw size={16} aria-hidden="true" />
             Refresh
           </AsyncButton>
-          <div className="tailwind-debug">CSS Debug Test</div>
         </div>
       }
     >

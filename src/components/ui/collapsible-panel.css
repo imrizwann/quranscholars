@@ -17,11 +17,11 @@
 .collapsible-panel-toggle {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
   border: 1px solid var(--border);
-  border-radius: 3px;
+  border-radius: 7px;
   color: var(--muted-foreground);
   /* background: var(--surface); */
   cursor: pointer;

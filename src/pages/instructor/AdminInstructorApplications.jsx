@@ -1,3 +1,4 @@
+import TableScroll from "@/components/ui/TableScroll.jsx";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Inbox, RefreshCw, Search, XCircle } from "lucide-react";
@@ -43,10 +44,10 @@ export default function AdminInstructorApplications() {
       {search && <button className="cw-button" type="button" onClick={() => { setInput(""); filter({ search: "" }); }}>Clear search</button>}
     </section>
     {query.isError ? <ReviewError error={query.error} retry={query.refetch} busy={query.isFetching} /> : !data ? <div className="studio-panel"><LoadingState variant="inline" label="Loading applications" /></div> : <section className="studio-panel admin-admissions review-list" aria-label="Instructor applications list" aria-busy={query.isFetching}>
-      <table className="admissions-table review-table"><thead><tr><th>Applicant</th><th>Teaching background</th><th>Submitted</th><th>Status</th><th><span className="sr-only">Action</span></th></tr></thead><tbody>
+      <TableScroll label="Instructor applications"><table className="admissions-table review-table"><thead><tr><th>Applicant</th><th>Teaching background</th><th>Submitted</th><th>Status</th><th><span className="sr-only">Action</span></th></tr></thead><tbody>
         {data.items.map(item => <tr key={item.id}><td data-label="Applicant"><strong>{item.fullName}</strong><p>{item.email}</p></td><td data-label="Teaching background"><strong>{item.specialization}</strong><p>{item.experienceYears} years &middot; {item.languages}</p></td><td data-label="Submitted">{reviewDate(item.submittedAt)}</td><td data-label="Status"><ReviewStatus status={item.status} /></td><td><Link className="cw-button" to={item.id} state={{ from: `/admin/instructor-applications?${params}` }} aria-label={`View application from ${item.fullName}`}>{item.status === "pending" ? "Review" : "View details"}<ArrowRight size={15} aria-hidden="true" /></Link></td></tr>)}
         {!data.items.length && <tr><td colSpan={5} className="admissions-empty"><h2>{status === "pending" && !search ? "No applications waiting for review" : "No applications found"}</h2><p>{search ? "Try a different search or clear your search." : status === "pending" ? "You're up to date. New submissions will appear here." : "Applications with this status will appear here."}</p></td></tr>}
-      </tbody></table>
+      </tbody></table></TableScroll>
       <div className="review-pagination"><span>{pagination.total} matching {pagination.total === 1 ? "application" : "applications"}</span><nav aria-label="Application pages"><button className="cw-button" aria-label="Previous page" disabled={page <= 1 || query.isFetching} onClick={() => filter({ page: String(page - 1) })}><ChevronLeft size={16} /></button><span>Page {page} of {pagination.totalPages}</span><button className="cw-button" aria-label="Next page" disabled={page >= pagination.totalPages || query.isFetching} onClick={() => filter({ page: String(page + 1) })}><ChevronRight size={16} /></button></nav></div>
     </section>}
   </WorkspacePage>;

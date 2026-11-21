@@ -135,7 +135,7 @@ export default function Navbar() {
             <NotificationBell />
             <Menu.Root open={openPopup === "profile"} onOpenChange={changePopup("profile")} modal={false}>
               <Menu.Trigger id="navbar-profile-trigger" className="navbar-avatar-button" aria-label={`Profile menu for ${name}`}><ProfileAvatar src={photoUrl} name={user.name} /></Menu.Trigger>
-              <Menu.Portal><Menu.Positioner align="end" sideOffset={10} collisionPadding={12} className="navbar-positioner"><Menu.Popup id="navbar-profile-menu" className="navbar-popup navbar-profile-popup qs-popup-motion" aria-label="Profile">
+              <Menu.Portal><Menu.Positioner positionMethod="fixed" align="end" sideOffset={10} collisionPadding={12} className="navbar-positioner navbar-profile-positioner"><Menu.Popup id="navbar-profile-menu" className="navbar-popup navbar-profile-popup qs-popup-motion" aria-label="Profile">
                 <div className="navbar-profile-summary"><span>{role}</span><strong>{name}</strong>{user.email && <p>{user.email}</p>}</div>
                 <MenuLinks links={links} />
                 <Menu.Separator className="navbar-divider" />

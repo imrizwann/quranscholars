@@ -48,7 +48,7 @@ test("purchase history shows real order details, statuses, cursor navigation, em
     assert.match(document.body.textContent, /pay_paid-order/); assert.match(document.body.textContent, /order_paid-order/); assert.match(document.body.textContent, /Not available yet/);
     assert.match(document.body.textContent, /before making another payment/);
     assert.equal(document.querySelectorAll("time").length, 3); assert.equal(document.querySelectorAll('a[href="/courses/tajweed"]').length, 2);
-    assert.equal(document.querySelector('a[href="/dashboard/learning"]').textContent, "My learning");
+    assert.equal(document.querySelector('a[href="/dashboard/learning"]'), null, "workspace navigation already provides My learning");
     assert.equal(requests[0].url, "https://api.example.test/api/purchases/history?limit=10"); assert.equal(requests[0].credentials, "include");
     await click("Next"); await settle(() => document.body.textContent.includes("Refund recorded"));
     assert.match(requests.at(-1).url, new RegExp(`before=${cursor}`)); assert.equal(document.querySelectorAll(".purchase-card").length, 1);

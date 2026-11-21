@@ -1,0 +1,10 @@
+.qs-table-scroll {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+.qs-table-scroll:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+.qs-table-scroll > table { min-width: 640px; }
+.qs-table-scroll th, .qs-table-scroll td { vertical-align: top; }

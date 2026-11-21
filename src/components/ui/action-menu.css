@@ -1,0 +1,70 @@
+/* Secondary curriculum actions keep the existing compact control sizing. */
+.cw-actions-trigger {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+.cw-actions-trigger:hover,
+.cw-actions-trigger[data-popup-open] {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+}
+.cw-actions-trigger:focus-visible,
+.cw-actions-popup [role="menuitem"]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+.cw-actions-positioner {
+  z-index: 120;
+}
+.cw-actions-popup {
+  min-width: 190px;
+  max-width: calc(100vw - 24px);
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--foreground);
+  background: var(--surface);
+  box-shadow: none;
+  font-family: var(--font-body);
+}
+.cw-actions-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 5px;
+  outline: none;
+  font-size: var(--font-size-label);
+  cursor: pointer;
+}
+.cw-actions-item[data-highlighted] {
+  background: var(--muted);
+}
+.cw-actions-item[data-danger] {
+  color: var(--destructive);
+}
+.cw-actions-item[data-disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+.cw-actions-item > svg {
+  flex-shrink: 0;
+}
+.cw-actions-separator {
+  height: 1px;
+  margin: 4px 5px;
+  background: var(--border);
+}
+
+@media (pointer: coarse) { .cw-actions-trigger { width: 44px; height: 44px; flex-basis: 44px; } }

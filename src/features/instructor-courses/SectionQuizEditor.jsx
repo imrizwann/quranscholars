@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown, ClipboardCheck, Plus, Trash2 } from "lucide-react";
 import api from "@/services/api/instructor/recordedCoursesApi.js";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import SelectField from "@/components/ui/SelectField.jsx";
 import { QueryMessage } from "./WorkspaceParts.jsx";
 import { userMessage } from "@/lib/user-messages.js";
+import { validateQuizDraft } from "./quiz-draft.js";
 
 const question = () => ({ prompt: "", options: ["", "", "", ""], correctOption: 0 });
 export default function SectionQuizEditor({ courseId, sectionId, open, onOpenChange, disabled, onEditing, onBusy }) {
@@ -14,13 +15,17 @@ export default function SectionQuizEditor({ courseId, sectionId, open, onOpenCha
 }
 function QuizEditor({ courseId, sectionId, disabled, onEditing, onBusy }) {
   const query = api.endpoints.getSectionQuiz.useQuery({ courseId, sectionId }, { refetchOnMountOrArgChange: true });
-  if (!query.currentData || query.error) return <QueryMessage query={{ data: query.currentData, error: query.error, loading: query.isFetching, refresh: query.refetch }} label="Loading section quiz" />;
-  return <QuizFields initial={query.currentData} courseId={courseId} sectionId={sectionId} disabled={disabled} onEditing={onEditing} onBusy={onBusy} />;
+  if (!query.currentData) return <QueryMessage query={{ error: query.error, loading: query.isFetching, refresh: query.refetch }} label="Loading section quiz" />;
+  // A background read failure must not unmount an instructor's unsaved questions.
+  return <><QueryMessage query={{ error: query.error, refresh: query.refetch }} /><QuizFields initial={query.currentData} courseId={courseId} sectionId={sectionId} disabled={disabled} onEditing={onEditing} onBusy={onBusy} /></>;
 }
 function QuizFields({ initial, courseId, sectionId, disabled, onEditing, onBusy }) {
   const initialDraft = value => ({ ...value, questions: value.questions.length ? value.questions.map(item => ({ ...item, options: [...item.options] })) : [question()] });
   const [draft, setDraft] = useState(() => initialDraft(initial));
   const [error, setError] = useState("");
+  const [invalidField, setInvalidField] = useState("");
+  const errorId = useId();
+  const pending = useRef(false);
   const [saved, setSaved] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [save, saving] = api.endpoints.saveSectionQuiz.useMutation();
@@ -28,26 +33,35 @@ function QuizFields({ initial, courseId, sectionId, disabled, onEditing, onBusy 
   const baseline = useRef(initial);
   editing.current = onEditing;
   useEffect(() => () => editing.current(false), []);
-  function change(update) { setDraft(previous => typeof update === "function" ? update(previous) : { ...previous, ...update }); setSaved(false); setDirty(true); onEditing(true); }
+  function change(update) { setDraft(previous => typeof update === "function" ? update(previous) : { ...previous, ...update }); setError(""); setInvalidField(""); setSaved(false); setDirty(true); onEditing(true); }
   function changeQuestion(index, field, value) { change(previous => ({ ...previous, questions: previous.questions.map((item, i) => i === index ? { ...item, [field]: value } : item) })); }
   async function submit(event) {
-    event.preventDefault(); if (saving.isLoading || disabled) return;
+    event.preventDefault(); if (pending.current || saving.isLoading || disabled) return;
+    const invalid = validateQuizDraft(draft);
+    if (invalid) {
+      setError(invalid.message); setInvalidField(invalid.field);
+      event.currentTarget.elements.namedItem(invalid.field)?.focus();
+      return;
+    }
+    pending.current = true;
     onBusy(true); setError("");
     try {
       const quiz = { version: draft.version, title: draft.title, passingPercent: Number(draft.passingPercent), published: draft.published, questions: draft.questions.map(item => ({ prompt: item.prompt, options: item.options, correctOption: Number(item.correctOption) })) };
       const result = await save({ courseId, sectionId, quiz }).unwrap();
       baseline.current = result; setDraft(initialDraft(result)); setDirty(false); onEditing(false); setSaved(true);
     } catch (failure) { setError(userMessage(failure)); }
-    finally { onBusy(false); }
+    finally { pending.current = false; onBusy(false); }
   }
   const blocked = disabled || saving.isLoading;
-  return <form className="cw-quiz-form cw-stack" onSubmit={submit}>
+  const inputError = name => ({ "aria-invalid": invalidField === name || undefined, "aria-describedby": invalidField === name ? errorId : undefined });
+  return <form className="cw-quiz-form cw-stack" onSubmit={submit} noValidate>
+    {error && <p id={errorId} className="cw-error" role="alert">{error}</p>}
     <p className={baseline.current.published ? "cw-notice" : "cw-field-hint"} role="status">{baseline.current.published ? "Published quiz. Enrolled learners can find it in their learning path." : "Draft quiz — hidden from learners. Select Publish quiz and save when it is ready. Publishing the course does not publish draft quizzes."}</p>
-    <label>Quiz title<input name="title" required minLength={3} maxLength={150} value={draft.title} disabled={blocked} onChange={event => change({ title: event.target.value })} /></label>
-    <div className="cw-quiz-settings"><label>Pass mark (%)<input name="passingPercent" type="number" required min={1} max={100} step={1} value={draft.passingPercent} disabled={blocked} onChange={event => change({ passingPercent: event.target.value })} /></label><label className="cw-quiz-checkbox"><input name="published" type="checkbox" checked={draft.published} disabled={blocked} onChange={event => change({ published: event.target.checked })} /><span>Publish quiz to enrolled learners</span></label></div>
-    {draft.questions.map((item, index) => <fieldset className="cw-quiz-question" key={index} disabled={blocked}><legend>Question {index + 1}</legend><div className="cw-row cw-between"><label>Question<input name={`questions[${index}][prompt]`} required minLength={3} maxLength={1000} value={item.prompt} onChange={event => changeQuestion(index, "prompt", event.target.value)} /></label>{draft.questions.length > 1 && <button type="button" className="cw-button cw-danger cw-icon-button" aria-label={`Remove question ${index + 1}`} onClick={() => change(previous => ({ ...previous, questions: previous.questions.filter((_, i) => i !== index) }))}><Trash2 size={15} aria-hidden="true" /></button>}</div><div className="cw-quiz-options">{item.options.map((option, optionIndex) => <label key={optionIndex}>Option {optionIndex + 1}<input name={`questions[${index}][options][${optionIndex}]`} required maxLength={400} value={option} onChange={event => changeQuestion(index, "options", item.options.map((value, i) => i === optionIndex ? event.target.value : value))} /></label>)}</div><SelectField label="Correct answer" value={String(item.correctOption)} onChange={value => changeQuestion(index, "correctOption", Number(value))} options={item.options.map((_, i) => ({ value: String(i), label: `Option ${i + 1}` }))} disabled={blocked} required /></fieldset>)}
+    <label>Quiz title<input name="title" {...inputError("title")} required minLength={3} maxLength={150} value={draft.title} disabled={blocked} onChange={event => change({ title: event.target.value })} /></label>
+    <div className="cw-quiz-settings"><label>Pass mark (%)<input name="passingPercent" {...inputError("passingPercent")} type="number" required min={1} max={100} step={1} value={draft.passingPercent} disabled={blocked} onChange={event => change({ passingPercent: event.target.value })} /></label><label className="cw-quiz-checkbox"><input name="published" type="checkbox" checked={draft.published} disabled={blocked} onChange={event => change({ published: event.target.checked })} /><span>Publish quiz to enrolled learners</span></label></div>
+    {draft.questions.map((item, index) => <fieldset className="cw-quiz-question" key={index} disabled={blocked}><legend>Question {index + 1}</legend><div className="cw-row cw-between"><label>Question<input name={`questions[${index}][prompt]`} {...inputError(`questions[${index}][prompt]`)} required minLength={3} maxLength={1000} value={item.prompt} onChange={event => changeQuestion(index, "prompt", event.target.value)} /></label>{draft.questions.length > 1 && <button type="button" className="cw-button cw-danger cw-icon-button" aria-label={`Remove question ${index + 1}`} onClick={() => change(previous => ({ ...previous, questions: previous.questions.filter((_, i) => i !== index) }))}><Trash2 size={15} aria-hidden="true" /></button>}</div><div className="cw-quiz-options">{item.options.map((option, optionIndex) => <div className="cw-quiz-option" key={optionIndex}><label>Option {optionIndex + 1}<input name={`questions[${index}][options][${optionIndex}]`} {...inputError(`questions[${index}][options][${optionIndex}]`)} required maxLength={400} value={option} onChange={event => changeQuestion(index, "options", item.options.map((value, i) => i === optionIndex ? event.target.value : value))} /></label>{item.options.length > 2 && <button type="button" className="cw-button cw-icon-button cw-danger" aria-label={`Remove option ${optionIndex + 1} from question ${index + 1}`} onClick={() => change(previous => ({ ...previous, questions: previous.questions.map((value, i) => i !== index ? value : { ...value, options: value.options.filter((_, n) => n !== optionIndex), correctOption: value.correctOption === optionIndex ? 0 : value.correctOption > optionIndex ? value.correctOption - 1 : value.correctOption }) }))}><Trash2 size={15} aria-hidden="true" /></button>}</div>)}</div><div className="cw-row cw-quiz-answer"><button type="button" className="cw-button cw-button-compact" disabled={blocked || item.options.length >= 6} onClick={() => changeQuestion(index, "options", [...item.options, ""])}><Plus size={15} aria-hidden="true" />Add option</button><SelectField label="Correct answer" value={String(item.correctOption)} onChange={value => changeQuestion(index, "correctOption", Number(value))} options={item.options.map((_, i) => ({ value: String(i), label: `Option ${i + 1}` }))} disabled={blocked} required /></div></fieldset>)}
     <div className="cw-row"><button type="button" className="cw-button" disabled={blocked || draft.questions.length >= 20} onClick={() => change(previous => ({ ...previous, questions: [...previous.questions, question()] }))}><Plus size={15} aria-hidden="true" />Add question</button><span className="cw-field-hint">Up to 20 questions. One correct answer per question.</span></div>
-    {error && <p className="cw-error" role="alert">{error}</p>}{saved && <p className="cw-notice" role="status">{draft.published ? "Quiz published. It unlocks after the section’s lessons and does not affect course completion." : "Draft saved. This quiz is not visible to learners."}</p>}
-    <div className="cw-row"><AsyncButton type="submit" className="cw-button cw-primary" loading={saving.isLoading} loadingLabel="Saving quiz" disabled={blocked || !dirty}>{draft.published ? "Save and publish quiz" : "Save draft"}</AsyncButton><button type="button" className="cw-button" disabled={blocked} onClick={() => { setDraft(initialDraft(baseline.current)); setError(""); setSaved(false); setDirty(false); onEditing(false); }}>Cancel changes</button></div><p className="cw-field-hint">Saving quiz changes gives learners five fresh attempts. Their lesson progress is kept.</p>
+    {saved && <p className="cw-notice" role="status">{draft.published ? "Quiz published. It unlocks after the section’s lessons and does not affect course completion." : "Draft saved. This quiz is not visible to learners."}</p>}
+    <div className="cw-row"><AsyncButton type="submit" className="cw-button cw-primary" loading={saving.isLoading} loadingLabel="Saving quiz" disabled={blocked || !dirty}>{draft.published ? "Save and publish quiz" : "Save draft"}</AsyncButton><button type="button" className="cw-button" disabled={blocked} onClick={() => { baseline.current = initial; setDraft(initialDraft(initial)); setError(""); setInvalidField(""); setSaved(false); setDirty(false); onEditing(false); }}>Cancel changes</button></div><p className="cw-field-hint">Saving quiz changes gives learners five fresh attempts. Their lesson progress is kept.</p>
   </form>;
 }

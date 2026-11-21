@@ -1,3 +1,4 @@
+import TableScroll from "@/components/ui/TableScroll.jsx";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -258,7 +259,7 @@ export function InstructorAnalytics({ view = "overview" }) {
                 <AnalyticsSkeleton label="Loading course statistics" />
               ) : data.courses.length ? (
                 <>
-                  <table className="analytics-table">
+                  <TableScroll label="Course enrollment totals"><table className="analytics-table">
                     <caption className="sr-only">
                       Enrollment totals for your courses
                     </caption>
@@ -303,7 +304,7 @@ export function InstructorAnalytics({ view = "overview" }) {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </table></TableScroll>
                   <Pagination
                     pagination={data.pagination}
                     page={page}

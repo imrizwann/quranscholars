@@ -1,0 +1,6 @@
+
+:is(.studio-tabs, .learning-tabs, .revenue-tabs, .review-tabs, .cd-section-nav, [role="tablist"]) {
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+:is(.studio-tabs, .learning-tabs, .revenue-tabs, .review-tabs, .cd-section-nav, [role="tablist"])::-webkit-scrollbar { display: none; }

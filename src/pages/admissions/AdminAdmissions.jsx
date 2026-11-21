@@ -1,3 +1,4 @@
+import TableScroll from "@/components/ui/TableScroll.jsx";
 import SelectField from "@/components/ui/SelectField.jsx";
 import { WorkspacePage } from "@/components/lms/WorkspaceUI.jsx";
 import { DashboardMetrics } from "@/components/lms/DashboardParts.jsx";
@@ -200,7 +201,7 @@ const AdminAdmissions = () => {
         </section>
 
         <section className="relative mt-5 overflow-hidden rounded-lg border border-border bg-surface">
-          <div className="admissions-results">
+          <TableScroll label="Student admissions" className="admissions-results">
             <table className="admissions-table w-full border-collapse text-left text-sm" role="table" aria-label="Student admissions">
               <thead className="border-b border-border bg-muted">
                 <tr>
@@ -312,7 +313,7 @@ const AdminAdmissions = () => {
                 )}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
 
           {(isFetching || isUpdatingStatus || isDeleting) && (
             <div className="absolute inset-0 grid place-items-center bg-background/70 backdrop-blur-[1px]">

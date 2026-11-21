@@ -44,3 +44,9 @@
   .course-review-help > p { flex-basis: 100%; }
   .course-review-pagination .cw-button { padding-inline: 10px; }
 }
+
+.course-review-error { border-color: color-mix(in srgb, var(--destructive) 35%, var(--border)); background: color-mix(in srgb, var(--destructive) 7%, var(--surface)); color: var(--destructive); font-weight: 600; }
+.course-review-rating[aria-invalid=true] { border-left: 3px solid var(--destructive); padding-left: 12px; }
+.course-review-rating .course-review-error { margin-top: 10px; }
+.course-review-list header > .course-review-stars { flex-shrink: 0; }
+@media (max-width: 540px) { .course-review-editor { padding: 16px; } .course-review-list header { gap: 8px; } .course-review-list header > div { min-width: 80px; } .course-review-editor textarea { font-size: 16px; } }

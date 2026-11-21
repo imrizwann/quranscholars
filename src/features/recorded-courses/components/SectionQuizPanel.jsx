@@ -74,18 +74,18 @@ function SubmittedQuiz({ quiz, result, refreshing, onDone, onRetake }) {
   function goTo(index) { focusQuestion.current = true; setQuestionIndex(index); }
   useEffect(() => { if (focusQuestion.current) { heading.current?.focus({ preventScroll: true }); focusQuestion.current = false; } }, [questionIndex]);
   return <div className="learning-quiz learning-quiz-result">
-    <div role="status">{result.passed ? <CheckCircle2 size={30} aria-hidden="true" /> : <RotateCcw size={30} aria-hidden="true" />}
+    <div role="status" className="learning-quiz-result-summary">{result.passed ? <CheckCircle2 size={24} aria-hidden="true" /> : <RotateCcw size={24} aria-hidden="true" />}<div>
       <h2>{result.passed ? "Section quiz passed" : "Keep practicing"}</h2>
       {Number.isFinite(result.scorePercent) && <p><strong>{result.scorePercent}%</strong> · {result.correctCount} of {quiz.questions.length} correct</p>}
       <p>{result.passed ? "You’ve completed this section’s knowledge check." : `The pass mark is ${quiz.passingPercent}%. Revisit the lessons before trying again.`} Your section and course completion are unchanged.</p>
       {!result.passed && quiz.passed && <p>A previous attempt passed. Your passed status is kept.</p>}
       {result.submittedAt && <p>Submitted on <time dateTime={result.submittedAt}>{new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(result.submittedAt))}</time></p>}
-    </div>
-    {question && result.answers?.length > 0 ? <section aria-label="Submitted answers" className="learning-quiz-submitted">
+    </div></div>
+    {question && result.answers?.length > 0 ? <details className="learning-quiz-submitted"><summary>Review submitted answers</summary><section aria-label="Submitted answers">
       <div className="learning-quiz-progress"><span>Submitted answer · Question {questionIndex + 1} of {quiz.questions.length}</span></div>
       <fieldset className="learning-quiz-question" key={question.id} disabled><legend tabIndex={-1} ref={heading}>{question.prompt}</legend><div className="learning-quiz-options">{question.options.map((option, optionIndex) => <label key={optionIndex}><input type="radio" name={`submitted-${question.id}`} value={optionIndex} checked={answers.get(question.id) === optionIndex} readOnly /><span>{option}</span></label>)}</div></fieldset>
       <nav className="learning-quiz-navigation" aria-label="Submitted question navigation"><button type="button" className="cw-button" disabled={questionIndex === 0} onClick={() => goTo(questionIndex - 1)}><ArrowLeft size={16} aria-hidden="true" />Previous</button><button type="button" className="cw-button" disabled={questionIndex === quiz.questions.length - 1} onClick={() => goTo(questionIndex + 1)}>Next<ArrowRight size={16} aria-hidden="true" /></button></nav>
-    </section> : <p>Answer choices aren’t available for this earlier submission. Your saved result is shown above.</p>}
+    </section></details> : <p>Answer choices aren’t available for this earlier submission. Your saved result is shown above.</p>}
     <div className="cw-row learning-quiz-result-actions"><button type="button" className="cw-button cw-primary" onClick={onDone}>Back to lessons</button>{remaining > 0 && <button type="button" className="cw-button" disabled={refreshing} onClick={onRetake}><RotateCcw size={15} aria-hidden="true" />Retake quiz ({remaining} left)</button>}</div>
     {remaining === 0 && <p>All five attempts have been used. You can continue learning or ask your instructor for guidance.</p>}
   </div>;

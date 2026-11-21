@@ -1,5 +1,3 @@
-import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
 import { WorkspacePage } from "@/components/lms/WorkspaceUI.jsx";
 import LearnerLibrary from "@/features/recorded-courses/components/LearnerLibrary.jsx";
 
@@ -12,11 +10,6 @@ export default function MyLearning() {
       eyebrow="Your library"
       title="My learning"
       description="Your enrolled courses, saved progress, and next lessons in one place."
-      action={
-        <Link to="/courses" className="cw-button">
-          Browse courses <ArrowRight size={16} aria-hidden="true" />
-        </Link>
-      }
     >
       {/* Post-MVP live-class switcher:
     <div className="studio-tabs" aria-label="Learning type">{[[false, "Recorded courses"], [true, "Live classes"]].map(([value, label]) => <button key={label} type="button" aria-pressed={live === value} onClick={() => setParams({ type: value ? "live-classes" : "courses" })}>{label}</button>)}</div>

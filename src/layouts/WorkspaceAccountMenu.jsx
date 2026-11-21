@@ -39,7 +39,7 @@ export default function WorkspaceAccountMenu({ type }) {
       <ProfileAvatar src={data?.smallUrl || data?.url} name={user?.name} />
     </Menu.Trigger>
     <Menu.Portal>
-      <Menu.Positioner align="end" sideOffset={10} collisionPadding={12} className="workspace-account-positioner">
+      <Menu.Positioner positionMethod="fixed" align="end" sideOffset={10} collisionPadding={12} className="workspace-account-positioner">
         <Menu.Popup className="workspace-account-popup qs-popup-motion" aria-label="Your account">
           <div className="workspace-account-summary">
             <span className="workspace-account-role">{role} account</span>
