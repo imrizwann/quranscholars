@@ -31,11 +31,15 @@ function publicUrl(name, value, { originOnly = false, realtime = false } = {}) {
 }
 
 export function validatePublicEnvironment(env) {
+  console.log("VALIDATOR DEBUG", {
+    apiUrlAllowed: publicNames.has("VITE_API_URL"),
+    publicNames: [...publicNames],
+  });
   for (const name of Object.keys(env)) {
     if (
       name.startsWith("VITE_") &&
       !name.startsWith("VITE_VERCEL_") &&
-      !vercelPublicNames.has(name)
+      !publicNames.has(name)
     ) {
       throw new Error(
         `Unexpected public variable ${name}; keep credentials in the backend environment`,
