@@ -36,6 +36,14 @@ export function validatePublicEnvironment(env) {
     publicNames: [...publicNames],
   });
   for (const name of Object.keys(env)) {
+    if (name.startsWith("VITE_")) {
+      console.log("ENV CHECK:", {
+        name: JSON.stringify(name),
+        length: name.length,
+        allowed: publicNames.has(name),
+        isVercel: name.startsWith("VITE_VERCEL_"),
+      });
+    }
     if (
       name.startsWith("VITE_") &&
       !name.startsWith("VITE_VERCEL_") &&
