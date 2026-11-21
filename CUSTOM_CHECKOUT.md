@@ -1,6 +1,6 @@
 # Custom Razorpay checkout — isolated implementation
 
-Branch: `feature/razorpay-custom-checkout`. This worktree preserves a copy of the current MVP working changes. The original `design/landing-page` worktree and backend have not been changed by this implementation. Nothing is merged into `main`.
+Branch: `feature/razorpay-custom-checkout`. Shared release fixes are synchronized from `main`; only the custom checkout, its tests and configuration differ. The rejected landing-page experiments have been removed from this branch. Custom checkout has not been merged into `main`, which continues to use Standard Checkout.
 
 **Status: disabled by default. Account enablement is unconfirmed. Automated tests use a simulated SDK; no live payment or real Razorpay test transaction has been initiated.**
 
