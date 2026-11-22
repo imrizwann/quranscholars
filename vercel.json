@@ -2,28 +2,26 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://quranscholars-apis-production.up.railway.app/api/:path*"
-    },
-    { "source": "/share/courses/:slug", "destination": "https://quranscholars-apis-production.up.railway.app/api/public/recorded-courses/:slug/share" },
-    { "source": "/((?!api(?:/|$)|assets(?:/|$)).*)", "destination": "/index.html" }
+      "source": "/((?!api(?:/|$)|assets(?:/|$)).*)",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {
-      "source": "/api/:path*",
-      "headers": [
-        { "key": "Cache-Control", "value": "private, no-store" },
-        { "key": "CDN-Cache-Control", "value": "no-store" },
-        { "key": "Vercel-CDN-Cache-Control", "value": "no-store" },
-        { "key": "x-vercel-enable-rewrite-caching", "value": "0" }
-      ]
-    },
-    {
       "source": "/((?!api(?:/|$)|assets(?:/|$)).*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache" },
-        { "key": "CDN-Cache-Control", "value": "no-store" },
-        { "key": "Vercel-CDN-Cache-Control", "value": "no-store" }
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "Vercel-CDN-Cache-Control",
+          "value": "no-store"
+        }
       ]
     }
   ]

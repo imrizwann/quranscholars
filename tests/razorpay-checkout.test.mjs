@@ -9,7 +9,7 @@ import { pathToFileURL } from "node:url";
 import { randomUUID } from "node:crypto";
 
 test("checkout loads only Razorpay's script, uses the existing theme and validates its callback", async () => {
-  const dom = new JSDOM("<!doctype html><html style='--primary: #0f766e'><head></head><body></body></html>", { url: "https://www.quranscholar.in" });
+  const dom = new JSDOM("<!doctype html><html style='--primary: #0f766e'><head></head><body></body></html>", { url: "https://darslearn.com" });
   const saved = Object.fromEntries(["window", "document", "getComputedStyle"].map(key => [key, globalThis[key]]));
   Object.assign(globalThis, { window: dom.window, document: dom.window.document, getComputedStyle: dom.window.getComputedStyle.bind(dom.window) });
   let options, opened = 0;
@@ -25,7 +25,7 @@ test("checkout loads only Razorpay's script, uses the existing theme and validat
     const checkout = openRazorpayCheckout(input); await Promise.resolve();
     assert.equal(opened, 1); assert.equal(options.theme.color, "#0f766e");
     assert.equal(options.name, "QuranScholar"); assert.equal(options.order_id, "order_one");
-    assert.equal(options.image, "https://www.quranscholar.in/web-app-manifest-192x192.png");
+    assert.equal(options.image, "https://darslearn.com/web-app-manifest-192x192.png");
     assert.equal(options.amount, 14900); assert.equal(options.modal.backdropclose, false);
     options.handler({ razorpay_order_id: "order_one", razorpay_payment_id: "pay_one", razorpay_signature: "signature" });
     assert.deepEqual(await checkout, { paymentId: "pay_one", signature: "signature" });

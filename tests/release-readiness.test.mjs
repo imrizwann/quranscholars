@@ -28,7 +28,7 @@ test("shared policy, admin operations, course metadata and sharing handle loadin
   Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: async value => copies.push(value) } });
   let root, store, apis, release;
   try {
-    const compiled = await build({ stdin: { contents: `export {default as Policy} from './src/pages/legal/CoursePolicy.jsx'; export {default as Operations} from './src/pages/instructor/AdminOperations.jsx'; export {default as Metadata} from './src/components/marketing/RouteMetadata.jsx'; export {default as Share} from './src/features/recorded-courses/components/CourseShareButton.jsx'; export {default as publicApi} from './src/services/api/courses/courses.api.js'; export {default as adminApi} from './src/services/api/revenueApi.js';`, resolveDir: process.cwd() }, bundle: true, write: false, format: "esm", platform: "node", packages: "external", jsx: "automatic", alias: { "@": resolve("src") }, loader: { ".css": "empty", ".svg": "dataurl", ".png": "dataurl" }, define: { "import.meta.env": JSON.stringify({ VITE_API_URL: "https://api.example.test", VITE_PUBLIC_SITE_URL: "https://www.quranscholar.in" }) } });
+    const compiled = await build({ stdin: { contents: `export {default as Policy} from './src/pages/legal/CoursePolicy.jsx'; export {default as Operations} from './src/pages/instructor/AdminOperations.jsx'; export {default as Metadata} from './src/components/marketing/RouteMetadata.jsx'; export {default as Share} from './src/features/recorded-courses/components/CourseShareButton.jsx'; export {default as publicApi} from './src/services/api/courses/courses.api.js'; export {default as adminApi} from './src/services/api/revenueApi.js';`, resolveDir: process.cwd() }, bundle: true, write: false, format: "esm", platform: "node", packages: "external", jsx: "automatic", alias: { "@": resolve("src") }, loader: { ".css": "empty", ".svg": "dataurl", ".png": "dataurl" }, define: { "import.meta.env": JSON.stringify({ VITE_API_URL: "https://api.example.test", VITE_PUBLIC_SITE_URL: "https://darslearn.com" }) } });
     await writeFile(output, compiled.outputFiles[0].text); const mod = await import(pathToFileURL(output));
     apis = [mod.publicApi, mod.adminApi];
     store = configureStore({ reducer: { user: () => ({ user: { _id: "a".repeat(24), role: "admin" } }), ...Object.fromEntries(apis.map(api => [api.reducerPath, api.reducer])) }, middleware: defaults => defaults().concat(...apis.map(api => api.middleware)) });
@@ -74,14 +74,14 @@ test("shared policy, admin operations, course metadata and sharing handle loadin
     await render(React.createElement(MetadataHarness), "/courses/recitation?privateReference=remove-this");
     await settle(() => document.title.includes(course.title));
     assert.equal(document.head.querySelector('meta[property="og:title"]').content, `${course.title} | QuranScholar`);
-    assert.equal(document.head.querySelector('link[rel="canonical"]').href, "https://www.quranscholar.in/courses/recitation");
+    assert.equal(document.head.querySelector('link[rel="canonical"]').href, "https://darslearn.com/courses/recitation");
     assert.equal(document.querySelector("script"), null);
     await act(async () => document.querySelector('a[href="/login"]').click());
     await settle(() => document.title === "Sign in | QuranScholar");
     assert.equal(document.head.querySelector('meta[name="robots"]').content, "noindex, nofollow");
     assert.equal(document.head.querySelectorAll('meta[name="description"]').length, 1);
     await render(React.createElement(mod.Share, { course })); await click("Share course");
-    assert.deepEqual(copies, ["https://frontend.example.test/share/courses/recitation"]);
+    assert.deepEqual(copies, ["https://api.example.test/api/public/recorded-courses/recitation/share"]);
     assert(notices.some(notice => notice.args[0] === "Course link copied"));
   } finally {
     release?.(); if (root) await act(async () => root.unmount());

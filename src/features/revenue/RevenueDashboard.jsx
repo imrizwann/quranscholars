@@ -89,7 +89,7 @@ function RevenueWorkspace({ admin }) {
         if (syncRun.current !== run) return;
         progress = { ...result, total: progress.total + result.processed, failures: progress.failures + result.failed.length };
         setSyncState(progress);
-        // Bounded requests keep Vercel work small and respect the admin rate limit.
+        // Bounded requests keep API work bounded and respect the admin rate limit.
         if (progress.hasNextPage) await new Promise(resolve => setTimeout(resolve, 2500));
       } while (progress.hasNextPage && syncRun.current === run);
     } catch (error) {

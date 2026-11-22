@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { isModuleLoadError, recoverModuleLoad } from "../src/lib/module-load-recovery.js";
 
-const failure = new TypeError("Failed to fetch dynamically imported module: https://www.quranscholar.in/assets/Profile-old.js");
+const failure = new TypeError("Failed to fetch dynamically imported module: https://darslearn.com/assets/Profile-old.js");
 function browser() {
   const values = new Map();
   let reloads = 0;

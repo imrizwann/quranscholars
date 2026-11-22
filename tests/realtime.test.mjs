@@ -9,7 +9,7 @@ test("inbox invalidations contain no user identity, content or permission change
   for (const extra of [{ userId: courseId }, { role: "instructor" }, { title: "Injected" }, { token: "secret" }]) assert.equal(parseRealtimeEvent(JSON.stringify({ ...event, ...extra })), null);
 });
 test("realtime URLs use the existing API origin without tokens and reject insecure production endpoints", () => {
-  assert.equal(realtimeUrl("/", "https://www.quranscholar.in"), "wss://www.quranscholar.in/api/realtime");
+  assert.equal(realtimeUrl("/", "https://darslearn.com"), "wss://darslearn.com/api/realtime");
   assert.equal(realtimeUrl("http://localhost:3000", "http://localhost:3001"), "ws://localhost:3000/api/realtime");
   assert.throws(() => realtimeUrl("ws://example.test", "https://frontend.test"));
   for (const base of ["https://a:b@example.test", "https://example.test?token=secret", "javascript:alert(1)"]) assert.throws(() => realtimeUrl(base, "https://frontend.test"));

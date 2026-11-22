@@ -89,7 +89,7 @@ const Donate = () => (
             title="Verify the campaign before you send funds."
             description="This page intentionally does not publish permanent account or payment details. Contact us for the current verified route and the information relevant to your contribution."
           />
-          <a href="mailto:contact@quranscholar.in?subject=Donation%20details" className="group mt-6 inline-flex items-center gap-2 text-sm font-black text-primary no-underline">Email the support team <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></a>
+          <a href="mailto:contact@darslearn.com?subject=Donation%20details" className="group mt-6 inline-flex items-center gap-2 text-sm font-black text-primary no-underline">Email the support team <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></a>
         </div>
         <div className="rounded-2xl bg-[#0b3e38] p-6 text-white sm:p-8">
           <div className="flex items-center gap-3"><span className="grid size-11 place-items-center rounded-xl bg-white/10 text-[#f4c95d]"><ShieldCheck className="size-5" /></span><div><p className="text-xs font-black uppercase tracking-[0.14em] text-[#9ed6c8]">Contribution checklist</p><h2 className="mt-1 text-xl font-black">Four things to confirm</h2></div></div>
@@ -112,7 +112,7 @@ const Donate = () => (
           <Mail className="size-5 text-primary" />
           <h2 className="mt-4 text-xl font-black">Need written confirmation?</h2>
           <p className="mt-3 text-sm font-medium leading-7 text-[#587067]">Email your transaction reference through the official contact address and state the campaign you intended to support.</p>
-          <a href="mailto:contact@quranscholar.in" className="mt-5 block break-words text-sm font-black text-primary no-underline">contact@quranscholar.in</a>
+          <a href="mailto:contact@darslearn.com" className="mt-5 block break-words text-sm font-black text-primary no-underline">contact@darslearn.com</a>
         </article>
       </div>
     </section>

@@ -99,7 +99,7 @@ const PrivacyPolicy = () => (
       highlights={[
         { label: "Last updated", value: "3 September 2026" },
         { label: "Applies to", value: "QuranScholar accounts, learning services, and support" },
-        { label: "Privacy contact", value: "contact@quranscholar.in" },
+        { label: "Privacy contact", value: "contact@darslearn.com" },
       ]}
       labelledBy="privacy-title"
     />
@@ -146,7 +146,7 @@ const PrivacyPolicy = () => (
             <p className="text-xs font-black uppercase tracking-[0.15em] text-[#9ed6c8]">Updates and contact</p>
             <h2 id="updates-title" className="mt-2 font-display text-2xl font-black tracking-[-0.035em] sm:text-3xl">Questions about your information?</h2>
             <p className="mt-4 max-w-2xl text-sm font-medium leading-7 text-white/70">This policy may change as the platform and applicable requirements evolve. Material changes will be reflected by the updated date. For access, correction, deletion, or privacy questions, contact us with enough detail to identify the relevant account or request.</p>
-            <a href="mailto:contact@quranscholar.in" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#f4c95d] px-4 text-sm font-black text-[#11342e] no-underline"><Mail className="size-4" />contact@quranscholar.in</a>
+            <a href="mailto:contact@darslearn.com" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#f4c95d] px-4 text-sm font-black text-[#11342e] no-underline"><Mail className="size-4" />contact@darslearn.com</a>
             <div className="mt-5"><Link to="/contact" className="group inline-flex items-center gap-2 text-sm font-black text-white no-underline">Open the contact page <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></Link></div>
           </section>
         </div>

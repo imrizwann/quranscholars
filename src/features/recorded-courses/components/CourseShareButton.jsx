@@ -7,7 +7,9 @@ export default function CourseShareButton({ course }) {
   async function share() {
     if (busy) return;
     setBusy(true);
-    const url = new URL(`/share/courses/${encodeURIComponent(course.slug)}`, window.location.origin).href;
+    // Public metadata is served directly by the API; frontend hosting needs no API proxy.
+    const apiOrigin = new URL(import.meta.env.VITE_API_URL || "/", window.location.origin);
+    const url = new URL(`/api/public/recorded-courses/${encodeURIComponent(course.slug)}/share`, apiOrigin).href;
     try {
       if (navigator.share) await navigator.share({ title: course.title, url });
       else { await navigator.clipboard.writeText(url); toast.success("Course link copied", { description: "Share it with someone who would enjoy this course." }); }

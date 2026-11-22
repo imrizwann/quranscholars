@@ -12,8 +12,8 @@ does not change an already generated bundle. Rebuild after URL changes.
 | Variable | Production value |
 | --- | --- |
 | `NODE_ENV` | `production`; custom Vite modes must also use production |
-| `VITE_API_URL` | `/` with a same-origin API proxy, or a complete HTTPS origin without `/api` |
-| `VITE_PUBLIC_SITE_URL` | Required canonical HTTPS website origin, without a trailing slash; match backend `APP_PUBLIC_URL` |
+| `VITE_API_URL` | `https://api.darslearn.com` (no `/api` suffix) |
+| `VITE_PUBLIC_SITE_URL` | `https://darslearn.com`; match backend `APP_PUBLIC_URL` |
 | `VITE_COURSE_MEDIA_BASE_URL` | Optional public HTTPS media URL/prefix; no signed URLs or private credentials |
 | `VITE_REALTIME_URL` | Optional HTTPS/WSS origin; blank uses the API URL |
 | `VITE_CATALOGUE_LAYOUT` | Optional `featured` or `full` |
@@ -32,8 +32,8 @@ Keep server credentials out of the frontend build environment altogether.
 2. With `VITE_API_URL=/`, forward **both `/api` and `/api/*`** to the API, retaining
    the path, method, body, cookies, Origin and CSRF header. Preserve API status and
    JSON errors; disable proxy error-page replacement and shared API caching.
-3. Forward `/share/courses/:slug` to `/api/public/recorded-courses/:slug/share`
-   for server-generated social metadata. This is an intentional HTML endpoint.
+3. New share links go directly to `/api/public/recorded-courses/:slug/share`
+   on the API origin for social metadata. Old frontend share links still open the course.
 4. Serve real files first, then `index.html` for frontend deep links such as
    `/courses/example`, `/profile`, `/instructor/courses` and `/learn/...`.
    Never apply that fallback to `/api`, `/api/*`, or missing `/assets/*` files.
@@ -44,10 +44,12 @@ Keep server credentials out of the frontend build environment altogether.
    a different hostname alone cannot share authentication. Polling remains usable
    with backend `REALTIME_ENABLED=false`.
 
-The existing `vercel.json` is an **optional deployment adapter**, not application
-logic. Its two upstream URLs must be changed when that adapter targets another
-API. Other platforms ignore it and implement the contract above in their router.
-No application code needs changing.
+The frontend `vercel.json` only serves static assets and SPA deep links, with HTML
+cache revalidation. It has no API or course-share proxy. The browser connects
+directly to `https://api.darslearn.com`; production must not use `VITE_API_URL=/`
+with this adapter. Set the API allowed origins to `https://darslearn.com` and
+`https://www.darslearn.com`. Protected media uses `https://video.darslearn.com`.
+The existing bucket, Worker and hosting project names are unchanged.
 
 ## nginx example for a VPS/container
 
