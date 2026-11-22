@@ -51,3 +51,64 @@ test("checkout loads only Razorpay's script, uses the existing theme and validat
     dom.window.close();
   }
 });
+
+test("stalled checkout can be closed without a dismiss event and ignores late callbacks", async () => {
+  const dom = new JSDOM("<html><head></head><body></body></html>", { url: "https://frontend.example.test" });
+  const saved = Object.fromEntries(["window", "document", "getComputedStyle"].map(key => [key, globalThis[key]]));
+  Object.assign(globalThis, { window: dom.window, document: dom.window.document, getComputedStyle: dom.window.getComputedStyle.bind(dom.window) });
+  let opened = 0, closed = 0, options;
+  const input = { payment: { amountMinor: 14900, currency: "INR", checkout: { provider: "razorpay", orderId: "order_one", publicKey: "rzp_test_public" } }, course: { title: "Course" }, user: {} };
+  try {
+    const pendingScript = new AbortController();
+    const pending = openRazorpayCheckout({ ...input, signal: pendingScript.signal });
+    const script = document.querySelector("script");
+    pendingScript.abort();
+    assert.equal(await pending, null, "can leave before SDK loads");
+    window.Razorpay = class { constructor(value) { options = value; } open() { opened++; } close() { closed++; } };
+    script.dispatchEvent(new dom.window.Event("load"));
+    await loadRazorpay(); await new Promise(resolve => setTimeout(resolve, 0));
+    assert.equal(opened, 0, "late script cannot open abandoned checkout");
+    const controller = new AbortController();
+    const checkout = openRazorpayCheckout({ ...input, signal: controller.signal });
+    await Promise.resolve();
+    assert.equal(opened, 1);
+    controller.abort();
+    assert.equal(await checkout, null);
+    assert.equal(closed, 1, "closes SDK even if ondismiss never fires");
+    options.handler({ razorpay_order_id: "order_one", razorpay_payment_id: "pay_late", razorpay_signature: "late" });
+    assert.equal(await checkout, null, "late payment must be reconciled by the server");
+    const resumed = openRazorpayCheckout(input); await Promise.resolve();
+    assert.equal(options.order_id, "order_one"); assert.equal(opened, 2);
+    options.modal.ondismiss(); await resumed;
+    window.Razorpay = class { open() { throw new Error("private SDK diagnostic"); } };
+    await assert.rejects(openRazorpayCheckout(input), error => /could not open/.test(error.userMessage) && !error.message.includes("private"));
+  } finally {
+    for (const [key, value] of Object.entries(saved)) { if (value === undefined) delete globalThis[key]; else globalThis[key] = value; }
+    dom.window.close();
+  }
+});
+
+test("script failure and timeout release the loader for a fresh attempt", async t => {
+  const dom = new JSDOM("<html><head></head><body></body></html>");
+  const saved = { window: globalThis.window, document: globalThis.document };
+  Object.assign(globalThis, { window: dom.window, document: dom.window.document });
+  try {
+    const failed = loadRazorpay();
+    document.querySelector("script").dispatchEvent(new dom.window.Event("error"));
+    await assert.rejects(failed, error => /Continue payment/.test(error.userMessage));
+    assert.equal(document.querySelector("script"), null);
+    t.mock.timers.enable({ apis: ["setTimeout"] });
+    const timedOut = loadRazorpay();
+    const assertion = assert.rejects(timedOut, /could not load/);
+    t.mock.timers.tick(15000); await assertion;
+    assert.equal(document.querySelector("script"), null);
+    const retried = loadRazorpay();
+    window.Razorpay = class {};
+    document.querySelector("script").dispatchEvent(new dom.window.Event("load"));
+    assert.equal(await retried, window.Razorpay);
+  } finally {
+    t.mock.timers.reset();
+    for (const [key, value] of Object.entries(saved)) { if (value === undefined) delete globalThis[key]; else globalThis[key] = value; }
+    dom.window.close();
+  }
+});

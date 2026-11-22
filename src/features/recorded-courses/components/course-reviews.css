@@ -2,6 +2,10 @@
 .course-review-editor header h3, .course-review-list h3 { font-size: 1rem; font-weight: 600; }
 .course-review-editor header p, .course-review-summary p { color: var(--muted-foreground); margin-top: 6px; line-height: 1.7; }
 .course-review-editor form { margin-top: 20px; }
+.course-review-published { margin-top: 20px; }
+.course-review-published-status { display: flex; align-items: center; gap: 8px; color: var(--primary); font-weight: 600; margin-bottom: 12px; }
+.course-review-published-status svg { flex-shrink: 0; }
+.course-review-published-comment { margin-top: 12px; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
 .course-review-rating { padding: 0; border: 0; margin: 0 0 20px; }
 .course-review-rating legend, .course-review-label { display: block; font-weight: 500; margin-bottom: 8px; }
 .course-review-rating > div { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }

@@ -30,7 +30,8 @@ function EnrollmentAction({ course, user }) {
   const [verify, verifying] = useVerifyCourseCheckoutMutation();
   const [reconcile, reconciling] = useReconcileCoursePaymentMutation();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const gateway = useRef(null);
+  const [checkoutDelayed, setCheckoutDelayed] = useState(false);
+  const checkoutController = useRef(null);
   const [intentId, setIntentId] = useState(() => readCheckout(user._id, course.id)?.intentId || null);
   const restoredIntent = useRef(intentId);
   const awaitingAccess = useRef(false);
@@ -47,7 +48,12 @@ function EnrollmentAction({ course, user }) {
   const active = access.currentData?.canAccessCourse === true && !access.error;
   const busy = enrolling.isLoading || paying.isLoading || verifying.isLoading || reconciling.isLoading || checkoutOpen;
   const enrollmentOpen = access.currentData?.enrollmentOpen ?? course.enrollmentOpen;
-  useEffect(() => { mounted.current = true; return () => { mounted.current = false; gateway.current?.close(); }; }, []);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; checkoutController.current?.abort(); }; }, []);
+  useEffect(() => {
+    if (!checkoutOpen) return;
+    const timer = setTimeout(() => setCheckoutDelayed(true), 15000);
+    return () => clearTimeout(timer);
+  }, [checkoutOpen]);
   const rememberPayment = useCallback(async confirmed => {
     if (!mounted.current) return;
     setLatest(confirmed);
@@ -104,9 +110,10 @@ function EnrollmentAction({ course, user }) {
         setLatest(result); setIntentId(result.intentId);
         if (result.state === "pending") {
           if (result.checkout?.provider === "razorpay") {
-            setCheckoutOpen(true);
-            const response = await openRazorpayCheckout({ payment: result, course, user, onInstance: instance => { if (!mounted.current) return false; gateway.current = instance; } });
-            gateway.current = null;
+            setCheckoutDelayed(false); setCheckoutOpen(true);
+            checkoutController.current = new AbortController();
+            const response = await openRazorpayCheckout({ payment: result, course, user, signal: checkoutController.current.signal });
+            checkoutController.current = null;
             if (!mounted.current) return;
             setCheckoutOpen(false);
             if (response) {
@@ -136,7 +143,7 @@ function EnrollmentAction({ course, user }) {
         if (failure?.status === 410) { clearCheckout(user._id, course.id); setIntentId(null); setLatest(null); setPolling(false); }
         setError(enrollmentFailureMessage(failure));
       }
-    } finally { lock.current = false; if (mounted.current) setCheckoutOpen(false); }
+    } finally { checkoutController.current = null; lock.current = false; if (mounted.current) setCheckoutOpen(false); }
   }
 
   if (active) return <><p className="cd-enrollment-status" role="status"><CheckCircle2 size={17} />You have access to this course</p><Link className="cw-button cw-primary cd-enrollment-action" to={`/learn/${encodeURIComponent(course.slug)}`}>Start learning<ArrowRight size={16} /></Link><Link className="cd-preview-link" to="/dashboard/learning">My learning</Link></>;
@@ -152,10 +159,14 @@ function EnrollmentAction({ course, user }) {
         <p>{course.title}</p>
         <dl><dt>Order total</dt><dd>{new Intl.NumberFormat(undefined, { style: "currency", currency: payment.currency }).format(payment.amountMinor / 10 ** ({ JPY: 0, KWD: 3 }[payment.currency] ?? 2))}</dd></dl>
         {payment.testMode && <p>Test mode. No real money will be charged.</p>}
-        <p role="status">{verifying.isLoading ? "Confirming your payment…" : checkoutOpen ? "Complete your payment in the secure checkout window." : "If you have already paid, check payment status before continuing."}</p>
+        <p role="status">{verifying.isLoading ? "Confirming your payment…" : checkoutOpen ? "Please wait for the secure payment window to open." : "If you have already paid, check payment status before continuing."}</p>
       </div>}
       {["failed", "refunded", "disputed"].includes(payment?.state) && <p className="cd-enrollment-note" role="status">{payment.state === "failed" ? "The payment was not completed." : "This payment no longer provides course access."}</p>}
-      <AsyncButton className="cw-button cw-primary cd-enrollment-action" loading={busy} loadingLabel={verifying.isLoading || reconciling.isLoading ? "Confirming payment" : checkoutOpen ? "Checkout open" : free && !intentId ? "Enrolling" : "Preparing checkout"} disabled={Boolean(intentId && status.isLoading) || access.isFetching} onClick={join}>{payment?.state === "pending" ? "Continue payment" : free && !intentId ? "Enroll for free" : "Buy course"}<ArrowRight size={16} /></AsyncButton>
+      <AsyncButton className="cw-button cw-primary cd-enrollment-action" loading={busy} loadingLabel={verifying.isLoading || reconciling.isLoading ? "Confirming payment" : checkoutOpen ? "Opening checkout…" : free && !intentId ? "Enrolling" : "Preparing checkout"} disabled={Boolean(intentId && status.isLoading) || access.isFetching} onClick={join}>{payment?.state === "pending" ? "Continue payment" : free && !intentId ? "Enroll for free" : "Buy course"}<ArrowRight size={16} /></AsyncButton>
+      {checkoutOpen && checkoutDelayed && <div className="cd-enrollment-feedback" role="status">
+        <p>Checkout not visible? Close it and check payment status before trying again.</p>
+        <button type="button" className="cw-button cd-payment-check" onClick={() => checkoutController.current?.abort()}>Close checkout and check status</button>
+      </div>}
       <p className="cd-enrollment-note">{free && !intentId ? "Join now and learn at your own pace." : "Course access starts after payment is confirmed."}</p>
     </>}
     {intentId && !active && <AsyncButton className="cw-button cd-payment-check" loading={status.isFetching || reconciling.isLoading} disabled={paying.isLoading || verifying.isLoading || checkoutOpen} loadingLabel="Checking payment" onClick={() => {

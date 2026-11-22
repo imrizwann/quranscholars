@@ -48,6 +48,86 @@ async function fixture(run) {
 const button = label => [...document.querySelectorAll("button")].find(item => item.textContent.includes(label));
 const click = element => act(async () => element.click());
 const response = data => Response.json({ success: true, data });
+const typeComment = value => act(async () => {
+  const input = document.querySelector('textarea[name="comment"]');
+  Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set.call(input, value);
+  input.dispatchEvent(new window.Event("input", { bubbles: true }));
+});
+
+test("publishing shows the saved review, refreshes public reviews, and supports editing and deletion", async () => fixture(async ({ mod, render, settle }) => {
+  let current = { review: null, revision: 0 }, writes = 0, publicReads = 0;
+  globalThis.fetch = async request => {
+    if (request.url.includes("/access")) return response({ canAccessCourse: false });
+    if (request.url.includes("/api/public/")) {
+      publicReads++;
+      return response({ summary: { average: current.review?.rating || 0, count: current.review ? 1 : 0 }, reviews: current.review ? [{ ...current.review, id: "review1", name: "Learner" }] : [], pagination: { totalPages: 1 } });
+    }
+    if (request.method !== "GET") {
+      writes++;
+      const body = await request.json();
+      assert.equal(body.revision, current.revision);
+      assert.equal(request.credentials, "include");
+      assert.equal(request.headers.get("X-CSRF-Protection"), "1");
+      current = { revision: current.revision + 1, review: request.method === "DELETE" ? null : { rating: body.rating, comment: body.comment, hidden: false, updatedAt: "2026-11-22T10:00:00Z" } };
+    }
+    return response(current);
+  };
+  const view = () => React.createElement(React.Fragment, null, React.createElement(mod.Editor, { courseId: "course1" }), React.createElement(mod.Reviews, { course: { id: "course1", slug: "test-course" } }));
+  await render(view()); await settle(() => button("Publish review"));
+  await click(document.querySelector('input[value="5"]'));
+  await typeComment("  Clear lessons and useful practice.  ");
+  await click(button("Publish review"));
+  await settle(() => button("Edit review") && document.querySelector('.course-review-list'));
+  assert.equal(document.querySelector('textarea[name="comment"]'), null, "published content is no longer presented as an unsent draft");
+  assert.match(document.querySelector('.course-review-published [role="status"]').textContent, /Your review is published/);
+  assert.equal(current.review.comment, "Clear lessons and useful practice.");
+  assert.match(document.querySelector('.course-review-list').textContent, /Clear lessons and useful practice/);
+  assert.equal(writes, 1); assert(publicReads >= 2);
+  await render(null); await render(view()); await settle(() => button("Edit review"));
+  assert.equal(document.querySelector('textarea[name="comment"]'), null, "reopening shows the saved review");
+  await click(button("Edit review"));
+  assert.equal(document.querySelector('textarea').value, current.review.comment);
+  await typeComment("Updated review after more lessons.");
+  await click(button("Save changes"));
+  await settle(() => button("Edit review"));
+  assert.equal(writes, 2); assert.equal(current.revision, 2);
+  assert.match(document.querySelector('.course-review-published-comment').textContent, /Updated review/);
+  await click(button("Edit review")); await typeComment("Unsaved change"); await click(button("Cancel"));
+  assert.equal(writes, 2); assert.doesNotMatch(document.querySelector('.course-review-published').textContent, /Unsaved change/);
+  await click(document.querySelector('.course-review-editor .cw-actions-trigger'));
+  await settle(() => document.querySelector('[role="menuitem"]'));
+  await click(document.querySelector('[role="menuitem"]'));
+  await settle(() => document.querySelector('[role="dialog"]'));
+  await click([...document.querySelectorAll('[role="dialog"] button')].find(item => item.textContent === "Delete review"));
+  await settle(() => button("Publish review"));
+  assert.equal(current.review, null); assert.equal(writes, 3);
+  assert.equal(document.querySelector('textarea[name="comment"]').value, "");
+}));
+
+for (const status of [503, 409]) test(`a rejected review (${status}) keeps the draft and never claims publication`, async () => fixture(async ({ mod, render, settle }) => {
+  let writes = 0;
+  globalThis.fetch = async request => {
+    if (request.method !== "GET") { writes++; return Response.json({ success: false }, { status }); }
+    return response({ review: null, revision: 0 });
+  };
+  await render(React.createElement(mod.Editor, { courseId: "course1" }));
+  await settle(() => button("Publish review"));
+  await click(document.querySelector('input[value="4"]')); await typeComment("Keep my draft after failure.");
+  await click(button("Publish review"));
+  await settle(() => document.querySelector('[role="alert"]'));
+  assert.equal(writes, 1); assert.equal(document.querySelector('textarea').value, "Keep my draft after failure.");
+  assert.equal(document.querySelector('.course-review-published'), null);
+  if (status === 409) assert(button("Load latest review"));
+}));
+
+test("a moderated review is shown as saved, never as publicly published", async () => fixture(async ({ mod, render, settle }) => {
+  globalThis.fetch = async () => response({ revision: 2, review: { rating: 4, comment: "Saved review", hidden: true } });
+  await render(React.createElement(mod.Editor, { courseId: "course1" }));
+  await settle(() => button("Edit review"));
+  assert.match(document.body.textContent, /currently hidden/);
+  assert.match(document.querySelector('[role="status"]').textContent, /Your review is saved/);
+  assert.doesNotMatch(document.body.textContent, /Your review is published/);
+}));
 
 
 test("missing rating is prominent, focuses the stars, and never sends a review", async () => fixture(async ({ mod, render, settle }) => {

@@ -13,7 +13,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { toast } from "sonner";
 import { createActionFeedbackMiddleware } from "../src/components/feedback/actionFeedbackMiddleware.js";
 
-for (const scenario of ["verified callback", "failed callback", "return without callback", "manual recovery", "webhook first", "expired test checkout"]) {
+for (const scenario of ["verified callback", "failed callback", "return without callback", "manual recovery", "webhook first", "expired test checkout", "checkout never appears"]) {
 test(`themed checkout safely recovers ${scenario} without a second order`, async t => {
   const notices = [];
   for (const type of ["loading", "success", "error", "info", "dismiss"]) t.mock.method(toast, type, (...args) => { notices.push({ type, title: args[0] }); });
@@ -29,7 +29,14 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
   const { MemoryRouter } = await import("react-router-dom");
   const output = resolve("tests", `razorpay-ui-fixture-${randomUUID()}.mjs`);
   const previousFetch = globalThis.fetch;
-  let root, store, apis, options;
+  let root, store, apis, options, delayedRecovery;
+  if (scenario === "checkout never appears") {
+    const realTimeout = globalThis.setTimeout;
+    t.mock.method(globalThis, "setTimeout", (fn, ms, ...args) => {
+      if (ms === 15000) { delayedRecovery = fn; return realTimeout(() => {}, 0); }
+      return realTimeout(fn, ms, ...args);
+    });
+  }
   try {
     const compiled = await build({ stdin: { contents: `export {default as Enrollment} from './src/features/recorded-courses/components/CourseEnrollment.jsx'; export {default as paymentApi} from './src/services/api/user/paymentApi.js'; export {default as learnerApi} from './src/services/api/user/learnerApi.js';`, resolveDir: process.cwd() }, bundle: true, write: false, format: "esm", platform: "node", packages: "external", jsx: "automatic", alias: { "@": resolve("src") }, loader: { ".css": "empty" }, define: { "import.meta.env": JSON.stringify({ VITE_API_URL: "https://api.example.test", PROD: true }) } });
     await writeFile(output, compiled.outputFiles[0].text);
@@ -99,8 +106,15 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
     assert.equal(verified, 0); assert.equal(document.querySelector('a[href="/learn/tajweed"]'), null);
     assert.match(document.body.textContent, /Secure checkout/);
     assert.doesNotMatch(document.body.textContent, /Test mode/);
-    assert(button("Checkout open").disabled);
-    await act(async () => options.modal.ondismiss());
+    assert(button("Opening checkout").disabled);
+    if (scenario === "checkout never appears") {
+      assert.equal(button("Close checkout and check status"), undefined);
+      assert.equal(attempts.length, 1);
+      await act(async () => delayedRecovery());
+      await act(async () => button("Close checkout and check status").click());
+    } else {
+      await act(async () => options.modal.ondismiss());
+    }
     await settle(() => button("Continue payment") && !button("Continue payment").disabled);
     await act(async () => button("Continue payment").click());
     await settle(() => attempts.length === 2);
@@ -128,7 +142,7 @@ test(`themed checkout safely recovers ${scenario} without a second order`, async
     await settle(() => document.querySelector('a[href="/learn/tajweed"]'));
     assert.equal(verified, scenario === "return without callback" ? 0 : 1);
     assert.equal(attempts.length, 2, "recovery must not initiate another checkout");
-    assert(recoveryChecks >= (scenario === "verified callback" ? 1 : 2));
+    assert(recoveryChecks >= (["verified callback", "checkout never appears"].includes(scenario) ? 1 : 2));
     assert.equal(notices.filter(notice => notice.title === "Your course is ready").length, 1);
     assert.doesNotMatch(JSON.stringify({ ...localStorage }), /signature|pay_one|rzp_|bbbb/);
     await act(async () => root.render(React.createElement(Provider, { store }, React.createElement(MemoryRouter, null, React.createElement(mod.Enrollment, { key: "already-enrolled", course })))));

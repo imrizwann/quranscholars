@@ -39,9 +39,9 @@ test("same-origin Vercel API requests preserve cookies, CSRF, paths, and playbac
     assert.equal(requests[1].headers.get("x-csrf-protection"), "1");
     const config = JSON.parse(await readFile("vercel.json", "utf8"));
     assert.equal(config.rewrites[0].source, "/api/:path*");
-    assert.equal(config.rewrites[0].destination, "https://quranscholars-apis.vercel.app/api/:path*");
+    assert.equal(config.rewrites[0].destination, "https://quranscholars-apis-production.up.railway.app/api/:path*");
     const sharing = config.rewrites.find(rule => rule.source === "/share/courses/:slug");
-    assert.equal(sharing.destination, "https://quranscholars-apis.vercel.app/api/public/recorded-courses/:slug/share");
+    assert.equal(sharing.destination, "https://quranscholars-apis-production.up.railway.app/api/public/recorded-courses/:slug/share");
     assert(config.rewrites.indexOf(sharing) < config.rewrites.length - 1, "social previews reach server metadata before the SPA fallback");
     assert.equal(config.rewrites.at(-1).destination, "/index.html", "SPA fallback follows the API rewrite");
     const headers = Object.fromEntries(config.headers.find(rule => rule.source === "/api/:path*").headers.map(({ key, value }) => [key, value]));

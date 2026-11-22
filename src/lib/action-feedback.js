@@ -50,7 +50,7 @@ const actions = {
     // check can finish through a webhook before the browser callback settles.
     createCourseCheckout: { pending: "Preparing your checkout…", error: enrollmentFailureMessage, success: data => data.state === "paid"
       ? { type: "success", title: "Payment confirmed", description: "Your course access is being checked. Open My learning when enrollment is confirmed." }
-      : data.state === "pending" ? { type: "info", title: "Checkout prepared", description: "Complete payment to enroll. Course access starts after payment is confirmed." }
+      : data.state === "pending" ? { type: "info", title: "Opening secure checkout", description: "Please wait while the payment window loads." }
       : { type: "info", title: "Payment status updated", description: "Check the payment details on this page before trying again." } },
   },
   fileUploadApi: { uploadAvatar: feedback("Updating profile photo…", "Profile photo updated") },

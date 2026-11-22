@@ -2,7 +2,7 @@ import ActionMenu from "@/components/ui/ActionMenu.jsx";
 import { useId, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, MessageSquare, Save, Shield, Star, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, MessageSquare, Pencil, Save, Shield, Star, Trash2 } from "lucide-react";
 import learnerApi from "@/services/api/user/learnerApi.js";
 import { useGetCourseAccessQuery } from "@/services/api/user/paymentApi.js";
 import { RatingStars } from "./CourseRating.jsx";
@@ -29,6 +29,7 @@ function ReviewForm({ courseId, query }) {
   const [error, setError] = useState("");
   const [conflict, setConflict] = useState(false);
   const [dialog, setDialog] = useState(null);
+  const [editing, setEditing] = useState(!initial.review);
   const [save, saving] = learnerApi.endpoints.saveCourseReview.useMutation();
   const [remove, deleting] = learnerApi.endpoints.deleteCourseReview.useMutation();
   const pending = useRef(false), id = useId();
@@ -42,14 +43,24 @@ function ReviewForm({ courseId, query }) {
     if (!rating) { setError("Choose a star rating before saving your review."); event.currentTarget.querySelector('input[type="radio"]')?.focus(); return; }
     if (comment.trim().length === 1) { setError("Write at least two characters, or leave your comment empty."); return; }
     pending.current = true; setError("");
-    try { load(await save({ courseId, rating, comment: comment.trim(), revision }).unwrap()); }
+    try { load(await save({ courseId, rating, comment: comment.trim(), revision }).unwrap()); setEditing(false); }
     catch (failure) { setError(userMessage(failure)); if (failure.status === 409) setConflict(true); }
     finally { pending.current = false; }
   }
   return <div className="course-review-editor">
     <header><h3>Your course review</h3><p>Share what worked well and what could be better. You can update your review as you learn.</p></header>
     {initial.review?.hidden && <p className="course-review-notice">Your review is currently hidden from the course page. Contact our team if you need help.</p>}
-    <form onSubmit={submit} aria-busy={busy || undefined}>
+    {!editing && initial.review ? <div className="course-review-published">
+      <p className="course-review-published-status" role="status"><CheckCircle2 size={18} aria-hidden="true" />{initial.review.hidden ? "Your review is saved" : "Your review is published"}</p>
+      <RatingStars rating={initial.review.rating} />
+      {initial.review.comment && <p className="course-review-published-comment">{initial.review.comment}</p>}
+      <div className="course-review-actions">
+        <button type="button" className="cw-button" onClick={() => { load(initial); setEditing(true); }} disabled={busy}><Pencil size={16} aria-hidden="true" />Edit review</button>
+        <ActionMenu label="Your review actions" disabled={busy} items={[{ label: "Delete review", icon: Trash2, danger: true, onClick: () => { load(initial); setDialog("delete"); } }]} />
+        <span className="course-review-saved">Saved {date(initial.review.updatedAt)}</span>
+      </div>
+      {query.error && <p className="course-review-error" role="alert">{userMessage(query.error)}</p>}
+    </div> : <form onSubmit={submit} aria-busy={busy || undefined}>
       <fieldset className="course-review-rating" aria-invalid={!rating && Boolean(error)} aria-describedby={!rating && error ? `${id}-rating-error` : undefined} disabled={busy || changedElsewhere}><legend>Your rating</legend><div>{ratings.map((label, index) => <label key={label} className={index < rating ? "is-selected" : ""}>
         <input type="radio" name={`${id}-rating`} value={index + 1} checked={rating === index + 1} onChange={() => { setRating(index + 1); setError(""); }} aria-label={`${index + 1} ${index === 0 ? "star" : "stars"}: ${label}`} />
         <Star size={25} fill={index < rating ? "currentColor" : "none"} aria-hidden="true" />
@@ -59,16 +70,17 @@ function ReviewForm({ courseId, query }) {
       <div className="course-review-help"><p id={`${id}-privacy`}>Your rating, comment, first name and last initial appear on the course page. Keep personal and contact details out of your review.</p><span id={`${id}-length`}>{comment.length}/3,000</span></div>
       {((error && rating > 0) || changedElsewhere || query.error) && <div className="course-review-error" role="alert"><p>{changedElsewhere ? "Your review changed on another device. Your draft is kept here; load the latest review before saving." : error || userMessage(query.error)}</p>{changedElsewhere && <button type="button" className="cw-button" onClick={() => setDialog("reload")} disabled={busy}>Load latest review</button>}</div>}
       <div className="course-review-actions"><AsyncButton type="submit" className="cw-button cw-primary" loading={saving.isLoading} loadingLabel="Saving review" disabled={busy || changedElsewhere || (Boolean(initial.review) && !dirty)}><Save size={16} aria-hidden="true" />{initial.review ? "Save changes" : "Publish review"}</AsyncButton>
+        {initial.review && <button type="button" className="cw-button" disabled={busy} onClick={() => { load(initial); setEditing(false); }}>Cancel</button>}
         {initial.review && <ActionMenu label="Your review actions" disabled={busy || changedElsewhere} items={[{ label: "Delete review", icon: Trash2, danger: true, onClick: () => { setError(""); setDialog("delete"); } }]} />}
         {initial.review && <span className="course-review-saved">Saved {date(initial.review.updatedAt)}</span>}
       </div>
-    </form>
+    </form>}
     <ConfirmationModal open={Boolean(dialog)} title={dialog === "reload" ? "Load your latest review?" : "Delete your course review?"} description={dialog === "reload" ? "Replace your unsaved changes in this tab with the latest review from your account?" : "Remove your rating and comment from the course page? You can write another review later."} confirmLabel={dialog === "reload" ? "Load latest review" : "Delete review"} danger={dialog === "delete"} busy={busy || query.isFetching} onCancel={() => setDialog(null)} onConfirm={async () => {
       if (pending.current) return;
       pending.current = true;
       try {
         if (dialog === "reload") load(await query.refetch().unwrap());
-        else load(await remove({ courseId, revision, confirm: true }).unwrap());
+        else { load(await remove({ courseId, revision, confirm: true }).unwrap()); setEditing(true); }
         setDialog(null);
       } catch (failure) { setError(userMessage(failure)); if (failure.status === 409) setConflict(true); }
       finally { pending.current = false; }
