@@ -1,5 +1,6 @@
 const publicNames = new Set([
   "VITE_API_URL",
+  "VITE_GOOGLE_CLIENT_ID",
   "VITE_PUBLIC_SITE_URL",
   "VITE_COURSE_MEDIA_BASE_URL",
   "VITE_REALTIME_URL",
@@ -31,6 +32,7 @@ function publicUrl(name, value, { originOnly = false, realtime = false } = {}) {
 }
 
 export function validatePublicEnvironment(env) {
+  if (env.VITE_GOOGLE_CLIENT_ID && !/^[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com$/.test(env.VITE_GOOGLE_CLIENT_ID.trim())) throw new Error("VITE_GOOGLE_CLIENT_ID must be a Google Web application client ID, not a client secret");
   console.log("VALIDATOR DEBUG", {
     apiUrlAllowed: publicNames.has("VITE_API_URL"),
     publicNames: [...publicNames],

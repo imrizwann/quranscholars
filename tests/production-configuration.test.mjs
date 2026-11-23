@@ -21,7 +21,7 @@ test("release configuration requires secure explicit API and canonical origins",
       });
     }
   }
-  for (const name of ["VITE_JWT_SECRET", "VITE_REDIS_PASSWORD", "VITE_RESEND_API_KEY", "VITE_RAZORPAY_KEY_SECRET"]) {
+  for (const name of ["VITE_JWT_SECRET", "VITE_REDIS_PASSWORD", "VITE_RESEND_API_KEY", "VITE_RAZORPAY_KEY_SECRET", "VITE_GOOGLE_CLIENT_SECRET"]) {
     assert.throws(() => validatePublicEnvironment({ ...valid, [name]: "private-value" }), error => {
       assert(error.message.includes(name)); assert(!error.message.includes("private-value")); return true;
     });
@@ -30,9 +30,17 @@ test("release configuration requires secure explicit API and canonical origins",
   assert.throws(() => validatePublicEnvironment({ ...valid, VITE_COURSE_MEDIA_BASE_URL: "https://media.example.test?key=private" }), /VITE_COURSE_MEDIA_BASE_URL/);
 });
 
+test("Google configuration accepts only a public Web client ID", () => {
+  validatePublicEnvironment({ ...valid, VITE_GOOGLE_CLIENT_ID: "123-public.apps.googleusercontent.com" });
+  validatePublicEnvironment({ ...valid, VITE_GOOGLE_CLIENT_ID: "" });
+  assert.throws(() => validatePublicEnvironment({ ...valid, VITE_GOOGLE_CLIENT_ID: "GOCSPX-private-value" }), error => {
+    assert.match(error.message, /client ID/); assert(!error.message.includes("private-value")); return true;
+  });
+});
+
 test("real production bundles exclude backend credentials, development routes and source maps", { timeout: 120_000 }, async t => {
-  const secrets = { JWT_SECRET: "bundle-test-jwt-private-sentinel", REDIS_PASSWORD: "bundle-test-redis-private-sentinel", RESEND_API_KEY: "bundle-test-mail-private-sentinel" };
-  const values = { ...valid, ...secrets, NODE_ENV: "production" };
+  const secrets = { JWT_SECRET: "bundle-test-jwt-private-sentinel", REDIS_PASSWORD: "bundle-test-redis-private-sentinel", RESEND_API_KEY: "bundle-test-mail-private-sentinel", GOOGLE_CLIENT_SECRET: "bundle-test-google-private-sentinel" };
+  const values = { ...valid, ...secrets, VITE_GOOGLE_CLIENT_ID: "123-public.apps.googleusercontent.com", NODE_ENV: "production" };
   for (const [name, value] of Object.entries(values)) {
     const previous = process.env[name]; process.env[name] = value;
     t.after(() => { if (previous === undefined) delete process.env[name]; else process.env[name] = previous; });

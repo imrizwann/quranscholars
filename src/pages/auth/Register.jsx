@@ -5,6 +5,7 @@ import { useRegisterMutation } from "@/services/api/user/userAuthApis.js";
 import { userMessage } from "@/lib/user-messages.js";
 import AuthPage from "@/features/auth/components/AuthPage.jsx";
 import AuthInput from "@/features/auth/components/AuthInput.jsx";
+import GoogleSignIn from "@/features/auth/components/GoogleSignIn.jsx";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 
 export default function Register() {
@@ -22,7 +23,7 @@ export default function Register() {
 
   async function submit(event) {
     event.preventDefault();
-    if (pending.current) return;
+    if (pending.current || isLoading) return;
     if (!name.trim() || !email.trim() || !password) {
       setError("Enter your name, email and password to create an account.");
       return;
@@ -91,6 +92,7 @@ export default function Register() {
           {error}
         </p>
       )}
+      <GoogleSignIn disabled={isLoading} onBusyChange={setIsLoading} returnTo={returnTo} />
       <form
         onSubmit={submit}
         aria-label="Create account"

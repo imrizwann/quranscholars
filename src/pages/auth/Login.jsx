@@ -10,6 +10,7 @@ import { loginDestination } from "@/components/guards/loginDestination.js";
 import { userMessage } from "@/lib/user-messages.js";
 import AuthPage from "@/features/auth/components/AuthPage.jsx";
 import AuthInput from "@/features/auth/components/AuthInput.jsx";
+import GoogleSignIn from "@/features/auth/components/GoogleSignIn.jsx";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 
 export default function Login() {
@@ -27,7 +28,7 @@ export default function Login() {
 
   async function submit(event) {
     event.preventDefault();
-    if (pending.current) return;
+    if (pending.current || isLoading) return;
     if (!email.trim() || !password) {
       setError("Enter your email and password to sign in.");
       return;
@@ -111,6 +112,7 @@ export default function Login() {
           {error}
         </p>
       )}
+      <GoogleSignIn disabled={isLoading} onBusyChange={setIsLoading} returnTo={returnTo} />
       <form
         onSubmit={submit}
         aria-label="Sign in"

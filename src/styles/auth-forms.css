@@ -2,6 +2,18 @@
 .auth-page-content { max-width: 460px; }
 .auth-form-column { min-width: 0; }
 .auth-illustration { display: none; }
+.auth-google { margin-bottom: 24px; }
+.auth-google-button { min-height: 44px; display: flex; justify-content: center; }
+.auth-google-button[hidden] { display: none; }
+.auth-google-button[inert] { opacity: .6; }
+.auth-google-message { margin-bottom: 14px; padding: 12px; border: 1px solid var(--border); border-radius: 7px; font-size: 14px; line-height: 1.6; }
+.auth-google-message[role="alert"] { color: var(--destructive); border-color: var(--destructive); }
+.auth-google-divider { display: flex; align-items: center; gap: 12px; margin-top: 24px; color: var(--muted-foreground); font-size: 13px; }
+.auth-google-divider::before, .auth-google-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.auth-google-retry, .auth-google-recovery { display: block; margin-top: 12px; color: var(--primary); font-size: 14px; font-weight: 600; text-underline-offset: 3px; }
+.auth-google-retry:hover, .auth-google-recovery:hover { text-decoration: underline; }
+.auth-google-retry:focus-visible, .auth-google-recovery:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.auth-google-retry:disabled { opacity: .6; cursor: not-allowed; }
 @media (min-width: 900px) {
   .auth-page-content--illustrated { max-width: 1040px; }
   .auth-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px); align-items: center; gap: 64px; }
