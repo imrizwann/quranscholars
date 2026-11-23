@@ -59,6 +59,13 @@ export default function Register() {
 
   return (
     <AuthPage
+      illustration={{
+        position: "right",
+        src: "/images/auth/welcome-to-learning.jpg",
+        title: "A new chapter starts here.",
+        description: "Find a course that interests you and learn at your own pace.",
+        source: "https://www.vecteezy.com/vector-art/10837960-young-muslim-woman-in-hijab-smiling-and-pointing-finger-to-the-side-vector-illustration-free-download",
+      }}
       title="Create your account"
       description="Learn at your pace or apply to teach. Start with one account."
       footer={
@@ -95,6 +102,7 @@ export default function Register() {
             id="register-name"
             name="name"
             label="Full name"
+            placeholder="Your full name"
             autoComplete="name"
             autoCapitalize="words"
             maxLength={120}
@@ -107,6 +115,7 @@ export default function Register() {
             id="register-email"
             name="email"
             label="Email address"
+            placeholder="you@example.com"
             type="email"
             autoComplete="email"
             inputMode="email"
@@ -122,6 +131,7 @@ export default function Register() {
             id="register-password"
             name="password"
             label="Password"
+            placeholder="Create a password"
             type="password"
             autoComplete="new-password"
             minLength={6}
@@ -136,7 +146,7 @@ export default function Register() {
           type="submit"
           loading={isLoading}
           loadingLabel="Creating account…"
-          className="mt-6 h-12 w-full rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-60"
+          className="auth-submit"
         >
           Create account
         </AsyncButton>

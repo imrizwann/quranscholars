@@ -31,6 +31,9 @@
 .home-start-links small { display: block; margin-top: 3px; font-size: var(--font-size-label); line-height: 1.6; color: #ffffffbf; }
 .home-start-links a > svg { flex-shrink: 0; color: #9ed6c8; }
 .home-hero-actions a { min-height: 44px; padding: 10px 18px; border-radius: 7px; }
+.home-hero-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; padding: 0; list-style: none; }
+.home-hero-tags li { display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid #ffffff26; border-radius: 6px; background: #ffffff0a; color: #e1f0eb; font-size: 13px; font-weight: 600; line-height: 1.5; }
+.home-hero-tags svg { flex-shrink: 0; color: #9ed6c8; }
 .home-mobile-instructor-link { display: none; }
 .home-hero-highlights { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .home-hero-highlights > div { border-top: 0; border-left: 1px solid #ffffff26; }

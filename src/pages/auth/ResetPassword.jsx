@@ -93,6 +93,7 @@ export default function ResetPassword() {
               id="reset-password"
               name="password"
               label="New password"
+              placeholder="Create a new password"
               type="password"
               autoComplete="new-password"
               minLength={8}
@@ -107,6 +108,7 @@ export default function ResetPassword() {
               id="reset-confirm"
               name="confirmPassword"
               label="Confirm new password"
+              placeholder="Re-enter your new password"
               type="password"
               autoComplete="new-password"
               minLength={8}
@@ -131,7 +133,7 @@ export default function ResetPassword() {
             </div>
           )}
           <AsyncButton
-            className="cw-button cw-primary mt-6"
+            className="auth-submit"
             type="submit"
             loading={sending.isLoading}
             loadingLabel="Updating password"

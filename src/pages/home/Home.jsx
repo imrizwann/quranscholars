@@ -118,7 +118,7 @@ const Home = () => {
               className="mb-5 inline-flex max-w-full items-center gap-2 rounded-md border border-white/[.18] bg-white/[.09] px-3.5 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#d6efe8] backdrop-blur max-sm:tracking-[0.1em]"
             >
               <ShieldCheck className="size-3.5 text-[#f4c95d]" />
-              Quran & Islamic learning, at your pace
+              {isFeaturedCatalogue ? "Quran recitation for beginners" : "Quran & Islamic learning, at your pace"}
             </motion.div>
 
             <motion.h1
@@ -126,20 +126,24 @@ const Home = () => {
               variants={reveal}
               className="max-w-196 text-balance font-display text-[clamp(3rem,6.6vw,6.1rem)] font-black leading-[0.96] tracking-normal text-white max-sm:text-[2.48rem] max-sm:leading-[1.04]"
             >
-              <span>IQRA</span> <span className="text-[#f4c95d]">ILM</span>{" "}<span>DEEN</span>
+              {isFeaturedCatalogue ? <>Learn to Recite the Quran with <span className="text-[#f4c95d]">Confidence</span></> : <><span>IQRA</span> <span className="text-[#f4c95d]">ILM</span>{" "}<span>DEEN</span></>}
             </motion.h1>
 
             <motion.p
               variants={reveal}
               className="mt-6 max-w-172 text-pretty text-[clamp(1.05rem,1.45vw,1.24rem)] font-medium leading-[1.75] text-white/[.74]"
             >
-              Learn Quran, Tajweed, Hadith, Fiqh, and family-focused Islamic
+              {isFeaturedCatalogue ? "Learn to recite the Quran with clear, step-by-step Tajweed lessons. Start with the basics, practise what you learn, and build confidence at your own pace." : <>Learn Quran, Tajweed, Hadith, Fiqh, and family-focused Islamic
               studies with structured courses, practical lessons, and guidance
-              to help you build a consistent learning routine.
+              to help you build a consistent learning routine.</>}
             </motion.p>
 
+            {isFeaturedCatalogue && <motion.ul variants={reveal} className="home-hero-tags" aria-label="Course highlights">
+              {["Beginner-Friendly", "Step-by-Step Lessons", "Learn at Your Own Pace"].map(label => <li key={label}><Check size={15} aria-hidden="true" />{label}</li>)}
+            </motion.ul>}
+
             {isFeaturedCatalogue ? <motion.div variants={reveal} className="home-hero-actions mt-8 flex flex-wrap items-center gap-3">
-              <Link to="/courses" className="cw-button cw-secondary">Explore courses<ArrowRight size={16} aria-hidden="true" /></Link>
+              <Link to="/courses" className="cw-button cw-secondary">Explore Tajweed Course<ArrowRight size={16} aria-hidden="true" /></Link>
             </motion.div> : <motion.div
               variants={reveal}
               className="home-hero-actions mt-8 flex flex-wrap items-center gap-3"
@@ -161,7 +165,7 @@ const Home = () => {
               <Link to="/instructor/application" className="home-mobile-instructor-link">Become an instructor<ArrowRight size={15} aria-hidden="true" /></Link>
             </motion.div>}
 
-            <motion.div
+            {!isFeaturedCatalogue && <motion.div
               variants={reveal}
               className="mt-8 grid max-w-2xl grid-cols-3 overflow-hidden rounded-lg border border-white/[.12] bg-white/10 backdrop-blur home-hero-highlights"
               aria-label="Platform highlights"
@@ -179,7 +183,7 @@ const Home = () => {
                   </p>
                 </div>
               ))}
-            </motion.div>
+            </motion.div>}
           </motion.div>
 
           {isFeaturedCatalogue ? <aside className="home-featured-course" aria-labelledby="home-featured-title" aria-busy={coursesLoading}>

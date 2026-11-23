@@ -54,7 +54,7 @@ test("simplified auth forms preserve registration, session hydration and intende
     const submit = async () => act(async () => document.querySelector("form").dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true })));
     assert.equal(document.querySelectorAll("h1").length, 1);
     assert.equal(document.querySelectorAll("input").length, 3);
-    assert.equal(document.querySelector("aside"), null);
+    assert.equal(document.querySelector("aside img")?.getAttribute("alt"), "", "The side illustration is decorative");
     assert.equal(document.querySelector('input[name="role"]'), null);
     assert.equal(document.querySelector("form").checkValidity(), false);
     await submit(); assert.equal(requests.length, 0);

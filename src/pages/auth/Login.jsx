@@ -62,6 +62,12 @@ export default function Login() {
 
   return (
     <AuthPage
+      illustration={{
+        src: "/images/auth/learning-with-laptop.svg",
+        title: "Make time for learning.",
+        description: "Pick up where you left off, one lesson at a time.",
+        source: "https://www.vecteezy.com/vector-art/10595807-young-muslim-woman-in-hijab-working-on-laptop-while-writing-plan-vector-illustration-free-download",
+      }}
       title="Sign in"
       description="Continue your courses or open your teaching workspace."
       footer={
@@ -116,6 +122,7 @@ export default function Login() {
             id="login-email"
             name="email"
             label="Email address"
+            placeholder="you@example.com"
             type="email"
             autoComplete="username"
             inputMode="email"
@@ -131,6 +138,8 @@ export default function Login() {
             id="login-password"
             name="password"
             label="Password"
+            labelAction={<Link to="/forgot-password">Forgot password?</Link>}
+            placeholder="Enter your password"
             type="password"
             autoComplete="current-password"
             maxLength={1024}
@@ -139,20 +148,12 @@ export default function Login() {
             onChange={(event) => setPassword(event.target.value)}
             disabled={isLoading}
           />
-          <div className="text-right">
-            <Link
-              to="/forgot-password"
-              className="text-sm font-semibold text-primary hover:underline"
-            >
-              Forgot password?
-            </Link>
-          </div>
         </div>
         <AsyncButton
           type="submit"
           loading={isLoading}
           loadingLabel="Signing in…"
-          className="mt-6 h-12 w-full rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-60"
+          className="auth-submit"
         >
           Sign in
         </AsyncButton>

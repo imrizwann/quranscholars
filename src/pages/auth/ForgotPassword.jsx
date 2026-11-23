@@ -69,6 +69,7 @@ export default function ForgotPassword() {
             id="recovery-email"
             name="email"
             label="Email address"
+            placeholder="you@example.com"
             type="email"
             autoComplete="email"
             inputMode="email"
@@ -86,7 +87,7 @@ export default function ForgotPassword() {
             </p>
           )}
           <AsyncButton
-            className="cw-button cw-primary mt-6"
+            className="auth-submit"
             type="submit"
             loading={sending.isLoading}
             loadingLabel="Requesting reset link"
