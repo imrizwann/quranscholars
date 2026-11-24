@@ -115,7 +115,7 @@ export default function Navbar() {
   return <Dialog.Root open={mobileOpen} onOpenChange={changeMobile}>
     <header className="navbar-shell">
       <nav className="navbar-inner" aria-label="Main navigation" data-search-open={searchOpen || undefined}>
-        <Link className="navbar-logo" to="/" aria-label="QuranScholar home"><Brand /></Link>
+        <Link className="navbar-logo" to="/" aria-label="DarsLearn home"><Brand /></Link>
         <div className="navbar-primary">
           {primaryLinks.map(({ to, label }) => <NavLink key={to} to={to} className="navbar-link">{label}</NavLink>)}
           <Menu.Root open={openPopup === "more"} onOpenChange={changePopup("more")} modal={false}>

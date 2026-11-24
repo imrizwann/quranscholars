@@ -91,8 +91,8 @@ function WorkspaceSidebar({
           to="/"
           className="workspace-brand"
           onClick={onNavigate}
-          aria-label="QuranScholar home"
-          title={collapsed ? "QuranScholar home" : undefined}
+          aria-label="DarsLearn home"
+          title={collapsed ? "DarsLearn home" : undefined}
         >
           <Brand caption />
         </NavLink>

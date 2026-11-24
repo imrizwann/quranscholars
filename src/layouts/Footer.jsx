@@ -43,7 +43,7 @@ const Footer = () => {
         <div className="flex flex-col gap-6 border-b border-border py-8 lg:flex-row lg:items-center lg:justify-between">
           <Link
             to="/"
-            aria-label="QuranScholar home"
+            aria-label="DarsLearn home"
             className="flex min-w-0 flex-col items-start gap-4 no-underline sm:flex-row sm:items-center"
           >
             <span className="inline-flex shrink-0 items-center gap-2.5 text-lg text-foreground"><Brand /></span>
