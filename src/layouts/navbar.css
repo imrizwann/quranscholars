@@ -56,7 +56,7 @@
 @media (max-width: 1023px) { .navbar-inner { min-height: 64px; padding: 8px 16px; gap: 12px; } .navbar-primary { display: none; } .navbar-mobile-trigger { display: grid; } .navbar-login { display: none; } .navbar-auth-links { gap: 0; } .navbar-search-form { --navbar-search-width: min(264px, calc(100vw - 208px)); } }
 @media (max-width: 600px) { .navbar-logo { font-size: 1rem; gap: 8px; } .navbar-logo .brand { --brand-width: 148px; } .navbar-inner { gap: 8px; padding-inline: 12px; } .navbar-actions { gap: 4px; } .navbar-icon-button, .navbar-actions .notification-trigger { width: 40px; height: 40px; } .navbar-search-form { flex-basis: 40px; width: 40px; height: 40px; } .navbar-search-form input { font-size: 1rem; } .navbar-auth-links .cw-button { padding-inline: 10px; } }
 @media (max-width: 767px) { .navbar-inner[data-search-open] .navbar-logo { opacity: 0; visibility: hidden; pointer-events: none; } }
-@media (max-width: 380px) { .navbar-logo .brand-art { width: calc(var(--brand-width) * 307 / 1270); } }
+@media (max-width: 380px) { .navbar-logo .brand { --brand-width: clamp(100px, calc(100vw - 214px), 148px); } }
 @media (prefers-reduced-motion: reduce) { .navbar-link, .navbar-more-trigger svg, .navbar-mobile-drawer, .navbar-logo, .navbar-search-form input { transition: none; } }
 
 @media (max-width: 639px) {

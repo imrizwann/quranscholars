@@ -14,7 +14,10 @@
 .learning-back, .learning-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; width: fit-content; }
 .learning-back { font-size: var(--font-size-body); color: var(--muted-foreground); }
 .learning-back:hover { color: var(--primary); }
-@media (max-width: 380px) { .learning-topbar .learning-brand .brand-art { width: calc(var(--brand-width) * 307 / 1270); } }
+@media (max-width: 380px) {
+  .learning-topbar .learning-back { justify-content: center; min-width: 44px; }
+  .learning-topbar .learning-back > span { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
 .learning-brand { color: var(--primary); font: 650 1rem/1.4 var(--font-display); }
 .learning-main { max-width: 1440px; padding: 26px clamp(16px, 3vw, 40px) 30px; margin-inline: auto; min-width: 0; }
 .learning-course-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 24px; }
