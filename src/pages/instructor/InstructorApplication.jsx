@@ -66,13 +66,13 @@ function ApplicationPage({ user }) {
   }
 
   if (!user) return <main className="public-page">
-    <Link to="/get-started/instructor" className="public-back"><ArrowLeft size={16} aria-hidden="true" />About teaching on QuranScholar</Link>
+    <Link to="/get-started/instructor" className="public-back"><ArrowLeft size={16} aria-hidden="true" />About teaching on DarsLearn</Link>
     <header className="public-heading"><p className="public-eyebrow">Instructor application</p><h1>Start your teaching journey.</h1><p>Sign in or create an account to share your teaching background and submit your qualifications for review.</p></header>
     <section className="public-panel" aria-labelledby="application-signin"><span className="public-icon"><Presentation size={22} aria-hidden="true" /></span><h2 id="application-signin" className="mt-4">One account for learning and teaching</h2><p className="mt-3">Your application and certificates are saved securely to your account. You can continue learning while the team reviews your application.</p><div className="public-actions"><Link to="/register" state={applicationReturn} className="cw-button cw-primary">Create an account<ArrowRight size={16} aria-hidden="true" /></Link><Link to="/login" state={applicationReturn} className="cw-button">Log in</Link></div></section>
   </main>;
 
   return <main className="public-page">
-    <Link to="/get-started/instructor" className="public-back"><ArrowLeft size={16} aria-hidden="true" />About teaching on QuranScholar</Link>
+    <Link to="/get-started/instructor" className="public-back"><ArrowLeft size={16} aria-hidden="true" />About teaching on DarsLearn</Link>
     <header className="public-heading">
       <p className="public-eyebrow">Instructor application</p>
       <h1>{instructor ? "Your teaching workspace is ready." : revising ? "Revise your instructor application." : application ? application.status === "pending" ? "Your application is submitted." : "Your application has been reviewed." : "Share your knowledge. Help others grow."}</h1>

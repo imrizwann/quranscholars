@@ -11,7 +11,7 @@ const footerColumns = [
       // { to: "/live-classes", label: "Live Classes" },
       { to: "/instructors", label: "Instructors" },
       // { to: "/services", label: "Services" },
-      { to: "/get-started/instructor", label: "Teach on QuranScholar" },
+      { to: "/get-started/instructor", label: "Teach on DarsLearn" },
       // { to: "/blogs", label: "Blogs" },
     ],
   },
@@ -103,7 +103,7 @@ const Footer = () => {
 
         <div className="flex flex-col gap-3 border-t border-border py-5 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p className="font-medium">
-            &copy; {new Date().getFullYear()} QuranScholar. All rights reserved.
+            &copy; {new Date().getFullYear()} DarsLearn. All rights reserved.
           </p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <Link

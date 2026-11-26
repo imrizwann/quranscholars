@@ -27,7 +27,7 @@ export default function InstructorCourseCard({ course }) {
         ) : (
           <div className="studio-course-placeholder">
             <BookOpen size={42} strokeWidth={1.25} aria-hidden="true" />
-            <span>QURANSCHOLAR</span>
+            <span>DARSLEARN</span>
             <small>Course cover</small>
           </div>
         )}

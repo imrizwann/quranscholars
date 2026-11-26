@@ -66,7 +66,7 @@ const sections = [
     id: "children",
     title: "Children and family accounts",
     icon: UserRoundCheck,
-    intro: "A parent or guardian should be involved when a minor uses QuranScholar.",
+    intro: "A parent or guardian should be involved when a minor uses DarsLearn.",
     items: [
       "We aim to collect only information needed to deliver and support the learning experience.",
       "Parents or guardians can contact us about access, correction, or deletion requests for a minor.",
@@ -92,13 +92,13 @@ const PrivacyPolicy = () => (
     <MarketingHero
       eyebrow="Privacy and data protection"
       title="Your information, explained clearly."
-      description="This policy describes how QuranScholar collects, uses, shares, and protects personal information across our website, admissions, courses, communications, and learner support."
+      description="This policy describes how DarsLearn collects, uses, shares, and protects personal information across our website, admissions, courses, communications, and learner support."
       icon={ShieldCheck}
       primaryAction={{ to: "/contact", label: "Contact us about privacy" }}
       secondaryAction={{ to: "/", label: "Return home" }}
       highlights={[
         { label: "Last updated", value: "3 September 2026" },
-        { label: "Applies to", value: "QuranScholar accounts, learning services, and support" },
+        { label: "Applies to", value: "DarsLearn accounts, learning services, and support" },
         { label: "Privacy contact", value: "contact@darslearn.com" },
       ]}
       labelledBy="privacy-title"
@@ -120,7 +120,7 @@ const PrivacyPolicy = () => (
 
       <div className="min-w-0">
         <div className="rounded-2xl border border-[#cfe0d8] bg-[#edf6f2] p-5 text-sm font-medium leading-7 text-[#405d52] sm:p-6">
-          <strong className="font-black text-[#173b31]">Plain-language summary:</strong> we use personal information to provide and improve QuranScholar. We limit access, work with service providers where needed, and give you a way to ask questions or exercise applicable rights.
+          <strong className="font-black text-[#173b31]">Plain-language summary:</strong> we use personal information to provide and improve DarsLearn. We limit access, work with service providers where needed, and give you a way to ask questions or exercise applicable rights.
         </div>
 
         <div className="mt-8 grid gap-6">
@@ -139,7 +139,7 @@ const PrivacyPolicy = () => (
 
           <section id="cookies" className="scroll-mt-28 rounded-2xl border border-[#dfe6e2] bg-white p-6 sm:p-8" aria-labelledby="cookies-title">
             <div className="flex items-start gap-4"><span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#e6f2ed] text-primary"><Cookie className="size-5" /></span><div><p className="text-xs font-black uppercase tracking-[0.13em] text-primary">Browser data</p><h2 id="cookies-title" className="mt-1 font-display text-2xl font-black tracking-[-0.035em] sm:text-3xl">Cookies and similar technologies</h2></div></div>
-            <p className="mt-5 text-sm font-medium leading-7 text-[#5f7268] sm:text-base">QuranScholar may use essential technologies to maintain sessions, remember preferences, protect accounts, and keep the service reliable. Where optional analytics or similar tools require consent, those choices should be provided through the relevant consent interface. Browser settings can also limit cookies, although some account features may stop working correctly.</p>
+            <p className="mt-5 text-sm font-medium leading-7 text-[#5f7268] sm:text-base">DarsLearn may use essential technologies to maintain sessions, remember preferences, protect accounts, and keep the service reliable. Where optional analytics or similar tools require consent, those choices should be provided through the relevant consent interface. Browser settings can also limit cookies, although some account features may stop working correctly.</p>
           </section>
 
           <section id="updates" className="scroll-mt-28 rounded-2xl bg-[#0b3e38] p-6 text-white sm:p-8" aria-labelledby="updates-title">

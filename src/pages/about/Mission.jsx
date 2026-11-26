@@ -52,7 +52,7 @@ const Mission = () => (
       description="Our purpose is to help people understand their faith and bring that knowledge into daily life, through clear teaching, thoughtful courses, and steady progress."
       icon={Sparkles}
       primaryAction={{ to: "/courses", label: "Start learning" }}
-      secondaryAction={{ to: "/about", label: "About QuranScholar" }}
+      secondaryAction={{ to: "/about", label: "About DarsLearn" }}
       highlightsTitle="What guides our work"
       highlights={[
         { label: "Grounded in", value: "Quran, authentic Sunnah, scholarship, and good character" },
@@ -110,7 +110,7 @@ const Mission = () => (
             id="focus-title"
             eyebrow="The long view"
             title="A learning ecosystem that grows with its students."
-            description="QuranScholar is designed to expand carefully: stronger curriculum, better learning tools, broader language support, and more pathways for individuals, families, and communities. Growth should improve trust and clarity—not weaken them."
+            description="DarsLearn is designed to expand carefully: stronger curriculum, better learning tools, broader language support, and more pathways for individuals, families, and communities. Growth should improve trust and clarity—not weaken them."
           />
           <Link to="/services" className="group mt-6 inline-flex items-center gap-2 text-sm font-black text-primary no-underline">Explore our learner services <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></Link>
         </div>

@@ -251,7 +251,7 @@ export function InstructorStart() {
         Get started
       </Link>
       <header className="public-heading">
-        <p className="public-eyebrow">Teaching on QuranScholar</p>
+        <p className="public-eyebrow">Teaching on DarsLearn</p>
         <h1>
           {instructor
             ? "Bring your next course to life."

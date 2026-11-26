@@ -118,7 +118,7 @@ export const serviceCatalog = [
     audience: "Learners, families, and organisations planning focused Islamic learning events.",
     outcomes: ["Learn around timely themes", "Connect with teachers and peers", "Bring structured learning to your community"],
     includes: ["Seasonal workshops", "Guest teacher sessions", "Community and family learning events"],
-    delivery: "Upcoming dates and registration details are announced through official QuranScholar channels.",
+    delivery: "Upcoming dates and registration details are announced through official DarsLearn channels.",
   },
 ];
 

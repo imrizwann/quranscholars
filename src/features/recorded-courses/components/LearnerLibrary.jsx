@@ -23,7 +23,7 @@ function LibraryCard({ course, disabled }) {
   const action = progress?.completed ? "Revisit course" : progress?.started ? "Continue learning" : progress ? "Start course" : "Open course";
   return <article className="studio-course-card">
     <Link to={destination} className="studio-course-cover" aria-label={`Open ${course.title}`}>
-      {image && failed !== image ? <img src={image} alt="" loading="lazy" onError={() => setFailed(image)} /> : <div className="studio-course-placeholder"><BookOpen size={42} strokeWidth={1.25} aria-hidden="true" /><span>QURANSCHOLAR</span></div>}
+      {image && failed !== image ? <img src={image} alt="" loading="lazy" onError={() => setFailed(image)} /> : <div className="studio-course-placeholder"><BookOpen size={42} strokeWidth={1.25} aria-hidden="true" /><span>DARSLEARN</span></div>}
       <span className="studio-course-status">{course.hidden ? "Hidden course" : course.status === "Archived" ? "Archived course" : "In your library"}</span>
     </Link>
     <div className="studio-course-body">

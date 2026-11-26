@@ -14,7 +14,7 @@ export default function InstructorAccessState({ errorMessage, onRetry, checking 
             <header className="public-heading">
               <p className="public-eyebrow">Instructor workspace</p>
               <h1 id="access-title">{failed ? "We couldn’t check your access." : "Instructor access required"}</h1>
-              <p>{failed ? "We need to verify your account before opening the workspace." : "This workspace is available to instructor accounts. You can explore teaching on QuranScholar and continue learning with your current account."}</p>
+              <p>{failed ? "We need to verify your account before opening the workspace." : "This workspace is available to instructor accounts. You can explore teaching on DarsLearn and continue learning with your current account."}</p>
             </header>
             {failed && <p className="mt-4" role="alert">{errorMessage}</p>}
             <div className="public-actions">

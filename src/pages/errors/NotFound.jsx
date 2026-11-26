@@ -7,7 +7,7 @@ const NotFound = () => (
       <div className="bg-[#082f2b] px-7 py-9 text-white sm:px-10 sm:py-11">
         <p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-[#9ed6c8]"><Compass className="size-4 text-[#f4c95d]" />Error 404</p>
         <h1 id="not-found-title" className="mt-4 text-balance font-display text-4xl font-black tracking-[-0.045em] sm:text-5xl">This page could not be found.</h1>
-        <p className="mt-4 max-w-2xl text-sm font-medium leading-7 text-white/70 sm:text-base">The link may be outdated, or the page may have moved as QuranScholar’s course and service structure evolved.</p>
+        <p className="mt-4 max-w-2xl text-sm font-medium leading-7 text-white/70 sm:text-base">The link may be outdated, or the page may have moved as DarsLearn’s course and service structure evolved.</p>
       </div>
       <div className="p-7 sm:p-10">
         <p className="text-sm font-bold text-[#52655c]">Choose a reliable place to continue:</p>

@@ -375,7 +375,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Why Quran Scholars */}
+      {/* Why DarsLearn */}
       <section className="bg-white px-6 py-24 max-sm:px-4 max-sm:py-18">
         <motion.div
           className="mx-auto max-w-7xl"
@@ -386,7 +386,7 @@ const Home = () => {
         >
           <div className="grid gap-12 lg:grid-cols-[.72fr_1.28fr] lg:gap-20">
             <div>
-              <SectionLabel>Why Quran Scholars</SectionLabel>
+              <SectionLabel>Why DarsLearn</SectionLabel>
               <h2 className="text-balance font-display text-[clamp(2.2rem,3.6vw,3.4rem)] font-black leading-[1.05] tracking-[-0.045em]">
                 Technology should support the teacher, not replace them.
               </h2>

@@ -79,7 +79,7 @@ export default function VerifyEmail() {
       description={
         verified
           ? "Your email address is confirmed. Thank you for keeping your account up to date."
-          : "Confirm your email address to help keep your QuranScholar account secure."
+          : "Confirm your email address to help keep your DarsLearn account secure."
       }
       footer={
         <Link

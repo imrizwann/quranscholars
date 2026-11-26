@@ -119,7 +119,7 @@ function LearningWorkspaceBody({ course, userId, lessonId, progress }) {
   useEffect(() => {
     if (!activeLessonTitle) return;
     const title = document.title;
-    document.title = `${activeLessonTitle} · ${course.title} | QuranScholar`;
+    document.title = `${activeLessonTitle} · ${course.title} | DarsLearn`;
     return () => { document.title = title; };
   }, [activeLessonTitle, course.title]);
   const remember = useCallback(({ currentTime }) => {

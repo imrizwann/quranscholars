@@ -19,7 +19,7 @@ const primaryLinks = [
 const moreLinks = [
   // { to: "/blogs", label: "Resources", icon: NotebookPen },
   // { to: "/services", label: "Learner services", icon: Headphones },
-  { to: "/about", label: "About QuranScholar", icon: Info },
+  { to: "/about", label: "About DarsLearn", icon: Info },
   { to: "/mission", label: "Our mission", icon: Compass },
   { to: "/contact", label: "Contact", icon: Mail },
 ];

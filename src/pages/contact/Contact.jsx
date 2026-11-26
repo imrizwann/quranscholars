@@ -43,7 +43,7 @@ const contactMethods = [
 
 const helpTopics = [
   { title: "Find a course", detail: "Compare subjects, course levels, and learning formats.", to: "/courses", icon: BookOpenCheck },
-  { title: "Teach on QuranScholar", detail: "Learn how to apply and have your qualifications reviewed.", to: "/get-started/instructor", icon: CheckCircle2 },
+  { title: "Teach on DarsLearn", detail: "Learn how to apply and have your qualifications reviewed.", to: "/get-started/instructor", icon: CheckCircle2 },
   { title: "Continue learning", detail: "Open your courses and see your saved progress.", to: "/dashboard/learning", icon: Headphones },
 ];
 
@@ -77,7 +77,7 @@ const Contact = () => {
     <main className="contact-page">
       <MarketingHero
         tone="dark"
-        eyebrow="Contact QuranScholar"
+        eyebrow="Contact DarsLearn"
         title="How can we help you?"
         description="Whether you are choosing your first course or need help getting back to a lesson, our team can help you find the next step."
         icon={MessageSquareText}

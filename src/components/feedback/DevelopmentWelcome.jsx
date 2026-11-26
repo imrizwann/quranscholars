@@ -45,18 +45,18 @@ export default function DevelopmentWelcome() {
         </span>
         <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#a6dace]">Assalamu alaikum</p>
         <h2 id="development-welcome-title" className="mt-3 font-display text-3xl font-black leading-tight sm:text-4xl">
-          Welcome to QuranScholar
+          Welcome to DarsLearn
         </h2>
         <p className="mt-3 text-sm leading-7 text-white/75">We’re glad you’re here and excited to share this learning journey with you.</p>
       </div>
       <div className="px-6 py-7 sm:px-9 sm:py-8">
         <span className="inline-flex rounded-full border border-[#ead69c] bg-[#fff5d8] px-3 py-1 text-xs font-bold text-[#705315]">Website under development</span>
         <p id="development-welcome-description" className="mt-4 text-sm leading-7 text-[#53665e]">
-          We’re still building and improving QuranScholar. You’re welcome to explore, but some features may be incomplete and some content is for demonstration. Things may change as we prepare for launch.
+          We’re still building and improving DarsLearn. You’re welcome to explore, but some features may be incomplete and some content is for demonstration. Things may change as we prepare for launch.
         </p>
         <p className="mt-5 flex items-start gap-2.5 text-sm font-semibold leading-7 text-[#234b40]">
           <Heart className="mt-1 size-5 shrink-0" aria-hidden="true" />
-          Thank you for visiting, and for your patience and support as we bring QuranScholar to life.
+          Thank you for visiting, and for your patience and support as we bring DarsLearn to life.
         </p>
         <button
           type="button"

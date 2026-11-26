@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Quran Scholars",
-  "short_name": "QuranScholar",
-  "description": "Quran Scholars learning platform",
+  "name": "DarsLearn",
+  "short_name": "DarsLearn",
+  "description": "DarsLearn learning platform",
   "start_url": "/",
   "scope": "/",
   "icons": [

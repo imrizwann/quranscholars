@@ -73,7 +73,7 @@ export default function Login() {
       description="Continue your courses or open your teaching workspace."
       footer={
         <>
-          New to QuranScholar?{" "}
+          New to DarsLearn?{" "}
           <Link
             to="/register"
             state={returnTo ? { from: returnTo } : undefined}

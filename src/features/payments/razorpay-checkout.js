@@ -53,7 +53,7 @@ export async function openRazorpayCheckout({ payment, course, user, onInstance, 
       instance = new Razorpay({
         key: checkout.publicKey, order_id: checkout.orderId,
         amount: payment.amountMinor, currency: payment.currency,
-        name: "QuranScholar", description: course.title,
+        name: "DarsLearn", description: course.title,
         image: new URL("/web-app-manifest-192x192.png", window.location.origin).href,
         prefill: { name: user.name || "", email: user.email || "" },
         theme: { color, backdrop_color: "#fcfcfa" },

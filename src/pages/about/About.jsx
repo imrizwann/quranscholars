@@ -47,13 +47,13 @@ const About = () => (
   <main className="about-page">
     <MarketingHero
       tone="dark"
-      eyebrow="About QuranScholar"
+      eyebrow="About DarsLearn"
       title="A clearer path to Quran and Islamic learning."
-      description="Understand more, one lesson at a time. QuranScholar brings recorded courses, clear lesson outlines, and saved progress together so you can learn around your daily life."
+      description="Understand more, one lesson at a time. DarsLearn brings recorded courses, clear lesson outlines, and saved progress together so you can learn around your daily life."
       icon={BookOpenCheck}
       primaryAction={{ to: "/courses", label: "Explore courses" }}
       secondaryAction={{ to: "/mission", label: "Read our mission" }}
-      highlightsTitle="Learning with QuranScholar"
+      highlightsTitle="Learning with DarsLearn"
       highlights={[
         { icon: BookOpenCheck, label: "Know where to begin", value: "Check the course level, instructor, and lesson outline before enrolling." },
         { icon: Laptop2, label: "Learn at your pace", value: "Watch, pause, and revisit lessons. Your progress is saved for next time." },

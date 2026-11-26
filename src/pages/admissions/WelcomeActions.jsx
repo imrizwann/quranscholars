@@ -22,7 +22,7 @@ export default function WelcomeActions({ name, hasAdmission, formOpen, onStartAd
     },
     {
       title: "Become an Instructor",
-      description: "Share your knowledge with others. Learn about teaching on QuranScholar and how to get started.",
+      description: "Share your knowledge with others. Learn about teaching on DarsLearn and how to get started.",
       icon: Presentation,
       to: "/get-started/instructor",
       label: "Explore teaching",
@@ -34,7 +34,7 @@ export default function WelcomeActions({ name, hasAdmission, formOpen, onStartAd
       <header className="public-heading">
         <p className="public-eyebrow">Your dashboard</p>
         <h1 id="welcome-title">
-          {firstName ? `Welcome, ${firstName}.` : "Welcome to QuranScholar."}
+          {firstName ? `Welcome, ${firstName}.` : "Welcome to DarsLearn."}
         </h1>
         <p className="mt-4 text-sm leading-7 text-muted-foreground sm:text-base">
           Learn, find guided support, or share your knowledge. Start wherever feels right for you.

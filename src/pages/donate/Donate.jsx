@@ -38,7 +38,7 @@ const causes = [
 
 const safeguards = [
   "Confirm the current campaign and intended use before contributing",
-  "Use only payment details shared through an official QuranScholar channel",
+  "Use only payment details shared through an official DarsLearn channel",
   "Keep your receipt or transaction reference for follow-up",
   "Contact us directly if you need allocation or eligibility information",
 ];

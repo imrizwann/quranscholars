@@ -47,7 +47,7 @@ const DiscoverIslam = () => {
                 viewport={{ once: true, amount: 0.45 }}>
 
                 
-                Quran Scholar brings live, mentor-led learning that blends
+                DarsLearn brings live, mentor-led learning that blends
                 Qur&apos;an, Sunnah, adab, and spiritual refinement. Study in small
                 cohorts, follow curated study plans, and witness your iman grow
                 in community.

@@ -13,7 +13,7 @@ import { JSDOM } from "jsdom";
 import { toast } from "sonner";
 
 test("shared policy, admin operations, course metadata and sharing handle loading, outcomes and safe errors", async t => {
-  const dom = new JSDOM("<html><head><title>QuranScholar</title></head><body><div id='root'></div></body></html>", { url: "https://frontend.example.test", pretendToBeVisual: true });
+  const dom = new JSDOM("<html><head><title>DarsLearn</title></head><body><div id='root'></div></body></html>", { url: "https://frontend.example.test", pretendToBeVisual: true });
   for (const key of ["window", "document", "navigator", "Node", "Element", "HTMLElement", "HTMLInputElement", "HTMLButtonElement", "Document", "ShadowRoot", "MutationObserver", "Event", "MouseEvent"]) Object.defineProperty(globalThis, key, { configurable: true, writable: true, value: key === "window" ? dom.window : dom.window[key] });
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
   globalThis.requestAnimationFrame = dom.window.requestAnimationFrame.bind(dom.window);
@@ -73,11 +73,11 @@ test("shared policy, admin operations, course metadata and sharing handle loadin
     const MetadataHarness = () => { const location = useLocation(); return React.createElement(React.Fragment, null, React.createElement(mod.Metadata), React.createElement(Link, { to: "/login" }, "Sign in"), React.createElement("output", null, location.pathname)); };
     await render(React.createElement(MetadataHarness), "/courses/recitation?privateReference=remove-this");
     await settle(() => document.title.includes(course.title));
-    assert.equal(document.head.querySelector('meta[property="og:title"]').content, `${course.title} | QuranScholar`);
+    assert.equal(document.head.querySelector('meta[property="og:title"]').content, `${course.title} | DarsLearn`);
     assert.equal(document.head.querySelector('link[rel="canonical"]').href, "https://darslearn.com/courses/recitation");
     assert.equal(document.querySelector("script"), null);
     await act(async () => document.querySelector('a[href="/login"]').click());
-    await settle(() => document.title === "Sign in | QuranScholar");
+    await settle(() => document.title === "Sign in | DarsLearn");
     assert.equal(document.head.querySelector('meta[name="robots"]').content, "noindex, nofollow");
     assert.equal(document.head.querySelectorAll('meta[name="description"]').length, 1);
     await render(React.createElement(mod.Share, { course })); await click("Share course");
