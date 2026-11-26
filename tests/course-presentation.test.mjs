@@ -75,10 +75,11 @@ for (const layout of [undefined, "full"]) test(`${layout || "featured (default)"
       } else {
         assert.equal(hero.querySelector(".home-start-panel"), null);
         assert.match(hero.querySelector(".home-featured-course").textContent, /Recitation foundations 1/);
-        assert.equal(hero.querySelector(".home-hero-actions a").getAttribute("href"), "/courses");
-        assert.match(hero.querySelector("h1").textContent, /IQRA/);
+        assert.equal(hero.querySelector(".home-hero-actions a").getAttribute("href"), "/courses/recitation-1", "the main call to action opens the featured course");
+        assert.match(hero.querySelector("h1").textContent, /Learn to Recite the Quran with Confidence/);
         assert.equal(document.querySelectorAll("article .catalogue-course-media").length, 1, "one course appears as one prominent preview");
-        assert.match(document.querySelector(".home-study-guide").textContent, /Your learning routine/);
+        assert.match(document.querySelector("#how-it-works").textContent, /three simple steps/);
+        assert.equal(document.querySelector("#courses"), null, "no 'more courses' section with a single course");
       }
     });
     if (layout !== "full") {

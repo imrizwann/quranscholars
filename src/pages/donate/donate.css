@@ -1,0 +1,82 @@
+/* ==========================================================================
+   Donate page (shares hero, buttons and section styles with about.css)
+   ========================================================================== */
+
+.donate-page .about-hero h1 { max-width: 17ch; }
+.donate-page a:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+
+/* ---------- Trust card (hero) ---------- */
+
+.donate-trust { padding: clamp(24px, 3vw, 32px); border: 1px solid rgba(255, 255, 255, .14); border-radius: 20px; background: rgba(255, 255, 255, .05); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.donate-trust-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 13px; background: rgba(244, 201, 93, .14); color: var(--about-gold); }
+.donate-trust h2 { margin-top: 16px; font-family: var(--font-display); font-size: 1.375rem; font-weight: 650; }
+.donate-trust > p { margin-top: 8px; color: rgba(255, 255, 255, .72); font-size: 15px; line-height: 1.65; }
+.donate-trust-channels { display: grid; gap: 10px; margin-top: 20px; }
+.donate-trust-channels a { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 12px 14px; border: 1px solid rgba(255, 255, 255, .12); border-radius: var(--radius-button); background: rgba(255, 255, 255, .04); color: #fff; text-decoration: none; transition: background-color 200ms var(--ease-out-ui), border-color 200ms var(--ease-out-ui); }
+.donate-trust-channels a:hover { border-color: rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .09); }
+.donate-trust-channels a:focus-visible { outline-color: var(--about-gold); }
+.donate-trust-channels svg { flex-shrink: 0; color: var(--about-mint); }
+.donate-trust-channels a > span:not(.sr-only) { display: grid; min-width: 0; }
+.donate-trust-channels strong { font-size: 14.5px; font-weight: 600; }
+.donate-trust-channels small { overflow: hidden; color: rgba(255, 255, 255, .62); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- Causes ---------- */
+
+.donate-causes { display: grid; gap: 16px; margin-top: 40px; padding: 0; list-style: none; }
+.donate-causes li { padding: 26px; border: 1px solid var(--about-line); border-radius: 18px; background: #fff; transition: border-color 200ms var(--ease-out-ui); }
+.donate-causes li:hover { border-color: color-mix(in srgb, var(--primary) 30%, var(--about-line)); }
+.donate-causes h3 { margin-top: 18px; font-size: 1.0625rem; font-weight: 650; }
+.donate-causes p { margin-top: 8px; color: var(--about-text); font-size: 15px; line-height: 1.7; }
+@media (min-width: 640px) { .donate-causes { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; } }
+@media (min-width: 1100px) { .donate-causes { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+/* ---------- Steps ---------- */
+
+.donate-steps { position: relative; display: grid; gap: 16px; margin-top: 40px; padding: 0; list-style: none; }
+.donate-steps li { position: relative; padding: 24px; border: 1px solid var(--about-line); border-radius: 18px; background: #fff; }
+.donate-step-top { display: flex; align-items: center; justify-content: space-between; }
+.donate-step-top svg { color: var(--primary); }
+.donate-step-number { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 15px; font-weight: 650; }
+.donate-steps h3 { margin-top: 18px; font-size: 1.0625rem; font-weight: 650; line-height: 1.35; }
+.donate-steps p { margin-top: 8px; color: var(--about-text); font-size: 15px; line-height: 1.65; }
+@media (min-width: 640px) { .donate-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; } }
+@media (min-width: 1100px) {
+  .donate-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  /* A line linking the four steps. */
+  .donate-steps::before { content: ""; position: absolute; top: 42px; right: 10%; left: 10%; height: 2px; background: linear-gradient(90deg, var(--primary), #d9a21b); opacity: .3; }
+}
+
+/* ---------- Sponsor a learner ---------- */
+
+.donate-sponsor { display: grid; align-items: center; gap: 32px; }
+.donate-sponsor .about-hero-actions { margin-top: 26px; }
+.donate-sponsor-points { display: grid; gap: 14px; padding: clamp(22px, 3vw, 30px); border: 1px solid rgba(255, 255, 255, .12); border-radius: 18px; background: rgba(255, 255, 255, .05); list-style: none; }
+.donate-sponsor-points li { display: flex; align-items: flex-start; gap: 12px; color: rgba(255, 255, 255, .85); font-size: 15.5px; line-height: 1.55; }
+.donate-sponsor-points li > svg { flex-shrink: 0; margin-top: 3px; color: var(--about-gold); }
+.donate-sponsor-head { align-items: center !important; margin-bottom: 4px; }
+.donate-sponsor-head strong { color: #fff; font-size: 1.0625rem; font-weight: 650; }
+@media (min-width: 900px) { .donate-sponsor { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 64px; } }
+
+/* ---------- Questions ---------- */
+
+.donate-faq-grid { display: grid; gap: 28px; }
+.donate-faq-grid .about-intro a { color: var(--primary); font-weight: 600; overflow-wrap: anywhere; text-underline-offset: 3px; }
+@media (min-width: 960px) { .donate-faq-grid { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 64px; align-items: start; } }
+.donate-faq { border-top: 1px solid var(--about-line); }
+.donate-faq details { border-bottom: 1px solid var(--about-line); }
+.donate-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 60px; padding: 16px 0; color: var(--about-ink); font-size: 1rem; font-weight: 600; cursor: pointer; list-style: none; }
+.donate-faq summary::-webkit-details-marker { display: none; }
+.donate-faq summary:hover { color: var(--primary); }
+.donate-faq summary:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.donate-faq summary svg { flex-shrink: 0; color: var(--primary); transition: transform 250ms var(--ease-out-ui); }
+.donate-faq details[open] summary svg { transform: rotate(180deg); }
+.donate-faq details p { padding: 0 40px 20px 0; color: var(--about-text); font-size: 15px; line-height: 1.75; }
+.donate-safety { display: flex; align-items: flex-start; gap: 12px; margin-top: 22px; padding: 16px 18px; border: 1px solid #f0e2b8; border-radius: 14px; background: #fffaf0; color: #4f4426; font-size: 14.5px; line-height: 1.6; }
+.donate-safety svg { flex-shrink: 0; margin-top: 2px; color: #9a7418; }
+
+@media (max-width: 639px) {
+  .donate-faq details p { padding-right: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .donate-trust-channels a, .donate-causes li, .donate-faq summary svg { transition: none; }
+}

@@ -30,6 +30,13 @@ test("release configuration requires secure explicit API and canonical origins",
   assert.throws(() => validatePublicEnvironment({ ...valid, VITE_COURSE_MEDIA_BASE_URL: "https://media.example.test?key=private" }), /VITE_COURSE_MEDIA_BASE_URL/);
 });
 
+test("home hero layout flag accepts only the supported layouts", () => {
+  for (const value of ["", "current", "video", "path", "editorial"]) validatePublicEnvironment({ ...valid, VITE_HOME_HERO_LAYOUT: value });
+  for (const value of ["split", "Video", "stage", "carousel"]) {
+    assert.throws(() => validatePublicEnvironment({ ...valid, VITE_HOME_HERO_LAYOUT: value }), /VITE_HOME_HERO_LAYOUT must be current, video, path or editorial/);
+  }
+});
+
 test("Google configuration accepts only a public Web client ID", () => {
   validatePublicEnvironment({ ...valid, VITE_GOOGLE_CLIENT_ID: "123-public.apps.googleusercontent.com" });
   validatePublicEnvironment({ ...valid, VITE_GOOGLE_CLIENT_ID: "" });

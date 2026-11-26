@@ -1,134 +1,121 @@
+import { Link, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { ArrowRight, ArrowUp, Globe2, Mail, MessageCircle, Phone } from "lucide-react";
 import Brand from "@/components/branding/Brand.jsx";
-import { Link } from "react-router-dom";
-import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import { contactDetails } from "@/data/contactDetails.js";
+import "./footer.css";
 
-const footerColumns = [
-  {
-    title: "Platform",
-    links: [
-      { to: "/courses", label: "All courses" },
-      // { to: "/live-classes", label: "Live Classes" },
-      { to: "/instructors", label: "Instructors" },
-      // { to: "/services", label: "Services" },
-      { to: "/get-started/instructor", label: "Teach on DarsLearn" },
-      // { to: "/blogs", label: "Blogs" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { to: "/about", label: "About" },
-      { to: "/mission", label: "Mission" },
-      { to: "/donate", label: "Donate" },
-      { to: "/contact", label: "Contact" },
-    ],
-  },
-  {
-    title: "Account",
-    links: [
-      { to: "/login", label: "Login" },
-      { to: "/register", label: "Register" },
-      { to: "/dashboard/learning", label: "My Learning" },
-      { to: "/privacy", label: "Privacy" },
-      { to: "/course-policy", label: "Access & refunds" },
-    ],
-  },
+// Account links depend on whether someone is signed in.
+const guestLinks = [
+  { to: "/login", label: "Log in" },
+  { to: "/register", label: "Create an account" },
+];
+const memberLinks = [
+  { to: "/dashboard/learning", label: "My learning" },
+  { to: "/dashboard/purchases", label: "Purchases" },
+  { to: "/profile", label: "Profile" },
 ];
 
-const Footer = () => {
+function footerColumns(signedIn) {
+  return [
+    {
+      title: "Learn",
+      links: [
+        { to: "/courses", label: "All courses" },
+        { to: "/instructors", label: "Our teachers" },
+        ...(signedIn ? memberLinks : guestLinks),
+        // { to: "/live-classes", label: "Live classes" }, // Post-MVP
+        // { to: "/blogs", label: "Articles" },            // Post-MVP
+      ],
+    },
+    {
+      title: "Teach",
+      links: [
+        { to: "/get-started/instructor", label: "Teach on DarsLearn" },
+        { to: "/instructor/application", label: "Apply to teach" },
+      ],
+    },
+    {
+      title: "Company",
+      links: [
+        { to: "/about", label: "About us" },
+        { to: "/mission", label: "Our mission" },
+        { to: "/donate", label: "Donate" },
+        // { to: "/services", label: "Services" }, // Post-MVP
+      ],
+    },
+    {
+      title: "Support",
+      links: [
+        { to: "/contact", label: "Contact us" },
+        { to: "/course-policy", label: "Access & refunds" },
+        { to: "/privacy", label: "Privacy policy" },
+      ],
+    },
+  ];
+}
+
+function scrollToTop() {
+  const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+}
+
+export default function Footer() {
+  const signedIn = useSelector(state => Boolean(state.user?.user?._id));
+  const { pathname } = useLocation();
+  // These pages end with their own call to action or contact section, so the help strip would repeat it.
+  // Sign-in and account pages stay focused on the form and already offer "Need help? Contact the team".
+  const showHelp = ![
+    "/", "/contact", "/get-started/instructor", "/donate",
+    "/login", "/register", "/forgot-password", "/reset-password", "/verify-email",
+  ].includes(pathname);
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="border-t border-border bg-surface text-foreground">
+    <footer className="site-footer">
+      <span className="site-footer-pattern" aria-hidden="true" />
       <div className="page-container">
-        <div className="flex flex-col gap-6 border-b border-border py-8 lg:flex-row lg:items-center lg:justify-between">
-          <Link
-            to="/"
-            aria-label="DarsLearn home"
-            className="flex min-w-0 flex-col items-start gap-4 no-underline sm:flex-row sm:items-center"
-          >
-            <span className="inline-flex shrink-0 items-center gap-2.5 text-lg text-foreground"><Brand /></span>
-            <span className="hidden h-8 w-px bg-border sm:block" />
-            <span className="max-w-sm text-sm font-medium leading-6 text-muted-foreground">
-              Online Quran and Islamic learning with structured courses,
-              clear lessons, and trusted teacher support.
-            </span>
-          </Link>
-
-          <div className="flex min-w-0 flex-col items-start gap-3 lg:shrink-0">
-            <p className="text-sm font-semibold">Need help choosing where to begin?</p>
-            <Link to="/contact" className="cw-button cw-primary min-h-11">Contact our team<ArrowRight size={16} aria-hidden="true" /></Link>
+        {showHelp && <div className="site-footer-help">
+          <div>
+            <h2>Not sure where to start?</h2>
+            <p>Tell us what you would like to learn and we will help you choose the right course.</p>
           </div>
-        </div>
+          <div className="site-footer-help-actions">
+            <Link to="/contact" className="site-footer-button site-footer-button--gold">Contact our team<ArrowRight size={16} aria-hidden="true" /></Link>
+            <a href={contactDetails.whatsappHref} target="_blank" rel="noopener noreferrer" className="site-footer-button">
+              <MessageCircle size={17} aria-hidden="true" />Chat on WhatsApp<span className="sr-only"> (opens in a new tab)</span>
+            </a>
+          </div>
+        </div>}
 
-        <div className="grid gap-8 py-8 lg:grid-cols-[1fr_auto] lg:items-start">
-          <div className="grid gap-8 sm:grid-cols-3 lg:min-w-[34rem]">
-            {footerColumns.map((column) => (
+        <div className="site-footer-main">
+          <div className="site-footer-brand">
+            <Link to="/" aria-label="DarsLearn home" className="site-footer-logo"><Brand tone="dark" /></Link>
+            <p>Structured online courses with clear lessons, qualified teachers and progress that follows you on every device.</p>
+            <ul className="site-footer-contact" aria-label="Contact details">
+              <li><Mail size={16} aria-hidden="true" /><a href={`mailto:${contactDetails.email}`}>{contactDetails.email}</a></li>
+              <li><Phone size={16} aria-hidden="true" /><a href={contactDetails.phoneHref}>{contactDetails.phone}</a></li>
+              <li><Globe2 size={16} aria-hidden="true" /><span>Learn online, from anywhere</span></li>
+            </ul>
+          </div>
+
+          <div className="site-footer-columns">
+            {footerColumns(signedIn).map(column => (
               <nav key={column.title} aria-label={column.title}>
-                <h2 className="text-sm font-bold text-foreground">
-                  {column.title}
-                </h2>
-                <div className="mt-3 grid gap-2">
-                  {column.links.map((link) => (
-                    <Link
-                      key={link.to}
-                      to={link.to}
-                      className="w-fit text-sm font-medium leading-6 text-muted-foreground no-underline transition hover:text-primary"
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
+                <h2>{column.title}</h2>
+                <ul>
+                  {column.links.map(link => <li key={link.to}><Link to={link.to}>{link.label}</Link></li>)}
+                </ul>
               </nav>
             ))}
           </div>
-
-          <div className="grid gap-5 lg:justify-items-end">
-            <div className="grid gap-3 text-sm font-medium text-muted-foreground lg:text-right">
-              <a className="inline-flex min-h-10 min-w-0 items-center gap-2 break-all hover:text-primary lg:justify-end" href={`mailto:${contactDetails.email}`}>
-                <Mail className="size-4 shrink-0 text-primary" aria-hidden="true" />
-                {contactDetails.email}
-              </a>
-              <a className="inline-flex min-h-10 items-center gap-2 hover:text-primary lg:justify-end" href={contactDetails.phoneHref}>
-                <Phone className="size-4 shrink-0 text-primary" aria-hidden="true" />
-                {contactDetails.phone}
-              </a>
-              <p className="inline-flex items-center gap-2 lg:justify-end">
-                <MapPin className="size-4 text-primary" />
-                Online classes worldwide
-              </p>
-            </div>
-
-          </div>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-border py-5 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-medium">
-            &copy; {new Date().getFullYear()} DarsLearn. All rights reserved.
-          </p>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <Link
-              to="/privacy"
-              className="font-semibold no-underline transition hover:text-primary"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              to="/contact"
-              className="font-semibold no-underline transition hover:text-primary"
-            >
-              Support
-            </Link>
-            <Link
-              to="/courses"
-              className="font-semibold no-underline transition hover:text-primary"
-            >
-              Courses
-            </Link>
-          </div>
+        <div className="site-footer-bottom">
+          <p>&copy; {year} DarsLearn. All rights reserved.</p>
+          <button type="button" className="site-footer-top" onClick={scrollToTop}>Back to top<ArrowUp size={15} aria-hidden="true" /></button>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}

@@ -16,18 +16,49 @@
 .auth-google-retry:disabled { opacity: .6; cursor: not-allowed; }
 @media (min-width: 900px) {
   .auth-page-content--illustrated { max-width: 1040px; }
-  .auth-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px); align-items: center; gap: 64px; }
+  .auth-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px); align-items: stretch; gap: 40px; }
   .auth-layout--illustration-right { grid-template-columns: minmax(0, 460px) minmax(0, 1fr); }
   .auth-layout--illustration-right .auth-form-column { grid-column: 1; grid-row: 1; }
   .auth-layout--illustration-right .auth-illustration { grid-column: 2; grid-row: 1; }
-  .auth-illustration { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 24px 0; }
-  .auth-illustration-copy { max-width: 350px; }
-  .auth-illustration h2 { font-size: 28px; font-weight: 650; line-height: 1.25; letter-spacing: -.025em; }
-  .auth-illustration p { margin-top: 12px; font-size: 16px; line-height: 1.7; color: var(--muted-foreground); }
-  .auth-illustration img { display: block; width: 100%; height: 370px; margin: 20px 0 12px; object-fit: contain; }
-  .auth-illustration-credit { font-size: 11px; line-height: 1.5; color: var(--muted-foreground); text-underline-offset: 3px; }
-  .auth-illustration-credit:hover { color: var(--primary); text-decoration: underline; }
-  .auth-illustration-credit:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
+  /* Brand panel beside the form: deep green with the star pattern and a soft gold glint. */
+  .auth-illustration { position: relative; isolation: isolate; display: flex; flex-direction: column; overflow: hidden; padding: 40px; border-radius: 20px; background: radial-gradient(circle at 100% 0%, rgba(20, 184, 166, .3) 0%, rgba(20, 184, 166, 0) 50%), #062925; color: #fff; text-align: left; }
+  .auth-illustration-pattern {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(circle at 92% 8%, rgba(244, 201, 93, .4) 0%, rgba(244, 201, 93, 0) 30%), rgba(255, 255, 255, .06);
+    -webkit-mask-image: var(--pattern-khatam), radial-gradient(ellipse 70% 60% at 100% 0%, #000 15%, transparent 75%);
+    mask-image: var(--pattern-khatam), radial-gradient(ellipse 70% 60% at 100% 0%, #000 15%, transparent 75%);
+    -webkit-mask-size: 96px 96px, 100% 100%;
+    mask-size: 96px 96px, 100% 100%;
+    -webkit-mask-repeat: repeat, no-repeat;
+    mask-repeat: repeat, no-repeat;
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+  .auth-illustration-copy { max-width: 26rem; }
+  .auth-illustration h2 { color: #fff; font-family: var(--font-display); font-size: 30px; font-weight: 650; line-height: 1.2; letter-spacing: -.025em; }
+  .auth-illustration p { margin-top: 10px; color: rgba(255, 255, 255, .72); font-size: 16px; line-height: 1.65; }
+  .auth-illustration-points { display: grid; gap: 12px; margin-top: 24px; padding: 0; list-style: none; }
+  .auth-illustration-points li { display: flex; align-items: center; gap: 10px; color: rgba(255, 255, 255, .88); font-size: 15px; line-height: 1.5; }
+  .auth-illustration-points li > span { display: grid; place-items: center; width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%; background: rgba(158, 214, 200, .18); color: #9ed6c8; }
+  /* The illustrations are square with their own soft background: show them as a rounded tile. */
+  .auth-illustration-art { display: flex; justify-content: center; margin-top: auto; padding-top: 28px; }
+  .auth-illustration-art img { display: block; width: 300px; max-width: 100%; height: auto; aspect-ratio: 1; border-radius: 18px; object-fit: cover; box-shadow: 0 24px 48px -24px rgba(0, 0, 0, .5); }
+  .auth-illustration-credit { margin-top: 10px; color: rgba(255, 255, 255, .5); font-size: 11px; line-height: 1.5; text-align: center; text-underline-offset: 3px; }
+  .auth-illustration-credit:hover { color: #fff; text-decoration: underline; }
+  .auth-illustration-credit:focus-visible { outline: 2px solid #f4c95d; outline-offset: 4px; }
+  /* Plain variant (Register): the illustration and its headline sit directly on the page. */
+  .auth-illustration--plain { align-self: center; align-items: center; overflow: visible; padding: 24px 0; border-radius: 0; background: none; color: inherit; text-align: center; }
+  .auth-illustration--plain .auth-illustration-pattern { display: none; }
+  .auth-illustration--plain .auth-illustration-copy { max-width: 350px; }
+  .auth-illustration--plain h2 { color: var(--foreground); font-size: 28px; line-height: 1.25; }
+  .auth-illustration--plain p { margin-top: 12px; color: var(--muted-foreground); line-height: 1.7; }
+  .auth-illustration--plain .auth-illustration-art { width: 100%; margin-top: 0; padding-top: 0; }
+  .auth-illustration--plain .auth-illustration-art img { width: 100%; height: 370px; margin: 20px 0 12px; aspect-ratio: auto; border-radius: 0; box-shadow: none; object-fit: contain; }
+  .auth-illustration--plain .auth-illustration-credit { margin-top: 0; color: var(--muted-foreground); }
+  .auth-illustration--plain .auth-illustration-credit:hover { color: var(--primary); }
+  .auth-illustration--plain .auth-illustration-credit:focus-visible { outline-color: var(--primary); }
   .auth-layout--illustration-right .auth-illustration {
     position: relative;
     align-self: stretch;
@@ -111,3 +142,7 @@
 @media (prefers-reduced-motion: reduce) {
   :root body .auth-page .auth-field .auth-field-input, .auth-page .auth-submit { transition: none; }
 }
+.auth-privacy-note { margin-top: 14px; color: var(--muted-foreground); font-size: 13px; line-height: 1.6; text-align: center; }
+.auth-privacy-note a { color: var(--primary); font-weight: 600; text-underline-offset: 3px; }
+.auth-privacy-note a:hover { text-decoration: underline; }
+.auth-illustration-mirrored { transform: scaleX(-1); }

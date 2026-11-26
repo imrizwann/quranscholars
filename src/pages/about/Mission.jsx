@@ -1,129 +1,156 @@
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
+  BadgeCheck,
   BookHeart,
-  BrainCircuit,
-  Check,
+  ChevronRight,
   Compass,
-  GraduationCap,
   HeartHandshake,
-  Sparkles,
+  Layers3,
+  Quote,
+  RotateCcw,
+  Sprout,
 } from "lucide-react";
-import MarketingHero from "@/components/marketing/MarketingHero.jsx";
-import SectionIntro from "@/components/marketing/SectionIntro.jsx";
+import "./about.css";
+import "./mission.css";
 
-const commitments = [
+const challenges = [
   {
-    title: "Preserve depth",
-    description: "Present Islamic knowledge with care, context, and respect for qualified scholarship.",
-    icon: BookHeart,
-  },
-  {
-    title: "Improve access",
-    description: "Use technology to make structured learning reachable across schedules and locations.",
-    icon: BrainCircuit,
-  },
-  {
-    title: "Develop character",
-    description: "Connect what students learn with worship, conduct, family life, and service.",
     icon: Compass,
+    challenge: "It is hard to know where to start.",
+    answer: "Every course shows its level, lesson outline and teacher before you enroll, and begins with the basics it needs.",
   },
   {
-    title: "Build confidence",
-    description: "Help learners participate in modern life while staying grounded in their faith.",
-    icon: GraduationCap,
+    icon: BadgeCheck,
+    challenge: "It is hard to know who to trust.",
+    answer: "Teachers apply with their background and certificates, and every application is reviewed before a course is published.",
+  },
+  {
+    icon: RotateCcw,
+    challenge: "It is hard to keep going.",
+    answer: "Short lessons and saved progress make it easy to return, even after a busy week, on any device.",
   },
 ];
 
-const focusAreas = [
-  "A coherent path from beginner foundations to deeper study",
-  "Teacher-led learning where interaction and correction matter",
-  "Self-paced access for students with changing schedules",
-  "Family and youth experiences designed for their real context",
-  "A platform that keeps progress, expectations, and next steps clear",
+const values = [
+  { icon: Sprout, title: "Knowledge should be beneficial", text: "We teach to change how people understand, act and live, not simply to fill time with content." },
+  { icon: Layers3, title: "Clarity over volume", text: "A short, well-ordered lesson is worth more than hours of unfocused video. Every course follows a clear path." },
+  { icon: HeartHandshake, title: "Respect for every learner", text: "Patient teaching for beginners, privacy for everyone, and real help when someone gets stuck." },
 ];
 
-const Mission = () => (
-  <main className="bg-[#fbfcfa] text-[#172b24]">
-    <MarketingHero
-      tone="dark"
-      eyebrow="Our mission"
-      title="Making Islamic learning easier to begin."
-      description="Our purpose is to help people understand their faith and bring that knowledge into daily life, through clear teaching, thoughtful courses, and steady progress."
-      icon={Sparkles}
-      primaryAction={{ to: "/courses", label: "Start learning" }}
-      secondaryAction={{ to: "/about", label: "About DarsLearn" }}
-      highlightsTitle="What guides our work"
-      highlights={[
-        { label: "Grounded in", value: "Quran, authentic Sunnah, scholarship, and good character" },
-        { label: "Enabled by", value: "Clear curriculum, thoughtful technology, and human guidance" },
-        { label: "Measured by", value: "Understanding, consistency, conduct, and beneficial action" },
-      ]}
-      labelledBy="mission-title"
-    />
+const roadmap = [
+  { stage: "Now", status: "Available now", tone: "live", title: "Quran recitation for beginners", text: "Our first course, built carefully so that every part of the learning experience is right before we grow." },
+  { stage: "Next", status: "In preparation", tone: "next", title: "New subjects", text: "Courses in computer science, English, mathematics and science, held to the same standard as our first." },
+  { stage: "Later", status: "Planned", tone: "planned", title: "More ways to learn", text: "Live classes with teachers, learning designed for families and young learners, and support for more languages." },
+];
 
-    <section className="px-4 py-14 sm:px-6 sm:py-18" aria-labelledby="mission-belief-title">
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,.85fr)_minmax(22rem,1.15fr)] lg:items-start">
-        <SectionIntro
-          id="mission-belief-title"
-          eyebrow="What we believe"
-          title="Beneficial knowledge should shape how a person lives."
-          description="Access alone is not enough. Learners need trustworthy material, good sequencing, capable teachers, meaningful practice, and the confidence to keep going."
-        />
-        <div className="rounded-2xl bg-[#0b3e38] p-7 text-white sm:p-9">
-          <HeartHandshake className="size-6 text-[#f4c95d]" />
-          <blockquote className="mt-5 text-balance font-display text-2xl font-black leading-tight tracking-[-0.03em] sm:text-3xl">
-            “Make room for meaningful learning, one lesson and one good habit at a time.”
-          </blockquote>
-          <p className="mt-5 text-sm font-medium leading-7 text-white/68">That principle guides how we design courses, support families, and decide what belongs on the platform.</p>
+
+export default function Mission() {
+  return (
+    <main className="about-page mission-page">
+      {/* Hero */}
+      <section className="about-hero" aria-labelledby="mission-title">
+        <span className="about-hero-pattern" aria-hidden="true" />
+        <div className="about-shell about-hero-grid">
+          <div className="about-hero-copy">
+            <nav className="about-breadcrumb" aria-label="Breadcrumb">
+              <Link to="/">Home</Link><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">Our mission</span>
+            </nav>
+            <p className="about-hero-eyebrow">Our mission</p>
+            <h1 id="mission-title">Make beneficial knowledge <span>clear and within reach.</span></h1>
+            <p className="about-hero-lead">
+              We want anyone, anywhere, to be able to learn something that matters to them from a trustworthy teacher, in short, clear lessons that fit into real life.
+            </p>
+            <div className="about-hero-actions">
+              <Link to="/courses" className="about-btn about-btn--gold">Explore courses<ArrowRight size={16} aria-hidden="true" /></Link>
+              <Link to="/about" className="about-btn about-btn--ghost">About DarsLearn</Link>
+            </div>
+          </div>
+
+          <figure className="mission-quote">
+            <Quote size={28} aria-hidden="true" />
+            <blockquote>Make room for meaningful learning, one lesson at a time.</blockquote>
+            <figcaption>The principle behind every course, feature and decision on DarsLearn.</figcaption>
+          </figure>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section className="border-y border-[#e1e7e3] bg-white px-4 py-14 sm:px-6 sm:py-18" aria-labelledby="commitments-title">
-      <div className="mx-auto max-w-7xl">
-        <SectionIntro id="commitments-title" eyebrow="Our commitments" title="Four principles behind every learning experience." align="center" />
-        <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {commitments.map(({ title, description, icon: Icon }) => (
-            <article key={title} className="rounded-2xl border border-[#dfe6e2] bg-[#fbfcfa] p-6">
-              <span className="grid size-11 place-items-center rounded-xl bg-[#e5f2ed] text-primary"><Icon className="size-5" /></span>
-              <h3 className="mt-5 text-lg font-black tracking-[-0.02em]">{title}</h3>
-              <p className="mt-2 text-sm font-medium leading-7 text-[#687970]">{description}</p>
-            </article>
-          ))}
+      {/* Why it matters */}
+      <section className="about-section" aria-labelledby="mission-why-title">
+        <div className="about-shell">
+          <div className="about-intro">
+            <p className="about-eyebrow">Why it matters</p>
+            <h2 id="mission-why-title">Wanting to learn is the easy part.</h2>
+            <p>Most people who want to learn give up for the same few reasons. We designed DarsLearn around each one.</p>
+          </div>
+          <ol className="mission-challenges">
+            {challenges.map(({ icon: Icon, challenge, answer }) => (
+              <li key={challenge}>
+                <div className="mission-challenge">
+                  <span className="mission-label">The challenge</span>
+                  <p>{challenge}</p>
+                </div>
+                <div className="mission-answer">
+                  <span className="about-icon"><Icon size={20} aria-hidden="true" /></span>
+                  <div>
+                    <span className="mission-label mission-label--answer">Our answer</span>
+                    <p>{answer}</p>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section className="px-4 py-14 sm:px-6 sm:py-18" aria-labelledby="focus-title">
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(22rem,1fr)_minmax(0,1fr)] lg:items-center">
-        <div className="rounded-2xl border border-[#dfe6e2] bg-white p-6 sm:p-8">
-          <p className="text-xs font-black uppercase tracking-[0.15em] text-primary">What we are building toward</p>
-          <ul className="mt-5 grid gap-3.5">
-            {focusAreas.map((item) => (
-              <li key={item} className="flex items-start gap-3 text-sm font-bold leading-6 text-[#53665e]"><Check className="mt-1 size-4 shrink-0 text-primary" strokeWidth={3} />{item}</li>
+      {/* Values */}
+      <section className="about-section about-features" aria-labelledby="mission-values-title">
+        <div className="about-shell">
+          <div className="about-intro">
+            <p className="about-eyebrow">What we believe</p>
+            <h2 id="mission-values-title">Three beliefs that shape how we teach.</h2>
+          </div>
+          <ul className="mission-values">
+            {values.map(({ icon: Icon, title, text }) => (
+              <li key={title}>
+                <span className="about-icon"><Icon size={21} aria-hidden="true" /></span>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </li>
             ))}
           </ul>
+          <aside className="mission-heritage" aria-label="How we teach faith subjects">
+            <span className="about-icon about-icon--soft-gold"><BookHeart size={21} aria-hidden="true" /></span>
+            <p>
+              <strong>Teaching the Quran and Islamic subjects.</strong> When we teach faith subjects, we do so with care for authentic sources and respect for qualified scholarship. Our Quran courses are taught by teachers whose background we have reviewed.
+            </p>
+          </aside>
         </div>
-        <div>
-          <SectionIntro
-            id="focus-title"
-            eyebrow="The long view"
-            title="A learning ecosystem that grows with its students."
-            description="DarsLearn is designed to expand carefully: stronger curriculum, better learning tools, broader language support, and more pathways for individuals, families, and communities. Growth should improve trust and clarity—not weaken them."
-          />
-          <Link to="/services" className="group mt-6 inline-flex items-center gap-2 text-sm font-black text-primary no-underline">Explore our learner services <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></Link>
+      </section>
+
+      {/* Roadmap */}
+      <section className="about-section" aria-labelledby="mission-roadmap-title">
+        <div className="about-shell">
+          <div className="about-intro">
+            <p className="about-eyebrow">Where we are going</p>
+            <h2 id="mission-roadmap-title">Growing carefully, one subject at a time.</h2>
+            <p>We add new courses only when they meet the same standard as our first. Growth should build trust, not weaken it.</p>
+          </div>
+          <ol className="mission-roadmap">
+            {roadmap.map(({ stage, status, tone, title, text }) => (
+              <li key={stage} data-tone={tone}>
+                <div className="mission-roadmap-top">
+                  <span className="mission-stage">{stage}</span>
+                  <span className="mission-status">{status}</span>
+                </div>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </li>
+            ))}
+          </ol>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section className="px-4 pb-16 sm:px-6 sm:pb-20">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 rounded-2xl bg-[#0b3e38] p-7 text-white sm:p-10 lg:flex-row lg:items-center lg:justify-between">
-        <div className="max-w-2xl"><p className="text-xs font-black uppercase tracking-[0.15em] text-[#9ed6c8]">Take part</p><h2 className="mt-3 font-display text-3xl font-black tracking-[-0.04em]">Turn the intention to learn into a steady path.</h2></div>
-        <div className="flex flex-wrap gap-3"><Link to="/courses" className="group inline-flex min-h-12 items-center gap-2 rounded-lg bg-[#f4c95d] px-5 text-sm font-black text-[#11342e] no-underline">Explore courses <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></Link><Link to="/donate" className="inline-flex min-h-12 items-center rounded-lg border border-white/20 bg-white/10 px-5 text-sm font-black text-white no-underline">Support the mission</Link></div>
-      </div>
-    </section>
-  </main>
-);
-
-export default Mission;
+    </main>
+  );
+}

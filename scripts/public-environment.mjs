@@ -5,6 +5,7 @@ const publicNames = new Set([
   "VITE_COURSE_MEDIA_BASE_URL",
   "VITE_REALTIME_URL",
   "VITE_CATALOGUE_LAYOUT",
+  "VITE_HOME_HERO_LAYOUT",
   "VITE_USER_NODE_ENV",
 ]);
 const vercelPublicNames = new Set([
@@ -73,5 +74,11 @@ export function validatePublicEnvironment(env) {
     !["featured", "full"].includes(env.VITE_CATALOGUE_LAYOUT)
   ) {
     throw new Error("VITE_CATALOGUE_LAYOUT must be featured or full");
+  }
+  if (
+    env.VITE_HOME_HERO_LAYOUT &&
+    !["current", "video", "path", "editorial"].includes(env.VITE_HOME_HERO_LAYOUT)
+  ) {
+    throw new Error("VITE_HOME_HERO_LAYOUT must be current, video, path or editorial");
   }
 }

@@ -61,8 +61,11 @@ export default function Register() {
   return (
     <AuthPage
       illustration={{
-        position: "right",
         src: "/images/auth/welcome-to-learning.jpg",
+        // Flipped so the character points towards the form on the right.
+        mirrored: true,
+        // Plain illustration beside the form (no brand panel).
+        plain: true,
         title: "A new chapter starts here.",
         description: "Find a course that interests you and learn at your own pace.",
         source: "https://www.vecteezy.com/vector-art/10837960-young-muslim-woman-in-hijab-smiling-and-pointing-finger-to-the-side-vector-illustration-free-download",
@@ -153,6 +156,10 @@ export default function Register() {
           Create account
         </AsyncButton>
       </form>
+      <p className="auth-privacy-note">
+        Your account is free. Read how we protect your information in our{" "}
+        <Link to="/privacy">Privacy policy</Link>.
+      </p>
     </AuthPage>
   );
 }

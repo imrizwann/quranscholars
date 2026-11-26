@@ -81,9 +81,6 @@ const SeekingKnowledge = () => {
           
           <div>
             <div>
-              IQRA
-            </div>
-            <div>
               <p>
                 Live & Guided
               </p>

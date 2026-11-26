@@ -1,8 +1,9 @@
 ﻿import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Camera, ArrowLeft, ShieldCheck, Trash2, Upload } from "lucide-react";
+import { ArrowRight, BadgeCheck, Camera, ChevronRight, KeyRound, MailWarning, Presentation, ShieldCheck, Trash2, Upload } from "lucide-react";
 import { useUploadAvatarMutation } from "@/services/api/user/fileUploadApis.js";
+import { useGetMyInstructorApplicationQuery } from "@/services/api/user/instructorApplicationApi.js";
 import useProfilePhoto from "@/features/profile/useProfilePhoto.js";
 import AvatarImage from "@/features/profile/components/AvatarImage.jsx";
 import { getProfileInitials } from "@/features/profile/profile-initials.js";
@@ -11,9 +12,70 @@ import LearnerProfileForm from "@/features/profile/components/LearnerProfileForm
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import FileTypeIcon from "@/components/files/FileTypeIcon.jsx";
 import { userMessage } from "@/lib/user-messages.js";
+import "../onboarding/onboarding.css";
 import "./profile.css";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+// Teaching card: the right next step for each account type and application status.
+function TeachingCard({ user }) {
+  const learner = user?.role === "user";
+  const query = useGetMyInstructorApplicationQuery(undefined, { skip: !learner, refetchOnMountOrArgChange: true });
+  const application = query.currentData?.application;
+
+  let card = {
+    badge: null,
+    title: "Teach on DarsLearn",
+    text: "Share your knowledge with learners everywhere. Apply with your teaching background and certificates, and our team will review your application.",
+    primary: { to: "/instructor/application", label: "Apply to teach" },
+    secondary: { to: "/get-started/instructor", label: "How teaching works" },
+  };
+  if (user?.role === "admin") card = {
+    title: "Instructor applications",
+    text: "Review teaching backgrounds and certificates before approving instructor access.",
+    primary: { to: "/admin/instructor-applications", label: "Review applications" },
+  };
+  else if (user?.role === "instructor") card = {
+    badge: { tone: "approved", label: "Instructor" },
+    title: "Your teaching workspace",
+    text: "Create courses, organise your lessons and follow how your learners are progressing.",
+    primary: { to: "/instructor/courses", label: "Open Course Studio" },
+    secondary: { to: "/instructor/dashboard", label: "Instructor dashboard" },
+  };
+  else if (application?.status === "pending") card = {
+    badge: { tone: "pending", label: "Under review" },
+    title: "Your teaching application",
+    text: "Our team is reviewing your background and certificates. You can keep learning while you wait.",
+    primary: { to: "/instructor/application", label: "View application" },
+  };
+  else if (application?.status === "rejected") card = {
+    badge: { tone: "rejected", label: "Changes requested" },
+    title: "Your teaching application",
+    text: "Read the team's feedback, update your details or certificates and submit your application again.",
+    primary: { to: "/instructor/application", label: "Revise application" },
+  };
+  else if (application?.status === "approved") card = {
+    badge: { tone: "approved", label: "Approved" },
+    title: "Your teaching application",
+    text: "Your application has been approved. Open your application to see the next steps.",
+    primary: { to: "/instructor/application", label: "View application" },
+  };
+
+  return (
+    <section className="public-panel profile-teach" aria-labelledby="profile-teach-title" aria-busy={(learner && query.isLoading) || undefined}>
+      <div className="profile-teach-head">
+        <span className="profile-teach-icon"><Presentation size={20} aria-hidden="true" /></span>
+        {card.badge && <span className="profile-badge" data-tone={card.badge.tone}>{card.badge.label}</span>}
+      </div>
+      <h2 id="profile-teach-title" className="profile-card-title">{card.title}</h2>
+      <p>{learner && query.isLoading ? "Checking your teaching application…" : card.text}</p>
+      <div className="profile-actions">
+        <Link to={card.primary.to} className="cw-button cw-primary">{card.primary.label}<ArrowRight size={16} aria-hidden="true" /></Link>
+        {card.secondary && <Link to={card.secondary.to} className="profile-text-link">{card.secondary.label}</Link>}
+      </div>
+    </section>
+  );
+}
 
 export default function ProfilePage() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -94,228 +156,167 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="public-page profile-page">
+    <main className="start-page profile-page">
       <ProfileDeleteModal
         returnFocus={deleteButton}
         open={modalVisible}
         onClose={() => setModalVisible(false)}
       />
-      <Link className="public-back" to={dashboard}>
-        <ArrowLeft size={16} aria-hidden="true" />
-        Back to dashboard
-      </Link>
-      <header className="public-heading">
-        <p className="public-eyebrow">Your account</p>
-        <h1>Your profile</h1>
-        <p>
-          Manage your profile photo, review your account details, and control
-          your account access.
-        </p>
-      </header>
-      <div className="profile-layout">
-        <div className="profile-main">
-          <section
-            className="public-panel profile-photo-panel"
-            aria-labelledby="profile-photo-title"
-          >
+
+      {/* Identity header */}
+      <section className="start-hero profile-hero" aria-labelledby="profile-name">
+        <span className="start-hero-pattern" aria-hidden="true" />
+        <div className="start-shell">
+          <nav className="start-breadcrumb" aria-label="Breadcrumb">
+            <Link to="/">Home</Link>
+            <span className="start-breadcrumb-item"><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">Profile</span></span>
+          </nav>
+          <div className="profile-identity">
             <div className="profile-photo" aria-busy={isUploading || undefined}>
               <AvatarImage
                 src={previewUrl || photo.data?.url}
                 alt={`${name}'s profile photo`}
-                size={112}
+                size={104}
                 className="profile-avatar-image"
                 fallback={<span aria-hidden="true">{initials}</span>}
               />
-            </div>
-            <div className="profile-photo-content">
-              <h2 id="profile-photo-title">Profile photo</h2>
-              <p>
-                Choose a photo for your account. JPG, PNG, or WebP, up to 3 MB.
-              </p>
-              {user?.role === "instructor" && (
-                <p className="profile-account-help">
-                  Your account name and photo also appear on your public
-                  instructor profile and course pages.
-                </p>
-              )}
-              <input
-                id="profile-photo-upload"
-                ref={fileInput}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                hidden
-                onChange={chooseImage}
-                aria-label="Choose a profile photo"
-                disabled={isUploading}
-              />
-              <div className="profile-actions">
-                <button
-                  type="button"
-                  className="cw-button"
-                  onClick={() => fileInput.current?.click()}
-                  disabled={isUploading}
-                >
-                  <Camera size={16} aria-hidden="true" />
-                  {photo.data?.url ? "Change photo" : "Choose photo"}
-                </button>
-                {file && (
-                  <>
-                    <AsyncButton
-                      className="cw-button cw-primary"
-                      loading={isUploading}
-                      loadingLabel="Saving photo"
-                      onClick={savePhoto}
-                    >
-                      <Upload size={16} aria-hidden="true" />
-                      Save photo
-                    </AsyncButton>
-                    <button
-                      type="button"
-                      className="cw-button"
-                      disabled={isUploading}
-                      onClick={() => {
-                        setFile(null);
-                        setError("");
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </>
-                )}
-              </div>
-              {file && (
-                <div
-                  className="profile-selected-file qs-file-surface"
-                  data-file-kind="image"
-                >
-                  <FileTypeIcon kind="image" size="sm" />
-                  <p className="profile-file">Selected image: {file.name}</p>
-                </div>
-              )}
-              {error && (
-                <p
-                  className="profile-feedback profile-feedback-error"
-                  role="alert"
-                >
-                  {error}
-                </p>
-              )}
-              {message && (
-                <p className="profile-feedback" role="status">
-                  {message}
-                </p>
-              )}
-              {photo.isError && (
-                <div className="profile-photo-error">
-                  <p>Your saved photo could not be loaded.</p>
-                  <AsyncButton
-                    className="cw-button cw-button-compact"
-                    loading={photo.isFetching}
-                    loadingLabel="Loading"
-                    onClick={photo.refetch}
-                  >
-                    Try again
-                  </AsyncButton>
-                </div>
-              )}
-            </div>
-          </section>
-          <section
-            className="public-panel"
-            aria-labelledby="profile-details-title"
-          >
-            <h2 id="profile-details-title">Account details</h2>
-            <p className="profile-section-description">
-              Your registered account information.
-            </p>
-            <dl className="profile-details">
-              <div>
-                <dt>Full name</dt>
-                <dd>{name}</dd>
-              </div>
-              <div>
-                <dt>Email address</dt>
-                <dd>{user?.email || "Not provided"}</dd>
-              </div>
-              <div>
-                <dt>Account type</dt>
-                <dd>{role}</dd>
-              </div>
-            </dl>
-            <p className="profile-account-help">
-              Need to correct your name or email?{" "}
-              <Link to="/contact">Contact our team</Link>.
-            </p>
-            <div className="profile-actions">
-              <span className="text-sm text-muted-foreground">
-                {user?.emailVerified
-                  ? "Email verified"
-                  : "Email not yet verified"}
-              </span>
-              {!user?.emailVerified && (
-                <Link className="cw-button" to="/verify-email">
-                  Verify email
-                </Link>
-              )}
-            </div>
-          </section>
-          {user?._id && <LearnerProfileForm key={user._id} />}
-        </div>
-        <aside className="profile-sidebar">
-          <section
-            className="public-panel"
-            aria-labelledby="profile-access-title"
-          >
-            <span className="public-icon">
-              <ShieldCheck size={20} aria-hidden="true" />
-            </span>
-            <h2 id="profile-access-title" className="profile-card-title">
-              Account access
-            </h2>
-            <p>
-              Use your registered email and password to sign in. Keep your
-              password private.
-            </p>
-            <div className="profile-actions">
-              <Link to="/forgot-password" className="cw-button">
-                Reset password
-              </Link>
-              <Link to={dashboard} className="cw-button">
-                Open dashboard
-              </Link>
-            </div>
-          </section>
-          <section
-            className="public-panel profile-danger"
-            aria-labelledby="profile-delete-title"
-          >
-            <Trash2 size={20} aria-hidden="true" />
-            <h2 id="profile-delete-title" className="profile-card-title">
-              Delete account
-            </h2>
-            <p>
-              Deleting your account permanently ends your access. You will need
-              your current password to confirm.
-            </p>
-            {user?.role === "instructor" && (
-              <p className="profile-account-help">
-                Courses, including archived courses, need an instructor. Resolve
-                course ownership with our team before deleting your account.
-              </p>
-            )}
-            <div className="profile-actions">
               <button
-                ref={deleteButton}
                 type="button"
-                className="cw-button cw-danger"
+                className="profile-photo-edit"
+                onClick={() => fileInput.current?.click()}
                 disabled={isUploading}
-                onClick={() => setModalVisible(true)}
+                aria-label={photo.data?.url ? "Change profile photo" : "Choose a profile photo"}
               >
-                Delete account
+                <Camera size={16} aria-hidden="true" />
               </button>
             </div>
-          </section>
-        </aside>
+            <div className="profile-identity-copy">
+              <h1 id="profile-name">{name}</h1>
+              <p className="profile-identity-email">{user?.email || "Email not provided"}</p>
+              <div className="profile-badges">
+                <span className="profile-badge" data-tone="role">{role}</span>
+                {user?.emailVerified
+                  ? <span className="profile-badge" data-tone="approved"><BadgeCheck size={14} aria-hidden="true" />Email verified</span>
+                  : <Link to="/verify-email" className="profile-badge" data-tone="pending"><MailWarning size={14} aria-hidden="true" />Verify your email</Link>}
+              </div>
+            </div>
+            <div className="profile-identity-actions">
+              <Link to="/dashboard/learning" className="cw-button cw-primary">My learning<ArrowRight size={16} aria-hidden="true" /></Link>
+              <Link to={dashboard} className="cw-button">Open dashboard</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="start-shell profile-body">
+        <div className="profile-layout">
+          <div className="profile-main">
+            <section className="public-panel" aria-labelledby="profile-details-title">
+              <h2 id="profile-details-title">Account details</h2>
+              <p className="profile-section-description">Your registered account information.</p>
+              <dl className="profile-details">
+                <div><dt>Full name</dt><dd>{name}</dd></div>
+                <div><dt>Email address</dt><dd>{user?.email || "Not provided"}</dd></div>
+                <div><dt>Account type</dt><dd>{role}</dd></div>
+                <div><dt>Email status</dt><dd>{user?.emailVerified ? "Verified" : "Not yet verified"}</dd></div>
+              </dl>
+              <p className="profile-account-help">
+                Need to correct your name or email? <Link to="/contact">Contact our team</Link>.
+              </p>
+              {!user?.emailVerified && (
+                <div className="profile-actions">
+                  <Link className="cw-button" to="/verify-email">Verify email</Link>
+                </div>
+              )}
+            </section>
+
+            <section className="public-panel profile-photo-panel" aria-labelledby="profile-photo-title">
+              <div className="profile-photo-content">
+                <h2 id="profile-photo-title">Profile photo</h2>
+                <p>Choose a photo for your account. JPG, PNG, or WebP, up to 3 MB.</p>
+                {user?.role === "instructor" && (
+                  <p className="profile-account-help">
+                    Your account name and photo also appear on your public instructor profile and course pages.
+                  </p>
+                )}
+                <input
+                  id="profile-photo-upload"
+                  ref={fileInput}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  hidden
+                  onChange={chooseImage}
+                  aria-label="Choose a profile photo"
+                  disabled={isUploading}
+                />
+                <div className="profile-actions">
+                  <button type="button" className="cw-button" onClick={() => fileInput.current?.click()} disabled={isUploading}>
+                    <Camera size={16} aria-hidden="true" />
+                    {photo.data?.url ? "Change photo" : "Choose photo"}
+                  </button>
+                  {file && (
+                    <>
+                      <AsyncButton className="cw-button cw-primary" loading={isUploading} loadingLabel="Saving photo" onClick={savePhoto}>
+                        <Upload size={16} aria-hidden="true" />
+                        Save photo
+                      </AsyncButton>
+                      <button type="button" className="cw-button" disabled={isUploading} onClick={() => { setFile(null); setError(""); }}>
+                        Cancel
+                      </button>
+                    </>
+                  )}
+                </div>
+                {file && (
+                  <div className="profile-selected-file qs-file-surface" data-file-kind="image">
+                    <FileTypeIcon kind="image" size="sm" />
+                    <p className="profile-file">Selected image: {file.name}. The preview is shown at the top of the page.</p>
+                  </div>
+                )}
+                {error && <p className="profile-feedback profile-feedback-error" role="alert">{error}</p>}
+                {message && <p className="profile-feedback" role="status">{message}</p>}
+                {photo.isError && (
+                  <div className="profile-photo-error">
+                    <p>Your saved photo could not be loaded.</p>
+                    <AsyncButton className="cw-button cw-button-compact" loading={photo.isFetching} loadingLabel="Loading" onClick={photo.refetch}>
+                      Try again
+                    </AsyncButton>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {user?._id && <LearnerProfileForm key={user._id} />}
+          </div>
+
+          <aside className="profile-sidebar">
+            <TeachingCard user={user} />
+
+            <section className="public-panel" aria-labelledby="profile-access-title">
+              <span className="public-icon"><ShieldCheck size={20} aria-hidden="true" /></span>
+              <h2 id="profile-access-title" className="profile-card-title">Account access</h2>
+              <p>Use your registered email and password to sign in. Keep your password private.</p>
+              <div className="profile-actions">
+                <Link to="/forgot-password" className="cw-button"><KeyRound size={16} aria-hidden="true" />Reset password</Link>
+              </div>
+            </section>
+
+            <section className="public-panel profile-danger" aria-labelledby="profile-delete-title">
+              <Trash2 size={20} aria-hidden="true" />
+              <h2 id="profile-delete-title" className="profile-card-title">Delete account</h2>
+              <p>Deleting your account permanently ends your access. You will need your current password to confirm.</p>
+              {user?.role === "instructor" && (
+                <p className="profile-account-help">
+                  Courses, including archived courses, need an instructor. Resolve course ownership with our team before deleting your account.
+                </p>
+              )}
+              <div className="profile-actions">
+                <button ref={deleteButton} type="button" className="cw-button cw-danger" disabled={isUploading} onClick={() => setModalVisible(true)}>
+                  Delete account
+                </button>
+              </div>
+            </section>
+          </aside>
+        </div>
       </div>
     </main>
   );

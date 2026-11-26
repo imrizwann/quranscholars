@@ -13,6 +13,21 @@ there are more than three courses. It never silently hides published courses.
 The API currently supplies newest ordering; do not advertise additional sorting
 options until they are supported by the API.
 
+## Home page hero layout
+
+With the featured catalogue, `VITE_HOME_HERO_LAYOUT` chooses the home page hero.
+The full catalogue always uses `current`.
+
+| Build setting | Hero |
+| --- | --- |
+| `VITE_HOME_HERO_LAYOUT=current` (default) | Headline on the left, featured course card on the right. |
+| `VITE_HOME_HERO_LAYOUT=video` | Centred headline above a large stage that plays the course trailer, with a course info bar. |
+| `VITE_HOME_HERO_LAYOUT=path` | The featured course drawn as a learning path through its sections, with an enroll card. |
+| `VITE_HOME_HERO_LAYOUT=editorial` | Full-bleed course image with a large overlaid headline and a course bar. Needs a clean course image. |
+
+Blank or unknown values use `current`; release builds reject unknown values. To
+try another layout locally, change the value in `.env` and restart `npm run dev`.
+
 Set the flag before building, then rebuild to change modes. Authentication,
 checkout, enrollment, progress, reviews, instructor tools and backend security
 remain shared. This is a presentation flag, not an authorization control or a

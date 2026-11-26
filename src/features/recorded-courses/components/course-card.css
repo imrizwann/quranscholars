@@ -1,0 +1,57 @@
+/* ==========================================================================
+   Course card (shared): catalogue, home page, instructor profiles, related courses.
+   ========================================================================== */
+
+.course-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  transition: border-color 200ms var(--ease-out-ui), box-shadow 200ms var(--ease-out-ui), transform 200ms var(--ease-out-ui);
+}
+.course-card:hover { border-color: color-mix(in srgb, var(--primary) 30%, var(--border)); box-shadow: 0 20px 40px -28px rgba(6, 41, 37, .35); transform: translateY(-2px); }
+.course-card-media { flex-shrink: 0; }
+.course-card-media .catalogue-cover > img { transition: transform 500ms var(--ease-out-ui); }
+.course-card:hover .course-card-media .catalogue-cover > img { transform: scale(1.03); }
+
+.course-card-body { display: flex; flex: 1; flex-direction: column; padding: 20px; }
+.course-card-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.course-card-category { min-width: 0; overflow: hidden; color: var(--primary); font-size: 12px; font-weight: 650; letter-spacing: .1em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.course-card-level { flex-shrink: 0; padding: 3px 9px; border-radius: 999px; background: var(--muted); color: var(--muted-foreground); font-size: 12px; font-weight: 600; }
+
+.course-card-title { display: -webkit-box; margin-top: 10px; overflow: hidden; font-family: var(--font-display); font-size: 1.125rem; font-weight: 650; line-height: 1.35; letter-spacing: -.01em; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow-wrap: anywhere; }
+.course-card-title a { color: var(--foreground); text-decoration: none; }
+.course-card-title a:hover { color: var(--primary); }
+.course-card-title a:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; border-radius: 4px; }
+.course-card-byline { margin-top: 8px; color: var(--muted-foreground); font-size: 14px; font-weight: 500; }
+.course-card-description { display: -webkit-box; margin-top: 10px; overflow: hidden; color: var(--muted-foreground); font-size: 14px; line-height: 1.6; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
+
+.course-card-social { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 14px; }
+.course-card-learners { display: inline-flex; align-items: center; gap: 6px; color: var(--muted-foreground); font-size: 13px; font-weight: 500; }
+.course-card-learners svg { color: var(--primary); }
+
+.course-card-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 14px; padding: 14px 0 0; border-top: 1px solid var(--border); list-style: none; }
+.course-card-facts li { display: inline-flex; align-items: center; gap: 6px; color: var(--muted-foreground); font-size: 13px; font-weight: 500; }
+.course-card-facts svg { flex-shrink: 0; color: var(--primary); }
+
+.course-card-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 18px; }
+.course-card-cta { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--primary); font-size: 14px; font-weight: 600; text-decoration: none; }
+.course-card-cta svg { transition: transform 200ms var(--ease-out-ui); }
+.course-card:hover .course-card-cta svg { transform: translateX(3px); }
+.course-card-cta:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; border-radius: var(--radius-button); }
+
+/* ---------- Featured: small catalogues (vertical card with a solid call to action) ---------- */
+
+.recorded-course-card--featured .course-card-body { padding: 22px; }
+.recorded-course-card--featured .course-card-title { font-size: 1.25rem; }
+.recorded-course-card--featured .course-card-cta { justify-content: center; padding: 0 20px; border-radius: var(--radius-button); background: var(--primary); color: var(--primary-foreground); }
+.recorded-course-card--featured .course-card-cta:hover { background: var(--primary-hover); }
+
+@media (prefers-reduced-motion: reduce) {
+  .course-card, .course-card-media .catalogue-cover > img, .course-card-cta svg { transition: none; }
+  .course-card:hover, .course-card:hover .course-card-media .catalogue-cover > img, .course-card:hover .course-card-cta svg { transform: none; }
+}

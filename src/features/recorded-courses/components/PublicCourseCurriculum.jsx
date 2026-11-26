@@ -33,7 +33,7 @@ export default function PublicCourseCurriculum({ course }) {
     if (next.has(id)) next.delete(id); else next.add(id);
     return next;
   });
-  return <section id="course-curriculum" className="cd-content-section" aria-labelledby="curriculum-heading">
+  return <section id="course-curriculum" className="cd-section" aria-labelledby="curriculum-heading">
     <div className="cd-section-heading">
       <div><p className="cd-eyebrow">Your learning path</p><h2 id="curriculum-heading">Course curriculum</h2></div>
       {course.sections.length > 0 && <button type="button" className="cd-text-button" onClick={() => setExpanded(allExpanded ? new Set() : new Set(course.sections.map((section) => section.id)))}>{allExpanded ? "Collapse all" : "Expand all"}</button>}

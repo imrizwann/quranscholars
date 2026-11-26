@@ -1,170 +1,252 @@
-import { useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  BookOpenCheck,
+  BookOpen,
   CheckCircle2,
+  ChevronRight,
   Clock3,
-  Headphones,
+  Copy,
+  CreditCard,
+  GraduationCap,
+  HelpCircle,
+  KeyRound,
   Mail,
   MapPin,
-  MessageSquareText,
+  MessageCircle,
+  MonitorPlay,
   Phone,
+  ReceiptText,
   Send,
   ShieldCheck,
 } from "lucide-react";
-import MarketingHero from "@/components/marketing/MarketingHero.jsx";
-import SectionIntro from "@/components/marketing/SectionIntro.jsx";
 import { contactDetails } from "@/data/contactDetails.js";
 import "./contact.css";
 
-const contactMethods = [
+const MESSAGE_LIMIT = 2000;
+
+// Each topic tells people exactly what to include, so we can help on the first reply.
+const topics = [
+  { id: "course", label: "Choosing a course", icon: BookOpen, hint: "Tell us what you would like to learn and your current level, and we will suggest where to begin." },
+  { id: "payment", label: "Enrollment or payment", icon: CreditCard, hint: "Include the course title, your payment reference and the date you paid. If money was debited but you were not enrolled, please do not pay again while we check." },
+  { id: "access", label: "Accessing my lessons", icon: MonitorPlay, hint: "Tell us the course, the device and browser you use, and what happens when you try to watch." },
+  { id: "refund", label: "Refund request", icon: ReceiptText, hint: "Include the course title, payment reference and purchase date. Change-of-mind refunds are available within 7 days of payment if you have watched less than 20% of the course.", link: { to: "/course-policy", label: "Read the refund policy" } },
+  { id: "teaching", label: "Teaching on DarsLearn", icon: GraduationCap, hint: "Tell us about your subject and teaching experience, or apply directly with your certificates.", link: { to: "/get-started/instructor", label: "How teaching works" } },
+  { id: "other", label: "Something else", icon: HelpCircle, hint: "Tell us how we can help. The more detail you share, the faster we can reply." },
+];
+
+const quickAnswers = [
   {
-    label: "Email learner support",
-    value: contactDetails.email,
-    href: `mailto:${contactDetails.email}`,
-    detail: "Best for courses, enrollment, accounts, and teaching applications.",
-    icon: Mail,
+    question: "I paid but cannot see my course",
+    icon: CreditCard,
+    answer: "Open My learning while signed in to the account you paid with. If the course is still missing, contact us with your payment reference. Please do not pay again while we check.",
+    link: { to: "/dashboard/learning", label: "Open My learning" },
   },
   {
-    label: "Call us",
-    value: contactDetails.phone,
-    href: contactDetails.phoneHref,
-    detail: "Speak with our team about your learning needs.",
-    icon: Phone,
+    question: "How do refunds work?",
+    icon: ReceiptText,
+    answer: "You can request a change-of-mind refund within 7 days of payment if you have watched less than 20% of the course. Approved refunds return to your original payment method.",
+    link: { to: "/course-policy", label: "Access and refund policy" },
   },
   {
-    label: "Location",
-    value: contactDetails.location,
-    detail: "Our learning platform serves students online across regions.",
-    icon: MapPin,
+    question: "I forgot my password",
+    icon: KeyRound,
+    answer: "Reset it yourself in a minute. We will email a reset link to the address registered to your account.",
+    link: { to: "/forgot-password", label: "Reset your password" },
   },
 ];
 
-const helpTopics = [
-  { title: "Find a course", detail: "Compare subjects, course levels, and learning formats.", to: "/courses", icon: BookOpenCheck },
-  { title: "Teach on DarsLearn", detail: "Learn how to apply and have your qualifications reviewed.", to: "/get-started/instructor", icon: CheckCircle2 },
-  { title: "Continue learning", detail: "Open your courses and see your saved progress.", to: "/dashboard/learning", icon: Headphones },
-];
+const emptyForm = { name: "", email: "", topic: "", message: "" };
 
-const inputClass = "contact-input";
+function validate(form) {
+  const errors = {};
+  if (!form.name.trim()) errors.name = "Enter your name.";
+  if (!form.email.trim()) errors.email = "Enter your email address.";
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) errors.email = "Enter a valid email address, like name@example.com.";
+  if (!form.topic) errors.topic = "Choose what your message is about.";
+  if (!form.message.trim()) errors.message = "Write your message.";
+  return errors;
+}
 
-const Contact = () => {
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
-  const [notice, setNotice] = useState("");
+export default function Contact() {
+  const id = useId();
+  const formRef = useRef(null);
+  const [form, setForm] = useState(emptyForm);
+  const [errors, setErrors] = useState({});
+  const [prepared, setPrepared] = useState(null);
+  const [copied, setCopied] = useState("");
+  const topic = topics.find(item => item.id === form.topic);
 
-  const updateField = (event) => {
-    const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
-    if (notice) setNotice("");
+  const update = (name, value) => {
+    setForm(current => ({ ...current, [name]: value }));
+    if (errors[name]) setErrors(current => ({ ...current, [name]: undefined }));
+    setPrepared(null);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = event => {
     event.preventDefault();
-    const emptyField = ["name", "subject", "message"].find(name => !form[name].trim());
-    if (emptyField) {
-      event.currentTarget.elements.namedItem(emptyField)?.focus();
-      setNotice("Please complete each field before preparing your email.");
+    const nextErrors = validate(form);
+    setErrors(nextErrors);
+    const firstError = ["name", "email", "topic", "message"].find(name => nextErrors[name]);
+    if (firstError) {
+      formRef.current?.querySelector(`[data-field="${firstError}"]`)?.focus();
       return;
     }
-    const subject = encodeURIComponent(form.subject.trim());
-    const body = encodeURIComponent(`Name: ${form.name.trim()}\nEmail: ${form.email.trim()}\n\n${form.message.trim()}`);
-    window.location.href = `mailto:${contactDetails.email}?subject=${subject}&body=${body}`;
-    setNotice(`Review and send the message in your email app. If it does not open, email ${contactDetails.email} directly.`);
+    const subject = `${topic.label} – ${form.name.trim()}`;
+    const body = `Name: ${form.name.trim()}\nEmail: ${form.email.trim()}\nTopic: ${topic.label}\n\n${form.message.trim()}`;
+    setPrepared({ subject, body });
+    setCopied("");
+    window.location.href = `mailto:${contactDetails.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
+
+  const copy = async (text, what) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(what);
+    } catch {
+      setCopied("unavailable");
+    }
+  };
+
+  const fieldError = name => errors[name] && <p id={`${id}-${name}-error`} className="contact-error" role="alert">{errors[name]}</p>;
+  const describedBy = (name, extra) => [errors[name] && `${id}-${name}-error`, extra].filter(Boolean).join(" ") || undefined;
 
   return (
     <main className="contact-page">
-      <MarketingHero
-        tone="dark"
-        eyebrow="Contact DarsLearn"
-        title="How can we help you?"
-        description="Whether you are choosing your first course or need help getting back to a lesson, our team can help you find the next step."
-        icon={MessageSquareText}
-        primaryAction={{ href: "#contact-message", label: "Write to us" }}
-        secondaryAction={{ to: "/courses", label: "Explore courses" }}
-        highlightsTitle="How we can help"
-        highlights={[
-          { icon: BookOpenCheck, label: "Choosing a course", value: "Ask about the level, lessons, or what you need before enrolling." },
-          { icon: Headphones, label: "Accessing your lessons", value: "Get help with signing in, enrollment, or a playback problem." },
-          { icon: CheckCircle2, label: "Teaching with us", value: "Ask about instructor applications and the review process." },
-        ]}
-        labelledBy="contact-title"
-      />
-
-      <section className="public-page contact-section" aria-labelledby="contact-form-title">
-        <div className="contact-layout">
+      {/* Hero */}
+      <section className="contact-hero" aria-labelledby="contact-title">
+        <span className="contact-hero-pattern" aria-hidden="true" />
+        <div className="contact-shell contact-hero-grid">
           <div>
-            <SectionIntro
-              id="contact-options-title"
-              eyebrow="Contact options"
-              title="Reach us in the way that works for you."
-              description="Email gives us the clearest record of your request. Add your registered email and course name to help us respond faster."
-            />
-            <div className="contact-methods">
-              {contactMethods.map(({ label, value, href, detail, icon: Icon }) => (
-                <article key={label} className="contact-method">
-                  <div className="contact-method-content">
-                    <span className="public-icon"><Icon className="size-4.5" aria-hidden="true" /></span>
-                    <div className="contact-method-details">
-                      <p className="contact-method-label">{label}</p>
-                      {href ? <a href={href} className="contact-method-value">{value}</a> : <p className="contact-method-value">{value}</p>}
-                      <p className="contact-method-description">{detail}</p>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-            <div className="contact-availability">
-              <Clock3 className="mt-0.5 size-4.5 shrink-0 text-primary" />
-              Support availability can vary across time zones. Email is monitored on business days.
-            </div>
-            <a className="cw-button contact-whatsapp" href={contactDetails.whatsappHref} target="_blank" rel="noopener noreferrer"><MessageSquareText size={16} aria-hidden="true" />Message on WhatsApp<span className="sr-only"> (opens in a new tab)</span><ArrowRight size={15} aria-hidden="true" /></a>
+            <nav className="contact-breadcrumb" aria-label="Breadcrumb">
+              <Link to="/">Home</Link><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">Contact</span>
+            </nav>
+            <p className="contact-hero-eyebrow">Contact us</p>
+            <h1 id="contact-title">How can we <span>help you?</span></h1>
+            <p className="contact-hero-lead">Questions about a course, enrolling, payments or your account? Our team is here to help, whether you are choosing your first course or getting back to a lesson.</p>
+            <ul className="contact-hero-points">
+              <li><Clock3 size={16} aria-hidden="true" />We aim to reply within 48 hours</li>
+            </ul>
           </div>
 
-          <div id="contact-message" tabIndex={-1} className="public-panel contact-form-panel">
-            <p className="public-eyebrow">Send a message</p>
-            <h2 id="contact-form-title" className="contact-form-title">How can we help?</h2>
-            <p id="contact-form-help" className="contact-form-description">Prepare a message in your email app, then review and send it there.</p>
+          <aside className="contact-channels" aria-labelledby="contact-channels-title">
+            <h2 id="contact-channels-title">Reach us directly</h2>
+            <a className="contact-channel contact-channel--whatsapp" href={contactDetails.whatsappHref} target="_blank" rel="noopener noreferrer">
+              <span className="contact-channel-icon"><MessageCircle size={20} aria-hidden="true" /></span>
+              <span><strong>Chat on WhatsApp</strong><small>Quick questions and help choosing a course</small></span>
+              <ArrowRight size={17} aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span>
+            </a>
+            <a className="contact-channel" href={`mailto:${contactDetails.email}`}>
+              <span className="contact-channel-icon"><Mail size={20} aria-hidden="true" /></span>
+              <span><strong>{contactDetails.email}</strong><small>Best for payments, refunds and account help</small></span>
+              <ArrowRight size={17} aria-hidden="true" />
+            </a>
+            <a className="contact-channel" href={contactDetails.phoneHref}>
+              <span className="contact-channel-icon"><Phone size={20} aria-hidden="true" /></span>
+              <span><strong>{contactDetails.phone}</strong><small>Call us</small></span>
+              <ArrowRight size={17} aria-hidden="true" />
+            </a>
+            <p className="contact-location"><MapPin size={15} aria-hidden="true" />{contactDetails.location} · Learning online, worldwide</p>
+          </aside>
+        </div>
+      </section>
 
-            <form className="contact-form" onSubmit={handleSubmit} aria-describedby="contact-form-help">
-              <div className="contact-field-row">
-                <label className="contact-field">Full name
-                  <input className={inputClass} name="name" value={form.name} onChange={updateField} autoComplete="name" placeholder="Your full name" maxLength={100} required />
-                </label>
-                <label className="contact-field">Email address
-                  <input className={inputClass} type="email" name="email" value={form.email} onChange={updateField} autoComplete="email" placeholder="you@example.com" maxLength={254} required />
-                </label>
+      {/* Form */}
+      <section className="contact-section" aria-labelledby="contact-form-title">
+        <div className="contact-shell contact-form-grid">
+          <div className="contact-form-intro">
+            <p className="contact-eyebrow">Send a message</p>
+            <h2 id="contact-form-title">Write to our team</h2>
+            <p>Choose a topic and we will tell you what to include, so we can help you on the first reply.</p>
+            <ul className="contact-tips">
+              <li><CheckCircle2 size={17} aria-hidden="true" />Use the email address registered to your DarsLearn account</li>
+              <li><CheckCircle2 size={17} aria-hidden="true" />Mention the course title and any payment reference</li>
+              <li><ShieldCheck size={17} aria-hidden="true" />Never share passwords, card details, PINs or one-time passwords</li>
+            </ul>
+          </div>
+
+          <div className="contact-card">
+            <form ref={formRef} className="contact-form" onSubmit={handleSubmit} noValidate>
+              <div className="contact-row">
+                <div className="contact-field">
+                  <label htmlFor={`${id}-name`}>Your name</label>
+                  <input className="contact-input" id={`${id}-name`} data-field="name" name="name" value={form.name} onChange={e => update("name", e.target.value)} autoComplete="name" placeholder="Your full name" maxLength={100} aria-invalid={Boolean(errors.name)} aria-describedby={describedBy("name")} />
+                  {fieldError("name")}
+                </div>
+                <div className="contact-field">
+                  <label htmlFor={`${id}-email`}>Email address</label>
+                  <input className="contact-input" id={`${id}-email`} data-field="email" type="email" name="email" value={form.email} onChange={e => update("email", e.target.value)} autoComplete="email" placeholder="you@example.com" maxLength={254} aria-invalid={Boolean(errors.email)} aria-describedby={describedBy("email")} />
+                  {fieldError("email")}
+                </div>
               </div>
-              <label className="contact-field">Subject
-                <input className={inputClass} name="subject" value={form.subject} onChange={updateField} placeholder="Course, enrollment, account…" maxLength={150} required />
-              </label>
-              <label className="contact-field">Message
-                <textarea className={inputClass} name="message" value={form.message} onChange={updateField} placeholder="Include your course name and what you need help with." maxLength={2000} aria-describedby="contact-message-count" required />
-                <span id="contact-message-count" className="contact-message-count">{form.message.length.toLocaleString()} / 2,000 characters</span>
-              </label>
-              <div className="contact-form-actions">
-                <p className="contact-privacy"><ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-primary" />Do not include passwords, payment details, or other sensitive information.</p>
-                <button type="submit" className="cw-button cw-primary">Prepare email <Send className="size-4" aria-hidden="true" /></button>
+
+              <fieldset className="contact-field contact-topics" aria-describedby={describedBy("topic")}>
+                <legend>What is your message about?</legend>
+                <div className="contact-topic-grid">
+                  {topics.map(({ id: topicId, label, icon: Icon }, index) => (
+                    <label key={topicId} className="contact-topic" data-selected={form.topic === topicId}>
+                      <input type="radio" name="topic" value={topicId} checked={form.topic === topicId} onChange={() => update("topic", topicId)} data-field={index === 0 ? "topic" : undefined} />
+                      <Icon size={17} aria-hidden="true" />
+                      <span>{label}</span>
+                    </label>
+                  ))}
+                </div>
+                {fieldError("topic")}
+              </fieldset>
+
+              {topic && (
+                <div className="contact-hint" id={`${id}-hint`}>
+                  <p><strong>Helpful to include:</strong> {topic.hint}</p>
+                  {topic.link && <Link to={topic.link.to}>{topic.link.label}<ArrowRight size={14} aria-hidden="true" /></Link>}
+                </div>
+              )}
+
+              <div className="contact-field">
+                <label htmlFor={`${id}-message`}>Your message</label>
+                <textarea className="contact-input" id={`${id}-message`} data-field="message" name="message" rows={6} value={form.message} onChange={e => update("message", e.target.value)} placeholder="Include your course name and what you need help with." maxLength={MESSAGE_LIMIT} aria-invalid={Boolean(errors.message)} aria-describedby={describedBy("message", `${id}-count ${topic ? `${id}-hint` : ""}`.trim())} />
+                <div className="contact-field-foot">
+                  {fieldError("message") || <span />}
+                  <span id={`${id}-count`} className="contact-count">{form.message.length.toLocaleString()} / {MESSAGE_LIMIT.toLocaleString()}</span>
+                </div>
               </div>
-              {notice && <p className="contact-notice" role="status" aria-live="polite">{notice}</p>}
+
+              <div className="contact-submit">
+                <button type="submit" className="contact-button contact-button--primary">Send with your email app<Send size={16} aria-hidden="true" /></button>
+                <p>Your email app opens with the message ready. Review it and press send.</p>
+              </div>
+
+              {prepared && (
+                <div className="contact-prepared" role="status">
+                  <p className="contact-prepared-title"><CheckCircle2 size={18} aria-hidden="true" />Your message is ready in your email app.</p>
+                  <p>Did nothing open? Copy your message and send it to <strong>{contactDetails.email}</strong> from any email account.</p>
+                  <div className="contact-prepared-actions">
+                    <button type="button" className="contact-button" onClick={() => copy(`Subject: ${prepared.subject}\n\n${prepared.body}`, "message")}><Copy size={15} aria-hidden="true" />{copied === "message" ? "Message copied" : "Copy message"}</button>
+                    <button type="button" className="contact-button" onClick={() => copy(contactDetails.email, "email")}><Copy size={15} aria-hidden="true" />{copied === "email" ? "Email copied" : "Copy email address"}</button>
+                  </div>
+                  {copied === "unavailable" && <p className="contact-copy-note">Copying is not available in this browser. Please select and copy the text manually.</p>}
+                </div>
+              )}
             </form>
           </div>
         </div>
       </section>
 
-      <section className="contact-help" aria-labelledby="contact-help-title">
-        <div className="public-page contact-section">
-          <SectionIntro id="contact-help-title" eyebrow="Helpful places to start" title="Your next step may be right here." />
-          <div className="contact-help-grid">
-            {helpTopics.map(({ title, detail, to, icon: Icon }) => (
-              <Link key={title} to={to} className="public-panel contact-help-card"><span className="public-icon"><Icon size={20} aria-hidden="true" /></span><div><h3 className="contact-help-heading">{title}</h3><p className="contact-help-description">{detail}</p></div><ArrowRight size={17} aria-hidden="true" /></Link>
+      {/* Quick answers */}
+      <section className="contact-section contact-answers" aria-labelledby="contact-answers-title">
+        <div className="contact-shell">
+          <p className="contact-eyebrow">Quick answers</p>
+          <h2 id="contact-answers-title">You might not need to wait for us.</h2>
+          <ul className="contact-answer-grid">
+            {quickAnswers.map(({ question, answer, link, icon: Icon }) => (
+              <li key={question}>
+                <h3><span className="contact-answer-icon"><Icon size={18} aria-hidden="true" /></span>{question}</h3>
+                <p>{answer}</p>
+                <Link to={link.to} className="contact-link">{link.label}<ArrowRight size={15} aria-hidden="true" /></Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
     </main>
   );
-};
-
-export default Contact;
+}

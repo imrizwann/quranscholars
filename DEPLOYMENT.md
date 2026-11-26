@@ -17,6 +17,7 @@ does not change an already generated bundle. Rebuild after URL changes.
 | `VITE_COURSE_MEDIA_BASE_URL` | Optional public HTTPS media URL/prefix; no signed URLs or private credentials |
 | `VITE_REALTIME_URL` | Optional HTTPS/WSS origin; blank uses the API URL |
 | `VITE_CATALOGUE_LAYOUT` | Optional `featured` or `full` |
+| `VITE_HOME_HERO_LAYOUT` | Optional `current` (default), `video`, `path` or `editorial`; see `RELEASE_MODES.md` |
 | `VITE_GOOGLE_CLIENT_ID` | Optional public Google Web client ID; must match API `GOOGLE_CLIENT_ID`. Blank disables Google sign-in. See `docs/google-auth.md`. |
 
 `VITE_USER_NODE_ENV` is Vite's internal mode marker, not an application setting.

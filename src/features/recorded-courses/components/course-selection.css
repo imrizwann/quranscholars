@@ -10,30 +10,12 @@
 .featured-catalogue-intro p { color: var(--muted-foreground); font-size: var(--font-size-body); line-height: 1.75; }
 @media (min-width: 640px) { .course-selection { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1280px) { .course-selection { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.course-selection--featured, .course-catalogue-list { grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 768px) {
-  .recorded-course-card--featured, .recorded-course-skeleton--featured {
-    display: grid;
-    grid-template-columns: minmax(0, .9fr) minmax(0, 1.3fr);
-    min-height: 340px;
-  }
-  .recorded-course-card--featured .catalogue-course-media,
-  .recorded-course-skeleton--featured .recorded-course-skeleton-media {
-    align-self: stretch;
-    position: relative;
-    height: auto;
-    min-height: 0;
-    aspect-ratio: auto;
-  }
-  /* Fill the media column without letting the image dictate the row height. */
-  .recorded-course-card--featured .catalogue-cover { position: absolute; inset: 0; }
-  .recorded-course-card--featured .catalogue-cover > img { object-fit: cover; }
-  .recorded-course-card--featured .recorded-course-card-content,
-  .recorded-course-skeleton--featured .recorded-course-skeleton-content { padding: 24px; }
-  .recorded-course-card--featured h3 { font-size: 1.375rem; }
-}
-@media (min-width: 1024px) {
-  .recorded-course-card--featured .recorded-course-card-content,
-  .recorded-course-skeleton--featured .recorded-course-skeleton-content { padding: 28px; }
-  .recorded-course-card--featured h3 { font-size: 1.5rem; }
-}
+.course-catalogue-list { grid-template-columns: minmax(0, 1fr); }
+/* Featured (small catalogue, up to three courses): vertical cards in a grid.
+   A single course is shown beside its spotlight panel (see courses-catalogue.css). */
+.course-selection--featured { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 640px) { .course-selection--featured { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .course-selection--featured { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.course-selection--featured[data-course-count="0"],
+.course-selection--featured[data-course-count="1"] { grid-template-columns: minmax(0, 1fr); }
+.recorded-course-skeleton--featured { border-radius: 16px; }

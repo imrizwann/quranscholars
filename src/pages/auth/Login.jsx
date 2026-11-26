@@ -65,6 +65,8 @@ export default function Login() {
     <AuthPage
       illustration={{
         src: "/images/auth/learning-with-laptop.svg",
+        // Plain illustration beside the form (no brand panel).
+        plain: true,
         title: "Make time for learning.",
         description: "Pick up where you left off, one lesson at a time.",
         source: "https://www.vecteezy.com/vector-art/10595807-young-muslim-woman-in-hijab-working-on-laptop-while-writing-plan-vector-illustration-free-download",

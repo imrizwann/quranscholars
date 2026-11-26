@@ -4,119 +4,184 @@ import {
   BookOpenCheck,
   Building2,
   Check,
+  ChevronDown,
+  ChevronRight,
+  GraduationCap,
   HandHeart,
-  HeartHandshake,
   Landmark,
   Mail,
+  MessageCircle,
+  ReceiptText,
+  Send,
   ShieldCheck,
 } from "lucide-react";
-import MarketingHero from "@/components/marketing/MarketingHero.jsx";
-import SectionIntro from "@/components/marketing/SectionIntro.jsx";
+import { contactDetails } from "@/data/contactDetails.js";
+import "../about/about.css";
+import "./donate.css";
+
+// Donations are arranged directly with our team: this page never publishes payment details.
+const enquiryBody = [
+  "Assalamu alaikum,",
+  "",
+  "I would like to support DarsLearn.",
+  "",
+  "Name:",
+  "Area I would like to support (learning access, madrasa support, community spaces, family relief, sponsoring a learner, or not sure yet):",
+  "Approximate amount (optional):",
+  "",
+  "Please share the current verified campaign and payment details.",
+].join("\n");
+const enquiryHref = `mailto:${contactDetails.email}?subject=${encodeURIComponent("Donation enquiry")}&body=${encodeURIComponent(enquiryBody)}`;
 
 const causes = [
+  { icon: BookOpenCheck, title: "Learning access", text: "Help eligible learners access structured courses and essential learning resources." },
+  { icon: Building2, title: "Madrasa support", text: "Strengthen teaching environments with resources, teacher support and learning materials." },
+  { icon: Landmark, title: "Community spaces", text: "Support carefully reviewed educational and worship-space needs in underserved communities." },
+  { icon: HandHeart, title: "Family relief", text: "Contribute to approved initiatives that address essential needs with dignity and care." },
+];
+
+const steps = [
+  { icon: Send, title: "Tell us what you would like to support", text: "Email or message us with the area you have in mind, or ask us to suggest one." },
+  { icon: ShieldCheck, title: "We confirm the campaign", text: "We reply with the current campaign, what it supports and how your contribution will be used." },
+  { icon: HandHeart, title: "Give through the verified route", text: "Use only the payment details we share with you directly through an official DarsLearn channel." },
+  { icon: ReceiptText, title: "Receive written confirmation", text: "Send us your transaction reference and we confirm your contribution in writing." },
+];
+
+const sponsorPoints = [
+  "We share current sponsorship needs and how learners are chosen",
+  "You can support one learner or a wider programme",
+  "You decide after you have all the information",
+];
+
+const questions = [
   {
-    title: "Learning access",
-    description: "Help eligible students access structured Islamic courses and essential learning resources.",
-    icon: BookOpenCheck,
+    question: "Can I donate online on this page?",
+    answer: "Not on this page. To protect donors from fraud, we never publish permanent payment details. Contact us and we share the current verified details directly.",
   },
   {
-    title: "Madrasa support",
-    description: "Strengthen teaching environments with appropriate resources, teacher support, and learning materials.",
-    icon: Building2,
+    question: "How will my donation be used?",
+    answer: "Before you give, we confirm the active campaign and its purpose with you, so you know exactly what your contribution supports.",
   },
   {
-    title: "Community spaces",
-    description: "Support carefully reviewed educational and worship-space needs in underserved communities.",
-    icon: Landmark,
-  },
-  {
-    title: "Family relief",
-    description: "Contribute to approved initiatives that address essential needs with dignity and care.",
-    icon: HandHeart,
+    question: "Will I receive a confirmation?",
+    answer: "Yes. Keep your transaction reference and email it to us with the campaign you supported. We confirm your contribution in writing.",
   },
 ];
 
-const safeguards = [
-  "Confirm the current campaign and intended use before contributing",
-  "Use only payment details shared through an official DarsLearn channel",
-  "Keep your receipt or transaction reference for follow-up",
-  "Contact us directly if you need allocation or eligibility information",
-];
+export default function Donate() {
+  return (
+    <main className="about-page donate-page">
+      {/* Hero */}
+      <section className="about-hero" aria-labelledby="donate-title">
+        <span className="about-hero-pattern" aria-hidden="true" />
+        <div className="about-shell about-hero-grid">
+          <div className="about-hero-copy">
+            <nav className="about-breadcrumb" aria-label="Breadcrumb">
+              <Link to="/">Home</Link><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">Donate</span>
+            </nav>
+            <p className="about-hero-eyebrow">Support the mission</p>
+            <h1 id="donate-title">Help make beneficial learning <span>reachable for more people.</span></h1>
+            <p className="about-hero-lead">
+              Your support helps learners access courses, helps teachers serve, and strengthens educational foundations in communities that need them most.
+            </p>
+            <div className="about-hero-actions">
+              <a href={enquiryHref} className="about-btn about-btn--gold">Request donation details<ArrowRight size={16} aria-hidden="true" /></a>
+              <Link to="/mission" className="about-btn about-btn--ghost">Read our mission</Link>
+            </div>
+          </div>
 
-const Donate = () => (
-  <main className="bg-[#fbfcfa] text-[#172b24]">
-    <MarketingHero
-      eyebrow="Support the mission"
-      title="Help make beneficial learning more accessible."
-      description="Your support can help students learn, teachers serve, and communities build stronger educational foundations. Contact us for the current verified campaigns and contribution options."
-      icon={HeartHandshake}
-      primaryAction={{ to: "/contact", label: "Request donation details" }}
-      secondaryAction={{ to: "/mission", label: "Read our mission" }}
-      highlights={[
-        { label: "Before donating", value: "Ask for the current campaign, purpose, and payment instructions" },
-        { label: "For sponsorship", value: "Tell us whether you want to support a student or a wider program" },
-        { label: "Need a record?", value: "Keep your transaction reference and request confirmation" },
-      ]}
-      labelledBy="donate-title"
-    />
-
-    <section className="px-4 py-14 sm:px-6 sm:py-18" aria-labelledby="causes-title">
-      <div className="mx-auto max-w-7xl">
-        <SectionIntro
-          id="causes-title"
-          eyebrow="Areas of support"
-          title="Give toward a clear, current need."
-          description="Campaign availability changes. We confirm the active purpose and contribution route before accepting support for a specific area."
-        />
-        <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {causes.map(({ title, description, icon: Icon }) => (
-            <article key={title} className="rounded-2xl border border-[#dfe6e2] bg-white p-6">
-              <span className="grid size-11 place-items-center rounded-xl bg-[#e6f2ed] text-primary"><Icon className="size-5" /></span>
-              <h2 className="mt-5 text-lg font-black tracking-[-0.02em]">{title}</h2>
-              <p className="mt-2 text-sm font-medium leading-7 text-[#687970]">{description}</p>
-            </article>
-          ))}
+          <aside className="donate-trust" aria-labelledby="donate-trust-title">
+            <span className="donate-trust-icon"><ShieldCheck size={22} aria-hidden="true" /></span>
+            <h2 id="donate-trust-title">Verified giving only</h2>
+            <p>We never publish bank or payment details on this website. To keep your gift safe, we share the current verified details with you directly.</p>
+            <div className="donate-trust-channels">
+              <a href={enquiryHref}><Mail size={17} aria-hidden="true" /><span><strong>Email us</strong><small>{contactDetails.email}</small></span></a>
+              <a href={contactDetails.whatsappHref} target="_blank" rel="noopener noreferrer"><MessageCircle size={17} aria-hidden="true" /><span><strong>WhatsApp</strong><small>{contactDetails.phone}</small></span><span className="sr-only"> (opens in a new tab)</span></a>
+            </div>
+          </aside>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section className="border-y border-[#e1e7e3] bg-white px-4 py-14 sm:px-6 sm:py-18" aria-labelledby="responsible-giving-title">
-      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,.78fr)_minmax(22rem,1.22fr)] lg:items-center">
-        <div>
-          <SectionIntro
-            id="responsible-giving-title"
-            eyebrow="Give responsibly"
-            title="Verify the campaign before you send funds."
-            description="This page intentionally does not publish permanent account or payment details. Contact us for the current verified route and the information relevant to your contribution."
-          />
-          <a href="mailto:contact@darslearn.com?subject=Donation%20details" className="group mt-6 inline-flex items-center gap-2 text-sm font-black text-primary no-underline">Email the support team <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></a>
-        </div>
-        <div className="rounded-2xl bg-[#0b3e38] p-6 text-white sm:p-8">
-          <div className="flex items-center gap-3"><span className="grid size-11 place-items-center rounded-xl bg-white/10 text-[#f4c95d]"><ShieldCheck className="size-5" /></span><div><p className="text-xs font-black uppercase tracking-[0.14em] text-[#9ed6c8]">Contribution checklist</p><h2 className="mt-1 text-xl font-black">Four things to confirm</h2></div></div>
-          <ul className="mt-6 grid gap-3">
-            {safeguards.map((item) => <li key={item} className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm font-semibold leading-6 text-white/80"><Check className="mt-1 size-4 shrink-0 text-[#f4c95d]" strokeWidth={3} />{item}</li>)}
+      {/* Causes */}
+      <section className="about-section" aria-labelledby="donate-causes-title">
+        <div className="about-shell">
+          <div className="about-intro">
+            <p className="about-eyebrow">Areas you can support</p>
+            <h2 id="donate-causes-title">Give toward a clear, current need.</h2>
+            <p>Campaigns change over time. We confirm the active purpose with you before accepting support for any area.</p>
+          </div>
+          <ul className="donate-causes">
+            {causes.map(({ icon: Icon, title, text }) => (
+              <li key={title}>
+                <span className="about-icon"><Icon size={21} aria-hidden="true" /></span>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </li>
+            ))}
           </ul>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section className="px-4 py-14 sm:px-6 sm:py-18">
-      <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-3">
-        <article className="rounded-2xl border border-[#dfe6e2] bg-white p-6 lg:col-span-2 sm:p-8">
-          <p className="text-xs font-black uppercase tracking-[0.15em] text-primary">Sponsor learning</p>
-          <h2 className="mt-2 font-display text-3xl font-black tracking-[-0.04em]">Want to help a student access a course?</h2>
-          <p className="mt-4 max-w-2xl text-sm font-medium leading-7 text-[#687970]">Ask about current sponsorship needs, student eligibility, and how support is assigned. We’ll share the available options before you decide.</p>
-          <Link to="/contact" className="group mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#0f766e] px-4 text-sm font-black text-white no-underline">Discuss sponsorship <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></Link>
-        </article>
-        <article className="rounded-2xl border border-[#cfe0d8] bg-[#edf6f2] p-6 sm:p-8">
-          <Mail className="size-5 text-primary" />
-          <h2 className="mt-4 text-xl font-black">Need written confirmation?</h2>
-          <p className="mt-3 text-sm font-medium leading-7 text-[#587067]">Email your transaction reference through the official contact address and state the campaign you intended to support.</p>
-          <a href="mailto:contact@darslearn.com" className="mt-5 block break-words text-sm font-black text-primary no-underline">contact@darslearn.com</a>
-        </article>
-      </div>
-    </section>
-  </main>
-);
+      {/* How giving works */}
+      <section className="about-section about-features" aria-labelledby="donate-steps-title">
+        <div className="about-shell">
+          <div className="about-intro">
+            <p className="about-eyebrow">How giving works</p>
+            <h2 id="donate-steps-title">Four simple, safe steps.</h2>
+          </div>
+          <ol className="donate-steps">
+            {steps.map(({ icon: Icon, title, text }, index) => (
+              <li key={title}>
+                <div className="donate-step-top">
+                  <span className="donate-step-number" aria-hidden="true">{index + 1}</span>
+                  <Icon size={20} aria-hidden="true" />
+                </div>
+                <h3><span className="sr-only">Step {index + 1}: </span>{title}</h3>
+                <p>{text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
 
-export default Donate;
+      {/* Sponsor a learner */}
+      <section className="about-section about-standards" aria-labelledby="donate-sponsor-title">
+        <span className="about-standards-pattern" aria-hidden="true" />
+        <div className="about-shell donate-sponsor">
+          <div className="about-intro about-intro--dark">
+            <p className="about-eyebrow">Sponsor a learner</p>
+            <h2 id="donate-sponsor-title">Help someone begin a course they could not afford.</h2>
+            <p>Ask about current sponsorship needs. We explain who is eligible and how support is assigned before you decide.</p>
+            <div className="about-hero-actions">
+              <a href={enquiryHref} className="about-btn about-btn--gold">Discuss sponsorship<ArrowRight size={16} aria-hidden="true" /></a>
+            </div>
+          </div>
+          <ul className="donate-sponsor-points">
+            <li className="donate-sponsor-head"><span className="about-icon about-icon--gold"><GraduationCap size={21} aria-hidden="true" /></span><strong>What to expect</strong></li>
+            {sponsorPoints.map(point => <li key={point}><Check size={16} strokeWidth={2.5} aria-hidden="true" />{point}</li>)}
+          </ul>
+        </div>
+      </section>
+
+      {/* Questions */}
+      <section className="about-section" aria-labelledby="donate-faq-title">
+        <div className="about-shell donate-faq-grid">
+          <div className="about-intro">
+            <p className="about-eyebrow">Questions donors ask</p>
+            <h2 id="donate-faq-title">Give with confidence.</h2>
+            <p>Anything else? Email <a href={`mailto:${contactDetails.email}`}>{contactDetails.email}</a> and we will be glad to help.</p>
+          </div>
+          <div className="donate-faq">
+            {questions.map(({ question, answer }) => (
+              <details key={question}>
+                <summary>{question}<ChevronDown size={18} aria-hidden="true" /></summary>
+                <p>{answer}</p>
+              </details>
+            ))}
+            <p className="donate-safety"><ShieldCheck size={17} aria-hidden="true" />If anyone asks you to pay into an account we have not confirmed with you directly, please contact us before sending money.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
