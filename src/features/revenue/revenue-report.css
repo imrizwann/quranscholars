@@ -1,0 +1,98 @@
+/* ==========================================================================
+   Earnings and revenue report polish (instructor Earnings and admin Revenue):
+   payout stage bar, "how it works" steps, waterfall calculation, clearer
+   totals, filters and payout cards. Loaded after revenue.css.
+   ========================================================================== */
+
+/* ---------- Payout stage bar under the balance figures ---------- */
+.revenue-pipeline { margin: -6px 0 20px; padding: 16px 18px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.revenue-pipeline-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.revenue-pipeline-head h3 { font-size: var(--font-size-body); font-weight: 650; }
+.revenue-pipeline-head p { color: var(--muted-foreground); font-size: var(--font-size-label); }
+.revenue-pipeline-head strong { color: var(--foreground); font-variant-numeric: tabular-nums; }
+.revenue-pipeline-bar { display: flex; gap: 3px; height: 12px; margin-top: 12px; overflow: hidden; border-radius: 999px; background: var(--muted); }
+.revenue-pipeline-bar span { min-width: 6px; }
+.revenue-pipeline-legend { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 12px; list-style: none; color: var(--muted-foreground); font-size: var(--font-size-label); }
+.revenue-pipeline-legend li { display: inline-flex; align-items: center; gap: 7px; }
+.revenue-pipeline-legend li > span { width: 10px; height: 10px; border-radius: 3px; }
+.revenue-pipeline-legend strong { color: var(--foreground); font-weight: 600; font-variant-numeric: tabular-nums; }
+.revenue-pipeline-legend em { font-size: var(--font-size-caption); font-style: normal; }
+.revenue-pipeline [data-tone="held"] > span, .revenue-pipeline-bar [data-tone="held"] { background: #e9c46a; }
+.revenue-pipeline [data-tone="ready"] > span, .revenue-pipeline-bar [data-tone="ready"] { background: #2a9d8f; }
+.revenue-pipeline [data-tone="moving"] > span, .revenue-pipeline-bar [data-tone="moving"] { background: #7fb8d9; }
+.revenue-pipeline [data-tone="paid"] > span, .revenue-pipeline-bar [data-tone="paid"] { background: var(--primary); }
+
+/* ---------- How earnings are calculated: intro and four steps ---------- */
+.revenue-howto { margin-bottom: 24px; }
+.revenue-howto-head { display: flex; align-items: flex-start; gap: 14px; }
+.revenue-howto-icon { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: color-mix(in srgb, var(--primary) 10%, var(--surface)); color: var(--primary); }
+.revenue-howto h2 { font-size: 1.0625rem; }
+.revenue-howto .revenue-note { max-width: 80ch; margin-top: 4px; }
+.revenue-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 18px; list-style: none; }
+.revenue-steps li { position: relative; display: flex; align-items: flex-start; gap: 10px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: color-mix(in srgb, var(--muted) 40%, var(--surface)); }
+.revenue-steps li:not(:last-child)::after { content: ""; position: absolute; top: 50%; right: -9px; width: 6px; height: 6px; border-top: 2px solid var(--border); border-right: 2px solid var(--border); transform: translateY(-50%) rotate(45deg); }
+.revenue-step-icon { display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--primary); }
+.revenue-steps h3 { font-size: var(--font-size-label); font-weight: 650; line-height: 1.4; }
+.revenue-steps h3 span { color: var(--primary); }
+.revenue-steps p { margin-top: 3px; color: var(--muted-foreground); font-size: var(--font-size-caption); line-height: 1.55; }
+@media (max-width: 1100px) { .revenue-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .revenue-steps li::after { display: none; } }
+@media (max-width: 540px) { .revenue-steps { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- Tabs and filters read as one toolbar ---------- */
+.revenue-tabs { margin-bottom: 16px; }
+.revenue-tabs button { font-size: var(--font-size-body); }
+.revenue-tabs button[aria-current] { font-weight: 600; }
+.revenue-report-filters { padding: 14px 16px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.revenue-report-filters > h2 { color: var(--muted-foreground); font-size: var(--font-size-label); font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
+.revenue-report-filters > .revenue-note { margin-top: 2px; font-size: var(--font-size-caption); }
+.revenue-report-filters .revenue-filters { margin-top: 12px; }
+
+/* ---------- Overview totals as tiles ---------- */
+.revenue-overview > h2 { font-size: 1.125rem; }
+.revenue-overview > .revenue-totals { gap: 12px; }
+.revenue-overview > .revenue-totals > div { padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: color-mix(in srgb, var(--muted) 35%, var(--surface)); }
+.revenue-overview > .revenue-totals dd { font-family: var(--font-display, inherit); font-size: 1.375rem; }
+
+/* ---------- Earnings calculation as a waterfall ---------- */
+.revenue-calculation { border-bottom: 0; padding-bottom: 0; }
+.revenue-calculation-lines { max-width: 760px; gap: 14px; }
+.revenue-calculation-lines > div { row-gap: 6px; }
+.revenue-line-bar { position: relative; grid-column: 1 / -1; display: block; height: 6px; overflow: hidden; border-radius: 999px; background: var(--muted); }
+.revenue-line-bar::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--share, 0%); border-radius: inherit; background: color-mix(in srgb, var(--primary) 55%, var(--surface)); }
+.revenue-line-bar[data-tone="deduct"]::after { background: #e5a39b; }
+.revenue-line-bar[data-tone="net"]::after { background: var(--primary); }
+.revenue-line-bar[data-tone="earned"]::after { background: #d9a21b; }
+.revenue-calculation-lines .revenue-calculation-result { padding: 14px 16px; }
+.revenue-calculation-result dd { font-family: var(--font-display, inherit); font-size: 1.25rem; }
+.revenue-calculation-result .revenue-line-bar { background: color-mix(in srgb, var(--primary) 12%, var(--surface)); }
+.revenue-formula { width: fit-content; max-width: 100%; border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--border)); background: color-mix(in srgb, var(--primary) 6%, var(--surface)); }
+
+/* ---------- Tables ---------- */
+.revenue-panel .analytics-table tbody th { font-weight: 600; }
+.revenue-panel .analytics-table td { font-variant-numeric: tabular-nums; }
+
+/* ---------- Payout history cards ---------- */
+.revenue-payout { padding: 18px 20px; background: var(--surface); }
+.revenue-payout h3 { font-size: var(--font-size-body); font-weight: 650; }
+.revenue-payout > .revenue-row p { margin-top: 2px; }
+.revenue-status { padding: 3px 10px; border-radius: 999px; font-size: var(--font-size-caption); font-weight: 650; }
+.revenue-status[data-status=processing], .revenue-status[data-status=approved], .revenue-status[data-status=pending] { background: #fdf3d8; color: #7a5a0c; }
+.revenue-status[data-status=failed], .revenue-status[data-status=cancelled] { background: color-mix(in srgb, var(--destructive) 8%, var(--surface)); }
+.revenue-payout .revenue-totals { gap: 0; margin-block: 16px; overflow: hidden; border: 1px solid var(--border); border-radius: 10px; }
+.revenue-payout .revenue-totals > div { padding: 12px 14px; }
+.revenue-payout .revenue-totals > div + div { border-left: 1px solid var(--border); }
+.revenue-payout .revenue-totals > div:last-child { background: color-mix(in srgb, var(--primary) 6%, var(--surface)); }
+.revenue-payout .revenue-totals > div:last-child dt, .revenue-payout .revenue-totals > div:last-child dd { color: var(--primary); }
+.revenue-payout .revenue-totals dd { font-size: 1rem; }
+@media (max-width: 640px) {
+  .revenue-payout .revenue-totals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .revenue-payout .revenue-totals > div + div { border-left: 0; }
+  .revenue-payout .revenue-totals > div { border-top: 1px solid var(--border); }
+}
+
+/* Sales ledger status label and payout activity toggle */
+.revenue-sale-status { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--muted); color: var(--muted-foreground); font-weight: 600; text-transform: capitalize; }
+.revenue-sale-status[data-status="paid"] { background: color-mix(in srgb, var(--primary) 10%, var(--surface)); color: var(--primary); }
+.revenue-sale-status[data-status="refunded"], .revenue-sale-status[data-status="disputed"] { background: color-mix(in srgb, var(--destructive) 8%, var(--surface)); color: var(--destructive); }
+.revenue-sale-status[data-status="review_required"] { background: #fdf3d8; color: #7a5a0c; }
+.revenue-payout details summary { display: inline-flex; align-items: center; color: var(--primary); font-weight: 600; }

@@ -14,6 +14,7 @@ import AdminRoute from "@/components/guards/AdminRoute.jsx";
 import InstructorCourseAccess from "@/features/instructor-courses/InstructorCourseAccess.jsx";
 import NotLoggedIn from "@/components/guards/NotLoggedIn.jsx";
 import CourseRouteRedirect from "@/components/navigation/CourseRouteRedirect.jsx";
+import AccountRedirect from "@/components/navigation/AccountRedirect.jsx";
 import RouteErrorPage from "@/components/feedback/RouteErrorPage.jsx";
 const Home = lazy(() => import("@/pages/home/Home.jsx"));
 const CoursePolicy = lazy(() => import("@/pages/legal/CoursePolicy.jsx"));
@@ -99,7 +100,12 @@ const VideoDeletionStatus = lazy(
   () => import("@/pages/instructor/VideoDeletionStatus.jsx"),
 );
 const PrivacyPolicy = lazy(() => import("@/pages/legal/PrivacyPolicy.jsx"));
-const Profile = lazy(() => import("@/pages/account/Profile.jsx"));
+const AccountProfilePage = lazy(() =>
+  import("@/pages/account/AccountPages.jsx").then((m) => ({ default: m.AccountProfilePage })),
+);
+const AccountSettingsPage = lazy(() =>
+  import("@/pages/account/AccountPages.jsx").then((m) => ({ default: m.AccountSettingsPage })),
+);
 const NotFound = lazy(() => import("@/pages/errors/NotFound.jsx"));
 
 const InteractiveLesson = lazy(
@@ -379,8 +385,27 @@ const router = createBrowserRouter([
       { path: "/reset-password", element: <ResetPassword /> },
       { path: "/verify-email", element: <VerifyEmail /> },
       {
+        // Profile now lives in each workspace; this keeps old links working.
         path: "/profile",
-        element: <ProtectedRoute>{<Profile />}</ProtectedRoute>,
+        element: <ProtectedRoute><AccountRedirect /></ProtectedRoute>,
+      },
+      {
+        path: "/admin/profile",
+        element: (
+          <AdminRoute>
+            <WorkspaceLayout type="admin" />
+          </AdminRoute>
+        ),
+        children: [{ index: true, element: <AccountProfilePage /> }],
+      },
+      {
+        path: "/admin/settings",
+        element: (
+          <AdminRoute>
+            <WorkspaceLayout type="admin" />
+          </AdminRoute>
+        ),
+        children: [{ index: true, element: <AccountSettingsPage /> }],
       },
       {
         path: "/admin/admissions",

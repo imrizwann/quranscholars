@@ -3,10 +3,11 @@ import SelectField from "@/components/ui/SelectField.jsx";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import { useEffect, useId, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Users, Search, RefreshCw, ChevronDown } from "lucide-react";
+import { Users, Search, RefreshCw, ChevronDown, X, Check, Lock } from "lucide-react";
 import { WorkspacePage, WorkspaceEmpty } from "@/components/lms/WorkspaceUI.jsx";
 import api from "@/services/api/instructor/recordedCoursesApi.js";
 import { Pagination, QueryMessage } from "@/features/instructor-courses/WorkspaceParts.jsx";
+import ProfileAvatar from "@/features/profile/components/ProfileAvatar.jsx";
 import "../admissions/admin-admissions.css";
 import "./instructor-students.css";
 
@@ -18,6 +19,47 @@ function Timestamp({ value, includeTime = false }) {
   })}</time>;
 }
 
+// Expanded quiz results for one enrollment: a summary, then one row per published quiz.
+function QuizResults({ id, item, quizzes }) {
+  const results = quizzes.results || [];
+  const scored = results.filter(quiz => quiz.bestScore != null);
+  const average = scored.length ? Math.round(scored.reduce((sum, quiz) => sum + quiz.bestScore, 0) / scored.length) : null;
+  const name = item.name || "Learner";
+  return <section id={id} className="roster-quiz-details" aria-label={`Quiz results for ${name} in ${item.courseTitle}`}>
+    <div className="quiz-results-head">
+      <div>
+        <h3>Quiz results</h3>
+        <p className="roster-note">Published quizzes in {item.courseTitle}. Quizzes are optional and do not affect course completion.</p>
+      </div>
+      <ul className="quiz-results-summary" aria-label="Quiz summary">
+        <li><strong>{quizzes.passed} of {quizzes.total}</strong><span>passed</span></li>
+        <li><strong>{quizzes.attempted} of {quizzes.total}</strong><span>attempted</span></li>
+        <li><strong>{average == null ? "-" : `${average}%`}</strong><span>average best score</span></li>
+      </ul>
+    </div>
+    <ol className="quiz-results-list">{results.map((quiz, index) => {
+      const state = quiz.passed ? "passed" : quiz.attempts ? "retry" : quiz.available ? "ready" : "locked";
+      const label = { passed: "Passed", retry: "Not passed yet", ready: "Not attempted", locked: "Locked" }[state];
+      return <li key={quiz.quizId} data-state={state}>
+        <span className="quiz-index" aria-hidden="true">{state === "passed" ? <Check size={14} strokeWidth={3} /> : state === "locked" ? <Lock size={13} /> : index + 1}</span>
+        <div className="quiz-name">
+          <h4>{quiz.title}</h4>
+          <p className="roster-note">{quiz.sectionTitle}</p>
+        </div>
+        <dl className="quiz-scores">
+          <div className="quiz-best"><dt>Best score</dt><dd>{quiz.bestScore == null ? "-" : `${quiz.bestScore}%`}</dd>{quiz.bestScore != null && <span className="quiz-bar" style={{ "--score": `${Math.max(0, Math.min(100, quiz.bestScore))}%` }} aria-hidden="true" />}</div>
+          <div><dt>Latest</dt><dd>{quiz.latestScore == null ? "-" : `${quiz.latestScore}%`}</dd></div>
+          <div><dt>Attempts</dt><dd>{quiz.attempts}</dd></div>
+        </dl>
+        <div className="quiz-status">
+          <span className="cw-status" data-passed={quiz.passed} data-state={state}>{label}</span>
+          <p className="roster-note">{quiz.lastSubmittedAt ? <>Last submitted <Timestamp value={quiz.lastSubmittedAt} includeTime /></> : quiz.available ? "Ready to attempt" : "Unlocks after this section's lessons"}</p>
+        </div>
+      </li>;
+    })}</ol>
+  </section>;
+}
+
 function LearnerRow({ item }) {
   const [expanded, setExpanded] = useState(false);
   const detailsId = useId();
@@ -27,7 +69,7 @@ function LearnerRow({ item }) {
   const progressLabel = !learning?.totalLessons ? "No published lessons" : learning.completed ? "Completed" : learning.started ? "In progress" : "Not started";
   return <>
     <tr>
-      <td data-label="Learner"><strong>{item.name || "Learner"}</strong><p className="cw-muted break-all">{item.email}</p></td>
+      <td data-label="Learner"><div className="roster-learner"><ProfileAvatar name={item.name || "Learner"} src={item.avatar || null} size={36} /><div><strong>{item.name || "Learner"}</strong><p className="cw-muted break-all">{item.email}</p></div></div></td>
       <td data-label="Course"><Link className="cw-text-link" to={`/instructor/courses/${encodeURIComponent(item.courseId)}`}>{item.courseTitle}</Link><p className="roster-note">Enrolled <Timestamp value={item.enrolledAt} /></p></td>
       <td data-label="Progress">{learning ? <div className="roster-progress">
         <div><strong>{learning.progressPercent}%</strong><span>{progressLabel}</span></div>
@@ -39,15 +81,7 @@ function LearnerRow({ item }) {
       <td data-label="Access"><span className="cw-status roster-access" data-access={item.status}>{({ active: "Active", expired: "Expired", cancelled: "Cancelled", refunded: "Refunded" })[item.status] || "Unavailable"}</span></td>
     </tr>
     {expanded && quizzes?.total > 0 && <tr className="roster-details-row"><td colSpan={6}>
-      <section id={detailsId} className="roster-quiz-details" aria-label={`Quiz results for ${item.name || "Learner"} in ${item.courseTitle}`}>
-        <h3>Quiz results · {item.name || "Learner"}</h3>
-        <p className="roster-note">Current published quizzes for {item.courseTitle}. Quizzes are optional and do not affect course completion.</p>
-        <ul>{quizzes.results.map(quiz => <li key={quiz.quizId}>
-          <div className="roster-quiz-heading"><div><h4>{quiz.title}</h4><p className="roster-note">{quiz.sectionTitle}</p></div><span className="cw-status" data-passed={quiz.passed}>{quiz.passed ? "Passed" : quiz.attempts ? "Not passed yet" : quiz.available ? "Not attempted" : "Locked"}</span></div>
-          <dl><div><dt>Best score</dt><dd>{quiz.bestScore == null ? "Not attempted" : `${quiz.bestScore}%`}</dd></div><div><dt>Latest score</dt><dd>{quiz.latestScore == null ? "Not attempted" : `${quiz.latestScore}%`}</dd></div><div><dt>Attempts</dt><dd>{quiz.attempts}</dd></div></dl>
-          {quiz.lastSubmittedAt ? <p className="roster-note">Last submitted <Timestamp value={quiz.lastSubmittedAt} includeTime /></p> : <p className="roster-note">{quiz.available ? "Ready for the learner to attempt." : "Available after completing this section’s lessons."}</p>}
-        </li>)}</ul>
-      </section>
+      <QuizResults id={detailsId} item={item} quizzes={quizzes} />
     </td></tr>}
   </>;
 }
@@ -59,10 +93,23 @@ export default function InstructorStudents() {
   useEffect(() => { setPage(1); }, [courseId]);
   const query = api.endpoints.getStudents.useQuery({ page, limit: 20, ...(courseId ? { courseId } : {}), ...(search ? { search } : {}), ...(status ? { status } : {}) }, { refetchOnMountOrArgChange: true, refetchOnFocus: true, refetchOnReconnect: true });
   const data = query.currentData;
+  // Course filter options: the instructor's courses (the API returns at most 50 per page).
+  const courses = api.endpoints.getCourses.useQuery({ page: 1, limit: 50 }).currentData?.courses || [];
+  const courseOptions = [{ value: "all", label: "All courses" }, ...courses.map(course => ({ value: String(course._id), label: course.title }))];
+  if (courseId && !courses.some(course => String(course._id) === courseId)) courseOptions.push({ value: courseId, label: data?.course?.title || "Selected course" });
   return <WorkspacePage eyebrow="Teaching workspace" title="Your learners" description="Follow your learners’ progress, recent activity, and quiz results across your courses." action={<AsyncButton className="cw-button" loading={query.isFetching} loadingLabel="Refreshing" onClick={query.refetch}><RefreshCw size={16} aria-hidden="true" />Refresh</AsyncButton>}>
-    <form className="cw-row studio-search" onSubmit={event => { event.preventDefault(); setSearch(input.trim()); setPage(1); }}><label><span className="sr-only">Find a learner</span><Search size={18} aria-hidden="true" /><input name="search" value={input} onChange={event => setInput(event.target.value)} maxLength={100} placeholder="Search by name or email" type="search" /></label><button className="cw-button" type="submit">Search</button><SelectField name="enrollmentStatus" aria-label="Enrollment status" value={status || "all"} onChange={(value) => { setStatus(value === "all" ? "" : value); setPage(1); }} options={[{ value: "all", label: "All enrollments" }, { value: "active", label: "Active" }, { value: "expired", label: "Expired" }, { value: "cancelled", label: "Cancelled" }, { value: "refunded", label: "Refunded" }]} className="w-full sm:w-48" /></form>
+    <form className="roster-toolbar" role="search" onSubmit={event => { event.preventDefault(); setSearch(input.trim()); setPage(1); }}>
+      <div className="roster-search">
+        <label><span className="sr-only">Find a learner</span><Search size={17} aria-hidden="true" /><input name="search" value={input} onChange={event => setInput(event.target.value)} maxLength={100} placeholder="Search by name or email" type="search" />{(input || search) && <button type="button" className="roster-search-clear" aria-label="Clear search" onClick={() => { setInput(""); setSearch(""); setPage(1); }}><X size={15} aria-hidden="true" /></button>}</label>
+        <button className="cw-button" type="submit">Search</button>
+      </div>
+      <div className="roster-filters">
+        {courseOptions.length > 1 && <SelectField name="courseFilter" aria-label="Course" value={courseId || "all"} onChange={(value) => { setParams(value === "all" ? {} : { courseId: value }); setPage(1); }} options={courseOptions} />}
+        <SelectField name="enrollmentStatus" aria-label="Enrollment status" value={status || "all"} onChange={(value) => { setStatus(value === "all" ? "" : value); setPage(1); }} options={[{ value: "all", label: "All enrollments" }, { value: "active", label: "Active" }, { value: "expired", label: "Expired" }, { value: "cancelled", label: "Cancelled" }, { value: "refunded", label: "Refunded" }]} />
+        {courseId && <button type="button" className="cw-button" onClick={() => { setParams({}); setPage(1); }}>Show all courses</button>}
+      </div>
+    </form>
     <QueryMessage query={{ data, loading: query.isFetching, error: query.error, refresh: query.refetch }} label="Loading your learners and progress" />
-    {courseId && <div className="cw-row cw-between mt-5"><p className="cw-muted">Enrollments for {data?.course?.title || "the selected course"}</p><button type="button" className="cw-button" onClick={() => { setParams({}); setPage(1); }}>Show all courses</button></div>}
     {!query.error && data?.items.length === 0 && <WorkspaceEmpty icon={Users} title={search || status ? "No matching learners" : "Your learners will appear here"} description={search || status ? "Try another name or choose all enrollments." : "When someone enrolls in one of your courses, you can follow their progress here."} />}
     {!query.error && Boolean(data?.items.length) && <div className="admin-admissions studio-panel instructor-roster mt-5"><p className="cw-muted">{data.pagination.total} {data.pagination.total === 1 ? "enrollment" : "enrollments"}. Progress reflects the course’s current published lessons.</p><TableScroll label="Learner records" className="admissions-results"><table className="admissions-table w-full text-left text-sm" aria-label="Course enrollments and learning progress"><thead><tr>{["Learner", "Course", "Progress", "Recent activity", "Quizzes", "Access"].map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead><tbody>{data.items.map(item => <LearnerRow key={item._id} item={item} />)}</tbody></table></TableScroll></div>}
     {!query.error && <Pagination pagination={data?.pagination} page={page} onPage={setPage} loading={query.isFetching} />}

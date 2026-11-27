@@ -5,13 +5,13 @@ import LoadingState from "@/components/feedback/LoadingState.jsx";
 import { useGetLearnerProfileQuery, useUpdateLearnerProfileMutation } from "@/services/api/user/learnerApi.js";
 import { userMessage } from "@/lib/user-messages.js";
 
+// "Select" keeps the field optional; it is not a gender option.
 const genderOptions = [
-  { value: "not_provided", label: "Not provided" },
+  { value: "not_provided", label: "Select" },
   { value: "male", label: "Male" },
   { value: "female", label: "Female" },
-  { value: "other", label: "Other" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ];
+const knownGender = value => (genderOptions.some(option => option.value === value) ? value : "not_provided");
 const textFields = [
   { name: "city", label: "City", autoComplete: "address-level2", maxLength: 100 },
   { name: "state", label: "State or region", autoComplete: "address-level1", maxLength: 100 },
@@ -52,7 +52,7 @@ export default function LearnerProfileForm() {
     {profile.currentData && <form onSubmit={submit} aria-busy={saving.isLoading || undefined}>
       <fieldset className="profile-preferences" disabled={saving.isLoading || Boolean(profile.error)}>
         <legend className="sr-only">Optional learning profile details</legend>
-        <SelectField id="learner-gender" name="gender" label="Gender" options={genderOptions} value={values.gender || "not_provided"} onChange={value => change("gender", value === "not_provided" ? "" : value)} disabled={saving.isLoading || Boolean(profile.error)} />
+        <SelectField id="learner-gender" name="gender" label="Gender" options={genderOptions} value={knownGender(values.gender)} onChange={value => change("gender", value === "not_provided" ? "" : value)} disabled={saving.isLoading || Boolean(profile.error)} />
         {textFields.map(({ label, ...field }) => <label key={field.name} className="profile-field" htmlFor={`learner-${field.name}`}>{label}<input {...field} id={`learner-${field.name}`} className="profile-input" value={values[field.name] || ""} onChange={event => change(field.name, event.target.value)} /></label>)}
       </fieldset>
       <div className="profile-actions"><AsyncButton type="submit" className="cw-button cw-primary" loading={saving.isLoading} loadingLabel="Saving details" disabled={!dirty || profile.isFetching || Boolean(profile.error)}>Save details</AsyncButton>{dirty && <button type="button" className="cw-button" disabled={saving.isLoading} onClick={() => { setEdits({}); setError(""); setMessage(""); }}>Cancel</button>}</div>

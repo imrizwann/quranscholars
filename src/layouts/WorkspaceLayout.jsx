@@ -61,7 +61,7 @@ function WorkspaceSidebar({
   mobile = false,
   collapsed = false,
 }) {
-  const base = instructor ? "/instructor" : "/dashboard";
+  const base = admin ? "/admin" : instructor ? "/instructor" : "/dashboard";
   const { pathname } = useLocation();
   const links = admin
     ? adminLinks
@@ -120,17 +120,10 @@ function WorkspaceSidebar({
         <p className="workspace-nav-caption workspace-account-caption">
           Account
         </p>
-        {(admin
-          ? [{ to: "/profile", label: "Profile", icon: UserRound }]
-          : [
-              {
-                to: `${base}/profile`,
-                label: instructor ? "Public profile" : "Profile",
-                icon: UserRound,
-              },
-              { to: `${base}/settings`, label: "Settings", icon: Settings },
-            ]
-        ).map(renderLink)}
+        {[
+          { to: `${base}/profile`, label: "Profile", icon: UserRound },
+          { to: `${base}/settings`, label: "Settings", icon: Settings },
+        ].map(renderLink)}
       </nav>
       <div className="workspace-sidebar-footer">
         <p>
@@ -158,7 +151,7 @@ export default function WorkspaceLayout({ type = "student" }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { pathname } = useLocation();
-  const base = instructor ? "/instructor" : "/dashboard";
+  const base = admin ? "/admin" : instructor ? "/instructor" : "/dashboard";
   const closeNavigation = useCallback(() => setMobileOpen(false), []);
   const activeLink = [
     ...(admin ? adminLinks : instructor ? instructorLinks : studentLinks),

@@ -1,0 +1,46 @@
+/* ==========================================================================
+   Instructor overview (/instructor/dashboard): recent enrollments and course checklist.
+   ========================================================================== */
+
+.overview-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr); gap: 20px; align-items: start; }
+/* Same columns as the analytics panels above, so edges line up. */
+
+.overview-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px 20px; margin-bottom: 14px; }
+.overview-panel-head > div { min-width: 0; }
+.studio-page .overview-panel-head p { margin-top: 4px; color: var(--muted-foreground); font-size: var(--font-size-label); line-height: 1.6; }
+
+/* Recent enrollments */
+.enrollment-list { list-style: none; }
+.enrollment-list > li { display: flex; align-items: center; gap: 12px; padding-block: 12px; border-top: 1px solid var(--border); }
+.enrollment-list > li:first-child { border-top: 0; padding-top: 4px; }
+.enrollment-main { flex: 1; min-width: 0; }
+.studio-page .enrollment-name { color: var(--foreground); font-size: var(--font-size-body); font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+.studio-page .enrollment-course { margin-top: 1px; overflow: hidden; color: var(--muted-foreground); font-size: var(--font-size-caption); line-height: 1.5; text-overflow: ellipsis; white-space: nowrap; }
+.enrollment-meta { display: grid; justify-items: end; gap: 4px; flex-shrink: 0; color: var(--muted-foreground); font-size: var(--font-size-caption); }
+.enrollment-progress { display: inline-flex; align-items: center; gap: 7px; color: var(--primary); font-weight: 650; font-variant-numeric: tabular-nums; }
+.enrollment-progress > span { position: relative; width: 56px; height: 5px; overflow: hidden; border-radius: 999px; background: var(--muted); }
+.enrollment-progress > span::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--share, 0%); border-radius: inherit; background: var(--primary); }
+
+/* Course checklist */
+.checklist-list { display: grid; gap: 12px; list-style: none; }
+.checklist-list > li { padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: color-mix(in srgb, var(--muted) 45%, var(--surface)); }
+.checklist-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.checklist-title { min-width: 0; color: var(--foreground); font-size: var(--font-size-body); font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+.checklist-title:hover { color: var(--primary); }
+.checklist-count { flex-shrink: 0; padding: 2px 9px; border-radius: 999px; background: #fdf3d8; color: #7a5a0c; font-size: var(--font-size-caption); font-weight: 650; }
+.checklist-count[data-ready] { background: color-mix(in srgb, var(--primary) 10%, var(--surface)); color: var(--primary); }
+.checklist-items { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; list-style: none; }
+.checklist-items li { display: inline-flex; align-items: center; gap: 6px; color: var(--muted-foreground); font-size: var(--font-size-caption); }
+.checklist-items li svg { color: color-mix(in srgb, var(--muted-foreground) 70%, transparent); }
+.checklist-items li[data-done] { color: var(--foreground); }
+.checklist-items li[data-done] svg { color: var(--primary); }
+
+/* Loading, empty and error states */
+.overview-skeleton { display: grid; gap: 10px; list-style: none; }
+.overview-skeleton li { height: 44px; border-radius: 8px; background: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .overview-skeleton li { animation: overview-pulse 1.4s ease-in-out infinite; } }
+@keyframes overview-pulse { 50% { opacity: .55; } }
+.overview-note { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding: 16px; border-radius: 10px; background: var(--muted); color: var(--muted-foreground); font-size: var(--font-size-label); line-height: 1.6; }
+.overview-note > svg { flex-shrink: 0; color: var(--primary); }
+.overview-note p { flex: 1 1 220px; }
+@media (max-width: 1050px) { .overview-grid { grid-template-columns: minmax(0, 1fr); } }

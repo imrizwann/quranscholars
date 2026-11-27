@@ -9,6 +9,7 @@ import useSignOut from "@/features/auth/useSignOut.js";
 import useProfilePhoto from "@/features/profile/useProfilePhoto.js";
 import ProfileAvatar from "@/features/profile/components/ProfileAvatar.jsx";
 import NotificationBell from "@/realtime/NotificationBell.jsx";
+import { profilePath } from "@/features/profile/account-paths.js";
 import "./navbar.css";
 
 const primaryLinks = [
@@ -29,7 +30,7 @@ function accountLinks(user) {
     { to: "/dashboard/learning", label: "My learning", icon: BookOpen },
     { to: "/dashboard/purchases", label: "Purchases", icon: ReceiptText },
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/profile", label: "My profile", icon: UserRound },
+    { to: profilePath(user.role), label: "My profile", icon: UserRound },
     ...(user.role === "instructor" ? [{ to: "/instructor/dashboard", label: "Instructor dashboard", icon: Presentation }] : []),
     ...(user.role === "admin" ? [{ to: "/admin/instructor-applications", label: "Admin dashboard", icon: ShieldCheck }] : []),
   ];

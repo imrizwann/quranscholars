@@ -210,3 +210,41 @@
     padding: 16px;
   }
 }
+
+/* Overall lesson progress: ring + summary + bar */
+.analytics-learning-progress { grid-template-columns: auto minmax(0, 1fr); column-gap: clamp(18px, 3vw, 32px); row-gap: 14px; }
+.analytics-learning-progress progress { grid-column: 2; }
+.analytics-ring { position: relative; grid-row: span 2; width: clamp(92px, 10vw, 118px); aspect-ratio: 1; }
+.analytics-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.analytics-ring circle { fill: none; stroke-width: 10; }
+.analytics-ring-track { stroke: var(--muted); }
+.analytics-ring-bar { stroke: var(--primary); stroke-linecap: round; transition: stroke-dasharray 600ms var(--ease-out-ui, ease); }
+.analytics-ring .analytics-progress-value { position: absolute; inset: 0; display: grid; place-items: center; font-size: clamp(1.25rem, 2vw, 1.5rem); }
+@media (max-width: 479px) {
+  .analytics-learning-progress { grid-template-columns: minmax(0, 1fr); }
+  .analytics-ring { grid-row: auto; width: 96px; }
+  .analytics-learning-progress progress { grid-column: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .analytics-ring-bar { transition: none; } }
+
+/* Panel headings with a link to the full report (instructor overview). */
+.analytics-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px 20px; }
+.analytics-heading > div { min-width: 0; }
+.analytics-panel-link { display: inline-flex; flex-shrink: 0; align-items: center; gap: 5px; min-height: 32px; color: var(--primary); font-size: var(--font-size-label); font-weight: 600; white-space: nowrap; }
+.analytics-panel-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.analytics-revenue > .analytics-heading + p { margin-top: 6px; }
+
+/* Enrollment share bar beside each count. */
+.analytics-count { white-space: nowrap; }
+.analytics-share {
+  display: inline-block;
+  position: relative;
+  width: clamp(48px, 8vw, 110px);
+  height: 6px;
+  margin-right: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--muted);
+  vertical-align: middle;
+}
+.analytics-share::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--share, 0%); border-radius: inherit; background: var(--primary); }

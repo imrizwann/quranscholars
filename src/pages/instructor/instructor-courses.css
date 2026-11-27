@@ -1,0 +1,58 @@
+/* ==========================================================================
+   Instructor courses (/instructor/courses): status tabs with counts and search.
+   ========================================================================== */
+
+.courses-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin: 4px 0 24px;
+  border-bottom: 1px solid var(--border);
+}
+.studio-page .courses-toolbar .courses-tabs { margin: 0; border-bottom: 0; }
+.courses-tabs button { display: inline-flex; align-items: center; gap: 8px; margin-bottom: -1px; padding-inline: 4px 14px; }
+.courses-tab-count {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.courses-tabs button[aria-pressed="true"] .courses-tab-count { background: color-mix(in srgb, var(--primary) 12%, var(--surface)); color: var(--primary); }
+
+.courses-search { display: flex; align-items: center; gap: 8px; padding-bottom: 10px; }
+.courses-search label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: clamp(220px, 26vw, 320px);
+  min-height: 40px;
+  padding-inline: 12px 6px;
+  border: 1px solid var(--input);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--muted-foreground);
+}
+.courses-search label:focus-within { outline: 2px solid var(--ring); outline-offset: 2px; }
+.courses-search input { flex: 1; width: 100%; min-width: 0; border: 0; background: transparent; color: var(--foreground); font-size: var(--font-size-body); }
+.courses-search input:focus-visible { outline: none; box-shadow: none; }
+.courses-search input::-webkit-search-cancel-button { display: none; }
+.courses-search-clear { display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; color: var(--muted-foreground); cursor: pointer; }
+.courses-search-clear:hover { background: var(--muted); color: var(--foreground); }
+.courses-search .cw-button { min-height: 40px; margin-right: 0; border-radius: var(--radius-button, 4px); }
+.courses-refresh { width: 40px; padding: 0; }
+.studio-page .courses-result-note { margin: -8px 0 18px; color: var(--muted-foreground); font-size: var(--font-size-label); }
+
+@media (max-width: 899px) {
+  .courses-toolbar { flex-direction: column-reverse; flex-wrap: nowrap; align-items: stretch; border-bottom: 0; }
+  .studio-page .courses-toolbar .courses-tabs { border-bottom: 1px solid var(--border); }
+  .courses-search { padding-bottom: 0; }
+  .courses-search { min-width: 0; }
+  .courses-search label { flex: 1; width: auto; min-width: 0; }
+}

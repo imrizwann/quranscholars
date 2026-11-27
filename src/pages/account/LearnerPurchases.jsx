@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, ReceiptText, RefreshCw } from "lucide-react";
+import { ArrowUpRight, Check, Copy, ReceiptText, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 import {
   WorkspaceEmpty,
   WorkspacePage,
@@ -47,6 +48,28 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
   timeStyle: "short",
 });
+
+// A reference people may need to quote to support, with a copy button.
+function Reference({ value, fallback, label }) {
+  const [copied, setCopied] = useState(false);
+  if (!value) return <span className="purchase-muted">{fallback}</span>;
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      toast.success(`Copied ${label}`);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Copy is not available", { description: "Select the reference and copy it manually." });
+    }
+  };
+  return <span className="purchase-reference-row">
+    <code className="purchase-reference">{value}</code>
+    <button type="button" className="purchase-copy" onClick={copy} aria-label={`Copy ${label}`}>
+      {copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}<span className="sr-only">Copy</span>
+    </button>
+  </span>;
+}
 
 function PurchaseHistory({ authenticated }) {
   const [cursors, setCursors] = useState([null]),
@@ -147,68 +170,41 @@ function PurchaseHistory({ authenticated }) {
                       aria-label={`Order for ${order.course.title}`}
                     >
                       <div className="purchase-card-heading">
-                        <h2>{order.course.title}</h2>
-                        <div className="purchase-badges">
-                          {order.testMode && (
-                            <span className="purchase-test">Test payment</span>
-                          )}
-                          <span
-                            className="purchase-status"
-                            data-status={order.status}
-                          >
-                            {label}
-                          </span>
+                        <span className="purchase-icon" aria-hidden="true"><ReceiptText size={20} /></span>
+                        <div className="purchase-title">
+                          <h2>{order.course.title}</h2>
+                          <div className="purchase-badges">
+                            <span className="purchase-status" data-status={order.status}>{label}</span>
+                            {order.testMode && <span className="purchase-test">Test payment</span>}
+                          </div>
                         </div>
+                        <dl className="purchase-total">
+                          <dt>Order amount</dt>
+                          <dd className="purchase-amount">{formatMoney(order.amountMinor, order.currency, order.currencyExponent)}</dd>
+                        </dl>
                       </div>
                       <dl className="purchase-details">
                         <div>
-                          <dt>Order amount</dt>
-                          <dd className="purchase-amount">
-                            {formatMoney(
-                              order.amountMinor,
-                              order.currency,
-                              order.currencyExponent,
-                            )}
-                          </dd>
-                        </div>
-                        <div>
                           <dt>Ordered on</dt>
-                          <dd>
-                            {validDate ? (
-                              <time dateTime={date.toISOString()}>
-                                {dateFormatter.format(date)}
-                              </time>
-                            ) : (
-                              "Date unavailable"
-                            )}
-                          </dd>
+                          <dd>{validDate ? <time dateTime={date.toISOString()}>{dateFormatter.format(date)}</time> : "Date unavailable"}</dd>
                         </div>
                         <div>
                           <dt>Order reference</dt>
-                          <dd className="purchase-reference">
-                            {order.orderReference || "Awaiting confirmation"}
-                          </dd>
+                          <dd><Reference value={order.orderReference} fallback="Awaiting confirmation" label="order reference" /></dd>
                         </div>
                         <div>
                           <dt>Payment reference</dt>
-                          <dd className="purchase-reference">
-                            {order.paymentReference || "Not available yet"}
-                          </dd>
+                          <dd><Reference value={order.paymentReference} fallback="Not available yet" label="payment reference" /></dd>
                         </div>
                       </dl>
                       <div className="purchase-card-footer">
                         <p>
                           {description}
-                          {order.testMode &&
-                            " This is a test transaction; no real payment was collected."}
+                          {order.testMode && " This is a test transaction; no real payment was collected."}
                         </p>
                         {order.course.slug && (
-                          <Link
-                            className="cw-text-link"
-                            to={`/courses/${encodeURIComponent(order.course.slug)}`}
-                          >
-                            Course details{" "}
-                            <ArrowUpRight size={15} aria-hidden="true" />
+                          <Link className="cw-text-link" to={`/courses/${encodeURIComponent(order.course.slug)}`}>
+                            Course details <ArrowUpRight size={15} aria-hidden="true" />
                           </Link>
                         )}
                       </div>

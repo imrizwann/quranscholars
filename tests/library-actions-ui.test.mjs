@@ -60,10 +60,11 @@ test("learner library menus confirm hiding, restore from the hidden view and req
     const menu = text => [...document.querySelectorAll('[role="menuitem"]')].find(node => node.textContent.trim() === text);
     const confirm = text => [...document.querySelectorAll('.qs-confirm-actions button')].find(node => node.textContent.trim() === text);
     const options = title => document.querySelector(`button[aria-label="Course options: ${title}"]`);
+    // The library view is a pair of toggle buttons ("My courses" / "Hidden courses").
     const chooseView = async label => {
-      await click(document.querySelector('[role="combobox"]'));
-      await settle(() => document.querySelector('[role="option"]'));
-      await click([...document.querySelectorAll('[role="option"]')].find(node => node.textContent.trim() === label));
+      const tab = [...document.querySelectorAll('[aria-label="Library view"] button')].find(node => node.textContent.trim() === label);
+      await click(tab);
+      assert.equal(tab.getAttribute("aria-pressed"), "true");
     };
     await settle(() => options(free.title));
     assert.equal(document.querySelector('progress[aria-label="Advanced recitation progress"]').value, 50);

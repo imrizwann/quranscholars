@@ -1,0 +1,73 @@
+/* ==========================================================================
+   Learner progress (/dashboard/progress): one row per enrolled course.
+   ========================================================================== */
+
+.progress-list {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  list-style: none;
+}
+.progress-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1.4fr) minmax(180px, 1fr) 124px;
+  align-items: center;
+  gap: 14px 22px;
+  padding: 16px 20px;
+  transition: background-color 160ms var(--ease-out-ui, ease);
+}
+.progress-row + .progress-row { border-top: 1px solid var(--border); }
+.progress-row:hover { background: color-mix(in srgb, var(--primary) 3%, var(--surface)); }
+
+.progress-thumb {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  color: var(--primary);
+}
+.progress-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.progress-row-main { min-width: 0; }
+.studio-page .progress-row-main h3 { font-size: var(--font-size-body); font-weight: 650; line-height: 1.4; overflow-wrap: anywhere; }
+.progress-row-main h3 a { color: var(--foreground); }
+.progress-row-main h3 a:hover { color: var(--primary); }
+.studio-page .progress-row-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 4px; color: var(--muted-foreground); font-size: var(--font-size-caption); line-height: 1.5; }
+.progress-row-next { min-width: 0; overflow-wrap: anywhere; }
+.progress-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-weight: 600;
+}
+.progress-row[data-state="started"] .progress-state { background: #fdf3d8; color: #7a5a0c; }
+.progress-row[data-state="completed"] .progress-state { background: color-mix(in srgb, var(--primary) 10%, var(--surface)); color: var(--primary); }
+
+.progress-row-bar { display: grid; gap: 7px; min-width: 0; font-size: var(--font-size-caption); color: var(--muted-foreground); }
+.progress-row-bar > div { display: flex; justify-content: space-between; gap: 10px; }
+.progress-row-bar strong { color: var(--primary); font-size: var(--font-size-label); font-variant-numeric: tabular-nums; }
+.progress-row-bar progress { display: block; appearance: none; width: 100%; height: 6px; overflow: hidden; border: 0; border-radius: 999px; background: var(--muted); color: var(--primary); }
+.progress-row-bar progress::-webkit-progress-bar { background: var(--muted); }
+.progress-row-bar progress::-webkit-progress-value { background: var(--primary); border-radius: 999px; }
+.progress-row-bar progress::-moz-progress-bar { background: var(--primary); border-radius: 999px; }
+.progress-row .cw-button { justify-self: stretch; min-height: 40px; border-radius: var(--radius-button, 4px); white-space: nowrap; }
+
+@media (max-width: 899px) {
+  .progress-row { grid-template-columns: auto minmax(0, 1fr); }
+  .progress-row-bar { grid-column: 1 / -1; }
+  .progress-row .cw-button { grid-column: 1 / -1; justify-self: start; }
+}
+@media (max-width: 479px) {
+  .progress-row { padding: 14px 16px; }
+  .progress-thumb { width: 72px; }
+  .progress-row .cw-button { justify-self: stretch; }
+}
+@media (prefers-reduced-motion: reduce) { .progress-row { transition: none; } }

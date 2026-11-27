@@ -2,6 +2,7 @@ import TableScroll from "@/components/ui/TableScroll.jsx";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  ArrowRight,
   BookOpen,
   CheckCheck,
   CircleCheck,
@@ -61,7 +62,8 @@ function Metrics({ query, items }) {
   );
 }
 
-export function LearnerAnalytics({ detailed = false }) {
+// emptyHint: the overview turns this off because its course list already shows an empty state.
+export function LearnerAnalytics({ detailed = false, emptyHint = true }) {
   const query = learnerApi.endpoints.getLearnerAnalytics.useQuery(
     undefined,
     options,
@@ -114,6 +116,13 @@ export function LearnerAnalytics({ detailed = false }) {
         summary?.totalEnrolledCourses > 0 &&
         (hasLessonTotals ? (
           <section className="studio-panel analytics-learning-progress">
+            <div className="analytics-ring">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle className="analytics-ring-track" cx="60" cy="60" r="52" />
+                {completion > 0 && <circle className="analytics-ring-bar" cx="60" cy="60" r="52" pathLength="100" strokeDasharray={`${completion} 100`} />}
+              </svg>
+              <span className="analytics-progress-value">{completion}%</span>
+            </div>
             <div>
               <h2>Your lesson progress</h2>
               <p>
@@ -124,7 +133,6 @@ export function LearnerAnalytics({ detailed = false }) {
               </p>
               <p>{COURSE_COMPLETION_DESCRIPTION}</p>
             </div>
-            <span className="analytics-progress-value">{completion}%</span>
             <progress
               max={Math.max(1, totalLessons)}
               value={completedLessons}
@@ -135,7 +143,7 @@ export function LearnerAnalytics({ detailed = false }) {
         ) : (
           <AnalyticsSkeleton label="Updating lesson progress" />
         ))}
-      {!query.isError &&
+      {emptyHint && !query.isError &&
         query.currentData?.summary.totalEnrolledCourses === 0 && (
           <p className="analytics-empty">
             Your learning journey starts with your first course.{" "}
@@ -144,7 +152,7 @@ export function LearnerAnalytics({ detailed = false }) {
             </Link>
           </p>
         )}
-      {!detailed && (
+      {!detailed && summary?.totalEnrolledCourses !== 0 && (
         <div className="analytics-report-links">
           <Link className="cw-text-link" to="/dashboard/progress">
             View your progress
@@ -162,6 +170,8 @@ export function InstructorAnalytics({ view = "overview" }) {
     options,
   );
   const data = query.isError ? undefined : query.currentData;
+  // Bars compare each course with the most-enrolled course on this page.
+  const maxEnrollments = Math.max(0, ...(data?.courses || []).map((course) => Number(course.enrollments) || 0));
   const items =
     view === "earnings"
       ? [
@@ -227,16 +237,6 @@ export function InstructorAnalytics({ view = "overview" }) {
         />
       )}
       <Metrics query={query} items={items} />
-      {view === "overview" && (
-        <div className="analytics-report-links">
-          <Link className="cw-text-link" to="/instructor/analytics">
-            Course analytics
-          </Link>
-          <Link className="cw-text-link" to="/instructor/earnings">
-            View earnings
-          </Link>
-        </div>
-      )}
       <QueryMessage query={queryState(query)} />
       {!query.isError && (
         <div
@@ -254,6 +254,11 @@ export function InstructorAnalytics({ view = "overview" }) {
                       : "Your recorded courses"}
                   </p>
                 </div>
+                {view === "overview" && (
+                  <Link className="analytics-panel-link" to="/instructor/analytics">
+                    Course analytics<ArrowRight size={15} aria-hidden="true" />
+                  </Link>
+                )}
               </div>
               {!data ? (
                 <AnalyticsSkeleton label="Loading course statistics" />
@@ -293,6 +298,11 @@ export function InstructorAnalytics({ view = "overview" }) {
                             data-label="Enrollments"
                             className="analytics-count"
                           >
+                            <span
+                              className="analytics-share"
+                              aria-hidden="true"
+                              style={{ "--share": `${maxEnrollments ? Math.round((course.enrollments / maxEnrollments) * 100) : 0}%` }}
+                            />
                             <Link
                               className="cw-text-link"
                               aria-label={`View ${count(course.enrollments)} enrollments for ${course.title}`}
@@ -328,7 +338,14 @@ export function InstructorAnalytics({ view = "overview" }) {
           )}
           {view !== "analytics" && (
             <section className="studio-panel analytics-revenue">
-              <h2>Verified course sales</h2>
+              <div className="analytics-heading">
+                <h2>Verified course sales</h2>
+                {view === "overview" && (
+                  <Link className="analytics-panel-link" to="/instructor/earnings">
+                    Earnings<ArrowRight size={15} aria-hidden="true" />
+                  </Link>
+                )}
+              </div>
               <p>
                 Verified live payments. Free enrollments, refunds, and disputes
                 are excluded.

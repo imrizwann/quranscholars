@@ -19,6 +19,9 @@ test("workspaces render real courses and library data, covers, and honest unavai
       export { default as paymentApi } from './src/services/api/user/paymentApi.js';
       export { default as learnerApi } from './src/services/api/user/learnerApi.js';
       export { default as revenueApi } from './src/services/api/revenueApi.js';
+      export { default as fileUploadApi } from './src/services/api/user/fileUploadApis.js';
+      export { default as instructorApplicationApi } from './src/services/api/user/instructorApplicationApi.js';
+      export { default as userAuthApi } from './src/services/api/user/userAuthApis.js';
       export { default as Courses } from './src/pages/instructor/InstructorCourses.jsx';
       export { default as InstructorDashboard } from './src/pages/instructor/InstructorDashboard.jsx';
       export { default as StudentDashboard } from './src/pages/dashboard/StudentDashboard.jsx';
@@ -33,7 +36,8 @@ test("workspaces render real courses and library data, covers, and honest unavai
   let store, apis;
   try {
     const mod = await import(pathToFileURL(output));
-    apis = [mod.coursesApi, mod.paymentApi, mod.learnerApi, mod.revenueApi];
+    // The learner profile page also uses the photo, teaching-application and account APIs, as in src/app/store.js.
+    apis = [mod.coursesApi, mod.paymentApi, mod.learnerApi, mod.revenueApi, mod.fileUploadApi, mod.instructorApplicationApi, mod.userAuthApi];
     const records = [{ _id: "course-1", title: "Real Tajweed Course", slug: "tajweed", status: "Draft", category: { name: "Tajweed" }, thumbnailUrl: "https://media.example.test/cover.webp", stats: { totalSections: 2, totalLessons: 7 }, trailerVideo: { status: "COMPLETED" } }, { _id: "course-2", title: "Course Without Cover", slug: "no-cover", status: "Published", published: true }];
     globalThis.fetch = async (request) => {
       const url = new URL(request.url);

@@ -1,9 +1,9 @@
 import { useLocation } from "react-router-dom";
 import LearnerProgress from "./LearnerProgress.jsx";
 import LearnerPurchases from "../account/LearnerPurchases.jsx";
+import { AccountProfilePage, AccountSettingsPage } from "../account/AccountPages.jsx";
 import { ClipboardCheck, Heart } from "lucide-react";
 import {
-  WorkspaceAccount,
   WorkspaceEmpty,
   WorkspaceGuide,
   WorkspacePage,
@@ -29,8 +29,8 @@ export default function StudentSectionPage() {
   const key = useLocation().pathname.split("/").pop();
   if (key === "progress") return <LearnerProgress />;
   if (key === "purchases") return <LearnerPurchases />;
-  if (["profile", "settings"].includes(key))
-    return <WorkspaceAccount settings={key === "settings"} />;
+  if (key === "profile") return <AccountProfilePage />;
+  if (key === "settings") return <AccountSettingsPage />;
   const [title, description, Icon, emptyTitle, emptyDescription] =
     pages[key] || pages.assignments;
   return (

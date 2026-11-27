@@ -2,7 +2,8 @@ import InstructorStudents from "./InstructorStudents.jsx";
 import InstructorReports from "./InstructorReports.jsx";
 import { useLocation } from "react-router-dom";
 import { ClipboardCheck, Library, MessageSquareText, Radio } from "lucide-react";
-import { WorkspaceAccount, WorkspaceEmpty, WorkspaceGuide, WorkspacePage } from "@/components/lms/WorkspaceUI.jsx";
+import { WorkspaceEmpty, WorkspaceGuide, WorkspacePage } from "@/components/lms/WorkspaceUI.jsx";
+import { AccountProfilePage, AccountSettingsPage } from "../account/AccountPages.jsx";
 export { default as InstructorDashboard } from "./InstructorDashboard.jsx";
 
 const pages = {
@@ -16,7 +17,8 @@ export function InstructorSectionPage() {
   const key = useLocation().pathname.split("/").pop();
   if (key === "students") return <InstructorStudents />;
   if (["earnings", "analytics"].includes(key)) return <InstructorReports kind={key} />;
-  if (["profile", "settings"].includes(key)) return <WorkspaceAccount instructor settings={key === "settings"} />;
+  if (key === "profile") return <AccountProfilePage />;
+  if (key === "settings") return <AccountSettingsPage />;
   const page = pages[key] || pages["live-classes"];
   return <WorkspacePage eyebrow="Teaching workspace" title={page.title} description={page.intro}><div className="studio-split"><WorkspaceEmpty icon={page.icon} badge="Coming soon" title={page.empty} description={page.description} to="/instructor/courses" action="Open course studio" /><WorkspaceGuide title="Prepare for your next step" items={page.steps} /></div></WorkspacePage>;
 }

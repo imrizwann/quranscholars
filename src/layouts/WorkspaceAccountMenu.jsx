@@ -16,12 +16,12 @@ export default function WorkspaceAccountMenu({ type }) {
   const { key: locationKey } = useLocation();
   const role = type === "admin" ? "Admin" : type === "instructor" ? "Instructor" : "Learner";
   const name = user?.name?.trim() || "Your account";
-  const base = type === "instructor" ? "/instructor" : "/dashboard";
+  const base = type === "admin" ? "/admin" : type === "instructor" ? "/instructor" : "/dashboard";
   const links = [
-    { to: "/profile", label: "My profile", icon: UserRound },
+    { to: `${base}/profile`, label: "My profile", icon: UserRound },
     { to: "/dashboard/purchases", label: "Purchases", icon: ReceiptText },
     ...(user?.role === "instructor" ? [{ to: "/instructor/dashboard", label: "Instructor dashboard", icon: Presentation }] : []),
-    ...(type === "admin" ? [] : [{ to: `${base}/settings`, label: "Account settings", icon: Settings }]),
+    { to: `${base}/settings`, label: "Account settings", icon: Settings },
     { to: type === "admin" ? "/admin/instructor-applications" : type === "instructor" ? `${base}/courses` : `${base}/learning`, label: type === "admin" ? "Instructor applications" : type === "instructor" ? "Manage courses" : "My learning", icon: LayoutDashboard },
     { to: "/courses", label: "Browse courses", icon: BookOpen },
     ...(type === "admin" ? [] : [

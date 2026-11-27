@@ -35,7 +35,10 @@ test("instructor roster renders account progress, expandable quiz scores, pagina
     const gate = new Promise(resolve => { release = resolve; });
     const requests = [];
     globalThis.fetch = async request => {
-      const url = new URL(request.url); requests.push(url);
+      const url = new URL(request.url);
+      // The course filter loads the instructor's courses; every other request must be the roster.
+      if (url.pathname === "/api/instructor/recorded-courses") return Response.json({ success: true, data: { courses: [{ _id: "course1", title: "Tajweed foundations" }], pagination: { page: 1, total: 1, totalCourses: 1, hasNextPage: false } } });
+      requests.push(url);
       assert.equal(url.pathname, "/api/instructor/recorded-courses/students");
       assert.equal(request.credentials, "include");
       assert.equal(url.searchParams.has("userId"), false);

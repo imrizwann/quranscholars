@@ -1,0 +1,80 @@
+/* ==========================================================================
+   Learner workspace account pages: /dashboard/profile and /dashboard/settings.
+   Shared avatar, badge and form styles come from pages/account/profile.css.
+   ========================================================================== */
+
+/* ---------- Profile ---------- */
+
+.account-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (min-width: 1024px) {
+  .account-layout { grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr); gap: 24px; }
+  .account-side { position: sticky; top: 24px; }
+}
+.account-main, .account-side { display: grid; gap: 20px; min-width: 0; }
+
+.account-identity { position: relative; overflow: hidden; }
+.account-identity::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 76px;
+  background: radial-gradient(circle at 92% 0%, rgba(244, 201, 93, .3), transparent 45%), linear-gradient(120deg, #0f5e52, #062925);
+}
+.account-identity-head { position: relative; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px 20px; padding-top: 28px; }
+.account-photo.profile-photo { position: relative; width: 88px; height: 88px; overflow: visible; flex-shrink: 0; border-radius: 50%; box-shadow: 0 0 0 4px var(--surface); }
+.account-photo .profile-avatar-image { border-radius: 50%; }
+.account-photo .profile-photo-edit { width: 32px; height: 32px; }
+.account-identity-copy { flex: 1 1 220px; min-width: 0; margin-top: 54px; }
+@media (max-width: 479px) { .account-identity-copy { flex-basis: 100%; margin-top: 0; } }
+.studio-page .account-identity-copy h2 { font-family: var(--font-display, inherit); font-size: clamp(1.25rem, 2vw, 1.5rem); line-height: 1.25; overflow-wrap: anywhere; }
+.studio-page .account-identity-copy > p { margin-top: 2px; color: var(--muted-foreground); font-size: var(--font-size-label); overflow-wrap: anywhere; }
+.account-identity-copy .profile-badges { margin-top: 10px; }
+.account-identity .profile-badge { box-shadow: none; border: 1px solid var(--border); }
+.account-identity .profile-badge[data-tone] { border-color: transparent; }
+
+.account-photo-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+.studio-page .account-photo-controls > p { flex: 1 1 240px; color: var(--muted-foreground); font-size: var(--font-size-label); line-height: 1.6; }
+.account-photo-controls .profile-actions { margin-top: 0; }
+
+.account-snapshot h2 { font-size: 1rem; }
+.account-snapshot dl { display: grid; gap: 2px; margin-top: 12px; }
+.account-snapshot dl > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; border-bottom: 1px solid var(--border); }
+.account-snapshot dt { display: inline-flex; align-items: center; gap: 9px; color: var(--muted-foreground); font-size: var(--font-size-label); }
+.account-snapshot dt svg { color: var(--primary); }
+.account-snapshot dd { font-family: var(--font-display, inherit); font-size: 1.125rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.account-skeleton { display: inline-block; width: 28px; height: 18px; border-radius: 4px; background: var(--muted); }
+.account-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; color: var(--primary); font-size: var(--font-size-label); font-weight: 600; }
+.account-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.studio-page .account-muted { margin-top: 10px; color: var(--muted-foreground); font-size: var(--font-size-label); }
+.account-side .profile-teach { margin: 0; }
+
+/* ---------- Settings ---------- */
+
+.account-settings { display: grid; gap: 20px; max-width: 980px; }
+.settings-group { padding-block: clamp(18px, 2vw, 22px) 4px; }
+.settings-group > h2 { padding-bottom: 6px; font-size: 1rem; }
+.setting-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  padding-block: 18px;
+  border-top: 1px solid var(--border);
+}
+.settings-group > h2 + .setting-row { border-top: 0; }
+@media (min-width: 760px) {
+  .setting-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 28px; align-items: start; }
+}
+.setting-label { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.setting-icon { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 9px; background: color-mix(in srgb, var(--primary) 9%, var(--surface)); color: var(--primary); }
+.studio-page .setting-label h3 { font-size: var(--font-size-body); font-weight: 650; }
+.studio-page .setting-label p { margin-top: 2px; color: var(--muted-foreground); font-size: var(--font-size-label); line-height: 1.6; }
+.setting-control { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; min-width: 0; }
+.setting-control .cw-button { min-height: 40px; border-radius: var(--radius-button, 4px); }
+.studio-page .setting-value { flex-basis: 100%; color: var(--foreground); font-size: var(--font-size-body); font-weight: 550; overflow-wrap: anywhere; }
+.setting-control .profile-badge { box-shadow: none; }
+.studio-page .setting-note { flex-basis: 100%; color: var(--muted-foreground); font-size: var(--font-size-label); line-height: 1.6; }
+.studio-page .setting-note.is-error { color: var(--destructive); }
+.setting-note a { color: var(--primary); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.settings-danger { border-color: color-mix(in srgb, var(--destructive) 25%, var(--border)); }
+.settings-danger > h2 { color: var(--destructive); }
+.settings-danger .setting-icon { background: color-mix(in srgb, var(--destructive) 8%, var(--surface)); color: var(--destructive); }

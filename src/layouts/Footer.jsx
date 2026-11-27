@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { ArrowRight, ArrowUp, Globe2, Mail, MessageCircle, Phone } from "lucide-react";
 import Brand from "@/components/branding/Brand.jsx";
 import { contactDetails } from "@/data/contactDetails.js";
+import { profilePath } from "@/features/profile/account-paths.js";
 import "./footer.css";
 
 // Account links depend on whether someone is signed in.
@@ -10,20 +11,20 @@ const guestLinks = [
   { to: "/login", label: "Log in" },
   { to: "/register", label: "Create an account" },
 ];
-const memberLinks = [
+const memberLinks = role => [
   { to: "/dashboard/learning", label: "My learning" },
   { to: "/dashboard/purchases", label: "Purchases" },
-  { to: "/profile", label: "Profile" },
+  { to: profilePath(role), label: "Profile" },
 ];
 
-function footerColumns(signedIn) {
+function footerColumns(signedIn, role) {
   return [
     {
       title: "Learn",
       links: [
         { to: "/courses", label: "All courses" },
         { to: "/instructors", label: "Our teachers" },
-        ...(signedIn ? memberLinks : guestLinks),
+        ...(signedIn ? memberLinks(role) : guestLinks),
         // { to: "/live-classes", label: "Live classes" }, // Post-MVP
         // { to: "/blogs", label: "Articles" },            // Post-MVP
       ],
@@ -62,6 +63,7 @@ function scrollToTop() {
 
 export default function Footer() {
   const signedIn = useSelector(state => Boolean(state.user?.user?._id));
+  const role = useSelector(state => state.user?.user?.role);
   const { pathname } = useLocation();
   // These pages end with their own call to action or contact section, so the help strip would repeat it.
   // Sign-in and account pages stay focused on the form and already offer "Need help? Contact the team".
@@ -100,7 +102,7 @@ export default function Footer() {
           </div>
 
           <div className="site-footer-columns">
-            {footerColumns(signedIn).map(column => (
+            {footerColumns(signedIn, role).map(column => (
               <nav key={column.title} aria-label={column.title}>
                 <h2>{column.title}</h2>
                 <ul>

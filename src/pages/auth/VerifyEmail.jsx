@@ -10,6 +10,7 @@ import useEmailActionToken from "@/features/auth/useEmailActionToken.js";
 import AuthPage from "@/features/auth/components/AuthPage.jsx";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import { userMessage } from "@/lib/user-messages.js";
+import { profilePath } from "@/features/profile/account-paths.js";
 
 export default function VerifyEmail() {
   const { token, setToken, valid } = useEmailActionToken();
@@ -84,7 +85,7 @@ export default function VerifyEmail() {
       footer={
         <Link
           className="font-semibold text-primary hover:underline"
-          to={user ? "/profile" : "/login"}
+          to={user ? profilePath(user.role) : "/login"}
         >
           {user ? "Back to your profile" : "Back to sign in"}
         </Link>
