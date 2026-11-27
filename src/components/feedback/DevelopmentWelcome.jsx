@@ -64,7 +64,7 @@ export default function DevelopmentWelcome() {
           onClick={() => dialogRef.current.close()}
           className="mt-7 min-h-12 w-full rounded-xl bg-[#174d42] px-5 text-sm font-bold text-white transition hover:bg-[#103c33] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#174d42]"
         >
-          Thank you — let’s explore
+          Thank you - let’s explore
         </button>
       </div>
     </dialog>

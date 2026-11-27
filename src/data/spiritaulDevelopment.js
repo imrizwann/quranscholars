@@ -12,7 +12,7 @@ export const pillars = [
     },
     {
         title: "Purification of the Heart",
-        desc: "Ikhlas, sabr, shukr, tawbah—taught with reflective exercises and journaling prompts.",
+        desc: "Ikhlas, sabr, shukr, tawbah - taught with reflective exercises and journaling prompts.",
         icon: FiFeather,
     },
     {

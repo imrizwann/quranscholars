@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 
 /* =========================================================
-   BERRY & SAND — light + dark tokens
+   BERRY & SAND - light + dark tokens
    ========================================================= */
 
 const THEMES = {
@@ -130,7 +130,7 @@ const ALL_ASSIGNMENTS = [
 ];
 
 const NOTIFICATIONS = [
-  { icon: CheckCircle2, tone: "success", title: "Quiz graded — Applied Supply Chain Analytics", meta: "2 hours ago" },
+  { icon: CheckCircle2, tone: "success", title: "Quiz graded - Applied Supply Chain Analytics", meta: "2 hours ago" },
   { icon: AlertTriangle, tone: "warning", title: "Negotiation Fundamentals module due tomorrow", meta: "Yesterday" },
   { icon: Star, tone: "accent", title: 'You earned the "12-day streak" badge', meta: "3 days ago" },
 ];

@@ -9,7 +9,7 @@ const ServicesList = () => (
     <MarketingHero
       eyebrow="Learner services"
       title="More than courses. Support for the whole learning journey."
-      description="Find the right mix of structured study, teacher guidance, family support, and community learning—without having to navigate a confusing list of disconnected programs."
+      description="Find the right mix of structured study, teacher guidance, family support, and community learning - without having to navigate a confusing list of disconnected programs."
       icon={Headphones}
       primaryAction={{ to: "/courses", label: "Browse courses" }}
       secondaryAction={{ to: "/contact", label: "Talk to learner support" }}

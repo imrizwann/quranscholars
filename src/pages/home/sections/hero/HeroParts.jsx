@@ -48,7 +48,7 @@ export function TrailerPlayer({ course, autoStart = false, label = "Watch the co
     return (
       <div className="home-trailer home-trailer--playing">
         <Suspense fallback={<div className="home-trailer-loading" role="status"><span className="sr-only">Loading trailer</span></div>}>
-          <VideoPlayer src={source} poster={course.thumbnail} title={`${course.title} — course trailer`} autoPlay />
+          <VideoPlayer src={source} poster={course.thumbnail} title={`${course.title} - course trailer`} autoPlay />
         </Suspense>
       </div>
     );
@@ -82,7 +82,7 @@ export function TrailerDialog({ course, open, onClose }) {
     if (!open && node.open) node.close();
   }, [open]);
   return (
-    <dialog ref={dialog} className="home-trailer-dialog" aria-label={`${course.title} — course trailer`} onClose={onClose} onClick={event => { if (event.target === dialog.current) onClose(); }}>
+    <dialog ref={dialog} className="home-trailer-dialog" aria-label={`${course.title} - course trailer`} onClose={onClose} onClick={event => { if (event.target === dialog.current) onClose(); }}>
       <button type="button" className="home-trailer-dialog-close" onClick={onClose} aria-label="Close trailer"><X size={20} aria-hidden="true" /></button>
       {open && <TrailerPlayer course={course} autoStart />}
     </dialog>

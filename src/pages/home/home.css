@@ -215,7 +215,6 @@
   letter-spacing: .14em;
   text-transform: uppercase;
 }
-.home-featured-label::before { content: ""; width: 20px; height: 1px; background: currentColor; opacity: .6; }
 
 .home-course-card {
   overflow: hidden;

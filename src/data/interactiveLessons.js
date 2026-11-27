@@ -29,7 +29,7 @@ export const featureCards = [
     },
     {
         title: "Paced Sprints",
-        desc: "45–60 minute blocks with reflection pauses and stretch prompts to avoid fatigue.",
+        desc: "45-60 minute blocks with reflection pauses and stretch prompts to avoid fatigue.",
         icon: FiClock,
     },
     {

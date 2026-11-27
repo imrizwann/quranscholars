@@ -639,7 +639,7 @@ const Admission = () => {
                     <div className="flex gap-3">
                       <CalendarClock className="mt-0.5 size-4 shrink-0 text-primary" />
                       <div>
-                        <p className="text-xs font-bold">24–48 hour review</p>
+                        <p className="text-xs font-bold">24-48 hour review</p>
                         <p className="mt-1 text-xs leading-5 text-muted-foreground">
                           We contact you by WhatsApp and email.
                         </p>

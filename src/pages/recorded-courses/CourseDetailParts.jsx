@@ -101,7 +101,7 @@ export function EnrollCard({ course, trailerSource }) {
       <div className="cd-collapse" data-open={!compact || undefined} inert={compact || undefined}><div>
         <section id="course-preview" className="cd-card-media" aria-labelledby="preview-heading" tabIndex={-1}>
           {trailerSource ? <>
-            <div className="cd-video-stage"><CourseVideo src={trailerSource} poster={course.thumbnail} title={`${course.title} — course trailer`} /></div>
+            <div className="cd-video-stage"><CourseVideo src={trailerSource} poster={course.thumbnail} title={`${course.title} - course trailer`} /></div>
             <div className="cd-media-caption"><PlayCircle aria-hidden="true" /><div><h2 id="preview-heading">A first look at your course</h2><p>Free preview. Watch it before you enroll.</p></div></div>
           </> : <>
             <div className="cd-card-cover">

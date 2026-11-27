@@ -92,7 +92,7 @@ export default function Contact() {
       formRef.current?.querySelector(`[data-field="${firstError}"]`)?.focus();
       return;
     }
-    const subject = `${topic.label} – ${form.name.trim()}`;
+    const subject = `${topic.label} - ${form.name.trim()}`;
     const body = `Name: ${form.name.trim()}\nEmail: ${form.email.trim()}\nTopic: ${topic.label}\n\n${form.message.trim()}`;
     setPrepared({ subject, body });
     setCopied("");

@@ -127,7 +127,7 @@ const CourseOverview = () => {
                     label: "Live + Replay",
                     value: course.mode || "Blended"
                   },
-                  { label: "Cohort Size", value: "12–18 learners" },
+                  { label: "Cohort Size", value: "12-18 learners" },
                   {
                     label: "Language",
                     value: course.language || "EN"
@@ -226,7 +226,7 @@ const CourseOverview = () => {
                 Upcoming live session
               </p>
               <p>
-                Next Q&A · Feb 18, 2026 — 8:00 PM
+                Next Q&A · Feb 18, 2026 - 8:00 PM
               </p>
               <p>
                 Join live or watch the recording; submit questions in advance.

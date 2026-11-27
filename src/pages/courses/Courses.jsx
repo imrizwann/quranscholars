@@ -29,7 +29,7 @@ const sortOptions = [
   },
   {
     value: "alphabetical",
-    label: "Title: A–Z",
+    label: "Title: A-Z",
     description: "Browse alphabetically",
   },
   {
@@ -337,7 +337,7 @@ const Courses = () => {
                   Courses
                 </dt>
                 <dd className="mt-1.5 text-xl font-black text-white">
-                  {isLoading ? "—" : pagination.total}
+                  {isLoading ? "-" : pagination.total}
                 </dd>
               </div>
               <div className="p-4 max-sm:border-b max-sm:border-white/10 sm:border-r sm:border-white/10">
@@ -345,7 +345,7 @@ const Courses = () => {
                   Subjects
                 </dt>
                 <dd className="mt-1.5 text-xl font-black text-white">
-                  {isLoading ? "—" : categoryCount}
+                  {isLoading ? "-" : categoryCount}
                 </dd>
               </div>
               <div className="p-4">

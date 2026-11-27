@@ -22,6 +22,6 @@ export const faqs = [
     {
         question: "Do you offer trial classes?",
         answer:
-            "Absolutely—book a free trial to experience the teaching style before enrolling.",
+            "Absolutely - book a free trial to experience the teaching style before enrolling.",
     },
 ];

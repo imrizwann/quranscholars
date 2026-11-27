@@ -33,7 +33,7 @@ const ServiceDetailPage = ({ service }) => {
             id={`${service.slug}-outcomes`}
             eyebrow="What this service supports"
             title="A focused experience with clear learner outcomes."
-            description="Every support service is designed to complement structured learning—not add more noise to your schedule."
+            description="Every support service is designed to complement structured learning - not add more noise to your schedule."
           />
           <div className="mt-8 grid gap-5 md:grid-cols-3">
             {service.outcomes.map((outcome, index) => (

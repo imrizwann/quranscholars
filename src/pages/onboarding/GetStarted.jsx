@@ -35,7 +35,7 @@ function Breadcrumb({ trail }) {
 }
 
 /* ==========================================================================
-   /get-started — choose to learn or to teach
+   /get-started - choose to learn or to teach
    ========================================================================== */
 
 export default function GetStarted() {
@@ -148,7 +148,7 @@ export function StudentStart() {
 }
 
 /* ==========================================================================
-   /get-started/instructor — how teaching works and the application status
+   /get-started/instructor - how teaching works and the application status
    ========================================================================== */
 
 const statusBadges = {
