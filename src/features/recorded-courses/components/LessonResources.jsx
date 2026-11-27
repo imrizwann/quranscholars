@@ -14,7 +14,7 @@ export default function LessonResources({ target, manage = false, active = true,
   const [upload, uploading] = api.endpoints.uploadLessonResource.useMutation();
   const [remove, removing] = api.endpoints.removeLessonResource.useMutation();
   const [download, downloading] = api.endpoints.downloadLessonResource.useMutation();
-  const [file, setFile] = useState(null), [title, setTitle] = useState(""), [error, setError] = useState(""), [message, setMessage] = useState(""), [confirmation, setConfirmation] = useState(null), [downloadId, setDownloadId] = useState(null);
+  const [file, setFile] = useState(null), [title, setTitle] = useState(""), [error, setError] = useState(""), [message, setMessage] = useState(""), [confirmation, setConfirmation] = useState(null), [downloadId, setDownloadId] = useState(null), [dragging, setDragging] = useState(false);
   const input = useRef(null), pending = useRef(false), mounted = useRef(true), request = useRef(null);
   const id = useId();
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; request.current?.abort(); }; }, []);
@@ -41,9 +41,15 @@ export default function LessonResources({ target, manage = false, active = true,
     } catch (failure) { if (mounted.current) setError(userMessage(failure)); }
     finally { request.current = null; if (mounted.current) { setDownloadId(null); downloading.reset(); } }
   }
+  function pickFile(selected, field) {
+    setMessage(""); setError(""); setFile(null);
+    if (!selected) return;
+    if (selected.type !== "application/pdf" || !/.pdf$/i.test(selected.name) || selected.size <= 0 || selected.size > data.maxBytes) { setError("Choose a PDF up to 3 MB."); if (field) field.value = ""; return; }
+    setFile(selected);
+  }
   if (!active || (!manage && !query.error && data?.items.length === 0)) return null;
   return <section className="lesson-resources" aria-labelledby={`${id}-title`}>
-    <div className="lesson-resources-heading"><FileTypeIcon kind="pdf" size="sm" /><div><h3 id={`${id}-title`}>Lesson resources</h3><p>Notes, worksheets, and practice materials for this lesson.</p></div></div>
+    <div className="lesson-resources-heading"><FileTypeIcon kind="pdf" size="sm" /><div><h3 id={`${id}-title`}>Lesson resources</h3><p>Notes, worksheets, and practice materials for this lesson.</p></div>{canManage && data && <span className="lesson-resources-count">{data.items.length} of {data.maxFiles} files</span>}</div>
     <QueryMessage query={{ data, error: query.error, loading: query.isFetching, refresh: query.refetch }} label="Loading lesson resources" compact />
     {error && <p className="cw-error" role="alert">{error}</p>}{message && <p className="cw-notice" role="status">{message}</p>}
     {!query.error && data?.items.length > 0 && <ul className="lesson-resource-list">{data.items.map(resource => <li key={resource.id} className="qs-file-surface" data-file-kind="pdf">
@@ -53,14 +59,17 @@ export default function LessonResources({ target, manage = false, active = true,
     </li>)}</ul>}
     {data && !data.available && <p className="cw-muted">Lesson downloads are unavailable. Please contact our team for help.</p>}
     {canManage && data.available && (data.items.length >= data.maxFiles ? <p className="cw-muted">This lesson has five resources. Remove a resource before adding another.</p> : <form className="lesson-resource-form" onSubmit={save}>
-      <label htmlFor={`${id}-file`}>Add a PDF<input id={`${id}-file`} name="file" type="file" accept="application/pdf,.pdf" ref={input} disabled={blocked} aria-describedby={`${id}-help`} onChange={event => {
-        const selected = event.target.files?.[0]; setMessage(""); setError(""); setFile(null);
-        if (!selected) return;
-        if (selected.type !== "application/pdf" || !/\.pdf$/i.test(selected.name) || selected.size <= 0 || selected.size > data.maxBytes) { setError("Choose a PDF up to 3 MB."); event.target.value = ""; return; }
-        setFile(selected);
-      }} /></label><p id={`${id}-help`} className="cw-field-hint">PDF files up to 3 MB. Up to five resources per lesson. Downloads require course access.</p>
-      {file && <label htmlFor={`${id}-name`}>Resource title (optional)<input id={`${id}-name`} name="title" value={title} onChange={event => setTitle(event.target.value)} maxLength={150} placeholder={file.name.replace(/\.pdf$/i, "")} disabled={blocked} /></label>}
-      <AsyncButton type="submit" className="cw-button" loading={uploading.isLoading} loadingLabel="Uploading PDF" disabled={blocked || !file}><Upload size={16} aria-hidden="true" />Upload PDF</AsyncButton>
+      <label htmlFor={`${id}-file`} className="lesson-resource-drop" data-dragging={dragging || undefined} data-disabled={blocked || undefined}
+        onDragOver={event => { if (blocked) return; event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)}
+        onDrop={event => { event.preventDefault(); setDragging(false); if (!blocked) pickFile(event.dataTransfer.files?.[0]); }}>
+        <span className="lesson-resource-drop-icon" aria-hidden="true"><Upload size={18} /></span>
+        <span><strong>{file ? "Choose a different PDF" : "Add a PDF"}</strong><small>Drag a file here or click to browse</small></span>
+        <input id={`${id}-file`} className="lesson-resource-file" name="file" type="file" accept="application/pdf,.pdf" ref={input} disabled={blocked} aria-describedby={`${id}-help`} onChange={event => pickFile(event.target.files?.[0], event.target)} />
+      </label>
+      <p id={`${id}-help`} className="cw-field-hint">PDF files up to 3 MB. Up to five resources per lesson. Downloads require course access.</p>
+      {file && <div className="lesson-resource-selected qs-file-surface" data-file-kind="pdf"><FileTypeIcon kind="pdf" /><div><strong>{file.name}</strong><p>{sizeLabel(file.size)} · ready to upload</p></div></div>}
+      {file && <label htmlFor={`${id}-name`}>Resource title (optional)<input id={`${id}-name`} name="title" value={title} onChange={event => setTitle(event.target.value)} maxLength={150} placeholder={file.name.replace(/.pdf$/i, "")} disabled={blocked} /></label>}
+      {file && <AsyncButton type="submit" className="cw-button cw-primary" loading={uploading.isLoading} loadingLabel="Uploading PDF" disabled={blocked}><Upload size={16} aria-hidden="true" />Upload PDF</AsyncButton>}
     </form>)}
     <ConfirmationModal open={Boolean(confirmation)} title="Remove lesson resource?" description={`Remove “${confirmation?.title || "this PDF"}” from the lesson? Enrolled learners will lose access to this resource.`} danger confirmLabel="Remove resource" busy={removing.isLoading} busyLabel="Removing resource" onCancel={() => setConfirmation(null)} onConfirm={async () => {
       if (pending.current || !confirmation || blocked) return;

@@ -16,3 +16,23 @@
 .lesson-resource-form input[type=file] { max-width: 100%; font-size: var(--font-size-label); }
 .lesson-resources > .cw-muted { margin-top: 14px; }
 @media (max-width: 600px) { .learning-overview + .lesson-resources { margin-inline: 18px; } .lesson-resource-list > li { flex-wrap: wrap; } .lesson-resource-actions { margin-left: auto; } }
+
+/* Instructor upload: count, drop area and selected file */
+.lesson-resources-heading > div { flex: 1; min-width: 0; }
+.lesson-resources-count { flex-shrink: 0; padding: 2px 9px; border-radius: 999px; background: var(--muted); color: var(--muted-foreground); font-size: var(--font-size-caption); font-weight: 650; }
+.lesson-resource-drop { position: relative; display: flex !important; grid-template-columns: none; align-items: center; gap: 12px !important; padding: 14px 16px; border: 1.5px dashed color-mix(in srgb, var(--primary) 35%, var(--border)); border-radius: 10px; background: color-mix(in srgb, var(--primary) 4%, var(--surface)); cursor: pointer; transition: background-color 160ms var(--ease-out-ui, ease), border-color 160ms var(--ease-out-ui, ease); }
+.lesson-resource-drop:hover, .lesson-resource-drop[data-dragging] { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 9%, var(--surface)); }
+.lesson-resource-drop:focus-within { outline: 2px solid var(--ring); outline-offset: 2px; }
+.lesson-resource-drop[data-disabled] { cursor: not-allowed; opacity: .6; }
+.lesson-resource-drop-icon { display: grid; place-items: center; flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px; background: var(--surface); color: var(--primary); box-shadow: 0 1px 2px rgb(0 0 0 / 6%); }
+.lesson-resource-drop strong { display: block; font-size: var(--font-size-body); font-weight: 600; }
+.lesson-resource-drop small { display: block; margin-top: 1px; color: var(--muted-foreground); font-size: var(--font-size-caption); font-weight: 400; }
+.lesson-resource-file { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.lesson-resource-form > .cw-field-hint { margin-top: -6px; }
+.lesson-resource-selected { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; }
+.lesson-resource-selected > div { min-width: 0; }
+.lesson-resource-selected strong { display: block; font-size: var(--font-size-body); font-weight: 600; overflow-wrap: anywhere; }
+.lesson-resource-selected p { color: var(--muted-foreground); font-size: var(--font-size-caption); }
+.lesson-resource-list > li { transition: border-color 160ms var(--ease-out-ui, ease); }
+.lesson-resource-list > li:hover { border-color: color-mix(in srgb, var(--primary) 30%, var(--border)); }
+@media (prefers-reduced-motion: reduce) { .lesson-resource-drop, .lesson-resource-list > li { transition: none; } }

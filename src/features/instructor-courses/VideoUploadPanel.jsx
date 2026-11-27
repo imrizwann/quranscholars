@@ -12,7 +12,7 @@ import VideoProgress from "./VideoProgress.jsx";
 import VideoPreview from "./VideoPreview.jsx";
 import AsyncButton from "@/components/ui/AsyncButton.jsx";
 import ConfirmationModal from "@/components/ui/ConfirmationModal.jsx";
-import { Upload, RefreshCw, Trash2 } from "lucide-react";
+import { Upload, UploadCloud, RefreshCw, Trash2 } from "lucide-react";
 import {
   usePrepareVideoUploadMutation,
   useProcessVideoMutation,
@@ -74,6 +74,30 @@ export default function VideoUploadPanel({
     status,
   );
   useEffect(() => { onActivityChange?.(phase ? { phase, progress } : null); }, [phase, progress, onActivityChange]);
+  const [dragging, setDragging] = useState(false);
+
+  // Shared by the file picker and drag-and-drop.
+  function choose(selectedFile) {
+    if (!selectedFile || locked) return;
+    setError("");
+    setNotice("");
+    setUnconfirmedUploadId(null);
+    try {
+      videoMetadata(selectedFile);
+      setFile(selectedFile);
+      setUploadedPreview(null);
+    } catch (failure) {
+      setError(readableError(failure));
+      if (input.current) input.current.value = "";
+      setFile(null);
+    }
+  }
+  function clearSelection() {
+    setFile(null);
+    setError("");
+    setNotice("");
+    if (input.current) input.current.value = "";
+  }
 
   async function upload() {
     if (controller.current || locked || serverBusy) return;
@@ -192,53 +216,48 @@ export default function VideoUploadPanel({
     }
   }
 
+  const hasVideo = status !== "NOT_UPLOADED";
+  const lessonPlayer = Boolean(target.lessonId) && status === "COMPLETED" && !file;
+  // Show the preview only when there is something to play; status cards explain every other state.
+  const showPreview = lessonPlayer || Boolean(previewFile) || Boolean(savedPlaybackSource) || status === "COMPLETED";
+  const canChoose = !serverBusy && !busy;
+  const showUpload = (!serverBusy && file) || action === "upload";
+  const showPrepare = !file && processingUploadId && !processingConfirmed && (["UPLOADING", "UPLOADED", "FAILED"].includes(status) || unconfirmedUploadId || action === "process");
+  const subject = target.lessonId ? "lesson video" : "course trailer";
+  const dropHandlers = locked ? {} : {
+    onDragOver: event => { event.preventDefault(); setDragging(true); },
+    onDragLeave: () => setDragging(false),
+    onDrop: event => { event.preventDefault(); setDragging(false); choose(event.dataTransfer?.files?.[0]); },
+  };
+
+  const zoneVisible = canChoose && !file;
+  const removeButton = (
+    <AsyncButton
+      className="cw-button cw-danger cw-button-compact"
+      aria-label={target.lessonId ? "Remove lesson video" : "Remove trailer"}
+      title={target.lessonId ? "Remove lesson video" : "Remove trailer"}
+      loading={deleting}
+      loadingLabel="Removing"
+      disabled={locked}
+      onClick={() => onDelete(path, "video", target)}
+    >
+      <Trash2 size={15} aria-hidden="true" />
+      Remove
+    </AsyncButton>
+    );
+  const chooseButton = <button type="button" className="cw-button cw-button-compact" disabled={locked} onClick={() => input.current?.click()}><Upload size={15} aria-hidden="true" />{file ? "Choose another file" : hasVideo ? "Choose replacement" : "Choose video"}</button>;
+
   return (
     <div className="cw-video">
-      <div className="cw-video-layout">
+      <div className="cw-video-layout" data-preview={showPreview || undefined}>
         <div className="cw-stack cw-video-upload">
-          <VideoProgress video={video} phase={phase} progress={progress} file={file} unconfirmed={Boolean(unconfirmedUploadId)} accepted={Boolean(notice) && !error && ["UPLOADING", "UPLOADED"].includes(status)} onClear={!locked ? () => { setFile(null); setError(""); setNotice(""); if (input.current) input.current.value = ""; } : undefined} />
-          {!serverBusy && !busy && (
-            <div className="cw-video-file">
-              <strong>{file ? "Video selected" : video?.uploadId ? "Replace your video" : "Add a video"}</strong>
-              <input id={`video-upload-${target.courseId}-${target.lessonId || "trailer"}`} aria-label={target.lessonId ? "Choose a lesson video" : "Choose a course trailer"}
-                ref={input}
-                hidden
-                type="file"
-                accept=".mp4,.mov,.webm,.mkv"
-                disabled={locked}
-                onChange={(event) => {
-                  const selectedFile = event.target.files?.[0];
-                  if (!selectedFile) return;
-                  setError("");
-                  setNotice("");
-                  setUnconfirmedUploadId(null);
-                  try {
-                    videoMetadata(selectedFile);
-                    setFile(selectedFile);
-                    setUploadedPreview(null);
-                  } catch (failure) {
-                    setError(readableError(failure));
-                    event.target.value = "";
-                    setFile(null);
-                  }
-                }}
-              />
-              <span className="cw-field-hint">
-                MP4, MOV, WebM or MKV. Your video is prepared for playback
-                automatically after upload.
-              </span>
-              <button type="button" className="cw-button cw-button-compact" disabled={locked} onClick={() => input.current?.click()}><Upload size={15} aria-hidden="true" />{file ? "Choose another file" : video?.uploadId ? "Choose replacement" : "Choose video"}</button>
-            </div>
-          )}
-          {error && !processingConfirmed && (
-            <p className="cw-error" role="alert">
-              {error}
-            </p>
-          )}
-          <div className="cw-row">
-            {((!serverBusy && file) || action === "upload") && (
+          {canChoose && <input id={`video-upload-${target.courseId}-${target.lessonId || "trailer"}`} aria-label={target.lessonId ? "Choose a lesson video" : "Choose a course trailer"} ref={input} hidden type="file" accept=".mp4,.mov,.webm,.mkv" disabled={locked} onChange={(event) => choose(event.target.files?.[0])} />}
+          <VideoProgress video={video} phase={phase} progress={progress} file={file} unconfirmed={Boolean(unconfirmedUploadId)} accepted={Boolean(notice) && !error && ["UPLOADING", "UPLOADED"].includes(status)} onClear={!locked ? clearSelection : undefined} />
+          {error && !processingConfirmed && <p className="cw-error" role="alert">{error}</p>}
+          {(showUpload || showPrepare || phase === "Uploading" || (showRemoveAction && status !== "NOT_UPLOADED" && !zoneVisible)) && <div className="cw-row cw-video-actions">
+            {showUpload && (
               <AsyncButton
-                className="cw-button cw-secondary"
+                className="cw-button cw-primary"
                 loading={action === "upload"}
                 loadingLabel={phase}
                 disabled={locked || !file}
@@ -255,56 +274,44 @@ export default function VideoUploadPanel({
                 {video?.uploadId ? "Replace video" : "Upload video"}
               </AsyncButton>
             )}
-            {!file && processingUploadId && !processingConfirmed &&
-              (["UPLOADING", "UPLOADED", "FAILED"].includes(status) ||
-                unconfirmedUploadId ||
-                action === "process") && (
-                <AsyncButton
-                  className="cw-button"
-                  loading={action === "process"}
-                  loadingLabel="Preparing video"
-                  disabled={locked}
-                  onClick={() => setConfirmation("process")}
-                >
-                  <RefreshCw size={16} aria-hidden="true" />
-                  {status === "FAILED" && !unconfirmedUploadId ? "Try again" : "Prepare video"}
-                </AsyncButton>
-              )}
-            {phase === "Uploading" && (
-              <button
-                className="cw-button"
-                onClick={() => setConfirmation("cancel")}
+            {canChoose && file && chooseButton}
+            {showPrepare && (
+              <AsyncButton
+                className="cw-button cw-primary"
+                loading={action === "process"}
+                loadingLabel="Preparing video"
+                disabled={locked}
+                onClick={() => setConfirmation("process")}
               >
+                <RefreshCw size={16} aria-hidden="true" />
+                {status === "FAILED" && !unconfirmedUploadId ? "Try again" : "Prepare video"}
+              </AsyncButton>
+            )}
+            {phase === "Uploading" && (
+              <button type="button" className="cw-button" onClick={() => setConfirmation("cancel")}>
                 Cancel upload
               </button>
             )}
-            {showRemoveAction && status !== "NOT_UPLOADED" && (
-              <AsyncButton
-                className="cw-button cw-danger cw-button-compact"
-                aria-label={
-                  target.lessonId ? "Remove lesson video" : "Remove trailer"
-                }
-                title={
-                  target.lessonId ? "Remove lesson video" : "Remove trailer"
-                }
-                loading={deleting}
-                loadingLabel="Removing"
-                disabled={locked}
-                onClick={() => onDelete(path, "video", target)}
-              >
-                <Trash2 size={15} aria-hidden="true" />
-                Remove
-              </AsyncButton>
-            )}
-          </div>
+            {showRemoveAction && status !== "NOT_UPLOADED" && !zoneVisible && removeButton}
+          </div>}
+          {zoneVisible && (
+            <div className="cw-video-file" data-variant={hasVideo ? "replace" : "empty"} data-dragging={dragging || undefined} data-disabled={locked || undefined} {...dropHandlers}>
+              <span className="cw-video-file-icon" aria-hidden="true"><UploadCloud size={20} /></span>
+              <div className="cw-video-file-copy">
+                <strong>{hasVideo ? `Replace the ${subject}` : `Add the ${subject}`}</strong>
+                <span className="cw-field-hint">Drag a video here or choose a file. MP4, MOV, WebM or MKV.{hasVideo ? " A new upload replaces the current video." : " We prepare it for playback after upload."}</span>
+              </div>
+              <div className="cw-video-file-actions">{chooseButton}{showRemoveAction && hasVideo && removeButton}</div>
+            </div>
+          )}
         </div>
-        {target.lessonId && status === "COMPLETED" && !file ? <section className="cw-video-preview" aria-label="Lesson preview"><div className="cw-preview-heading"><h3>Lesson preview</h3></div><ProtectedLessonVideo key={`${target.lessonId}/${video?.uploadId}`} target={target} title={video?.originalFileName || "Lesson preview"} /><p className="cw-field-hint cw-preview-caption">Only you and learners with course access can play this lesson.</p></section> : <VideoPreview
+        {showPreview && (lessonPlayer ? <section className="cw-video-preview" aria-label="Lesson preview"><div className="cw-preview-heading"><h3>Lesson preview</h3></div><ProtectedLessonVideo key={`${target.lessonId}/${video?.uploadId}`} target={target} title={video?.originalFileName || "Lesson preview"} /><p className="cw-field-hint cw-preview-caption">Only you and learners with course access can play this lesson.</p></section> : <VideoPreview
           file={previewFile}
           hasUploadedVideo={status !== "NOT_UPLOADED"}
           status={status}
           playbackSource={savedPlaybackSource}
           title={video?.originalFileName || "Video preview"}
-        />}
+        />)}
       </div>
       <ConfirmationModal
         open={confirmation !== null}

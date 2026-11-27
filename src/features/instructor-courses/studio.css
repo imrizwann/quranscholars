@@ -1,0 +1,89 @@
+/* ==========================================================================
+   Course Studio polish (/instructor/courses/:id): tabs with icons, section quiz
+   bar, publishing checklist progress. Loaded after course-workspace.css.
+   ========================================================================== */
+
+/* Tabs */
+.cw-studio-tabs [role="tab"] { display: inline-flex; align-items: center; gap: 8px; }
+.cw-studio-tabs [role="tab"] svg { flex-shrink: 0; opacity: .75; }
+.cw-studio-tabs [role="tab"][aria-selected="true"] svg { opacity: 1; }
+
+/* Section quiz bar (shown under a section's lessons while the editor is closed) */
+.studio-quiz-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 14px;
+  margin-top: 20px;
+  padding: 14px 16px;
+  border: 1px dashed color-mix(in srgb, var(--primary) 35%, var(--border));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+}
+.studio-quiz-bar-icon { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 9px; background: var(--surface); color: var(--primary); box-shadow: 0 1px 2px rgb(0 0 0 / 6%); }
+.studio-quiz-bar > div { flex: 1 1 240px; min-width: 0; }
+.studio-quiz-bar h3 { font-size: var(--font-size-body); font-weight: 650; }
+.studio-quiz-bar .cw-field-hint { margin-top: 1px; }
+.studio-quiz-bar .cw-button { border-radius: var(--radius-button, 4px); }
+
+/* Publishing checklist: progress and status marks */
+.cw-readiness-progress { display: grid; gap: 8px; margin: 18px 0 6px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: color-mix(in srgb, var(--muted) 45%, var(--surface)); }
+.cw-readiness-progress > div { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+.cw-readiness-progress strong { font-size: var(--font-size-body); font-weight: 650; }
+.cw-readiness-progress span { color: var(--muted-foreground); font-size: var(--font-size-label); }
+.cw-readiness-progress progress { display: block; appearance: none; width: 100%; height: 8px; overflow: hidden; border: 0; border-radius: 999px; background: var(--muted); }
+.cw-readiness-progress progress::-webkit-progress-bar { background: var(--muted); }
+.cw-readiness-progress progress::-webkit-progress-value { background: var(--primary); border-radius: 999px; }
+.cw-readiness-progress progress::-moz-progress-bar { background: var(--primary); border-radius: 999px; }
+.cw-readiness-list > li { align-items: center; }
+.cw-readiness-list > li > div { flex: 1; min-width: 0; }
+.cw-readiness-mark { display: grid; place-items: center; flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--muted); color: var(--muted-foreground); }
+.cw-readiness-list > li[data-ready] .cw-readiness-mark { background: var(--primary); color: var(--primary-foreground); }
+.cw-readiness-list > li:not([data-ready]) strong { color: var(--foreground); }
+
+/* Sections list: title with its publication state */
+.cw-section > .cw-section-text { display: grid; flex: 1; gap: 2px; min-width: 0; }
+.cw-section-text small { color: var(--muted-foreground); font-size: var(--font-size-caption); font-weight: 500; }
+.cw-section-text small[data-published] { color: var(--primary); }
+
+/* Lesson video: one column until there is something to play, then status beside the preview */
+.cw-video .cw-video-layout { grid-template-columns: minmax(0, 1fr); }
+.cw-video .cw-video-layout[data-preview] { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); }
+@container (max-width: 620px) { .cw-video .cw-video-layout[data-preview] { grid-template-columns: minmax(0, 1fr); } }
+.cw-video .cw-video-upload { gap: 12px; }
+.cw-video .cw-video-upload > * { margin: 0; }
+.cw-video-actions { gap: 8px; }
+.cw-video-actions .cw-button, .cw-video .cw-video-file .cw-button { border-radius: var(--radius-button, 4px); }
+
+/* Status card */
+.cw-video .cw-transfer { padding: 14px 16px; border-radius: 10px; }
+.cw-video .cw-transfer > p { margin-top: 4px; line-height: 1.55; }
+.cw-video .cw-transfer-file { align-items: center; margin: 12px 0 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.cw-video .cw-transfer-file + .cw-transfer-steps, .cw-video .cw-transfer-file + .cw-transfer-indeterminate, .cw-video .cw-transfer-file + .cw-transfer-percent { margin-top: 14px; }
+.cw-video .cw-transfer[data-state="ready"] { border-color: color-mix(in srgb, var(--primary) 28%, var(--border)); background: color-mix(in srgb, var(--primary) 5%, var(--surface)); }
+.cw-video .cw-transfer[data-state="failed"] { background: color-mix(in srgb, var(--destructive) 4%, var(--surface)); }
+.cw-video .cw-transfer[data-state="failed"] .cw-transfer-heading { color: var(--destructive); }
+
+/* Choose or drop a video */
+.cw-video .cw-video-upload > .cw-video-file { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; padding: 14px 16px; border: 1.5px dashed color-mix(in srgb, var(--primary) 32%, var(--border)); border-radius: 10px; background: color-mix(in srgb, var(--primary) 3%, var(--surface)); transition: border-color 160ms var(--ease-out-ui, ease), background-color 160ms var(--ease-out-ui, ease); }
+.cw-video .cw-video-upload > .cw-video-file[data-variant="empty"] { padding: 22px 20px; }
+.cw-video .cw-video-upload > .cw-video-file[data-variant="replace"] { background: var(--surface); }
+.cw-video .cw-video-upload > .cw-video-file[data-variant="selected"] { padding: 0; border: 0; background: none; }
+.cw-video .cw-video-upload > .cw-video-file:not([data-disabled]):hover, .cw-video .cw-video-upload > .cw-video-file[data-dragging] { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, var(--surface)); }
+.cw-video .cw-video-upload > .cw-video-file[data-variant="selected"]:hover { background: none; }
+.cw-video .cw-video-upload > .cw-video-file[data-disabled] { opacity: .65; }
+.cw-video-file-icon { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: var(--surface); color: var(--primary); box-shadow: 0 1px 2px rgb(0 0 0 / 6%); }
+.cw-video-file-copy { display: grid; flex: 1 1 220px; gap: 2px; min-width: 0; }
+.cw-video-file-copy strong { font-size: var(--font-size-body); font-weight: 600; }
+.cw-video-file-copy .cw-field-hint { margin: 0; line-height: 1.55; }
+@media (prefers-reduced-motion: reduce) { .cw-video .cw-video-upload > .cw-video-file { transition: none; } }
+.cw-video .cw-video-layout > .cw-video-upload { margin-top: 0; }
+.cw-video .cw-transfer-steps { max-width: 460px; }
+.cw-video-file-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Narrow: status first, then the preview, then actions and the replace area. */
+@container (max-width: 620px) {
+  .cw-video .cw-video-layout[data-preview] { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
+  .cw-video .cw-video-layout[data-preview] > .cw-video-upload { display: contents; }
+  .cw-video .cw-video-layout[data-preview] > .cw-video-preview { order: 1; }
+  .cw-video .cw-video-layout[data-preview] > .cw-video-upload > :not(.cw-transfer) { order: 2; }
+}

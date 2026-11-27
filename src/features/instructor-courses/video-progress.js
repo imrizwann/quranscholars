@@ -4,7 +4,7 @@ export function videoProgressState({ status = "NOT_UPLOADED", phase = "", progre
   if (phase === "Uploading") return { stage: 0, active: true, title: percent === 100 ? "Finishing your upload" : "Uploading your video", description: "Keep this page open until the file finishes uploading.", percent };
   if (phase) return { stage: 1, active: true, title: "Starting video preparation", description: "Your upload is complete. Confirming that preparation can begin.", indeterminate: true };
   if (hasFile && !["QUEUED", "PROCESSING", "PROCESSED", "DELETING"].includes(status)) return { stage: 0, title: "Ready to upload", description: "Review your selection, then upload your video." };
-  if (status === "COMPLETED") return { stage: 2, complete: true, title: "Ready to preview", description: "Your video has been prepared for playback." };
+  if (status === "COMPLETED") return { stage: 2, complete: true, title: "Video ready", description: "Prepared for playback." };
   if (status === "FAILED") return { stage: 1, failed: true, title: "Preparation needs attention" };
   if (["PROCESSING", "PROCESSED"].includes(status)) return { stage: 1, active: true, title: status === "PROCESSED" ? "Finishing preparation" : "Preparing your video", description: "Creating playback versions. You can keep working while we finish.", indeterminate: true };
   if (status === "QUEUED" || accepted) return { stage: 1, active: true, title: "Waiting to prepare", description: "Your file is uploaded. Preparation will start automatically.", indeterminate: true };

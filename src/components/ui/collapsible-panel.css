@@ -50,6 +50,9 @@
 }
 .collapsible-panel-content {
   overflow: hidden;
+  /* Room for focus rings: overflow is hidden for the open/close animation. */
+  padding-inline: 4px;
+  margin-inline: -4px;
 }
 .collapsible-panel-inner {
   display: flow-root;

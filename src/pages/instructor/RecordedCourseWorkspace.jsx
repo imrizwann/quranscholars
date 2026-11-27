@@ -35,7 +35,11 @@ import {
   ArrowLeft,
   ChevronRight,
   ChevronDown,
+  FileText,
   FolderOpen,
+  Image as ImageIcon,
+  Rocket,
+  Tag,
   Pencil,
   ClipboardCheck,
   Layers,
@@ -53,6 +57,9 @@ import CourseThumbnailEditor from "@/features/instructor-courses/CourseThumbnail
 import { trailerPlaybackSource } from "@/lib/trailer-playback.js";
 import "@/features/instructor-courses/course-workspace.css";
 import "@/components/lms/workspace-ui.css";
+import "@/features/instructor-courses/studio.css";
+
+const tabIcons = { details: FileText, curriculum: Layers, media: ImageIcon, pricing: Tag, publish: Rocket };
 
 function CurriculumItemForm({ label, disabled, loading, onCreate }) {
   const id = useId();
@@ -353,7 +360,7 @@ function Workspace({ courseId }) {
         <>
           <Tabs.Root value={activeTab} onValueChange={changeTab}>
             <Tabs.List className="studio-tabs cw-studio-tabs" aria-label="Course studio">
-              {studioTabs.map(([value, label]) => <Tabs.Tab key={value} value={value}>{label}</Tabs.Tab>)}
+              {studioTabs.map(([value, label]) => { const Icon = tabIcons[value]; return <Tabs.Tab key={value} value={value}>{Icon && <Icon size={16} aria-hidden="true" />}{label}</Tabs.Tab>; })}
             </Tabs.List>
             {unfinishedTab && <p className="cw-notice" role="status">You have unfinished edits in {studioTabs.find(([tab]) => tab === unfinishedTab)?.[1]}. <button type="button" className="cw-text-link" onClick={() => changeTab(unfinishedTab)}>Return to save or cancel</button></p>}
             <Tabs.Panel value="details" keepMounted className="cw-studio-panel"><CourseDetailsPanel course={data} disabled={busy || Boolean(course.error)} onBusy={setBusy} onEditing={changeMetadataEditing} /></Tabs.Panel>
@@ -397,7 +404,7 @@ function Workspace({ courseId }) {
                     }}
                   >
                     <span className="cw-section-number">{index + 1}</span>
-                    <span>{section.title}</span>
+                    <span className="cw-section-text">{section.title}<small data-published={section.published || undefined}>{section.published ? "Published" : "Draft"}</small></span>
                     {selected?._id === section._id && lessons.loading ? (
                       <Spinner size={16} decorative />
                     ) : (
@@ -451,6 +458,11 @@ function Workspace({ courseId }) {
                 {lessons.data?.items.length === 0 && <div className="cw-empty"><Video size={28} aria-hidden="true" /><p>No lessons yet. Add a title below, then upload your video.</p></div>}
                 <Pagination pagination={lessons.data?.pagination} page={lessonPage} onPage={setLessonPage} disabled={busy || sectionEditing} loading={lessons.loading} />
                 <CurriculumItemForm key={`lesson-form:${selected._id}`} label="Lesson" loading={pendingAction === `create:${sectionPath}/lessons`} disabled={busy || sectionEditing || Boolean(lessons.error) || Boolean(course.error)} onCreate={fields => create("lesson", fields)} />
+                {!quizOpen && <div className="studio-quiz-bar">
+                  <span className="studio-quiz-bar-icon"><ClipboardCheck size={18} aria-hidden="true" /></span>
+                  <div><h3>Section quiz</h3><p className="cw-field-hint">Optional knowledge check that unlocks after this section’s lessons.</p></div>
+                  <button type="button" className="cw-button" disabled={busy || sectionEditing} onClick={() => { setQuizOpen(true); requestAnimationFrame(() => quizEditor.current?.querySelector("input")?.focus()); }}>Open quiz editor</button>
+                </div>}
                 <div ref={quizEditor}><SectionQuizEditor key={`quiz:${selected._id}`} open={quizOpen} onOpenChange={setQuizOpen} courseId={courseId} sectionId={selected._id} disabled={busy || (sectionEditing && !quizEditing) || Boolean(course.error) || Boolean(sections.error)} onBusy={setBusy} onEditing={changeQuizEditing} /></div>
               </>}
             </CollapsiblePanel>
