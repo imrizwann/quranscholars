@@ -1,0 +1,96 @@
+/* ==========================================================================
+   Instructor application review: toolbar, richer rows, applicant overview,
+   resubmission context and a step-by-step decision panel
+   ========================================================================== */
+.review-avatar { display: inline-grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: color-mix(in srgb, var(--primary) 14%, var(--surface)); color: var(--primary); font-size: var(--font-size-label); font-weight: 700; letter-spacing: .02em; }
+.review-avatar[data-size="lg"] { width: 52px; height: 52px; font-size: 1.05rem; }
+
+/* List toolbar: status tabs and a compact search on one row */
+.review-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin: 24px 0 18px; border-bottom: 1px solid var(--border); }
+.review-toolbar .review-tabs { margin-top: 0; border-bottom: 0; }
+.review-tabs button { margin-bottom: -1px; }
+.review-search-form { display: flex; flex: 0 1 420px; gap: 8px; min-width: 0; padding-bottom: 10px; }
+.review-search-field { position: relative; display: flex; flex: 1; align-items: center; min-width: 0; }
+.review-search-field > svg { position: absolute; left: 12px; color: var(--muted-foreground); pointer-events: none; }
+.review-search-field input { width: 100%; min-height: 40px; padding: 8px 36px; border: 1px solid var(--input); border-radius: 8px; background: var(--surface); color: var(--foreground); font-size: var(--font-size-label); }
+.review-search-field input::-webkit-search-cancel-button { display: none; }
+.review-search-field input:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.review-search-clear { position: absolute; right: 6px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 6px; color: var(--muted-foreground); }
+.review-search-clear:hover { background: var(--muted); color: var(--foreground); }
+.review-search-form .cw-button { min-height: 40px; border-radius: var(--radius-button, 4px); }
+.review-search-note { margin: -6px 0 14px; color: var(--muted-foreground); font-size: var(--font-size-label); }
+
+/* Table rows */
+.review-applicant-cell { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.review-applicant-cell > div { min-width: 0; overflow-wrap: anywhere; }
+.review-doc-count { display: inline-flex; align-items: center; gap: 5px; }
+.review-date { white-space: nowrap; }
+.review-waiting { color: var(--muted-foreground); font-size: var(--font-size-caption); }
+.review-waiting[data-overdue] { color: #b45309; font-weight: 650; }
+.review-status-cell { display: grid; justify-items: start; gap: 6px; }
+.review-resubmitted { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, #2563eb 10%, var(--surface)); color: #1d4ed8; font-size: var(--font-size-caption); font-weight: 650; white-space: nowrap; }
+.review-table tbody tr[data-status="pending"] { background: color-mix(in srgb, #b45309 3%, var(--surface)); }
+.review-table .cw-button { border-radius: var(--radius-button, 4px); white-space: nowrap; }
+
+/* Applicant overview */
+.review-overview { gap: 14px; margin: 4px 0 20px; padding: 16px 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.review-overview-copy { display: grid; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
+.review-overview-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+/* Resubmission context */
+.review-resubmission { display: flex; gap: 12px; margin-bottom: 20px; padding: 16px 18px; border: 1px solid color-mix(in srgb, #2563eb 25%, var(--border)); border-left: 4px solid #2563eb; border-radius: 10px; background: color-mix(in srgb, #2563eb 5%, var(--surface)); }
+.review-resubmission > svg { flex-shrink: 0; margin-top: 2px; color: #1d4ed8; }
+.review-resubmission strong { font-size: var(--font-size-body); font-weight: 700; }
+.review-resubmission p { margin-top: 4px; color: var(--muted-foreground); font-size: var(--font-size-label); }
+.review-resubmission blockquote { margin-top: 8px; padding: 10px 12px; border-radius: 8px; background: var(--surface); color: var(--foreground); font-size: var(--font-size-label); line-height: 1.6; }
+
+/* Background and certificates */
+.studio-panel p.review-public-note, .review-public-note { display: flex; align-items: center; gap: 6px; margin: 6px 0 4px; color: var(--muted-foreground); font-size: var(--font-size-caption); }
+.review-public-note > svg { flex-shrink: 0; color: var(--primary); }
+.review-biography { line-height: 1.7; }
+.studio-section-title .review-opened-count { margin-left: auto; padding: 2px 9px; border-radius: 999px; background: var(--muted); color: var(--muted-foreground); font-size: var(--font-size-caption); font-weight: 650; }
+.studio-section-title .review-opened-count[data-done] { background: color-mix(in srgb, var(--primary) 12%, var(--surface)); color: var(--primary); }
+.review-documents li[data-opened] { border-color: color-mix(in srgb, var(--primary) 35%, var(--border)); }
+.review-opened { display: inline-flex; align-items: center; gap: 3px; margin-left: 8px; color: var(--primary); font-weight: 650; }
+.review-history-entry { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+.review-history-entry h3 { font-size: var(--font-size-body); font-weight: 650; }
+.review-history-entry p { margin-top: 4px; color: var(--muted-foreground); font-size: var(--font-size-label); }
+
+/* Decision panel */
+.review-decision { position: sticky; top: 84px; align-self: start; }
+.review-decision > p { color: var(--muted-foreground); font-size: var(--font-size-label); line-height: 1.6; }
+.review-steps { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
+.review-steps li { display: flex; align-items: flex-start; gap: 10px; font-size: var(--font-size-label); font-weight: 600; }
+.review-steps small { display: block; margin-top: 1px; color: var(--muted-foreground); font-size: var(--font-size-caption); font-weight: 400; }
+.review-step-mark { display: grid; place-items: center; flex-shrink: 0; width: 24px; height: 24px; border: 1.5px solid var(--border); border-radius: 50%; color: var(--muted-foreground); font-size: var(--font-size-caption); font-weight: 700; }
+.review-steps li[data-done] .review-step-mark { border-color: var(--primary); background: var(--primary); color: var(--primary-foreground); }
+.review-check { padding: 12px; border: 1px solid var(--border); border-radius: 8px; }
+.review-check:has(input:checked) { border-color: color-mix(in srgb, var(--primary) 40%, var(--border)); background: color-mix(in srgb, var(--primary) 5%, var(--surface)); }
+.review-reason { margin-top: 18px; }
+.review-starters { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.review-starters button { padding: 4px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--foreground); font-size: var(--font-size-caption); font-weight: 600; }
+.review-starters button:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.review-starters button:disabled { opacity: .5; cursor: not-allowed; }
+.review-reason-input { display: block; width: 100%; margin-top: 10px; min-height: 96px; padding: 10px 12px; border: 1px solid var(--input); border-radius: 8px; background: var(--surface); color: var(--foreground); font-size: var(--font-size-label); line-height: 1.6; resize: vertical; }
+.review-reason-input:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.review-reason-count { margin-top: 6px; color: var(--muted-foreground); font-size: var(--font-size-caption); text-align: right; font-variant-numeric: tabular-nums; }
+.review-reason-count[data-short] { color: #b45309; font-weight: 650; }
+.review-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.review-actions .cw-button { flex: 1 1 auto; justify-content: center; white-space: nowrap; border-radius: var(--radius-button, 4px); }
+.review-actions-hint { margin-top: 8px; color: var(--muted-foreground); font-size: var(--font-size-caption); text-align: center; }
+.review-outcome { display: flex; gap: 10px; margin: 12px 0 4px; padding: 12px 14px; border-radius: 10px; }
+.review-outcome[data-status="approved"] { background: color-mix(in srgb, var(--primary) 8%, var(--surface)); color: var(--primary); }
+.review-outcome[data-status="rejected"] { background: color-mix(in srgb, var(--destructive) 6%, var(--surface)); color: var(--destructive); }
+.review-outcome > svg { flex-shrink: 0; margin-top: 1px; }
+.review-outcome p { color: var(--foreground); font-size: var(--font-size-label); line-height: 1.6; }
+.review-final-note { margin-top: 14px; color: var(--muted-foreground); font-size: var(--font-size-caption); }
+
+@media (max-width: 1100px) { .review-decision { position: static; } }
+@media (max-width: 760px) {
+  .review-toolbar { align-items: stretch; flex-direction: column; flex-wrap: nowrap; }
+  .review-search-form { flex-basis: auto; }
+}
+
+
+/* Keep the visually hidden "Action" header label inside the scrolling table, not the page. */
+.review-table th { position: relative; }

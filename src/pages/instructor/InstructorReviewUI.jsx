@@ -8,3 +8,7 @@ export function ReviewStatus({ status }) {
 export function ReviewError({ error, retry, busy }) {
   return <div className="studio-panel review-error" role="alert"><h2>We could not load applications</h2><p>{userMessage(error)}</p><button className="cw-button" type="button" disabled={busy} onClick={retry}>Try again</button></div>;
 }
+export function ApplicantAvatar({ name, size = "md" }) {
+  const initials = String(name || "?").trim().split(/\s+/).slice(0, 2).map(part => part[0]?.toUpperCase() || "").join("") || "?";
+  return <span className="review-avatar" data-size={size} aria-hidden="true">{initials}</span>;
+}

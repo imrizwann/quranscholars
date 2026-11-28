@@ -7,12 +7,18 @@ import { Pagination, QueryMessage } from "@/features/instructor-courses/Workspac
 import CatalogueHero from "@/components/marketing/CatalogueHero.jsx";
 import "./instructors.css";
 
+// The whole card opens the profile: the name link stretches over the card.
 export function InstructorCard({ item }) {
+  const href = `/instructors/${item.id}`;
   return <article className="public-panel instructor-card">
-    <div className="instructor-card-heading"><ProfileAvatar name={item.name} src={item.avatar} size={56} /><div><h2><Link to={`/instructors/${item.id}`}>{item.name}</Link></h2><p>{item.title}</p></div></div>
+    <div className="instructor-card-heading"><ProfileAvatar name={item.name} src={item.avatar} size={64} /><div><h2><Link to={href} className="instructor-card-link">{item.name}</Link></h2>{item.title && <p>{item.title}</p>}</div></div>
     {item.bio && <p className="instructor-card-bio">{item.bio}</p>}
-    <div className="instructor-card-facts"><span><BookOpen size={16} aria-hidden="true" />{item.courseCount} {item.courseCount === 1 ? "course" : "courses"}</span>{item.languages.length > 0 && <span><Languages size={16} aria-hidden="true" />{item.languages.join(", ")}</span>}{item.experienceYears !== null && <span>{item.experienceYears} {item.experienceYears === 1 ? "year" : "years"} of teaching</span>}</div>
-    <Link to={`/instructors/${item.id}`} className="cw-button instructor-card-action">View instructor<ArrowRight size={16} aria-hidden="true" /></Link>
+    <ul className="instructor-card-facts">
+      <li><BookOpen size={16} aria-hidden="true" />{item.courseCount ? `${item.courseCount} ${item.courseCount === 1 ? "course" : "courses"}` : "Courses coming soon"}</li>
+      {item.experienceYears !== null && <li><GraduationCap size={16} aria-hidden="true" />{item.experienceYears} {item.experienceYears === 1 ? "year" : "years"} of teaching</li>}
+      {item.languages.length > 0 && <li><Languages size={16} aria-hidden="true" />{item.languages.join(", ")}</li>}
+    </ul>
+    <span className="instructor-card-action" aria-hidden="true">View profile<ArrowRight size={16} /></span>
   </article>;
 }
 
