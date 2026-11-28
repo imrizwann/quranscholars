@@ -1,158 +1,101 @@
+import { HandHeart, ShieldCheck, SlidersHorizontal, LockKeyhole } from "lucide-react";
 import { Link } from "react-router-dom";
-import {
-  ArrowRight,
-  Check,
-  Cookie,
-  Database,
-  FileText,
-  KeyRound,
-  Mail,
-  ShieldCheck,
-  UserRoundCheck,
-} from "lucide-react";
 import MarketingHero from "@/components/marketing/MarketingHero.jsx";
+import LegalDocument from "@/components/legal/LegalDocument.jsx";
 
-const sections = [
-  {
-    id: "information",
-    title: "Information we collect",
-    icon: Database,
-    intro: "We collect information that is needed to operate accounts, deliver learning, provide support, and keep the platform reliable.",
-    items: [
-      "Account and contact details such as your name, email address, phone number, country, and city.",
-      "Admissions, enrolment, course preferences, progress, attendance, and support history.",
-      "Payment references and billing status supplied by payment providers; we do not ask you to send card details through support messages.",
-      "Technical information such as device, browser, IP address, session activity, and error diagnostics.",
-    ],
-  },
-  {
-    id: "use",
-    title: "How we use information",
-    icon: UserRoundCheck,
-    intro: "Personal information is used for defined educational and operational purposes.",
-    items: [
-      "Create and secure your account, process admissions, and provide course access.",
-      "Track learning progress, attendance, and completion where those features apply.",
-      "Respond to questions and send essential service or schedule updates.",
-      "Improve accessibility, performance, safety, and the overall learning experience.",
-      "Prevent fraud, enforce platform terms, and meet applicable legal obligations.",
-    ],
-  },
-  {
-    id: "sharing",
-    title: "Sharing and service providers",
-    icon: KeyRound,
-    intro: "We may use trusted providers to host the platform, deliver communications, process payments, and monitor reliability.",
-    items: [
-      "Providers receive only the information needed to perform their contracted service.",
-      "Access is limited through operational controls and provider agreements where applicable.",
-      "We may disclose information when legally required or necessary to protect learners, the platform, or others.",
-      "We do not sell personal information as a business model.",
-    ],
-  },
-  {
-    id: "retention",
-    title: "Retention and security",
-    icon: ShieldCheck,
-    intro: "We retain information only while it supports the purpose for which it was collected or a legitimate legal and operational need.",
-    items: [
-      "Reasonable technical and organisational safeguards are used to protect information.",
-      "Access to sensitive records is restricted according to role and operational need.",
-      "No online system can promise absolute security; report suspected account misuse promptly.",
-      "Records may be retained to resolve disputes, maintain academic history, prevent misuse, or meet legal duties.",
-    ],
-  },
-  {
-    id: "children",
-    title: "Children and family accounts",
-    icon: UserRoundCheck,
-    intro: "A parent or guardian should be involved when a minor uses DarsLearn.",
-    items: [
-      "We aim to collect only information needed to deliver and support the learning experience.",
-      "Parents or guardians can contact us about access, correction, or deletion requests for a minor.",
-      "Safeguarding concerns should be raised directly through our support contact.",
-    ],
-  },
-  {
-    id: "rights",
-    title: "Your choices and rights",
-    icon: FileText,
-    intro: "Depending on your location and applicable law, you may have rights over the personal information we hold.",
-    items: [
-      "Request access to or correction of your personal information.",
-      "Request deletion or restriction where the law allows it.",
-      "Withdraw consent for optional communications.",
-      "Ask how information is used or raise a privacy concern.",
-    ],
-  },
+const LAST_UPDATED = "27 November 2026";
+const EMAIL = "contact@darslearn.com";
+
+const summary = [
+  { icon: HandHeart, title: "Only what we need", text: "We collect what is needed to run your account, deliver your courses, and process payments." },
+  { icon: LockKeyhole, title: "Never sold", text: "We do not sell your personal information or use advertising trackers." },
+  { icon: SlidersHorizontal, title: "You stay in control", text: "Update your details at any time, or ask us for a copy or deletion." },
 ];
 
-const PrivacyPolicy = () => (
-  <main className="bg-[#fbfcfa] text-[#172b24]">
+const sections = [
+  { id: "information", title: "Information we collect", paragraphs: [
+    "Depending on how you use DarsLearn, we collect:",
+  ], items: [
+    "Account details: your name, email address, and password (stored only as a secure hash), or your Google account if you sign in with Google, plus a profile photo if you add one.",
+    "Profile details you choose to add, such as gender, city, state, country, and preferred language.",
+    "Learning activity: your enrollments, the lessons you watch and your progress, quiz attempts and results, private notes, and course reviews.",
+    "Purchase records: the course, amount, payment status, and the payment reference from our payment provider. Card and bank details are entered with the payment provider, not stored by DarsLearn.",
+    "Messages you send us through the contact form or by email.",
+    "For instructors: application details (name, email, teaching background, languages) and documents submitted for review, course content, and earnings and payout records.",
+    "Technical information such as device and browser type, IP address, sign-in sessions, and error logs.",
+  ] },
+  { id: "use", title: "How we use your information", items: [
+    "Create and secure your account, including email verification and password resets.",
+    "Give you access to the courses you enroll in, save your progress, and let you continue where you left off.",
+    "Process payments, send receipts, and handle refund requests. Your viewing activity is used to check refund eligibility.",
+    "Send essential emails, such as purchase confirmations and important account notices.",
+    "Review instructor applications and pay instructors their earnings.",
+    "Prevent fraud, account sharing, and misuse, and meet our legal obligations.",
+    "Improve reliability, accessibility, and the learning experience.",
+  ] },
+  { id: "visibility", title: "What others can see", items: [
+    "The instructor of a course you enroll in can see your name, email address, profile photo, enrollment date, progress, and quiz results for that course.",
+    "Reviews you post (rating, comment, and your first name and last initial) are public on the course page.",
+    "Instructor profiles (name, photo, biography, and teaching details) are shown publicly on course pages.",
+    "Your notes are private to you.",
+  ] },
+  { id: "providers", title: "Service providers", paragraphs: [
+    "We use trusted providers to run DarsLearn. Each receives only the information it needs to provide its service:",
+  ], items: [
+    "Payments: Razorpay",
+    "Video and file storage and delivery: Cloudflare",
+    "Database hosting: MongoDB Atlas",
+    "Background processing: Redis Cloud",
+    "Email delivery: Resend",
+    "Sign-in with Google, if you choose it: Google",
+  ], note: "We do not sell personal information. We may disclose information when the law requires it, or when needed to protect learners, instructors, or the platform." },
+  { id: "retention", title: "How long we keep information", paragraphs: [
+    "We keep your account and learning information while your account is active. Purchase and payment records are kept for as long as accounting, tax, and other legal requirements need them, even after an account is deleted.",
+    "Some records may also be kept to resolve disputes or prevent misuse. When information is no longer needed, we delete or anonymise it.",
+  ] },
+  { id: "security", title: "How we protect it", items: [
+    "Passwords are stored only as secure hashes, never in readable form.",
+    "Course videos and files are delivered through protected, time-limited links.",
+    "Access to personal records is limited to people who need it for their role.",
+  ], note: "No online service can promise perfect security. If you notice anything suspicious on your account, change your password and contact us." },
+  { id: "children", title: "Children", paragraphs: [
+    "If a learner is under 18, a parent or guardian should create or supervise the account. Parents and guardians can contact us to see, correct, or delete their child's information.",
+  ] },
+  { id: "rights", title: "Your choices and rights", paragraphs: [
+    "Depending on where you live and the laws that apply, you can:",
+  ], items: [
+    "See and correct your details. Most can be updated yourself in Profile and Settings.",
+    "Ask for a copy of the personal information we hold about you.",
+    "Ask us to delete your information, where the law allows it.",
+    "Withdraw consent for optional communications.",
+    "Raise a concern about how your information is handled.",
+  ], note: `To make a request, email ${EMAIL} from your registered email address so we can verify it is you.` },
+  { id: "cookies", title: "Cookies and browser storage", paragraphs: [
+    "We use essential cookies and browser storage to keep you signed in, protect your account, and remember your preferences. We do not use advertising cookies. If you block them, signing in and some features will stop working.",
+  ] },
+  { id: "changes", title: "Changes to this policy", paragraphs: [
+    `We may update this policy as DarsLearn grows. The date at the top shows when it last changed. If a change is significant, we will let you know by email or on the website.`,
+  ] },
+];
+
+export default function PrivacyPolicy() {
+  return <main className="bg-[#fbfcfa] text-[#172b24]">
     <MarketingHero
       eyebrow="Privacy and data protection"
       title="Your information, explained clearly."
-      description="This policy describes how DarsLearn collects, uses, shares, and protects personal information across our website, admissions, courses, communications, and learner support."
+      description="How DarsLearn collects, uses, shares, and protects personal information when you browse our website, create an account, learn, teach, or contact us."
       icon={ShieldCheck}
       primaryAction={{ to: "/contact", label: "Contact us about privacy" }}
-      secondaryAction={{ to: "/", label: "Return home" }}
+      secondaryAction={{ to: "/course-policy", label: "Refund policy" }}
       highlights={[
-        { label: "Last updated", value: "3 September 2026" },
-        { label: "Applies to", value: "DarsLearn accounts, learning services, and support" },
-        { label: "Privacy contact", value: "contact@darslearn.com" },
+        { label: "Last updated", value: LAST_UPDATED },
+        { label: "Applies to", value: "The DarsLearn website, accounts, courses, and support" },
+        { label: "Privacy contact", value: EMAIL },
       ]}
       labelledBy="privacy-title"
     />
-
-    <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-18 lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start">
-      <aside className="lg:sticky lg:top-24">
-        <nav className="rounded-2xl border border-[#dfe6e2] bg-white p-3" aria-label="Privacy policy sections">
-          <p className="px-3 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#718078]">On this page</p>
-          <ul className="mt-1 grid gap-1">
-            {sections.map((section) => (
-              <li key={section.id}><a href={`#${section.id}`} className="block rounded-lg px-3 py-2 text-sm font-bold text-[#53665e] no-underline transition hover:bg-[#edf4f1] hover:text-primary">{section.title}</a></li>
-            ))}
-            <li><a href="#cookies" className="block rounded-lg px-3 py-2 text-sm font-bold text-[#53665e] no-underline transition hover:bg-[#edf4f1] hover:text-primary">Cookies</a></li>
-            <li><a href="#updates" className="block rounded-lg px-3 py-2 text-sm font-bold text-[#53665e] no-underline transition hover:bg-[#edf4f1] hover:text-primary">Updates and contact</a></li>
-          </ul>
-        </nav>
-      </aside>
-
-      <div className="min-w-0">
-        <div className="rounded-2xl border border-[#cfe0d8] bg-[#edf6f2] p-5 text-sm font-medium leading-7 text-[#405d52] sm:p-6">
-          <strong className="font-black text-[#173b31]">Plain-language summary:</strong> we use personal information to provide and improve DarsLearn. We limit access, work with service providers where needed, and give you a way to ask questions or exercise applicable rights.
-        </div>
-
-        <div className="mt-8 grid gap-6">
-          {sections.map(({ id, title, icon: Icon, intro, items }) => (
-            <section key={id} id={id} className="scroll-mt-28 rounded-2xl border border-[#dfe6e2] bg-white p-6 sm:p-8" aria-labelledby={`${id}-title`}>
-              <div className="flex items-start gap-4">
-                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#e6f2ed] text-primary"><Icon className="size-5" /></span>
-                <div><p className="text-xs font-black uppercase tracking-[0.13em] text-primary">Policy section</p><h2 id={`${id}-title`} className="mt-1 font-display text-2xl font-black tracking-[-0.035em] sm:text-3xl">{title}</h2></div>
-              </div>
-              <p className="mt-5 text-sm font-medium leading-7 text-[#5f7268] sm:text-base">{intro}</p>
-              <ul className="mt-5 grid gap-3">
-                {items.map((item) => <li key={item} className="flex items-start gap-3 text-sm font-medium leading-7 text-[#52655c]"><Check className="mt-1.5 size-4 shrink-0 text-primary" strokeWidth={3} />{item}</li>)}
-              </ul>
-            </section>
-          ))}
-
-          <section id="cookies" className="scroll-mt-28 rounded-2xl border border-[#dfe6e2] bg-white p-6 sm:p-8" aria-labelledby="cookies-title">
-            <div className="flex items-start gap-4"><span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#e6f2ed] text-primary"><Cookie className="size-5" /></span><div><p className="text-xs font-black uppercase tracking-[0.13em] text-primary">Browser data</p><h2 id="cookies-title" className="mt-1 font-display text-2xl font-black tracking-[-0.035em] sm:text-3xl">Cookies and similar technologies</h2></div></div>
-            <p className="mt-5 text-sm font-medium leading-7 text-[#5f7268] sm:text-base">DarsLearn may use essential technologies to maintain sessions, remember preferences, protect accounts, and keep the service reliable. Where optional analytics or similar tools require consent, those choices should be provided through the relevant consent interface. Browser settings can also limit cookies, although some account features may stop working correctly.</p>
-          </section>
-
-          <section id="updates" className="scroll-mt-28 rounded-2xl bg-[#0b3e38] p-6 text-white sm:p-8" aria-labelledby="updates-title">
-            <p className="text-xs font-black uppercase tracking-[0.15em] text-[#9ed6c8]">Updates and contact</p>
-            <h2 id="updates-title" className="mt-2 font-display text-2xl font-black tracking-[-0.035em] sm:text-3xl">Questions about your information?</h2>
-            <p className="mt-4 max-w-2xl text-sm font-medium leading-7 text-white/70">This policy may change as the platform and applicable requirements evolve. Material changes will be reflected by the updated date. For access, correction, deletion, or privacy questions, contact us with enough detail to identify the relevant account or request.</p>
-            <a href="mailto:contact@darslearn.com" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#f4c95d] px-4 text-sm font-black text-[#11342e] no-underline"><Mail className="size-4" />contact@darslearn.com</a>
-            <div className="mt-5"><Link to="/contact" className="group inline-flex items-center gap-2 text-sm font-black text-white no-underline">Open the contact page <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></Link></div>
-          </section>
-        </div>
-      </div>
-    </div>
-  </main>
-);
-
-export default PrivacyPolicy;
+    <LegalDocument summary={summary} sections={sections} contact={{ title: "Questions about your information?", text: "For access, correction, or deletion requests, or any privacy question, contact us with enough detail to identify your account.", email: EMAIL }}>
+      <p className="text-sm text-muted-foreground">See also our <Link to="/course-policy" className="cw-text-link">refund and cancellation policy</Link></p>
+    </LegalDocument>
+  </main>;
+}

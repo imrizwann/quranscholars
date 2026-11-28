@@ -30,7 +30,7 @@ const topics = [
   { id: "course", label: "Choosing a course", icon: BookOpen, hint: "Tell us what you would like to learn and your current level, and we will suggest where to begin." },
   { id: "payment", label: "Enrollment or payment", icon: CreditCard, hint: "Include the course title, your payment reference and the date you paid. If money was debited but you were not enrolled, please do not pay again while we check." },
   { id: "access", label: "Accessing my lessons", icon: MonitorPlay, hint: "Tell us the course, the device and browser you use, and what happens when you try to watch." },
-  { id: "refund", label: "Refund request", icon: ReceiptText, hint: "Include the course title, payment reference and purchase date. Change-of-mind refunds are available within 7 days of payment if you have watched less than 20% of the course.", link: { to: "/course-policy", label: "Read the refund policy" } },
+  { id: "refund", label: "Refund request", icon: ReceiptText, hint: "Include the course title, payment reference and purchase date. Refunds are available within 7 days of purchase if you have not started the course or downloaded its resources.", link: { to: "/course-policy", label: "Read the refund policy" } },
   { id: "teaching", label: "Teaching on DarsLearn", icon: GraduationCap, hint: "Tell us about your subject and teaching experience, or apply directly with your certificates.", link: { to: "/get-started/instructor", label: "How teaching works" } },
   { id: "other", label: "Something else", icon: HelpCircle, hint: "Tell us how we can help. The more detail you share, the faster we can reply." },
 ];
@@ -45,7 +45,7 @@ const quickAnswers = [
   {
     question: "How do refunds work?",
     icon: ReceiptText,
-    answer: "You can request a change-of-mind refund within 7 days of payment if you have watched less than 20% of the course. Approved refunds return to your original payment method.",
+    answer: "You can request a refund within 7 days of purchase if you have not started the course: no lesson played and no resource opened or downloaded. Approved refunds return to your original payment method.",
     link: { to: "/course-policy", label: "Access and refund policy" },
   },
   {

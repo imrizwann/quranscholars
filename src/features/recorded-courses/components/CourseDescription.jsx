@@ -4,7 +4,8 @@ import { ChevronDown } from "lucide-react";
 export default function CourseDescription({ text, textClassName = "cd-description", buttonClassName = "cd-text-button cd-description-toggle" }) {
   const id = useId();
   const [expanded, setExpanded] = useState(false);
-  const description = text?.trim() || "A detailed course description has not been added yet.";
+  // Descriptions are plain text; drop Markdown heading markers ("## ") that instructors sometimes type.
+  const description = text?.replace(/^[ \t]*#{1,6}[ \t]+/gm, "").trim() || "A detailed course description has not been added yet.";
   const characters = Array.from(description);
   const lengthy = characters.length > 600;
   const preview = lengthy ? `${characters.slice(0, 600).join("").replace(/\s+\S*$/, "").trimEnd()}…` : description;
