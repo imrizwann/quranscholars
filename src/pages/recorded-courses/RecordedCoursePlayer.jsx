@@ -40,7 +40,7 @@ function CourseOverview({ course, lesson, section, resources }) {
   </div>;
 }
 
-function LearningWorkspace({ course, userId, lessonId }) {
+function LearningWorkspace({ course, userId, lessonId, contentOpen }) {
   const progress = useGetCourseProgressQuery(course.id, { refetchOnMountOrArgChange: true, refetchOnFocus: true, refetchOnReconnect: true });
   const [restored, setRestored] = useState(null);
   const refresh = progress.refetch;
@@ -57,17 +57,16 @@ function LearningWorkspace({ course, userId, lessonId }) {
   if (!restored) return <ClassroomSkeleton label="Restoring your lesson and progress" />;
   const current = (progress.fulfilledTimeStamp || 0) >= (restored.fulfilledTimeStamp || 0)
     ? progress : { ...progress, currentData: restored.data, error: restored.error };
-  return <LearningWorkspaceBody course={course} userId={userId} lessonId={lessonId} progress={current} />;
+  return <LearningWorkspaceBody course={course} userId={userId} lessonId={lessonId} progress={current} contentOpen={contentOpen} />;
 }
 
-function LearningWorkspaceBody({ course, userId, lessonId, progress }) {
+function LearningWorkspaceBody({ course, userId, lessonId, progress, contentOpen }) {
   const sections = useMemo(() => orderedLearningSections(course.sections), [course.sections]);
   const lessons = useMemo(() => sections.flatMap(section => section.lessons), [sections]);
   const [lastLesson] = useState(() => !progress.error && progress.currentData
     ? progress.currentData.continueLessonId || progress.currentData.lastLessonId
     : readLastLesson(userId, course.id, lessons));
   const lesson = lessonId ? lessons.find(item => item.id === lessonId) : lessons.find(item => item.id === lastLesson) || lessons[0];
-  const [contentOpen, setContentOpen] = useState(true);
   const [finished, setFinished] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get("tab") || "overview";
@@ -154,7 +153,6 @@ function LearningWorkspaceBody({ course, userId, lessonId, progress }) {
   }
   if (!lesson) return <WorkspaceEmpty icon={BookOpen} title={lessonId ? "Lesson not found" : "Lessons are being prepared"} description={lessonId ? "This lesson may have moved. Return to the course to find the current lessons." : "Your course lessons will appear here when they are available."} to={lessonId ? `/learn/${encodeURIComponent(course.slug)}` : `/courses/${encodeURIComponent(course.slug)}`} action={lessonId ? "Open course" : "View course details"} />;
   return <>
-    <div className="learning-course-heading"><div><p className="studio-label">Your classroom</p><h1>{course.title}</h1><p>{course.instructor.name}<span aria-hidden="true"> · </span>{lessons.length} {lessons.length === 1 ? "lesson" : "lessons"}{course.totalDurationSeconds > 0 && <><span aria-hidden="true"> · </span>{course.durationLabel}</>}</p></div><button type="button" className="cw-button" onClick={() => setContentOpen(value => !value)} aria-expanded={contentOpen} aria-controls="learning-course-content">{contentOpen ? <PanelRightClose size={17} aria-hidden="true" /> : <PanelRightOpen size={17} aria-hidden="true" />}<span>{contentOpen ? "Hide course content" : "Show course content"}</span></button></div>
     <div className={`learning-grid${contentOpen ? "" : " learning-focus"}`}>
       <section className="learning-stage" aria-labelledby="learning-lesson-title">
         <div className="learning-video"><ProtectedLessonVideo key={`${course.id}/${lesson.id}`} target={{ courseId: course.id, sectionId: lesson.sectionId, lessonId: lesson.id }} title={lesson.title} poster={course.thumbnail} startTime={startTime} onPlaybackProgress={remember} onPlaybackPlay={watch.play} onPlaybackPause={data => { flush(); watch.pause(data); }} onPlaybackSeeking={watch.seeking} onPlaybackSeek={watch.seek} onEnded={end} /></div>
@@ -192,11 +190,23 @@ export default function RecordedCoursePlayer() {
   const owner = course?.canManage === true;
   const allowed = !access.error && (access.currentData?.canAccessCourse === true || owner);
   const pending = (!query.error && !course) || (course && !access.currentData && !access.error);
+  const [contentOpen, setContentOpen] = useState(true);
   return <div className="learning-room">
     <a href="#learning-main" className="workspace-skip-link">Skip to lesson</a>
-    <header className="learning-topbar"><Link to="/dashboard/learning" className="learning-back"><ArrowLeft size={17} aria-hidden="true" /><span>My learning</span></Link><Link className="learning-brand" to="/" aria-label="DarsLearn home"><Brand /></Link><WorkspaceAccountMenu type={user?.role === "instructor" ? "instructor" : user?.role === "admin" ? "admin" : "student"} /></header>
+    {/* Player top bar: course identity and the content toggle live here so the video starts right below it. */}
+    <header className="learning-topbar">
+      <div className="learning-topbar-start">
+        <Link to="/dashboard/learning" className="learning-back" aria-label="Back to My learning" title="Back to My learning"><ArrowLeft size={18} aria-hidden="true" /></Link>
+        <Link className="learning-brand" to="/" aria-label="DarsLearn home"><Brand /></Link>
+        {course && <><span className="learning-topbar-divider" aria-hidden="true" /><div className="learning-topbar-title"><h1>{course.title}</h1><p>{course.instructor.name}</p></div></>}
+      </div>
+      <div className="learning-topbar-end">
+        {course && allowed && <button type="button" className="learning-content-toggle" onClick={() => setContentOpen(value => !value)} aria-expanded={contentOpen} aria-controls="learning-course-content" title={contentOpen ? "Hide course content" : "Show course content"}>{contentOpen ? <PanelRightClose size={18} aria-hidden="true" /> : <PanelRightOpen size={18} aria-hidden="true" />}<span>Course content</span></button>}
+        <WorkspaceAccountMenu type={user?.role === "instructor" ? "instructor" : user?.role === "admin" ? "admin" : "student"} />
+      </div>
+    </header>
     <main id="learning-main" className="learning-main" tabIndex={-1}>
-      {pending ? <ClassroomSkeleton label={course ? "Checking course access" : "Loading your classroom"} /> : query.error ? <div className="learning-page-state"><QueryMessage query={{ error: query.error, refresh: query.refetch }} /><Link className="cw-button" to="/dashboard/learning">Return to My learning</Link></div> : access.error ? <div className="learning-page-state"><QueryMessage query={{ error: access.error, refresh: access.refetch }} /><Link className="cw-button" to="/dashboard/learning">Return to My learning</Link></div> : course && !allowed ? <WorkspaceEmpty icon={LockKeyhole} title="Course access required" description="Enroll in this course to watch its lessons. You can review the course outline and watch the trailer before joining." to={`/courses/${encodeURIComponent(course.slug)}`} action="View course details" /> : course && allowed ? <LearningWorkspace key={`${user?._id}/${course.id}`} course={course} userId={user?._id} lessonId={lessonId} /> : <WorkspaceEmpty title="Course not found" description="This course may have moved or is no longer available." to="/dashboard/learning" action="My learning" />}
+      {pending ? <ClassroomSkeleton label={course ? "Checking course access" : "Loading your classroom"} /> : query.error ? <div className="learning-page-state"><QueryMessage query={{ error: query.error, refresh: query.refetch }} /><Link className="cw-button" to="/dashboard/learning">Return to My learning</Link></div> : access.error ? <div className="learning-page-state"><QueryMessage query={{ error: access.error, refresh: access.refetch }} /><Link className="cw-button" to="/dashboard/learning">Return to My learning</Link></div> : course && !allowed ? <WorkspaceEmpty icon={LockKeyhole} title="Course access required" description="Enroll in this course to watch its lessons. You can review the course outline and watch the trailer before joining." to={`/courses/${encodeURIComponent(course.slug)}`} action="View course details" /> : course && allowed ? <LearningWorkspace key={`${user?._id}/${course.id}`} course={course} userId={user?._id} lessonId={lessonId} contentOpen={contentOpen} /> : <WorkspaceEmpty title="Course not found" description="This course may have moved or is no longer available." to="/dashboard/learning" action="My learning" />}
     </main>
   </div>;
 }
