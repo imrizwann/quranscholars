@@ -356,9 +356,13 @@
 }
 .learning-library {
   display: grid;
+  /* An implicit grid column grows to fit its widest child (the phone filter row
+     scrolls sideways on one line), pushing the cards off screen. Let it shrink. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   min-width: 0;
 }
+.library-toolbar, .library-filters { min-width: 0; }
 .learning-library > .cw-loading,
 .learning-library > .cw-error,
 .learning-library > .cw-pages {
@@ -905,7 +909,8 @@
 .library-filters button[aria-pressed="true"] span { background: var(--primary); color: var(--primary-foreground); }
 .library-filters button:disabled { opacity: .45; cursor: not-allowed; }
 @media (max-width: 639px) {
-  .library-toolbar { flex-direction: column; align-items: stretch; border-bottom: 0; gap: 14px; }
+  /* nowrap: in a wrapping column the line grows to the widest item (the scrolling chip row). */
+  .library-toolbar { flex-direction: column; flex-wrap: nowrap; align-items: stretch; border-bottom: 0; gap: 14px; }
   .library-tabs { border-bottom: 1px solid var(--border); }
   .library-filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
   .library-filters button { flex-shrink: 0; }
