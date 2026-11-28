@@ -49,7 +49,7 @@ const standards = [
   {
     icon: Scale,
     title: "Fair access and refunds",
-    text: "One payment gives you access to a course with no fixed expiry. If it is not right for you, you can request a refund within 7 days of payment, before watching more than 20% of it.",
+    text: "One payment gives you access to a course with no fixed expiry. If it is not right for you, you can request a refund within 7 days of purchase, as long as you have not started the course.",
     link: { to: "/course-policy", label: "Access and refund policy" },
   },
   {

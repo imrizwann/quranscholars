@@ -98,7 +98,7 @@ export const faqs = [
   },
   {
     question: "Can I get a refund?",
-    answer: "Yes. You can request a change-of-mind refund within 7 days of payment if you have watched less than 20% of the course.",
+    answer: "Yes. You can request a refund within 7 days of purchase if you have not started the course. Watching the free trailer does not count.",
   },
   {
     question: "What if I need help?",

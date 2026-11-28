@@ -49,7 +49,7 @@ function footerColumns(signedIn, role) {
       title: "Support",
       links: [
         { to: "/contact", label: "Contact us" },
-        { to: "/course-policy", label: "Access & refunds" },
+        { to: "/course-policy", label: "Refund policy" },
         { to: "/privacy", label: "Privacy policy" },
       ],
     },
