@@ -28,6 +28,14 @@ export default function Register() {
       setError("Enter your name, email and password to create an account.");
       return;
     }
+    if (password.length < 8) {
+      setError("Use at least 8 characters for your password.");
+      return;
+    }
+    if (new TextEncoder().encode(password).length > 72) {
+      setError("Your password is too long. Please use fewer characters.");
+      return;
+    }
     pending.current = true;
     setIsLoading(true);
     setError("");
@@ -139,8 +147,8 @@ export default function Register() {
             placeholder="Create a password"
             type="password"
             autoComplete="new-password"
-            minLength={6}
-            hint="Use at least 6 characters."
+            minLength={8}
+            hint="Use at least 8 characters."
             required
             value={password}
             onChange={(event) => setPassword(event.target.value)}
